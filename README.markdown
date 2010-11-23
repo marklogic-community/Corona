@@ -20,28 +20,35 @@ ___
    - jsonstore.xqy?uri=/foo/bar.json&collection=public&collection=published
    - jsonstore.xqy?uri=/foo/bar.json&quality=10
    - jsonstore.xqy?uri=/foo/bar.json&permission=public:read&collection=public&quality=10
+
 #### Get a JSON document
  - Request type: GET
  - Example: jsonstore.xqy?uri=/foo/bar.json
+
 #### Delete a JSON document
  - Request type: DELETE
  - Example: jsonstore.xqy?uri=/foo/bar.json
+
 #### Set a property on a document
  - Request type: POST
  - Properties are **not** held inside the JSON document, properties are stored outside of the document and don't effect the stored document at all.  They are best thought of as metadata about the document but should be avoided if possible due to storage overhead.
  - Example: jsonstore.xqy?uri=/foo/bar.json&property=publishState:final&property=needsEditorial:false
+
 #### Get a property of a document
  - Request type: GET
  - Returns the value of a property that has been set on a document.
  - Example: jsonstore.xqy?uri=/foo/bar.json&property=publishState
+
 #### Set permissions on a document
  - Request type: POST
  - When setting permissions on a document, all of the existing permissions are overwritten.
  - Example: jsonstore.xqy?uri=/foo/bar.json&permission=public:read&permission=admin:write
+
 #### Set collections on a document
  - Request type: POST
  - When setting collections on a document, all of the existing collections are overwritten.
  - Example: jsonstore.xqy?uri=/foo/bar.json&collection=public&collection=published
+
 #### Set the quality of a document
  - Request type: POST
  - Example: jsonstore.xqy?uri=/foo/bar.json&quality=10
