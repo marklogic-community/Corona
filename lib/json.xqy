@@ -60,8 +60,8 @@ declare function json:dispatch(
         else
             (: XXX - Encode unicode :)
             if($currentBit eq "\")
-            then ($jsonBits[$location + 1], json:dispatch($location + 1))
-            else ($currentBit, json:dispatch($location + 1))
+            then json:dispatch($location + 2)
+            else json:dispatch($location + 1)
 };
 
 
@@ -298,7 +298,6 @@ declare function json:xmlToJson(
     $element as element()
 ) as xs:string
 {
-    (: string-join(('{', json:printNameValue($element), '}'), "") :)
     json:processElement($element)
 };
 

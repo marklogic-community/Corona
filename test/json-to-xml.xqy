@@ -4,6 +4,9 @@ import module namespace json="http://marklogic.com/json" at "../lib/json.xqy";
 
 (: Working :)
 let $json := "[""hello"",""world"", [], {}, null, false, true]"
+let $json := "true"
+let $json := "false"
+let $json := "null"
 let $json := "[]"
 let $json := "{}"
 let $json := "{""flowStatus"":{""collector"":{""id"":""17498595829529319667"",""uri"":""collector-zip.xqy"",""name"":""Filesystem Zip Directory"",""summary"":""Load the contents of zip files from this directory on the server: /home/rgrimm/content"",""hasConfig"":true,""valid"":true},""transforms"":null,""databaseCount"":""4027"",""tickets"":{""ticketStatus"":[{""current"":""false"",""longRunning"":false,""has-transforms"":""false"",""state"":""completed"",""startTime"":""23 Sep 2010 16:59:50"",""progress"":100,""timeConsumed"":""2 second(s)"",""errors"":0,""totalDocuments"":8,""documentsProcessed"":8,""ticketId"":""/tickets/ticket/10017106554991392235"",""collectorId"":""17498595829529319667"",""destinationCount"":8},{""current"":""false"",""longRunning"":false,""has-transforms"":""false"",""state"":""completed"",""startTime"":""23 Sep 2010 16:59:38"",""progress"":100,""timeConsumed"":""2 second(s)"",""errors"":0,""totalDocuments"":8,""documentsProcessed"":8,""ticketId"":""/tickets/ticket/12813359101084061157"",""collectorId"":""17498595829529319667"",""destinationCount"":0},{""current"":""false"",""longRunning"":false,""has-transforms"":""false"",""state"":""completed"",""startTime"":""23 Sep 2010 15:12:33"",""progress"":100,""timeConsumed"":""35 second(s)"",""errors"":0,""totalDocuments"":3455,""documentsProcessed"":3455,""ticketId"":""/tickets/ticket/17976873322921528925"",""collectorId"":""17498595829529319667"",""destinationCount"":3447},{""current"":""false"",""longRunning"":false,""has-transforms"":""false"",""state"":""completed"",""startTime"":""23 Sep 2010 15:08:34"",""progress"":100,""timeConsumed"":""35 second(s)"",""errors"":0,""totalDocuments"":3455,""documentsProcessed"":3455,""ticketId"":""/tickets/ticket/14854376546708590679"",""collectorId"":""17498595829529319667"",""destinationCount"":0},{""current"":""false"",""longRunning"":false,""has-transforms"":""false"",""state"":""completed"",""startTime"":""23 Sep 2010 15:06:57"",""progress"":100,""timeConsumed"":""35 second(s)"",""errors"":0,""totalDocuments"":3455,""documentsProcessed"":3455,""ticketId"":""/tickets/ticket/10304857462729133110"",""collectorId"":""17498595829529319667"",""destinationCount"":0}]}}}"
@@ -15,5 +18,6 @@ let $json := "{""in_reply_to_status_id_str"":null,""place"":null,""coordinates""
 let $json := """\u304a\u3044\u304a\u3044\u3069\u3046\u3057\u3066\u8abf\u5b50\u304c\u60aa\u3044\u306e\uff57\uff57\uff57\uff57"""
 
 let $json := "{ key: ""book"", value: [""0596000405""], comparison: ""="", orPredicate: [{key: ""book"", value: ""0596000405""}, {key: ""article"", value: ""0596000405""}],  andPredicate: [],  descendant: {},  position: ""1 to last()"" }"
+let $json := "{ key: ""id"", value: [""0596000405"", ""123456789""], comparison: ""="", orPredicate: [{key: ""id"", value: ""0596000405""}, {key: ""other_id"", value: ""0596000405""}],  andPredicate: [],  descendant: {},  position: ""1 to last()"" }"
 
 return json:jsonToXML($json, true())
