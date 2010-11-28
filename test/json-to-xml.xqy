@@ -19,5 +19,38 @@ let $json := """\u304a\u3044\u304a\u3044\u3069\u3046\u3057\u3066\u8abf\u5b50\u30
 
 let $json := "{ key: ""book"", value: [""0596000405""], comparison: ""="", orPredicate: [{key: ""book"", value: ""0596000405""}, {key: ""article"", value: ""0596000405""}],  andPredicate: [],  descendant: {},  position: ""1 to last()"" }"
 let $json := "{ key: ""id"", value: [""0596000405"", ""123456789""], comparison: ""="", orPredicate: [{key: ""id"", value: ""0596000405""}, {key: ""other_id"", value: ""0596000405""}],  andPredicate: [],  descendant: {},  position: ""1 to last()"" }"
+let $json := "{ fulltext: {
+        or: [
+            { equals: {
+                key: ""greeting"",
+                string: ""Hello World"",
+                weight: 2.0,
+                caseSensitive: false,
+                diacriticSensitive: true,
+                punctuationSensitve: false,
+                whitespaceSensitive: false,
+                stemmed: true,
+                wildcarded: true,
+                minimumOccurances: 1,
+                maximumOccurances: null
+            }},
+            { contains: {
+                key: ""para"",
+                string: ""Hello World"",
+                weight: 1.0
+            }},
+            { range: {
+                key: ""para"",
+                value: ""Hello World"",
+                weight: 1.0,
+                operator: ""=""
+            }},
+            { collection: ""foo"" },
+
+        ],
+        filtered: false(),
+        score: ""logtfidf""
+    }
+}"
 
 return json:jsonToXML($json, true())

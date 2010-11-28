@@ -17,7 +17,7 @@ declare function json:jsonToXML(
     $asXML as xs:boolean
 )
 {
-    let $bits := string-to-codepoints($json)
+    let $bits := string-to-codepoints(replace($json, "\n", ""))
     let $set := xdmp:set($jsonBits, for $bit in $bits return codepoints-to-string($bit))
 
     let $typeBits := json:getType(1)
@@ -143,7 +143,11 @@ declare function json:buildObjectValue(
                 if($currentBit eq """")
                 then $deepValues[1] + 1
                 else $deepValues[1]
-            return ($deepValues[2], json:dispatch($location))
+            let $normalizedValue :=
+                if($currentBit eq """")
+                then $deepValues[2]
+                else normalize-space($deepValues[2])
+            return ($normalizedValue, json:dispatch($location))
 };
 
 
