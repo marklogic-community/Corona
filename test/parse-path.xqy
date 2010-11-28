@@ -33,8 +33,23 @@ let $json := "{ fulltext: {
                 weight: 1.0,
                 operator: ""=""
             }},
-            { collection: ""foo"" },
-
+            { geo: {
+                parent: ""location"",
+                latKey: ""latitude"",
+                longKey: ""longitude"",
+                key: ""latlong"",
+                region: [
+                    {point: {longitude: 12, latitude: 53}},
+                    {circle: {longitude: 12, latitude: 53, radius: 10}},
+                    {box: {north: 3, east: 4, south: -5, west: -6}},
+                    {polygon:[
+                        {longitude:12, latitude:53},
+                        {longitude:15, latitude:57},
+                        {longitude:12, latitude:53}
+                    ]}
+                ]
+            }},
+            { collection: ""foo"" }
         ],
         filtered: false(),
         score: ""logtfidf""

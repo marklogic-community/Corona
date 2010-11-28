@@ -155,7 +155,19 @@ declare function jsonpath:dispatchFulltextStep(
     $step as element()
 )
 {
-    let $precedent := ($step/and[@type = "array"], $step/or[@type = "array"], $step/range[@type = "object"], $step/equals[@type = "object"], $step/contains[@type = "object"], $step/collection[@type = "string"])[1]
+    let $precedent := (
+        $step/and[@type = "array"],
+        $step/or[@type = "array"],
+        $step/range[@type = "object"],
+        $step/equals[@type = "object"],
+        $step/contains[@type = "object"],
+        $step/collection[@type = "string"],
+        $step/geo[@type = "object"],
+        $step/point[@type = "object"],
+        $step/circle[@type = "object"],
+        $step/box[@type = "object"],
+        $step/polygon[@type = "array"]
+    )[1]
     return jsonpath:processFulltextStep($precedent)
 };
 
@@ -171,6 +183,12 @@ declare function jsonpath:processFulltextStep(
     case element(equals) return jsonpath:handleFulltextEquals($step)
     case element(contains) return jsonpath:handleFulltextContains($step)
     case element(collection) return jsonpath:handleFulltextCollection($step)
+    case element(geo) return jsonpath:handleFulltextGeo($step)
+    case element(region) return for $item in $step/item[@type = "object"] return jsonpath:processFulltextStep($item)
+    case element(point) return jsonpath:handleFulltextGeoPoint($step)
+    case element(circle) return jsonpath:handleFulltextGeoCircle($step)
+    case element(box) return jsonpath:handleFulltextGeoBox($step)
+    case element(polygon) return jsonpath:handleFulltextGeoPolygon($step)
     default return ()
 };
 
@@ -213,6 +231,58 @@ declare function jsonpath:handleFulltextCollection(
 )
 {
     cts:collection-query(jsonpath:stringOrArrayToSet($step))
+};
+
+declare function jsonpath:handleFulltextGeo(
+    $step as element(geo)
+)
+{
+    let $parent := $step/parent[@type = "string"]
+    let $key := $step/key[@type = "string"]
+    let $latKey := $step/latKey[@type = "string"]
+    let $longKey := $step/longKey[@type = "string"]
+
+    let $weight := xs:double(($step/weight[@type = "number"], 1.0)[1])
+    where exists($key) or (exists($latKey) and exists($longKey))
+    return
+        if(exists($parent) and exists($latKey) and exists($longKey))
+        then cts:element-pair-geospatial-query(xs:QName($parent), xs:QName($latKey), xs:QName($longKey), jsonpath:processFulltextStep($step/region), jsonpath:extractOptions($step, "geo"), $weight)
+        else if(exists($parent) and exists($key))
+        then cts:element-child-geospatial-query(xs:QName($parent), xs:QName($key), jsonpath:processFulltextStep($step/region), jsonpath:extractOptions($step, "geo"), $weight)
+        else if(exists($key))
+        then cts:element-geospatial-query(xs:QName($key), jsonpath:processFulltextStep($step/region), jsonpath:extractOptions($step, "geo"), $weight)
+        else ()
+};
+
+declare function jsonpath:handleFulltextGeoPoint(
+    $step as element()
+)
+{
+    cts:point($step/latitude, $step/longitude)
+};
+
+declare function jsonpath:handleFulltextGeoCircle(
+    $step as element(circle)
+)
+{
+    cts:circle($step/radius, jsonpath:handleFulltextGeoPoint($step))
+};
+
+declare function jsonpath:handleFulltextGeoBox(
+    $step as element(box)
+)
+{
+    cts:box($step/south, $step/west, $step/north, $step/east)
+};
+
+declare function jsonpath:handleFulltextGeoPolygon(
+    $step as element(polygon)
+)
+{
+    cts:polygon(
+        for $point in $step/item
+        return jsonpath:handleFulltextGeoPoint($point)
+    )
 };
 
 declare function jsonpath:stringOrArrayToSet(
@@ -300,6 +370,73 @@ declare function jsonpath:extractOptions(
         ,
         if(exists($item/score[@type = "string"]))
         then concat("score-", string($item/score[@type = "string"]))
+        else ()
+    )
+    else ()
+    ,
+    if($optionSet = "search")
+    then (
+        if(exists($item/coordinateType[@type = "string"]))
+        then 
+            if($item/coordinateType[@type = "string"] = "long-lat")
+            then "type=long-lat-point"
+            else "type=point"
+        else ()
+        ,
+        if(exists($item/excludeBoundaries))
+        then
+            if($item/excludeBoundaries/@boolean = "true")
+            then "boundaries-excluded"
+            else "boundaries-included"
+        else ()
+        ,
+        if(exists($item/excludeLatitudeBoundaries))
+        then
+            if($item/excludeLatitudeBoundaries/@boolean = "true")
+            then "boundaries-latitude-excluded"
+            else ()
+        else ()
+        ,
+        if(exists($item/excludeLongitudeBoundaries))
+        then
+            if($item/excludeLongitudeBoundaries/@boolean = "true")
+            then "boundaries-longitude-excluded"
+            else ()
+        else ()
+        ,
+        if(exists($item/excludeSouthBoundaries))
+        then
+            if($item/excludeSouthBoundaries/@boolean = "true")
+            then "boundaries-south-excluded"
+            else ()
+        else ()
+        ,
+        if(exists($item/excludeWestBoundaries))
+        then
+            if($item/excludeWestBoundaries/@boolean = "true")
+            then "boundaries-west-excluded"
+            else ()
+        else ()
+        ,
+        if(exists($item/excludeNorthBoundaries))
+        then
+            if($item/excludeNorthBoundaries/@boolean = "true")
+            then "boundaries-north-excluded"
+            else ()
+        else ()
+        ,
+        if(exists($item/excludeEastBoundaries))
+        then
+            if($item/excludeEastBoundaries/@boolean = "true")
+            then "boundaries-east-excluded"
+            else ()
+        else ()
+        ,
+        if(exists($item/excludeCircleBoundaries))
+        then
+            if($item/excludeCircleBoundaries/@boolean = "true")
+            then "boundaries-circle-excluded"
+            else ()
         else ()
     )
     else ()
