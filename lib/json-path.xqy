@@ -143,12 +143,25 @@ declare function jsonpath:parseFulltext(
     $tree as element(json)
 )
 {
+    let $cts := jsonpath:dispatchFulltextStep($tree/fulltext)
+    let $options := jsonpath:extractOptions($tree/fulltext, "search")
     let $position := jsonpath:extractPosition($tree)
     let $weight := xs:double(($tree/fulltext/weight[@type = "number"], 1.0)[1])
+    let $bits := tokenize($position, " to ")
+    let $positionLow := $bits[1]
+    let $positionHigh := $bits[2]
+    let $debug :=
+        if($tree/debug[@boolean = "true"])
+        then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
+        else ()
     return
-        if(exists($position))
-        then cts:search(/json, jsonpath:dispatchFulltextStep($tree/fulltext), jsonpath:extractOptions($tree/fulltext, "search"), $weight)[$position]
-        else cts:search(/json, jsonpath:dispatchFulltextStep($tree/fulltext), jsonpath:extractOptions($tree/fulltext, "search"), $weight)
+        if(exists($positionLow) and empty($positionHigh))
+        then cts:search(/json, $cts, $options, $weight)[xs:integer($positionLow)]
+        else if(exists($positionLow) and exists($positionHigh) and $positionHigh = "last()")
+        then cts:search(/json, $cts, $options, $weight)[xs:integer($positionLow) to last()]
+        else if(exists($positionLow) and exists($positionHigh))
+        then cts:search(/json, $cts, $options, $weight)[xs:integer($positionLow) to xs:integer($positionHigh)]
+        else cts:search(/json, $cts, $options, $weight)
 };
 
 declare function jsonpath:dispatchFulltextStep(
@@ -158,6 +171,9 @@ declare function jsonpath:dispatchFulltextStep(
     let $precedent := (
         $step/and[@type = "array"],
         $step/or[@type = "array"],
+        $step/not[@type = "object"],
+        $step/andNot[@type = "object"],
+        $step/property[@type = "object"],
         $step/range[@type = "object"],
         $step/equals[@type = "object"],
         $step/contains[@type = "object"],
@@ -179,6 +195,9 @@ declare function jsonpath:processFulltextStep(
     case element(item) return jsonpath:dispatchFulltextStep($step)
     case element(and) return cts:and-query(for $item in $step/item[@type = "object"] return jsonpath:processFulltextStep($item))
     case element(or) return cts:or-query(for $item in $step/item[@type = "object"] return jsonpath:processFulltextStep($item))
+    case element(not) return cts:not-query(jsonpath:dispatchFulltextStep($step))
+    case element(andNot) return jsonpath:handleFulltextAndNot($step)
+    case element(property) return cts:properties-query(jsonpath:dispatchFulltextStep($step))
     case element(range) return jsonpath:handleFulltextRange($step)
     case element(equals) return jsonpath:handleFulltextEquals($step)
     case element(contains) return jsonpath:handleFulltextContains($step)
@@ -190,6 +209,16 @@ declare function jsonpath:processFulltextStep(
     case element(box) return jsonpath:handleFulltextGeoBox($step)
     case element(polygon) return jsonpath:handleFulltextGeoPolygon($step)
     default return ()
+};
+
+declare function jsonpath:handleFulltextAndNot(
+    $step as element(andNot)
+)
+{
+    let $positive := $step/positive[@type = "object"]
+    let $negative := $step/positive[@type = "object"]
+    where exists($positive) and exists($negative)
+    return cts:and-not-query(jsonpath:dispatchFulltextStep($positive), jsonpath:dispatchFulltextStep($negative))
 };
 
 declare function jsonpath:handleFulltextRange(

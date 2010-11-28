@@ -22,11 +22,19 @@ let $json := "{ fulltext: {
                 minimumOccurances: 1,
                 maximumOccurances: null
             }},
-            { contains: {
+            {not: { contains: {
                 key: ""para"",
                 string: ""Hello World"",
                 weight: 1.0
+            }}},
+            {andNot: {
+                positive: { contains:{ key: ""para"", string: ""and""}},
+                negative: { contains:{ key: ""para"", string: ""gahagafaga""}}
             }},
+            {property: { contains: {
+                key: ""para"",
+                string: ""Hello World""
+            }}},
             { rangeignore: {
                 key: ""para"",
                 value: ""Hello World"",
@@ -54,7 +62,8 @@ let $json := "{ fulltext: {
         filtered: false(),
         score: ""logtfidf""
     },
-    position: ""1 to 10""
+    position: ""1 to 10"",
+    debug: true
 }"
 
 return jsonpath:parse($json)
