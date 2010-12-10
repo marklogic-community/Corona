@@ -1,0 +1,922 @@
+{
+  "com.chessgenius.android.chess": {
+    "category_term": "BRAIN",
+    "author_name": "ChessGenius",
+    "title": "Chess Genius",
+    "screenshots": true,
+    "package": "com.chessgenius.android.chess",
+    "author_uri": "http://www.chessgenius.com/android",
+    "description": "ChessGenius, award winning chess program. The author's chess programs have won ten World Championships.\n\n-Display of thinking\n-Hint\n-Tutor\n-Full take back & forward\n-Chess clocks\n-Big opening book & named openings\n-Set up position\n-33 playing levels including easy & blitz\n-Database\n-Simple, elegant user interface",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.wordwisepro": {
+    "category_term": "BRAIN",
+    "author_name": "Polyclef Software",
+    "title": "WordWise Pro",
+    "screenshots": true,
+    "package": "com.wordwisepro",
+    "author_uri": "http://www.polyclefsoftware.com/",
+    "description": "***iPhone Version Now Available. Play your friends with iPhones!***\n\nIf you like Scrabble or Words With Friends, you'll love WordWise!\n\nWordWise is a fun, turn-based 2-player crossword-style board game! Invite your friends with supported devices to play. \n\nPro version features up to 100 games at a time, stats, and no ads.",
+    "category_label": "Brain & Puzzle"
+  },
+  "net.hexage.everlands": {
+    "category_term": "BRAIN",
+    "author_name": "Hexage Ltd",
+    "title": "Everlands",
+    "screenshots": true,
+    "package": "net.hexage.everlands",
+    "author_uri": "http://www.hexage.net/everlands/",
+    "description": "Try Everlands HD if you have a hi-res device!\n\nA colorful world of Everlands has been invaded by dark and sinister forces.\n\nAnimals of the land have to unite and stand against the great threat casting shadow over their beloved homeland.\n\nLead dozens of courageous animals through more than 20 carefully prepared levels.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.hyperbees.ilg": {
+    "category_term": "BRAIN",
+    "author_name": "HyperBees Ltd.",
+    "title": "Impossible Level Game",
+    "screenshots": true,
+    "package": "com.hyperbees.ilg",
+    "author_uri": "http://facebook.com/impossible.level.game",
+    "description": "Update: 3 new levels!\n\nThe most annoyingly mind-boggling game for Android. Challenge your brain in 41 increasingly difficult levels, where each level is a riddle in itself. If you get stuck, relax, think and try again! Test yourself also in the time-attack mode.\n\nCheck our Facebook page for hints!",
+    "category_label": "Brain & Puzzle"
+  },
+  "chenzl.bubblebreaker": {
+    "category_term": "BRAIN",
+    "author_name": "tripleH",
+    "title": "bubble breaker",
+    "screenshots": true,
+    "package": "chenzl.bubblebreaker",
+    "author_uri": "http://www.cnblogs.com/czlinux/",
+    "description": "Bubble Breaker is a unique game where you must select a color group of bubbles on a grid and click to destroy them. The more bubbles you destroy with a single click, the higher your score will be. Unlike the other bubble games, Bubble Breaker involves more deep thinking and strategy instead of fast paced action.",
+    "category_label": "Brain & Puzzle"
+  },
+  "alterforce.huntress": {
+    "category_term": "BRAIN",
+    "author_name": "Smartpix Games",
+    "title": "Devilry Huntress",
+    "screenshots": true,
+    "package": "alterforce.huntress",
+    "author_uri": "http://smartpixgames.com",
+    "description": "Enjoy the thrilling Jewellust-like puzzle game! Swap and burst evil spirits to clean the Kingdom from devilry.\n40 levels, 2 game modes, 9 power-ups and comic Halloween theme make the game stylish and funny.",
+    "category_label": "Brain & Puzzle"
+  },
+  "org.hermit.netscramblefull": {
+    "category_term": "BRAIN",
+    "author_name": "Moonblink",
+    "title": "Scrambled Net Donate",
+    "screenshots": true,
+    "package": "org.hermit.netscramblefull",
+    "author_uri": "http://code.google.com/u/headstay/",
+    "description": "Apologies to everyone who has had problems downloading this.  If you need a refund, please contact me and I'll sort it out.\n\nThis is the donate version of Scrambled Net, and is identical to the free version.  If you wish to support my development efforts, then by all means buy this version.\n\nThanks for all your support!",
+    "category_label": "Brain & Puzzle"
+  },
+  "org.urbian.android.quiz.bible": {
+    "category_term": "BRAIN",
+    "author_name": "Urbian, Inc.",
+    "title": "Brain Cafe | Test your Faith",
+    "screenshots": true,
+    "package": "org.urbian.android.quiz.bible",
+    "author_uri": "http://www.urbian.biz/apps.html",
+    "description": "With “Test Your Faith,” the quiz from Brain Café, you can test your knowledge of the Bible with the most comprehensive mobile quiz available. With a simple, touch-screen, multiple choice interface, your idle hands need not become the devil's playthings.  Have fun, test your faith, and reconnect with the Lord.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.aevumobscurum.androidnorthamerica": {
+    "category_term": "BRAIN",
+    "author_name": "Noble Master Games",
+    "title": "Age of Conquest: N. America",
+    "screenshots": true,
+    "package": "com.aevumobscurum.androidnorthamerica",
+    "author_uri": "http://www.noblemaster.com",
+    "description": "IMPORTANT: Re-install the game if you have problems after the update. The game works fine, it's the update that brakes the installation. Sorry!\n\nThis is the single player version for Age of Conquest, a medieval risk-like turn-based strategy game. \n\nMap: N. AMERICA!\n\nV1.0.11:\nCopy to SD Card :)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.spcware.logicpic": {
+    "category_term": "BRAIN",
+    "author_name": "SPCWARE, LLC",
+    "title": "LogicPic",
+    "screenshots": true,
+    "package": "com.spcware.logicpic",
+    "author_uri": "http://www.spcware.com",
+    "description": "Reveal the underlying hidden picture by turning on the correct pixels based on numerical clues.  Provides unique features like many gesture shortcuts for maximum efficiency, unlimited undo, and guess mode.  Includes 4 difficulty levels and over 1000 puzzles.  Also known as picross, nonogram, griddler, and paint by number.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.jiuzhangtech.trafficjampaid": {
+    "category_term": "BRAIN",
+    "author_name": "JiuzhangTech Ltd",
+    "title": "Traffic Jam",
+    "screenshots": true,
+    "package": "com.jiuzhangtech.trafficjampaid",
+    "author_uri": "http://jiuzhangtech.com",
+    "description": "Traffic Jam is a very addictive puzzle game. The objective of the game is to get the yellow car out of the traffic jam. Sound simple, but incredible challenging at the difficult level.\n\nThe game contains 5000 levels, guarantee hours of entertainment.\n\n3 Themes included:\n- Car park\n- Harbor\n- Ice block\n- Plain block",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.clingmarks.pairuppro": {
+    "category_term": "BRAIN",
+    "author_name": "ClingMarks.com",
+    "title": "Pair Up Pro",
+    "screenshots": true,
+    "package": "com.clingmarks.pairuppro",
+    "author_uri": "http://www.clingmarks.com",
+    "description": "This is an advanced version of the popular Pair Up game. Your goal is to clear all tiles by connecting identical pairs. The faster you play, the more points you'll get. Share your SAT score online! Try \"Pair Up\" for free and you'll love it!\n\nLike this game? Try facebook game: http://http://apps.facebook.com/penguinlinks/",
+    "category_label": "Brain & Puzzle"
+  },
+  "me.zed_0xff.android.alchemy.premium": {
+    "category_term": "BRAIN",
+    "author_name": "Andrey 'Zed' Zaikin",
+    "title": "Alchemy Premium",
+    "screenshots": true,
+    "package": "me.zed_0xff.android.alchemy.premium",
+    "author_uri": "http://zed.0xff.me",
+    "description": "You have only four basic elements: Fire, Water, Earth and Air. Combine them and their products to get more than 200 new elements. You can create a Life, Beer, Vampires, Skyscrapers and much more..\n\nPREMIUM VERSION\n\n* v1.9.1: update checker fix\n+ no ads\n+ less permissions\n+ 'undo' feature\n+ 330 elements",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.techresearch.spp": {
+    "category_term": "BRAIN",
+    "author_name": "The Associated Press",
+    "title": "AP Today in History",
+    "screenshots": true,
+    "package": "com.techresearch.spp",
+    "author_uri": "http://www.apnews.com",
+    "description": "Get your daily dose of the past with AP's Today in History application. Each day, check out history's notable past events, celebrity birthdays, and complete a sliding picture puzzle of a historical AP photo from the archives of the world's largest breaking news agency.",
+    "category_label": "Brain & Puzzle"
+  },
+  "mpp.SetUsa": {
+    "category_term": "BRAIN",
+    "author_name": "Pockent LLC",
+    "title": "SET®",
+    "screenshots": true,
+    "package": "mpp.SetUsa",
+    "author_uri": "http://www.pockent.com",
+    "description": "**Droid update coming soon**\n\nSET®, This is the official version, approved by SET Enterprises and licensed by Mustang Mobile.\n\nSET, the classic card game of visual perception, is now on your Android phone. Quick-to-learn and highly addictive.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.nitoware.mahjonggPro": {
+    "category_term": "BRAIN",
+    "author_name": "nitoware",
+    "title": "Mahjongg Solitaire PRO",
+    "screenshots": true,
+    "package": "com.nitoware.mahjonggPro",
+    "author_uri": "http://nitoware.com",
+    "description": "The classic tile game Mahjongg Solitaire is now an Android classic! Many built-in layouts (and you can create your own), ten tile sets, twenty board sizes, twenty beautiful backgrounds, timer, undo, hints, reshuffles, and a cool WINNER screen.\n\nThis update restores the two deleted tilesets by popular request. We listen!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.sgg.wc": {
+    "category_term": "BRAIN",
+    "author_name": "Awesome Android Apps",
+    "title": "Word Collapse",
+    "screenshots": true,
+    "package": "com.sgg.wc",
+    "author_uri": "http://www.secondgeargames.com",
+    "description": "SUMMER SPECIAL: 30% OFF.\n3 GAMES IN 1\n\nIf you like Scrabble and TextTwist, this game is for you!\n\nWord Collapse is 3 games in 1 package:\n\n- Spot a word: clear the board by making words\n- Letterfall: new letters fall from above making it more difficult to complete the game\n- Untwist: guess a word from shuffled letters",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.areacode.drop7.rev1": {
+    "category_term": "BRAIN",
+    "author_name": "Area/Code Games",
+    "title": "Drop7",
+    "screenshots": true,
+    "package": "com.areacode.drop7.rev1",
+    "author_uri": "http://areacodeinc.com/",
+    "description": "Drop7 takes the simple and addictive fun of a casual puzzle game and injects it with a unique logical twist to create the first digital smart drug.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.applimobile.powervocab.pack.pack2": {
+    "category_term": "BRAIN",
+    "author_name": "Applimobile.com",
+    "title": "PowerVocab Ultra Edition",
+    "screenshots": true,
+    "package": "com.applimobile.powervocab.pack.pack2",
+    "author_uri": "http://applimobile.com/",
+    "description": "New in v2.1: Fixed search bugs.\n\nPowerVocab Ultra Edition contains over 1300 words and is designed for word-lovers. Use it to build  vocabulary for tests such as SAT, GRE, GMAT, ASVAB etc. Play for a few minutes daily to build a life-long skill. Includes words from Advanced Reader Edition, and Standard Edition.",
+    "category_label": "Brain & Puzzle"
+  },
+  "emre.android.words": {
+    "category_term": "BRAIN",
+    "author_name": "BitBar",
+    "title": "BitWords",
+    "screenshots": true,
+    "package": "emre.android.words",
+    "author_uri": "http://www.bitbar.org/words/",
+    "description": "Best word finding game just got better! Now with 3 different game modes with two difficulty modes each:\nFalling Letters mode, Timed mode, Strategic mode (classic).\n\nEasy mode: use any letter on the field. \nHard mode: use adjacent letters.\n\nHuge dictionary of 250000 words! (SOWPODS)\n\nOnline and Local scoreboards.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.secondbreakfast.games.wordsmith.pro": {
+    "category_term": "BRAIN",
+    "author_name": "Second Breakfast Studios",
+    "title": "Wordsmith",
+    "screenshots": true,
+    "package": "com.secondbreakfast.games.wordsmith.pro",
+    "author_uri": "http://groups.google.com/group/wordsmithgame",
+    "description": "***Uninstall the Free version before using this version\n\nWordsmith is a turn-based game similar to Scrabble or Words with Friends.\n\n**Please use the website to report issues instead of comments so we can help.\n\n-Play friends/random opponents\n-Push Notifications\n-Chat\n-No ads\n-Allows 50 simultaneous games",
+    "category_label": "Brain & Puzzle"
+  },
+  "couk.doridori.wordking.pro": {
+    "category_term": "BRAIN",
+    "author_name": "Dorian Cussen",
+    "title": "Word King",
+    "screenshots": true,
+    "package": "couk.doridori.wordking.pro",
+    "author_uri": "http://www.doridori.co.uk",
+    "description": "Word King is a fantastic word game for Android. See if you can get the top score by finding the biggest words before the time runs out. \n\nIf you like word games you will love Word King. Similar to Word Mole each level has a certain number of points needed to progress.\n\nCan you get the biggest words?\n\nBecome the Word King!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.sunkisseddesign.crosswords.ez30b01": {
+    "category_term": "BRAIN",
+    "author_name": "Sunkissed Design",
+    "title": "EZ-30! Crosswords 01",
+    "screenshots": true,
+    "package": "com.sunkisseddesign.crosswords.ez30b01",
+    "author_uri": "http://www.sunkissedapps.com/",
+    "description": "Introducing our Top 25 Paid iPhone Word game to Android!\n \n30 EASY & FUN crossword puzzles for everyone! No need to download from Internet.\n\nFeatures: Soft Keyboard. Gestures(tap, double tap, swipe, drag). Hint(long press of trackball). Comprehensive help with HELP TIPS. \n\nHave tons of FUN while exercising your brain. Enjoy",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.nroid.superhangman": {
+    "category_term": "BRAIN",
+    "author_name": "nRoid.com",
+    "title": "Super Hangman Pro",
+    "screenshots": true,
+    "package": "com.nroid.superhangman",
+    "author_uri": "http://www.nroid.com",
+    "description": "Super Hangman Pro challenges the user with over 16800 words in a fun way of studying for the SAT, GRE, TOEFL, GMAT vocabulary test. Words vary from simple to complex but are easy to learn while playing the game\n- 9 word categories\n- Hints with either definition or fill-in-the-blank\n- Solve option\n- Global Leader Board",
+    "category_label": "Brain & Puzzle"
+  },
+  "alterforce.engine": {
+    "category_term": "BRAIN",
+    "author_name": "Smartpix Games",
+    "title": "Jewellust",
+    "screenshots": true,
+    "package": "alterforce.engine",
+    "author_uri": "http://smartpixgames.com",
+    "description": "Welcome to the Ancient Egypt! Swap and burst gems to gather mosaic tiles. Pass 30 levels in 7 pyramids and Underground Temple to get Pharaoh's power!\n\n\"Best Puzzle Game\"! (AndroidNetworkAwards.com)\n\nUPDATE: some rare bugs are fixed.\n\nCAN'T DOWNLOAD OR CAN'T LAUNCH? PLEASE READ OUR FAQ.\n\n3.8Mb",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.WuZla.game.LostTreasure_Paid": {
+    "category_term": "BRAIN",
+    "author_name": "WuZla",
+    "title": "Magic Gem Ⅱ",
+    "screenshots": true,
+    "package": "com.WuZla.game.LostTreasure_Paid",
+    "author_uri": "http://wuzla.blogspot.com/",
+    "description": "Search \"wuzla\" have more fun!\n\nLed the team of your adventure, to mysterious sea, looking for lost treasure\n\nThis is a classic elimination game\n\nFeatures：\n5 different game modes,come experience it\n- Classic\n- Task\n- Cloning\n- Challenges\n- Puzzle",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.bendroid.tangrampro": {
+    "category_term": "BRAIN",
+    "author_name": "Bendroid LLC",
+    "title": "Tangram Pro",
+    "screenshots": true,
+    "package": "com.bendroid.tangrampro",
+    "author_uri": "http://www.bendroid.com",
+    "description": "by Bendroid\nwww.bendroid.com\n\nTangram Pro contains 300 puzzles to help beginners & professionals expand their \"seven boards of skill.\"",
+    "category_label": "Brain & Puzzle"
+  },
+  "net.rbgrn.wuzzle": {
+    "category_term": "BRAIN",
+    "author_name": "Battery Powered Games, LLC",
+    "title": "Wixel",
+    "screenshots": true,
+    "package": "net.rbgrn.wuzzle",
+    "author_uri": "http://www.batterypoweredgames.com/games/wixel",
+    "description": "Designed for word game enthusiasts, Wixel is the authority on scrambled word games.  Play solo anywhere or challenge friends and others online.\n\nFeatures:\nOnline Play\nUS Standard and US/UK Pro Word Lists (80k and 180k words)\n4x4 and 5x5 game boards\nStatistics Tracking\n\nLatest update:  \nNew US Word List (80k word standard)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.aevumobscurum.android": {
+    "category_term": "BRAIN",
+    "author_name": "Noble Master Games",
+    "title": "Age of Conquest: Europe",
+    "screenshots": true,
+    "package": "com.aevumobscurum.android",
+    "author_uri": "http://www.noblemaster.com",
+    "description": "IMPORTANT: Re-install the game if you have problems after the update. Also restart your phone! The game works fine. Thanks!\n\nThis is the SINGLE PLAYER version for Age of Conquest, a medieval risk-like turn-based strategy game. \n\nMap: EUROPE! \n\nNOTE: Try the Age of Conquest Lite (free) before purchase!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.wixity.deanslist": {
+    "category_term": "BRAIN",
+    "author_name": "Wixity Inc.",
+    "title": "Dean's List Trivia Game",
+    "screenshots": true,
+    "package": "com.wixity.deanslist",
+    "author_uri": "http://wixity.com",
+    "description": "Challenge your intellect with this creative trivia quiz that will keep you thinking for hours.  It will test your knowledge in a variety of subjects and the more you play, the more you can learn and win.  The best of the best will earn badges and establish themselves at the very top of the Dean's List.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.a1.chronpro.memoryfoodgameforkids": {
+    "category_term": "BRAIN",
+    "author_name": "ChronPro",
+    "title": "Memory Cards Game",
+    "screenshots": true,
+    "package": "com.a1.chronpro.memoryfoodgameforkids",
+    "author_uri": "http://www.chronpro.com",
+    "description": "Memory cards game. Designed for children 3+ years old, but would be fun for any age. This game will help you to improve memory and a fun way to pass spare time. Try our Lite version (3 levels) before buying.\nUpdate: new images",
+    "category_label": "Brain & Puzzle"
+  },
+  "net.kruseonline.wordfind": {
+    "category_term": "BRAIN",
+    "author_name": "Ryan Kruse",
+    "title": "Word Find Deluxe",
+    "screenshots": true,
+    "package": "net.kruseonline.wordfind",
+    "author_uri": "",
+    "description": "Word Find Deluxe puts a twist on traditional word search puzzles.\n\nRace against the clock to advance to the next level in Progressive mode or relax with a puzzle in Classic mode.\n\nPuzzles are generated from over 7500 common words so you'll be sure that you'll never play the same board twice.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.hbwares.wordfeud.full": {
+    "category_term": "BRAIN",
+    "author_name": "hbwares",
+    "title": "Wordfeud",
+    "screenshots": true,
+    "package": "com.hbwares.wordfeud.full",
+    "author_uri": "http://wordfeud.com/",
+    "description": "Ad free version of Wordfeud.\n\nPlay with friends or random opponents.\nParticipate in up to 30 games simultaneously.\nPush notifications.\nEnglish, Dutch, Scandinavian dictionaries.\nChat\n\nImportant: If you're updating and have a 1.6 device, uninstall previous version first.\n\n1.1.0: Added Swedish, Danish, SOWPODS dictionaries.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.fiffigt.spaghetti.full": {
+    "category_term": "BRAIN",
+    "author_name": "Fruxotic Games",
+    "title": "Spaghetti Marshmallows",
+    "screenshots": true,
+    "package": "com.fiffigt.spaghetti.full",
+    "author_uri": "http://fiffigt.com/games/",
+    "description": "Pin marshmallows with uncooked spaghetti and build your way to the next level. Spaghettis bend, snap and throw your marshmallows to the ground.\n\nOn level completion, go rampage and bring everything to the ground to a symphony of snapping spaghetti!\n\nNews: Undo button, +10 more levels, gfx update\nTEST LITE VERSION FIRST!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.anahoret.android.dots": {
+    "category_term": "BRAIN",
+    "author_name": "anahoret",
+    "title": "Kids Connect the Dots",
+    "screenshots": true,
+    "package": "com.anahoret.android.dots",
+    "author_uri": "http://androidgamesforkids.com/",
+    "description": "Kids Connect the Dots is a dot-to-dot kids game for preschool-age kids.\nKids join all the dots and reveal colorful image that is sure to excite your kids.\n\n100+ images.\n\nThis kids game will teach your kids to recognize and pronounce numbers and letters of the alphabet in a kid-friendly way.\n\nIf you have any issues email me.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.distinctdev.tmt": {
+    "category_term": "BRAIN",
+    "author_name": "DistinctDev, Inc.",
+    "title": "The Moron Test",
+    "screenshots": true,
+    "package": "com.distinctdev.tmt",
+    "author_uri": "http://www.distinctdev.com",
+    "description": "Are you a complete idiot? What about your friends, coworkers, and family? Buy The Moron Test now and find out! Point and laugh at everyone when they get stumped!\n\n* Works on all phones running OS 1.5 and up! *\n\nLATEST UPDATE:\n\n- Four sections with 400+ steps\n- Install to SD card on OS 2.2+\n- UI Tweaks",
+    "category_label": "Brain & Puzzle"
+  },
+  "mainwood.android.rushhour": {
+    "category_term": "BRAIN",
+    "author_name": "ThinkFun Inc.",
+    "title": "Rush Hour",
+    "screenshots": true,
+    "package": "mainwood.android.rushhour",
+    "author_uri": "http://www.thinkfun.com/",
+    "description": "Your goal is simple:  get the Red Car out the Exit Gate by moving the Blocking Cars and Trucks out of the way.  The puzzle features 2500 brand new challenges and adds bonus features including Hints and Auto-Solve!   Plus, players are challenged to solve the puzzle in the fewest possible spaces… a serious mental workout!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.touchapp.scramble": {
+    "category_term": "BRAIN",
+    "author_name": "TouchApp",
+    "title": "Scramble Touch",
+    "screenshots": true,
+    "package": "com.touchapp.scramble",
+    "author_uri": "http://www.appbrain.com/app/com.touchapp.scramble",
+    "description": "70% DISCOUNT FOR LIMITED TIME!\n\n9/10 people love the game!\nPLEASE DON'T GIVE 1 STAR FOR FORCE CLOSE, CONTACT US AND WE WILL FIX IT. WORKS FINE ON 99%+\nScramble Touch is word search game. Drag your finger to make a word.\nTime Mode- Find most words within given time\nList Mode- Complete list of words using least amount of time",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.enjoysudoku.enjoysudoku": {
+    "category_term": "BRAIN",
+    "author_name": "Jason Linhart",
+    "title": "Enjoy Sudoku",
+    "screenshots": true,
+    "package": "com.enjoysudoku.enjoysudoku",
+    "author_uri": "http://www.enjoysudoku.com/android/",
+    "description": "Enjoy Sudoku:\n\n* unlimited puzzles at 16 levels\n* skins\n* solver\n* tutorial\n* undo/redo\n* auto pencil\n* statistics\n* compare your time to others\n\nOur hints go from a gentle suggestion to detailed instructions; teach you to play Sudoku.\n\nIf you really Enjoy Sudoku, this is the app for you!\n\nsuduko,soduko,sudoko,sodoku,soduku",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.bendroid.mystique2unlocked": {
+    "category_term": "BRAIN",
+    "author_name": "Bendroid LLC",
+    "title": "Mystique Ch2: The Child",
+    "screenshots": true,
+    "package": "com.bendroid.mystique2unlocked",
+    "author_uri": "http://www.bendroid.com",
+    "description": "by Bendroid LLC\nwww.bendroid.com\n\nYou asked for it and waited patiently...now it's unleashed! \n\nAre you brave enough to play?\n\n* 14 locations\n* over 50 animations\n* dozens of items\n* new characters\n\nWant to continue your experience?  Look for Mystique Ch3: Obitus on the marketplace.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.seinfeld.trivia": {
+    "category_term": "BRAIN",
+    "author_name": "Kitten Mittens Apps",
+    "title": "Seinfeld Trivia",
+    "screenshots": true,
+    "package": "com.seinfeld.trivia",
+    "author_uri": "",
+    "description": "Seinfeld Trivia is the ultimate way to test your Seinfeld knowledge. With a seemingly endless amount of questions in the Trivia game mode alone, Seinfeld Trivia also includes Quotes Matcher and Bizarro Quotes game modes for optimal satisfaction.\n\n**Disclaimer** This app is not affiliated with the Seinfeld television show.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.camelgames.supertumble": {
+    "category_term": "BRAIN",
+    "author_name": "Camel Games",
+    "title": "Super Tumble",
+    "screenshots": true,
+    "package": "com.camelgames.supertumble",
+    "author_uri": "",
+    "description": "Addictive, sometimes maddening physics game! Fantastic graphics! Fun for all ages and all genders! Remove the blocks to get the star safely onto the platform. Come on, lots of different kinds of blocks and levels are waiting to challenge you.\n\n90 levels and no ads\n\nUPDATE\n\"License Verification\" issues fixed.",
+    "category_label": "Brain & Puzzle"
+  },
+  "org.thatquiz.thatquizmath": {
+    "category_term": "BRAIN",
+    "author_name": "Andrew Lyczak",
+    "title": "ThatQuiz Math",
+    "screenshots": true,
+    "package": "org.thatquiz.thatquizmath",
+    "author_uri": "http://www.thatquiz.org/",
+    "description": "Math practice for students of all grade levels.  Arithmetic, facts, inequalities, exponents, algebra, calculus, fractions, decimals, probability, time, money, measurement, place value, graphs, triangles, shapes, geometry, points, angles and much more.\n\nVersion 1.4: Better user interface!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.odeeapp.bibletime": {
+    "category_term": "BRAIN",
+    "author_name": "OdeeApps",
+    "title": "Bible Time!",
+    "screenshots": true,
+    "package": "com.odeeapp.bibletime",
+    "author_uri": "",
+    "description": "Bible Time!(edition: The Gospels) is a Bible quiz game testing your knowledge in various categories from The Gospels.  \n\nThis Bible trivia game is unique because it keeps track of every question you answer while showing you what area of the Gospels you are knowledgeable at.",
+    "category_label": "Brain & Puzzle"
+  },
+  "wood.enigma": {
+    "category_term": "BRAIN",
+    "author_name": "Jasotec GbR",
+    "title": "Woodenigma",
+    "screenshots": true,
+    "package": "wood.enigma",
+    "author_uri": "http://www.jasotec.com",
+    "description": "v1.0.10 Full Version with 850 puzzle.\n\nTo solve the puzzle, you have to fill up the shapes by placing the wooden Blocks on the correct position.\n\n* rotate the blocks by clicking them\n* move the blocks via drag'n'drop",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.Car": {
+    "category_term": "BRAIN",
+    "author_name": "GZORZ",
+    "title": "ParkingBreak",
+    "screenshots": true,
+    "package": "com.Car",
+    "author_uri": "http://market.android.com/publish/signup",
+    "description": "When ORZ is in a mess-up car park, you try to help him to find a best path to escape from the crowed car park with your imagination and fingers,how to minimize your cost to escape is a great Challenge,Come To help ORZ Challenge 99level\n\n****** Better compatibility",
+    "category_label": "Brain & Puzzle"
+  },
+  "uk.co.esstec.android.pokedex": {
+    "category_term": "BRAIN",
+    "author_name": "Stephen Willey",
+    "title": "Pokedex",
+    "screenshots": true,
+    "package": "uk.co.esstec.android.pokedex",
+    "author_uri": "http://android.esstec.co.uk/m",
+    "description": "All 649 Pokemon. Original 493 have full info, movelists, artwork & cries.\n\nThe new B&W Pokemon have basic stats, sprite and cry but not yet full info, moves or art. Missing data will be added over time.\n\nProblems? Please use my site and give lots of detail.\n\nUnofficial Pokedex",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.larvalabs.tactics": {
+    "category_term": "BRAIN",
+    "author_name": "Larva Labs Ltd.",
+    "title": "Battle for Mars w/Multiplayer",
+    "screenshots": true,
+    "package": "com.larvalabs.tactics",
+    "author_uri": "http://larvalabs.com/blog/android/battle-for-mars-upgrade-multiplayer/",
+    "description": "** v1.56 - OS 2.2 fixes, small multiplayer bug fix **\n\nBattle for Mars is a huge turn based strategy game where you use soldiers, robots, and spaceships to battle alien races. Fight in the mountains, forests and at sea. Includes:\n\n- 17 unit types\n- 6 building types\n- 3 enemy races\n- 13 quick maps\n- 12 map campaign",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.realarcade.TT2": {
+    "category_term": "BRAIN",
+    "author_name": "GameHouse",
+    "title": "TextTwist 2",
+    "screenshots": true,
+    "package": "com.realarcade.TT2",
+    "author_uri": "http://mobile.realarcade.com",
+    "description": "Twist letters again with TextTwist 2, the sequel to one of the most popular word games ever! Shuffle letters and form words in five challenging game modes. Play the original Timed and Untimed modes or take it to the next level in three other modes!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.chickenbrickstudios.lightup": {
+    "category_term": "BRAIN",
+    "author_name": "Chicken Brick Studios",
+    "title": "LightUp",
+    "screenshots": true,
+    "package": "com.chickenbrickstudios.lightup",
+    "author_uri": "http://www.chickenbrickstudios.com",
+    "description": "*** LIMITED TIME 75% OFF SALE! ***\n\nThe goal of LightUp is simple, just turn all of the tiles to blue.  It may seem easy at first, but it quickly turns into an addicting, brain-twisting challenge.\n\nTry the Lite version first for FREE!\n\nFull Version Features:\n- Over 125 unique levels\n- Hours of mind-bending fun!",
+    "category_label": "Brain & Puzzle"
+  },
+  "taito.BustAMove": {
+    "category_term": "BRAIN",
+    "author_name": "SQUARE ENIX, INC.",
+    "title": "Bust-A-Move",
+    "screenshots": true,
+    "package": "taito.BustAMove",
+    "author_uri": "http://www.square-enix.com/na/",
+    "description": "Simple, yet addicting action puzzle game now available on Android as an original full screen version!\nUsing the track ball or the touch panel, link 3 or more of same color bubbles to burst it!\n\n- Challenge Mode : Pit your skill against never-ending waves of bubbles.\n- Puzzle Mode : Play through 300 stages of puzzles!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.requiem.gembuster": {
+    "category_term": "BRAIN",
+    "author_name": "Requiem Software Labs, Inc",
+    "title": "Gem Buster",
+    "screenshots": true,
+    "package": "com.requiem.gembuster",
+    "author_uri": "http://www.requiemsoftwarelabs.com/puzzle/gem-buster.html",
+    "description": "Stretch your brain with Gem Buster! Swap gems to create groups of three or more.  You must to hunt for matches because you have to meet goals for each type of gem in order to move on to harder challenges. Online high scores keep you coming back for more!\n\nv1.33- Less laggy + Tutorial",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.congee.pachee": {
+    "category_term": "BRAIN",
+    "author_name": "congee games",
+    "title": "Pachee Gold (Legacy)",
+    "screenshots": true,
+    "package": "com.congee.pachee",
+    "author_uri": "http://www.congeegames.com",
+    "description": "Pachee Gold, previous Full Version.\nThis is meant as Legacy Version for former installments of the full version.\n\nFor new customers, please browse for the NEW Version of Pachee\nby Exozet Games.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.tonykay.twistype": {
+    "category_term": "BRAIN",
+    "author_name": "Tony Kay",
+    "title": "TwisType: Word Jumbles",
+    "screenshots": true,
+    "package": "com.tonykay.twistype",
+    "author_uri": "http://twistype.tony-kay.com",
+    "description": "Find as many words as possible in the jumbled letters in this beautifully rendered game with a vintage typewriter motif.\nSimilar to Text Twist and Word Warp, but better!\n\n- 5, 6, 7, and 8 letter jumbles! No app has longer jumbles!\n- Timed or untimed.\n- BINGO mode.\n- 3-day trial version available (TwisType Trial).",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.bitlogik.uconnect": {
+    "category_term": "BRAIN",
+    "author_name": "BitLogik",
+    "title": "U Connect",
+    "screenshots": true,
+    "package": "com.bitlogik.uconnect",
+    "author_uri": "http://www.bitlogik.com",
+    "description": "*** LIMITED TIME SALE $0.99 ***\n\nA simple yet extremely fun and addictive puzzle game. The goal is to connect all the points by dragging your finger from point to point without retracing your steps. Sounds simple? It might just have you playing for hours! Try to finish all 1000+ puzzles.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.realarcade.SSP": {
+    "category_term": "BRAIN",
+    "author_name": "GameHouse",
+    "title": "Sally's Spa",
+    "screenshots": true,
+    "package": "com.realarcade.SSP",
+    "author_uri": "http://mobile.realarcade.com/",
+    "description": "Treat yourself to some fast fun with Sally in Sally's Spa! Sally's back and ready to relax in original spa locations around the world. Refresh your customers with saunas, manicures, massages, and more in 25 awesome levels. Join Sally on her latest adventure today!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.aevumobscurum.androidafrica": {
+    "category_term": "BRAIN",
+    "author_name": "Noble Master Games",
+    "title": "Age of Conquest: Africa",
+    "screenshots": true,
+    "package": "com.aevumobscurum.androidafrica",
+    "author_uri": "http://www.noblemaster.com",
+    "description": "This is the single player version for Age of Conquest, a medieval risk-like turn-based strategy game. \n\nMap: AFRICA!\n\nWARNING: For strategy game enthusiasts only! Please try the free Lite version before purchase. Thank you.\n\nVersion 1.0.6:\n- Copy to SD Card :)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alonsoruibal.chessdroid": {
+    "category_term": "BRAIN",
+    "author_name": "mobialia.com",
+    "title": "Chess",
+    "screenshots": true,
+    "package": "com.alonsoruibal.chessdroid",
+    "author_uri": "http://www.mobialia.com/chess/",
+    "description": "The best app for chess lovers:\n\n-Simple and customizable interface\n-Strong AI with adjustable ELO levels\n-Play online on real time against other players on FICS or ICC!\n-Solve 2900 chess problems\n\nFollow @mobialia on Twitter\n\nYou can try the LITE version first",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.blockdot.chicktionaryfull": {
+    "category_term": "BRAIN",
+    "author_name": "Blockdot",
+    "title": "Chicktionary",
+    "screenshots": true,
+    "package": "com.blockdot.chicktionaryfull",
+    "author_uri": "http://m.blockdot.com",
+    "description": "Get ready for an egg-citing game\n\nEach hen bears a letter. The more words you create, the more points you earn!\n\n- 2 Modes of Game Play! Timed and Untimed\n- Earn Eggchievements for crazy stuff or just playing the game like a pro!\n- Shake your Google Phone to shuffle the chickens\n- 300 Levels of word fun!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.streetsofboston.gube": {
+    "category_term": "BRAIN",
+    "author_name": "Streets Of Boston",
+    "title": "The Gube - 3D Rubik Cube",
+    "screenshots": true,
+    "package": "com.streetsofboston.gube",
+    "author_uri": "http://soft.antonspaans.com/products/gube",
+    "description": "Have some moments to yourself? The cube, a test of wit and problem solving has now been brought to Android as \"The Gube\".\nSolve it by a smooth limitless 3D view and touchscreen & trackball manipulation. \n\nSupports Android2.x and QVGA/WVGA screens.\n\nRead review:\nAndroidTapp.com/?s\\u003dgube\n\n1.4.4: Add Nexus One support.",
+    "category_label": "Brain & Puzzle"
+  },
+  "smpxg.jewelxmas": {
+    "category_term": "BRAIN",
+    "author_name": "Smartpix Games",
+    "title": "Jewellust Xmas",
+    "screenshots": true,
+    "package": "smpxg.jewelxmas",
+    "author_uri": "http://smartpixgames.com",
+    "description": "Christmas version of our popular game \"Jewellust\".\nSwap and burst colorful signs to gather mosaic tiles. Help Santa to deliver gifts, pass 7 villages and solve jigsaw puzzles. Enjoy rich graphics, charming sounds and get into the Christmas spirit!\n\nThe game has 2 modes, 35 levels, 9 power-ups and online scores.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.mappn.cubicmandeluxe": {
+    "category_term": "BRAIN",
+    "author_name": "mAPPn, Inc.",
+    "title": "CubicMan",
+    "screenshots": true,
+    "package": "com.mappn.cubicmandeluxe",
+    "author_uri": "http://www.mappn.com/community/",
+    "description": "Update available,bug on Droid is fixed.\nPlayers need control a rolling magic stone to pass through various terrain in order to reach the final destination. The game contains moveable bridges, traps, odd-even switches and unidirectional switches. You need to find out a better way to make the stone reach the destination.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.snctln.game.WordWrenchFull": {
+    "category_term": "BRAIN",
+    "author_name": "snctlnSoftware",
+    "title": "WordWrench Full",
+    "screenshots": true,
+    "package": "com.snctln.game.WordWrenchFull",
+    "author_uri": "http://www.snctln.com",
+    "description": "The original 6 letter anagram game for Android is better than ever\n\nFind 4 5 & 6 letter words \n\nFind a 6 letter word to advance to the next puzzle \n\n-SHAKE your phone to mix the letters!!!\n\n-Dictionary support\n\n-Landscape, Portait, Keyboard, Touch, & Track Ball support\n\n-Lite: 250 puzzles, ads\n\n-Full: 8000+ puzzles, no ads",
+    "category_label": "Brain & Puzzle"
+  },
+  "uk.co.aifactory.backgammon": {
+    "category_term": "BRAIN",
+    "author_name": "AI Factory Limited",
+    "title": "Backgammon",
+    "screenshots": true,
+    "package": "uk.co.aifactory.backgammon",
+    "author_uri": "http://www.aifactory.co.uk",
+    "description": "Same as our \"Backgammon Free\", but no Ads.\n\nUser friendly interface\nStrong Backgammon AI\nFull match play + doubling cube\nHints, 2 player hotseat and stats\n \n*Does the Backgammon engine cheat? See \"CPU Strategy\" page + Manual Dice option (use real-world dice) to prove to yourself that it doesn't*",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.realarcade.TIK": {
+    "category_term": "BRAIN",
+    "author_name": "GameHouse",
+    "title": "Tiki Towers",
+    "screenshots": true,
+    "package": "com.realarcade.TIK",
+    "author_uri": "http://mobile.realarcade.com/",
+    "description": "Save the monkeys! Only you can help them in this revolutionary new puzzle game! Travel between five tropical islands, leading your tribe of monkeys to safety by building bamboo structures of all shapes and sizes. Winner of \"Best Casual Game\"",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.Appomatic.android.smartproject": {
+    "category_term": "BRAIN",
+    "author_name": "Appomatic Software",
+    "title": "Are You a Moron?",
+    "screenshots": true,
+    "package": "com.Appomatic.android.smartproject",
+    "author_uri": "http://www.appomaticsoftware.com",
+    "description": "Wondering if you’re a moron? Are your friends and family complete idiots? Download the Are You a Moron app and find out the truth. \n\n-Straightforward, addictive gameplay\n\n-2 Lessons with 30+ puzzles each\n-Multiple question/test types\n-4 possible outcomes\n\nNew in 2.1 - Bug fixes!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.aevumobscurum.androidsouthamerica": {
+    "category_term": "BRAIN",
+    "author_name": "Noble Master Games",
+    "title": "Age of Conquest: S. America",
+    "screenshots": true,
+    "package": "com.aevumobscurum.androidsouthamerica",
+    "author_uri": "http://www.noblemaster.com",
+    "description": "This is the single player version for Age of Conquest, a medieval risk-like turn-based strategy game. \n\nMap: S. AMERICA!\n\nV1.0.11: \n- Bugfix: white/invisible text!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.teamsoft.rushhour": {
+    "category_term": "BRAIN",
+    "author_name": "Team 5 Soft",
+    "title": "Blocked Traffic",
+    "screenshots": true,
+    "package": "com.teamsoft.rushhour",
+    "author_uri": "http://www.team5soft.com",
+    "description": "The goal of the game is to get a car on third line out of a box by moving the other cars out of its way. Cars can not enter Construction areas.\n\nGame has:\n\n* 1000 positions with 4 difficulty levels\n* (!) 6 graphic themes\n* Solution player for all positions\n* Min number of moves to solve puzzle\n\n(!) - new/updated features",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.icenta.sudoku": {
+    "category_term": "BRAIN",
+    "author_name": "genina.com",
+    "title": "Sudoku Premium",
+    "screenshots": true,
+    "package": "com.icenta.sudoku",
+    "author_uri": "http://www.genina.com",
+    "description": "You won’t be looking for a paper puzzle ever again!\n\nWith four difficulty levels, intuitive interface, and all the functions right at your fingertips, this Sudoku app is sure to be your favorite.\n\nFeatures: auto-save, top scores, history, real-time competitions, and much more.\n\nSupports: trackball, touch screen, keyboard.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.mmggames.sudoku": {
+    "category_term": "BRAIN",
+    "author_name": "Mighty Mighty Good Games",
+    "title": "Sudoku",
+    "screenshots": true,
+    "package": "com.mmggames.sudoku",
+    "author_uri": "http://www.mmggames.com",
+    "description": "The best selling Sudoku game for iPhone comes to Android.\n\nSudoku will give you many hours of fun and puzzle solving. Enjoy the challenge of solving Sudoku puzzles whenever or wherever you are using your phone.\n\nFEATURES\n• 800 unique handcrafted puzzles\n• Four different skill levels\n• Multiple color schemes and much more.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.requiem.fastFoodMayhem": {
+    "category_term": "BRAIN",
+    "author_name": "Requiem Software Labs, Inc",
+    "title": "Fast Food Mayhem",
+    "screenshots": true,
+    "package": "com.requiem.fastFoodMayhem",
+    "author_uri": "http://www.requiemsoftwarelabs.com/puzzle/fast-food-mayhem.html",
+    "description": "Waddle your way through endless waves of fast food puzzles! Match foods in groups of 4 or more to devour points and progress to more challenging levels. Use power ups and build combos for more points. Compete for the record with online score keeping!\n\nv1.72 - Improved Speed/Gameplay Tutorial",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.larvalabs.wordpops": {
+    "category_term": "BRAIN",
+    "author_name": "Larva Labs Ltd.",
+    "title": "WordPops",
+    "screenshots": true,
+    "package": "com.larvalabs.wordpops",
+    "author_uri": "http://larvalabs.com",
+    "description": "WordPops is an addictive cross between Tetris® and Scrabble®. Spell words with your finger to stop the bubbles from filling the screen.\n\n- Natural touch interface\n- Scrabble® style word scoring\n- Bonus 2x, 3x, 5x score bubbles\n- Freeze, explosion, mutate bubbles\n- Scored/relaxed game modes\n- Challenge friends to beat scores",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.gokgs.client.android": {
+    "category_term": "BRAIN",
+    "author_name": "KGS Online",
+    "title": "KGS Client",
+    "screenshots": true,
+    "package": "com.gokgs.client.android",
+    "author_uri": "http://www.igoweb.org/android/kgs.html",
+    "description": "This is a client for the KGS go server. KGS is a popular go/baduk/wei-chi server. With this client you can play and watch games on KGS.\n\nYOU MUST HAVE A (*free*) KGS ACCOUNT BEFORE USING THIS. Visit http://www.gokgs.com/ to get one.\n\nAll purchasers get 2 free months of KGS Plus. Contact wms@igoweb.org to get yours!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.virtuesoft.wordsearchpaid": {
+    "category_term": "BRAIN",
+    "author_name": "JiuzhangTech Ltd",
+    "title": "WordSearch Unlimited",
+    "screenshots": true,
+    "package": "com.virtuesoft.wordsearchpaid",
+    "author_uri": "http://jiuzhangtech.com",
+    "description": "WordSearch Unlimited is one of the best word puzzle games in the market.\nPlay unlimited high quality puzzles, with themes you like. \n\nThemes:\nNote Paper\nBlackboard\nParchment\nBlue Sky\nChristmas\nCustomized\n\nWord lists:\nEnglish, Animals, Food & Drink, Fruit & Veg, Family, Colors, Body Parts, Sports, Transports, Music and More.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.gameloft.android.GloftUNOG": {
+    "category_term": "BRAIN",
+    "author_name": "Gameloft",
+    "title": "UNO™",
+    "screenshots": true,
+    "package": "com.gameloft.android.GloftUNOG",
+    "author_uri": "http://www.gameloft.com",
+    "description": "Play UNO, the classic card game of matching colors and numbers, on your phone against computer opponents or friends on a single device! Enjoy the customization mode which lets you choose between 9 different rule sets, including 7-0 and Jump-in.\nFor more info follow the official Twitter http://twitter.com/UNO_Gameloft",
+    "category_label": "Brain & Puzzle"
+  },
+  "org.elegantbits.android.kidsworldexplorer.alphabet.paid": {
+    "category_term": "BRAIN",
+    "author_name": "ElegantBits",
+    "title": "Kids Alphabet",
+    "screenshots": true,
+    "package": "org.elegantbits.android.kidsworldexplorer.alphabet.paid",
+    "author_uri": "http://www.elegantbits.com",
+    "description": "Interesting and amusing game which was designed to help your children learn English alphabet. Amazing graphical and sounds design will make kids excited.\n\nLet your kids enjoy learning the alphabet !\n\nChanges: sounds playback improved, new game types were added.\n\nSee all news on: http://www.elegantbits.com/kids-alphabet",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.greenrift.wordmix": {
+    "category_term": "BRAIN",
+    "author_name": "Greenrift Software LLC",
+    "title": "Word Mix",
+    "screenshots": true,
+    "package": "com.greenrift.wordmix",
+    "author_uri": "http://www.greenriftsoftware.com",
+    "description": "The object of Word Mix is to correctly guess the 6 letter word to move on to the next level.  Guess more words to add to your score.  Similar to Word Warp and Text Twist.\n\nCompare your score with others!\n\nKeyboard support\n\nHints are available.\n\nTimed and untimed games!\n\n12000+ lvls\nDefinition lookup\nSmall screen support",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.standalone.Crosswords": {
+    "category_term": "BRAIN",
+    "author_name": "Stand Alone, Inc.",
+    "title": "Crosswords",
+    "screenshots": true,
+    "package": "com.standalone.Crosswords",
+    "author_uri": "http://www.standalone.com/android/crosswords/faq",
+    "description": "Crosswords for Android lets you download and solve crosswords from around the world, right on your handheld! New puzzles available every day from major newspapers, plus hints, clue listings, and tons more.\n\nFor more information, and supported puzzles, check out our FAQ, at http://www.standalone.com/android/crosswords/faq",
+    "category_label": "Brain & Puzzle"
+  },
+  "net.mathsworkout": {
+    "category_term": "BRAIN",
+    "author_name": "Workout Games",
+    "title": "Math Workout",
+    "screenshots": true,
+    "package": "net.mathsworkout",
+    "author_uri": "http://www.mathsworkout.net",
+    "description": "WOW! MORE THAN 50% OFF!! LIMITED PERIOD ONLY\n\nThe most popular brain training app on Android.  Math Workout helps enhance mental arithmetic for all ages. \n\nFEATURES\n- Unlimited World Challenge\n- All Workouts Unlocked\n- Progress charts\n- 6 User Profiles!\n- 20+ Cool Wallpapers\n- Great fun!\n\nPlease rate us! :)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.doodle.main": {
+    "category_term": "BRAIN",
+    "author_name": "Camel Games",
+    "title": "Space Physics",
+    "screenshots": true,
+    "package": "com.doodle.main",
+    "author_uri": "",
+    "description": "Space Physics is a puzzle game with amazing physics. In this magical world, your hand drawings come to life.\n\n**ATTENTION**\nTo save space, it contains only 1 level. Install and launch \"Pack for Space Physics\" (Free on market) to unleash levels and sounds\n\nUPDATE\nAllow install to SD for OS 2.2(Froyo)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.batterypoweredgames.antigenoutbreak": {
+    "category_term": "BRAIN",
+    "author_name": "Battery Powered Games, LLC",
+    "title": "Antigen: Outbreak",
+    "screenshots": true,
+    "package": "com.batterypoweredgames.antigenoutbreak",
+    "author_uri": "http://www.batterypoweredgames.com/games/antigen",
+    "description": "An attack-oriented puzzle game with an addictive, captivating strategy element.  Uses OpenGL and supports multitouch where available.\n\nOutbreak Features:\n4 New levels w/auto-save\n2 New power-ups\nMore songs\nMany achievements\nLeaderboard submissions\nAd-Free\n\nv1.1f - Bug Fixes\n\nTry Trackball/dpad Left and Right to Spin.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.shredderchess.android": {
+    "category_term": "BRAIN",
+    "author_name": "shredderchess.com",
+    "title": "Shredder Chess",
+    "screenshots": true,
+    "package": "com.shredderchess.android",
+    "author_uri": "http://www.shredderchess.com",
+    "description": "Shredder, the most successful chess program ever, now also available for Android. Play against Shredder, analyze with him and solve chess puzzles. Simply the usual Shredder standard for your pocket.\n\n* adjustable playing strength\n* intuitive and easy to operate\n* 1000 built in chess puzzles\n* rates your play\n* chess coach",
+    "category_label": "Brain & Puzzle"
+  },
+  "ts.SpotTheDifference": {
+    "category_term": "BRAIN",
+    "author_name": "Tailgate Studios, LLC",
+    "title": "Spot the Difference",
+    "screenshots": true,
+    "package": "ts.SpotTheDifference",
+    "author_uri": "http://www.tailgatestudios.com",
+    "description": "Welcome to Android's best selling photo-puzzle game. Can you find five differences in the photos and land in the global hall of fame?",
+    "category_label": "Brain & Puzzle"
+  },
+  "memorypro.com": {
+    "category_term": "BRAIN",
+    "author_name": "Jasper de Keijzer",
+    "title": "Memory Pro",
+    "screenshots": true,
+    "package": "memorypro.com",
+    "author_uri": "http://home-5.worldonline.nl/~jdekeij/android.html",
+    "description": "Added new theme with Sweets, cake and ice creams\nThe ultimate time waster & short term memory trainer. For the young and old. See free memory of the same author if in doubt. This version adds themes. Contains a beautiful designed HiRes fruit & flower theme.  \nHave fun! Fix: More easy to get a smile\nNO ADS and No permissions",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.vscorp.android.alphamixr": {
+    "category_term": "BRAIN",
+    "author_name": "Visual Systems Corp.",
+    "title": "Syrious Scramble Full",
+    "screenshots": true,
+    "package": "com.vscorp.android.alphamixr",
+    "author_uri": "http://syriousgames.com/index.php/syrious-scramble",
+    "description": "Make as many 3 to 6 letter words as you can from 6 scrambled letters before time runs out! If you like Text Twist or Scrabble, you'll love this addicting game! Now with definitions!\n\n- 8000+ puzzles\n- Global High Scores\n- Less than a cup of coffee but hours of fun!\n\nTry Lite first\n\nSerious Games AlphaMixr Alpha Mixer Mixr",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.anahoret.android.shapes": {
+    "category_term": "BRAIN",
+    "author_name": "anahoret",
+    "title": "Kids Shape Puzzle",
+    "screenshots": true,
+    "package": "com.anahoret.android.shapes",
+    "author_uri": "http://androidgamesforkids.com",
+    "description": "Kids Shape Puzzle is an educational and entertaining  kids game for preschool-age kids.\n\nThrill your kids with over 90 puzzles.\n\nKids slide the puzzle pieces into place and reveal the image.\nYour kids will gain cognitive and fine motor skills in a kid-friendly way.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.hg.babocrashdeluxecan": {
+    "category_term": "BRAIN",
+    "author_name": "Playbrains",
+    "title": "Babo Crash Deluxe",
+    "screenshots": true,
+    "package": "com.hg.babocrashdeluxecan",
+    "author_uri": "http://www.playbrains.com",
+    "description": "\"Bejeweled on Steroids!\" - AppModo\n\"Absolute must download\" - 94% - Gamers' Temple\n\nNew Deluxe! version...\n- 3 exciting game modes\n- OpenFeint leaderboards & achievements\n \nFast-paced puzzle action:\n- Gorgeous graphics\n- Heroic abilities\n- Strategic screen rotation\n- SD card\n \nYou've never played a Match 3 like this before!",
+    "category_label": "Brain & Puzzle"
+  },
+  "net.hexage.totemo.hd": {
+    "category_term": "BRAIN",
+    "author_name": "Hexage Ltd",
+    "title": "Totemo HD",
+    "screenshots": true,
+    "package": "net.hexage.totemo.hd",
+    "author_uri": "http://www.hexage.net/totemo/",
+    "description": "Totemo HD is optimized for hi-res devices (eg. Galaxy Tab,Droid,Desire,Nexus,EVO).\n\nUncover the mystery hidden between the realms in a unique puzzle game. Travel to enchanted places of the past with your witch doctor guide and solve over 100 logic tasks.\n\nPlay the survival mode for extra challenge.\n\nUnloose the spirit!",
+    "category_label": "Brain & Puzzle"
+  },
+  "net.hexage.totemo": {
+    "category_term": "BRAIN",
+    "author_name": "Hexage Ltd",
+    "title": "Totemo",
+    "screenshots": true,
+    "package": "net.hexage.totemo",
+    "author_uri": "http://www.hexage.net/totemo/",
+    "description": "Try Totemo HD if you have a hi-res device!\n\nUncover the mystery hidden between the realms in a unique puzzle game. Storm your brain and relax your mind solving over 100 mind-soothing logic tasks.\n\nPlay the survival mode for extra challenge and write your name into the on-line leaderboards.\n\nUnloose the spirit.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.realarcade.CL4": {
+    "category_term": "BRAIN",
+    "author_name": "GameHouse",
+    "title": "COLLAPSE!",
+    "screenshots": true,
+    "package": "com.realarcade.CL4",
+    "author_uri": "http://www.Collapse-Games.com",
+    "description": "The blockbusting, color-matching excitement of COLLAPSE! returns with award-winning gameplay, all-new customizable characters, and fantastic foes like the mighty Blocktopus and Blockula! Use explosive power-ups, buy amazing upgrades and bust those blocks!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.aevumobscurum.androidasia": {
+    "category_term": "BRAIN",
+    "author_name": "Noble Master Games",
+    "title": "Age of Conquest: Asia",
+    "screenshots": true,
+    "package": "com.aevumobscurum.androidasia",
+    "author_uri": "http://www.noblemaster.com",
+    "description": "IMPORTANT: Re-install if you have problems after the update. It's the market. Sorry! \n\nThis is the single player version for Age of Conquest, a medieval risk-like turn-based strategy game. \n\nMap: ASIA!\n\nV1.0.8: \n- Copy to SD Card :)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.frosteam.amtalee": {
+    "category_term": "BRAIN",
+    "author_name": "frosteam",
+    "title": "Amtalee",
+    "screenshots": true,
+    "package": "com.frosteam.amtalee",
+    "author_uri": "http://sites.google.com/site/frosteammobile/home",
+    "description": "Addictive puzzle game. Figure out a way to guide the block through obstacles and let it slide into exit. Use switches to toggle bridges. After several easy levels real fun begins, where reaching the exit won't be as easy anymore.\n\n1.0.19 View control improvements.",
+    "category_label": "Brain & Puzzle"
+  }
+}
