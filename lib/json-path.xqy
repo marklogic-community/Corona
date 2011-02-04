@@ -216,7 +216,7 @@ declare function jsonpath:handleFulltextAndNot(
 )
 {
     let $positive := $step/positive[@type = "object"]
-    let $negative := $step/positive[@type = "object"]
+    let $negative := $step/negative[@type = "object"]
     where exists($positive) and exists($negative)
     return cts:and-not-query(jsonpath:dispatchFulltextStep($positive), jsonpath:dispatchFulltextStep($negative))
 };
