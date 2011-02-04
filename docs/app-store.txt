@@ -1,0 +1,50 @@
+Below is a rough description of the sample app.
+
+Kind of funny that it's a sample app _store_ that shows how to use marklogic as a json _store_.
+
+
+1) Load json from android market data.  Note data only contains 2 categories for now.  We can fetch more later. 
+Also need to write a script that will fetch the icons and load those into marklogic for now (so app can run
+locally without internet connection).  Icons are at http://www.android.com/market/data/screenshots/{classname}N.png
+where N is either empty string (for icon), or 0, or 1 for screenshots.
+(Like, http://www.android.com/market/data/screenshots/com.andoop.freerunning0.png ).
+
+Also load data for palm app store.
+thumb is icon.  This adds 'version', 'orientation', 'price', 'devices', 'requirements'.
+Can make up (random or blank) this data for android.
+
+(Perhaps cons up simple form for manually adding new apps/editing existing ones; no image upload at first; do this 
+later when needed).
+
+2) Provide a one-box search interface that searches 
+title, description, category_label, author, 
+
+3) Search results should display a (scrollable/pagable) list of apps
+Icon
+Highlighed App title 
+(Highlighted Snippet ?)
+
+4) Clicking on a search result should show in page (like android.com/market) an app
+with 
+Title
+Author (with link to site)
+Description
+Screen shots
+
+5) Provide facets on 
+category/category_label
+author
+free or paid, bucketed cost 0, (0, 1], (1, 2], (2, 3], (3, 4], (4,5], (5, 10], (10, 15], (15, 20], (20, inf]
+featured or not
+orientation
+devices
+requirements
+
+6) "Instant" style filtering of results based on currently typed stuff in one-box
+(also updating facets).
+
+7) Once that's working, then add ability for someone to (a) provide a review and/or (b) rank the app (0-5).  
+Make review comments searchable in one-box as well and show up in search results if the hit is there.  
+
+
+8) Optional, use css that will make the app work ok on iphone/android/palm browsers.

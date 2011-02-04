@@ -1,0 +1,912 @@
+{
+  "com.standalone.CrosswordLight": {
+    "category_term": "BRAIN",
+    "author_name": "Stand Alone, Inc.",
+    "title": "Crossword Light",
+    "screenshots": true,
+    "package": "com.standalone.CrosswordLight",
+    "author_uri": "http://www.standalone.com",
+    "description": "Crossword Light for Android lets you solve crosswords from around the world, right on your hand held! Over 30 puzzles available, plus hints, clue listings, and tons more.\n\nFor more information, and supported puzzles, check out our FAQ, at http://www.standalone.com/android/crosswords/faq",
+    "category_label": "Brain & Puzzle"
+  },
+  "monkeypunch.android.disneypuzzle": {
+    "category_term": "BRAIN",
+    "author_name": "MonkeyPunch",
+    "title": "Dìsney Puzzle : Jigsaw",
+    "screenshots": true,
+    "package": "monkeypunch.android.disneypuzzle",
+    "author_uri": "http://www.monkeypunchandroid.blogspot.com/",
+    "description": "Dìsney puzzle game with lot's of Disney cartoons like the Princesses, Mìckey Mouse and Winnìe the poöh!\n\nDrag the JigSaw / photo pieces to the right places in order to recreate the image!\n\nGame contains: \n- 30 levels of 3x3 puzzles\n- 30 ,, of 4x4 ,,\n- 22 ,, of 5x5 ,,\n- 20 ,, of 6x6 ,,\n\n**Froyo compatible**",
+    "category_label": "Brain & Puzzle"
+  },
+  "uk.co.aifactory.chessfree": {
+    "category_term": "BRAIN",
+    "author_name": "AI Factory Limited",
+    "title": "Chess Free",
+    "screenshots": true,
+    "package": "uk.co.aifactory.chessfree",
+    "author_uri": "http://www.aifactory.co.uk",
+    "description": "Chess Free is the best free Chess game on Android!\n\nFeaturing:\n\nUser friendly interface\n10 difficulty levels (Beginner to Expert)\n2 player hot-seat\nReview game mode (+ moves list)\n3 Chess Boards and 2 Piece Sets\nChess Timers, Hints and Handicaps\nBased on Treebeard Chess engine\n\nSupported by unobtrusive Ads",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.onegravity.sudoku10k": {
+    "category_term": "BRAIN",
+    "author_name": "1gravity",
+    "title": "Sudoku 10'000 Free",
+    "screenshots": true,
+    "package": "com.onegravity.sudoku10k",
+    "author_uri": "http://www.1gravity.com",
+    "description": "Sudoku with 10'000 puzzles in four difficulty levels.\n\n- Sudoku Play: different input methods, undo/redo, (auto) pencil marks...\n- Sudoku Edit: create your own Sudoku\n- Sudoku Generator\n- Sudoku Solver\n- Sudoku Manager\n\nSupported by ads\n\nsodoko,sudoku,sudoko,sudoku,soduko,sudoku,sodoku,suduko,sudoku,sudoku,sudoku,suduku",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.songlyrics1990s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Song Lyrics Trivia - 1990s",
+    "screenshots": true,
+    "package": "com.alaskajim.songlyrics1990s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "Song Lyrics Trivia of the 1990s will quiz your knowledge of your favorite rock and pop songs from 1990-1999.  The game resembles the classic \"who sings it,\" but with lyrics instead of audio.  Featured artists include: Madonna, Alanis Morissette, Mariah Care, Michael Jackson, Sheryl Crow, Spice Girls, & Nirvana. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "monkeypunch.android.toystorypuzzle": {
+    "category_term": "BRAIN",
+    "author_name": "MonkeyPunch",
+    "title": "Toy Story Puzzle : Jigsaw",
+    "screenshots": true,
+    "package": "monkeypunch.android.toystorypuzzle",
+    "author_uri": "http://www.monkeypunchandroid.blogspot.com/",
+    "description": "The Toy Story Jigsaw Puzzle Game! Includes levels from Toy Story 3!\n\nDrag the JigSaw / photo pieces to the right places in order to recreate the image!\n\nGame contains: \n- 25 levels of 3x3 puzzles\n- 35 ,, of 4x4 ,,\n- 15 ,, of 5x5 ,,\n\n**Froyo compatible**",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.sporksoft.slidepuzzle": {
+    "category_term": "BRAIN",
+    "author_name": "SporkSoft",
+    "title": "Slide Puzzle",
+    "screenshots": true,
+    "package": "com.sporksoft.slidepuzzle",
+    "author_uri": "http://www.sporksoft.com",
+    "description": "The classic sliding tile game, sometimes called the 15 puzzle.  Features include a touch screen interface, multiple puzzle sizes, and customizable images.\n\nNew in 1.6.7:\n-Click sound effect now only plays when a tile changed location",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.google.android.checkers": {
+    "category_term": "BRAIN",
+    "author_name": "Aart Bik",
+    "title": "Checkers for Android",
+    "screenshots": true,
+    "package": "com.google.android.checkers",
+    "author_uri": "http://aartbik.blogspot.com/",
+    "description": "Checkers application with touch screen or trackball input. Highlights valid user moves and last played move. Undo up to eight half-moves. Engine plays at various levels with choice between mandatory captures or optional captures. Manual at: http://www.aartbik.com/MISC/amenu.html",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.whosingsit1980s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Who Sings It? 1980s Hits",
+    "screenshots": true,
+    "package": "com.alaskajim.whosingsit1980s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "This music trivia quiz game will test you on the artists and groups who have had the biggest hits from 1980 to 1989.  You will be presented with the song title and the year the song was a hit, and the challenge is to choose the artist or group who performed the song.  How well do you know the hits of the 1980s? brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.neuralplay.android.othello": {
+    "category_term": "BRAIN",
+    "author_name": "NeuralPlay",
+    "title": "NeuralPlay Othello Free",
+    "screenshots": true,
+    "package": "com.neuralplay.android.othello",
+    "author_uri": "http://www.neuralplay.com",
+    "description": "NeuralPlay's classic Othello game (also known as Reversi) offers six levels of computer play, including a strong neural network player to challenge you at the higher levels.\n\nMany game features are provided, including: human or computer play, undo move, display of legal moves and last move played, animations, and sound.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.dynamix.mobile.SmartTacToe": {
+    "category_term": "BRAIN",
+    "author_name": "Mobile Dynamix",
+    "title": "SmartTacToe",
+    "screenshots": true,
+    "package": "com.dynamix.mobile.SmartTacToe",
+    "author_uri": "http://www.mobiledynamix.com/mobile.php",
+    "description": "The game is simple. You try to make a horizontal, vertical or diagonal line of five and so does you opponent. Whoever gets it first - wins. Easy!\n\nv2.8 Online game fixes\n\nDon't like ads? Buy Premium Key for a buck :)\n\nWant to print directly from phone? Check out PrinterShare app",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.glu.android.bgd": {
+    "category_term": "BRAIN",
+    "author_name": "Glu Mobile",
+    "title": "Brain Genius Deluxe",
+    "screenshots": true,
+    "package": "com.glu.android.bgd",
+    "author_uri": "http://www.glu.com/",
+    "description": "Let Brain Genius take you through a daily dose of teasing and original brain exercises!Train your brain, with 24 touch & motion-controlled games as well as bonus puzzles including Sudoku!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.icenta.sudoku.ui": {
+    "category_term": "BRAIN",
+    "author_name": "genina.com",
+    "title": "Sudoku Free",
+    "screenshots": true,
+    "package": "com.icenta.sudoku.ui",
+    "author_uri": "http://www.genina.com",
+    "description": "With four difficulty levels, intuitive interface, and all the functions right at your fingertips, this Sudoku app is sure to be your favorite.\n\nUse trackball, touch screen, keyboard.\n\nThis version:\n - configurable notifications\n\nSupported by Ads.\n\n\nTo update from version 7.1 you must Uninstall the old version first.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.whosingsit2000s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Who Sings It? 2000s Hits",
+    "screenshots": true,
+    "package": "com.alaskajim.whosingsit2000s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "This music trivia game will quiz your knowledge of the artists and groups who have had the biggest hits from 2000 to 2009.  You will be presented with the song title and the year the song was a hit, and the challenge is to choose the artist or group who performed the song. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "memory.com": {
+    "category_term": "BRAIN",
+    "author_name": "Jasper de Keijzer",
+    "title": "Memory",
+    "screenshots": true,
+    "package": "memory.com",
+    "author_uri": "http://home-5.worldonline.nl/~jdekeij/android.html",
+    "description": "Added extra theme named \"Total mix\"\nThe object of the game is to turn over pairs of matching cards. It is a good game for children, though adults may find it challenging as well. Try to get the cool looking smiley (sunglasses) at the end of the game. Watch the counter in the upper left corner. The lower the value the better",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.musictrivia1970s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "1970s Music Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim.musictrivia1970s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "The 1970s is the decade that brought you funk, disco, and the beginnings of hip hop.  The 70s also had some pretty good rock & roll too... Led Zeppelin, Boston, and Aerosmith, just to name a few.  This game will quiz your knowledge of all the music of the feel-good-decade!  brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.resoundinggames.ordsvall": {
+    "category_term": "BRAIN",
+    "author_name": "Resounding Games",
+    "title": "Ordsvall",
+    "screenshots": true,
+    "package": "com.resoundinggames.ordsvall",
+    "author_uri": "http://www.resoundinggames.com",
+    "description": "Ordspel på svenska för din Androidtelefon! Klurigt spel som använder accelerometern. Hitta ord och vrid på telefonen för arrangera om bokstäverna. Två spellägen med många inställningar!\n\nDet här är en gratis fullversion med alla funktioner inkluderade, i gengäld så visas reklam.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.pedronveloso.trivialdroid": {
+    "category_term": "BRAIN",
+    "author_name": "pedronveloso",
+    "title": "Trivial Droid ( Quiz Game )",
+    "screenshots": true,
+    "package": "com.pedronveloso.trivialdroid",
+    "author_uri": "http://pedrodh.info/?p=4",
+    "description": "General knowledge Quiz / Trivia Game, with selectable categories, increasing difficulty and Online Score!\n\nNew:\n\\u003e Fixed bug preventing Android 2.2 users from playing\n\nNow you can see the entire change-log from the link bellow.\n\nPlease email me with suggestions or to report any bugs\n\nPlz rate if you like the game :)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.kiragames.unblockmefree": {
+    "category_term": "BRAIN",
+    "author_name": "Kiragames",
+    "title": "Unblock Me FREE",
+    "screenshots": true,
+    "package": "com.kiragames.unblockmefree",
+    "author_uri": "http://www.kiragames.com",
+    "description": "Unblock Me FREE is a simple and addictive puzzle game. The goal is to get the red block out of the board by sliding the other blocks out of the way. It's comes with 1200 puzzles in total worth hours of playing to keep you challenged.\n\nWhat's new 1.0.3:\n- No more loading screen\n\nNOTE: Dell Streak issue still don't fixed",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.hiphopmusic": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Hip Hop Music Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim.hiphopmusic",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "Hip Hop Music Trivia will quiz you on the hip hop and rap songs, albums, and artists that are making waves now and over the past 30 years.  Artists that appear in these questions include: Lil Wayne, Jay-Z, 2Pac, Diddy, Kanye West, Notorious B.I.G., Nas, Snoop Dogg, Public Enemy, Beastie Boys, and many more. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.enjoysudoku.enjoysudokudaily": {
+    "category_term": "BRAIN",
+    "author_name": "Jason Linhart",
+    "title": "Sudoku",
+    "screenshots": true,
+    "package": "com.enjoysudoku.enjoysudokudaily",
+    "author_uri": "http://www.enjoysudoku.com/android/",
+    "description": "Enjoy Sudoku Daily:\n\n* daily games at 16 levels\n* extensive tutorial\n* undo/redo\n* auto pencil\n* statistics\n* compare your time to others\n\nOur hints go from a gentle suggestion to detailed instructions; teach you to play Sudoku.\n\nIf you really Enjoy Sudoku Daily, this is the app for you!\n\nsuduko,soduko,sudoko,sodoku,free",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.distinctdev.tmtlite": {
+    "category_term": "BRAIN",
+    "author_name": "DistinctDev, Inc.",
+    "title": "The Moron Test: Section 1",
+    "screenshots": true,
+    "package": "com.distinctdev.tmtlite",
+    "author_uri": "http://www.distinctdev.com",
+    "description": "Are you a complete idiot? What about your friends, coworkers, and family? Buy The Moron Test now and find out! Point and laugh at everyone when they get stumped!\n\n* Works on all phones running OS 1.5 and up! *\n\nLATEST UPDATE:\n\n- One section with 100+ steps\n- Install to SD card on Android OS 2.2+\n- UI Tweaks",
+    "category_label": "Brain & Puzzle"
+  },
+  "zok.android.dots": {
+    "category_term": "BRAIN",
+    "author_name": "anahoret (Ivan Trusov)",
+    "title": "Kids Connect the Dots Lite",
+    "screenshots": true,
+    "package": "zok.android.dots",
+    "author_uri": "http://androidgamesforkids.com",
+    "description": "Kids Connect the Dots Lite is a dot-to-dot kids game for preschool-age kids.\nKids join all the dots and reveal colorful image that is sure to excite your kids.\n\n50+ puzzles.\n\nThis kids game will teach your kids to recognize numbers and letters of the alphabet in a kid-friendly way.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.rbmusic": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "R&B Music Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim.rbmusic",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "R&B Music Trivia will quiz your knowledge of popular R&B songs, albums and artists.  Questions cover the most popular rhythm & blues songs that are popular now and in past decades.  Featured artists include: Alicia Keys, Luther Vandross, John Legend, Babyface, Mary J. Blige, R. Kelly, and Boyz II Men. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.dahl.brendan.wordsearch.view": {
+    "category_term": "BRAIN",
+    "author_name": "Brendan Dahl",
+    "title": "Open WordSearch",
+    "screenshots": true,
+    "package": "com.dahl.brendan.wordsearch.view",
+    "author_uri": "http://www.brendandahl.com",
+    "description": "- Multiple word banks\n\nVersion 2.3.2:\n* new seasonal word list\n* fix external install issue\n* fix launcher icon on android 1.5\n\ncode base checkout fully compiles now; open sourced under GPL\n\nFeedback Welcome; email/mailing list",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.cwesoftware.slidingpuzzle": {
+    "category_term": "BRAIN",
+    "author_name": "CWE Software",
+    "title": "Sliding Block Puzzle",
+    "screenshots": true,
+    "package": "com.cwesoftware.slidingpuzzle",
+    "author_uri": "http://www.cwesoftware.com/",
+    "description": "Try to get the goal block through the opening on the board by moving the other blocks around, controlled by touching the screen! Contains 14 different levels that increase in difficulty! Try to get the fastest time tracked on the high score system!\n\n\nv2.1.0\n-Added two new levels",
+    "category_label": "Brain & Puzzle"
+  },
+  "peregin.android.same": {
+    "category_term": "BRAIN",
+    "author_name": "Levente Fall",
+    "title": "SameColors",
+    "screenshots": true,
+    "package": "peregin.android.same",
+    "author_uri": "http://www.peregin.com",
+    "description": "Clear the board by selecting the largest group of blocks with the same color! You can remove blocks with same color that are touching each other vertically or horizontally. Bonus points are received when the board is completely cleared. Upload your high score to the server!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.musictrivia1990s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "1990s Music Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim.musictrivia1990s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "This 1990s music trivia game will quiz your knowledge of everything that the 90s offered in music, and there was a lot!  It started with grunge, which was renamed alternative rock.  Boy bands continued their popularity while hip hop got bigger.  Euro dance music and even ska had waves of popularity. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "org.linuxuser.android.iconic": {
+    "category_term": "BRAIN",
+    "author_name": "Chris Hager",
+    "title": "Iconic Memory",
+    "screenshots": true,
+    "package": "org.linuxuser.android.iconic",
+    "author_uri": "http://www.4feets.com",
+    "description": "Iconic Memory is a touchscreen puzzle/memory game for players of any age. In each level white and colored spots appear and you have to redraw the patterns at an increasing pace and action level!\n\nIt may sound easy -- just have a look at the global highscore and try yourself on it!\n\nv1.5.2: new front screen, internal updates",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.songlyrics2000s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Song Lyrics Trivia - 2000s",
+    "screenshots": true,
+    "package": "com.alaskajim.songlyrics2000s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "Song Lyrics Trivia of the 2000s will quiz your knowledge of your favorite rock and pop (and a little country) songs from 2000-present.  The game resembles the classic \"who sings it,\" but with lyrics instead of audio.  Some of the artists include Beyonce, Eminem, Britney Spears, Madonna, Green Day, & Linkin Park. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.movietrivia1980s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "1980s Movie Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim.movietrivia1980s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "This 1980s Movie Trivia quiz game will challenge your knowledge of the decade that brought you a variety of all-time greats, including: Caddyshack, The Empire Strikes Back, Back To The Future, The Breakfast Club, Bull Durham, E.T., Platoon, The Princess Bride, Raiders Of The Lost Ark, and The Terminator.  80s brettsmovies",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.countrymusic": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Country Music Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim.countrymusic",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "Country music trivia will quiz your knowledge of the great country songs and artists through the decades.  You'll be asked about recent country giants like Tim McGraw & Carrie Underwood... and you'll also be asked a few questions about country legends of the past: Johnny Cash, Patsy Cline, and Hank Williams. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.magmamobile.game.BubbleBlast2": {
+    "category_term": "BRAIN",
+    "author_name": "Magma Mobile",
+    "title": "Bubble Blast 2",
+    "screenshots": true,
+    "package": "com.magmamobile.game.BubbleBlast2",
+    "author_uri": "http://m.androlib.com/",
+    "description": "Bubble Blast 2 is a puzzle game in which you burst bubbles to trigger a chain reaction in order to eliminate them.\n\n2 game modes are available\n- Puzzle mode with 700 levels\n- Arcade mode to play freely\n\nGlobal scores provided by Scoreloop\n\nWe will add more levels in next updates.\n\n1.0.5 : 100 new levels + Dutch",
+    "category_label": "Brain & Puzzle"
+  },
+  "us.sourcio.android.puzzle.madagaskar": {
+    "category_term": "BRAIN",
+    "author_name": "PlayGameSite.com",
+    "title": "Jigsaw Puzzles Game Mad",
+    "screenshots": true,
+    "package": "us.sourcio.android.puzzle.madagaskar",
+    "author_uri": "http://www.playgamesite.com",
+    "description": "Play amazing 170 puzzles now!\n\nNEW: ad remover, better hint lines\n\nIt's intended for brain training, education and review for video purchases. All artwork retain their copyright and were collected from  publicly accessible sites, modified and provided FREE under fair use for personal enjoyment.",
+    "category_label": "Brain & Puzzle"
+  },
+  "net.fractalgate.android.nationalflags": {
+    "category_term": "BRAIN",
+    "author_name": "FractalGate",
+    "title": "National Flags Quiz",
+    "screenshots": true,
+    "package": "net.fractalgate.android.nationalflags",
+    "author_uri": "",
+    "description": "This is a simple national flags quiz. How many questions can you answer within 60 seconds? There are two mode of 'Name to Flag' and 'Flag to Name'. It records your best score.\n\nIf you give us the country list in your language, we're gonna add it.\n\n1.0.3: Fixed typos in Russian.",
+    "category_label": "Brain & Puzzle"
+  },
+  "us.sourcio.android.puzzle.simpson": {
+    "category_term": "BRAIN",
+    "author_name": "PlayGameSite.com",
+    "title": "UltimateSimps Puzzle",
+    "screenshots": true,
+    "package": "us.sourcio.android.puzzle.simpson",
+    "author_uri": "http://www.playgamesite.com",
+    "description": "UPDATE: option settings, ads remover\n \nInstall now and have 170 levels to play! \n\nIt's intended for brain training, education and review for video purchases.All artwork retain their copyright and were collected from publicly accessible sites, modified and provided free under fair use for personal enjoyment.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.optimesoftware.checkers.free": {
+    "category_term": "BRAIN",
+    "author_name": "Optime Software",
+    "title": "Checkers",
+    "screenshots": true,
+    "package": "com.optimesoftware.checkers.free",
+    "author_uri": "http://www.optimesoftware.com",
+    "description": "Have you been searching for an awesome free checkers application for your Android phone?  Look no further - Checkers Free is the best free checkers application for Android. \n\nCheckers Free features awesome graphics, outstanding AI, 1 player and 2 player gameplay, and many other exciting features.  Download it today!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.googlecode.andoku": {
+    "category_term": "BRAIN",
+    "author_name": "Markus Wiederkehr",
+    "title": "Andoku Sudoku",
+    "screenshots": true,
+    "package": "com.googlecode.andoku",
+    "author_uri": "http://code.google.com/p/andoku/",
+    "description": "Andoku is an open source sudoku puzzle game for Android.\n\nIn additon to standard sudoku if offers the variations Sudoku-X, Hyper Sudoku, Percent Sudoku, Color Sudoku and Squiggly Sudoku. It comes with a total of 5000 puzzles.\n\nPlease report any problems at the project's home page (under Issues).",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.neilneil.android.games.simonclassic": {
+    "category_term": "BRAIN",
+    "author_name": "Mobikats ltd",
+    "title": "Classic Simon",
+    "screenshots": true,
+    "package": "com.neilneil.android.games.simonclassic",
+    "author_uri": "http://mobikats.com",
+    "description": "Test your memory with this classic 'Simon' style game. \n\nFeatures:\n- Classic (4 color) mode \n- Super (9 color) mode\n- 3 speed levels.\n- Magic Memory mode\n- Two Player game\n\nv1.15 - fixes, upgrade info\n\nSimple but challenging: Repeat the colors and sounds in the correct order. Great for both children and adults.",
+    "category_label": "Brain & Puzzle"
+  },
+  "posimotion.tictactoe": {
+    "category_term": "BRAIN",
+    "author_name": "PosiMotion LLC.",
+    "title": "Tic Tac Toe",
+    "screenshots": true,
+    "package": "posimotion.tictactoe",
+    "author_uri": "http://arcade.posimotion.com",
+    "description": "NOW INSTALLS ON SD CARD!\n\nThe #1 Tic Tac Toe game for the Android now with OpenFeint! Play against the computer with three different difficulties or your friends. Now with clean high resolution graphics for all devices. You can even watch the computer play against itself.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.glosculptor.glowpuzzle": {
+    "category_term": "BRAIN",
+    "author_name": "Glosculptor, ISDS",
+    "title": "GlowPuzzle",
+    "screenshots": true,
+    "package": "com.glosculptor.glowpuzzle",
+    "author_uri": "http://glosculptor.com",
+    "description": "GlowPuzzle is an amazing brainteaser app! You should connect the dots in the picture using straight continuous lines. You can't draw a line twice over the same place. \n\nKEY FEATURES:\n\n- Excellent glow graphics,\n- 290 built-in levels from very easy to extremely difficult.\n\nWHAT'S NEW?\n- 10 levels added",
+    "category_label": "Brain & Puzzle"
+  },
+  "alterforce.jewellust_lite": {
+    "category_term": "BRAIN",
+    "author_name": "Smartpix Games",
+    "title": "Jewellust lite",
+    "screenshots": true,
+    "package": "alterforce.jewellust_lite",
+    "author_uri": "http://smartpixgames.com",
+    "description": "This is a free trial version of gem-swapping puzzler JEWELLUST. Enjoy magnificent graphics, magic sounds and exciting gameplay. \nFull version has 30 levels and Survival mode. It is on Market! \n\nUpdate: some rare bugs are fixed\n\nDL SIZE: 2.6Mb.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.greenrift.wordmixlite": {
+    "category_term": "BRAIN",
+    "author_name": "Greenrift Software LLC",
+    "title": "Word Mix Lite",
+    "screenshots": true,
+    "package": "com.greenrift.wordmixlite",
+    "author_uri": "http://www.greenriftsoftware.com",
+    "description": "Ad supported.\nFull featured.\n\nThe the object of the game is to correctly guess the 6 letter word to move on to the next level.  Guess more words to increase your score!  Similar to Word Warp and Text Twist.\n\nKeyboard support\nLeader board\n2 dictionaries\n12000+ levels\nHints available.\nDefinition lookup.\nSmall screen support",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.hbwares.wordfeud.free": {
+    "category_term": "BRAIN",
+    "author_name": "hbwares",
+    "title": "Wordfeud FREE",
+    "screenshots": true,
+    "package": "com.hbwares.wordfeud.free",
+    "author_uri": "http://wordfeud.com/",
+    "description": "Free crossword style multiplayer word game\n\nPlay with friends or random opponents.\nParticipate in up to 30 games simultaneously.\nPush notifications.\nEnglish, Dutch, Scandinavian dictionaries.\nChat\n\nImportant: if you're updating and have a 1.6 device, uninstall the previous version first\n\n1.1.0: Swedish, Danish dictionaries.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.tosmart.chessroad": {
+    "category_term": "BRAIN",
+    "author_name": "贺照云",
+    "title": "棋路-中国象棋(Chinese Chess)",
+    "screenshots": true,
+    "package": "com.tosmart.chessroad",
+    "author_uri": "http://www.chessroad.com",
+    "description": "**BUG修改、美化、性能优化**\n\n一款专业的中国象棋打谱和对战的软件，是中国象棋爱好者不可缺少的伴侣。\n\n可以选择从“初级”到“专业”之间多达5种级别的游戏难度，棋力强大；\n\n在打谱模式下，支持目前常见的所有中国象棋棋谱格式，包括：\n\n * PGN（Portable Game Notion）\n * CBL（象棋桥）\n * XQF（象棋演播室）\n * CHE（QQ象棋）\n\n对战过程中支持悔棋，可以记录对战过程为棋谱，供分析和学习用；\n\n可以保存局面，下次对战前装载局面，继续游戏；\n\n支持棋谱文件格式关联，可以从常见的文件管理器（如ASTRO）中直接打开各种棋谱文件；\n\n“棋路”界面风格朴实，美观大方，以实用为主线，欢迎大家下载和使用。",
+    "category_label": "Brain & Puzzle"
+  },
+  "jp.co.wisdom.android.knankuro.free": {
+    "category_term": "BRAIN",
+    "author_name": "Sevenseas Teckworks Ltd,",
+    "title": "i漢字ナンクロFree",
+    "screenshots": true,
+    "package": "jp.co.wisdom.android.knankuro.free",
+    "author_uri": "http://www.sstw.co.jp",
+    "description": "漢字ナンクロファン待望のアプリ「i漢字ナンクロ」のFREE版が登場です！\n番号を探す手間も、鉛筆も消しゴムも不要！\nアプリならではの快適操作による漢字ナンクロの世界を、ぜひお試し下さい。\n\n\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\n＜FREE版の出題＞\n・初級問題に、FREE版オリジナルの全漢字ナンクロ10問を収録。\n・中級、上級問題には、有料版「i漢字ナンクロ1」の各１問を収録。\n(出題はインフォレスト(株)より既刊の「パズルキングシリーズ　漢字ナンクロ」「漢字道」から厳選されたものです。)\n\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d\\u003d",
+    "category_label": "Brain & Puzzle"
+  },
+  "uk.co.aifactory.backgammonfree": {
+    "category_term": "BRAIN",
+    "author_name": "AI Factory Limited",
+    "title": "Backgammon Free",
+    "screenshots": true,
+    "package": "uk.co.aifactory.backgammonfree",
+    "author_uri": "http://www.aifactory.co.uk",
+    "description": "Backgammon Free is the best free Backgammon game on Android\n\nUser friendly interface\nStrong Backgammon AI\nFull match play + doubling cube\nHints, 2 player hotseat and stats\n\nSupported by unobtrusive Ads\n \n*Does it cheat? See \"CPU Strategy\" page + Manual Dice option (use real-world dice) to prove to yourself that it doesn't*",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "1980s Music Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "When you think of the 1980s, do you think of Mikhail Gorbachev, the Iran-Iraq war, or Mount St. Helens?  No, you think of 80s Music!!  This music trivia game will quiz your knowledge of the decade known for its synthpop, hair metal, disco backlash, MTV, and the rise of hip hop.  brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "org.urbian.android.games.memorytrainer": {
+    "category_term": "BRAIN",
+    "author_name": "Urbian, Inc.",
+    "title": "Memory Trainer",
+    "screenshots": true,
+    "package": "org.urbian.android.games.memorytrainer",
+    "author_uri": "http://www.urbian.biz/apps/",
+    "description": "It has been recently scientifically proven that regular mental exercise can\ngreatly improve your memory. This app has been designed to do just that! In\nparticular, Memory Trainer works out your spatial and working memory, focus, chunking and concentration skills.\n\nIncluded: Graphical progress.\n\nUpdate: Targeted training.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.musictrivia2000s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "2000s Music Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim.musictrivia2000s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "This 2000s music trivia game will quiz your knowledge of everything the first decade of the millennium had to offer in music... Britney Spears, Eminem, Madonna, Green Day, Pink, Dido, Beyonce, Coldplay, Kelly Clarkson, Justin Timberlake, Maroon 5, Gwen Stefani, Evanescence, Nickelback, iPod and American Idol. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "us.sourcio.android.puzzle.family": {
+    "category_term": "BRAIN",
+    "author_name": "PlayGameSite.com",
+    "title": "FamilyG 160 Puzzles",
+    "screenshots": true,
+    "package": "us.sourcio.android.puzzle.family",
+    "author_uri": "http://www.playgamesite.com",
+    "description": "Play 160 levels of jigsaw puzzles!\n\nNEW: settings, ads remover: works for ALL our puzzles! \n\nIt's intended for brain training, education and review for video purchases. All artwork retain their copyright and were collected from  publicly accessible sites, modified and provided FREE under fair use for personal enjoyment.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.socialin.android.puzzle.princess": {
+    "category_term": "BRAIN",
+    "author_name": "PlayGameSite.com",
+    "title": "Princesses Puzzle Game",
+    "screenshots": true,
+    "package": "com.socialin.android.puzzle.princess",
+    "author_uri": "http://www.playgamesite.com",
+    "description": "Play 150 Puzzles with your favorite princesses! \n\nNew: Ads remover\n\nThis free app intended for brain training, education and review for video purchases. All artwork retain their copyright and were collected from  publicly accessible sites, modified and provided under fair use for personal use and enjoyment.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.akbur.mathsworkout": {
+    "category_term": "BRAIN",
+    "author_name": "Workout Games",
+    "title": "Math Workout Lite",
+    "screenshots": true,
+    "package": "com.akbur.mathsworkout",
+    "author_uri": "http://www.mathsworkout.net",
+    "description": "FEATURED BY T-MOBILE, SAMSUNG & DoCoMo!\n\nMath/Maths Workout is a daily exercise designed to enhance your mental arithmetic.\n\nKeep your mind healthy, test your mental math and exercise your brain once a day.\n\nFEATURES\n- Inspired by Kumon\n- Try the World Challenge\n- Fly the Math Blaster\n- Fun for all ages\n- Keeps you sharp",
+    "category_label": "Brain & Puzzle"
+  },
+  "org.androidsoft.games.memory.kids": {
+    "category_term": "BRAIN",
+    "author_name": "androidsoft.org",
+    "title": "Memory Game For Kids",
+    "screenshots": true,
+    "package": "org.androidsoft.games.memory.kids",
+    "author_uri": "http://www.androidsoft.org",
+    "description": "Simple game for little kids. Discover tiles by pair.\n\nIcons come from the Crystal Clear project directed by Everaldo Coelho.\n\nNo ads, no access to internet nor to your private data.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.numberones": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Who Sings It?  #1 Hits",
+    "screenshots": true,
+    "package": "com.alaskajim.numberones",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "This music trivia game will quiz your knowledge of the artists and groups who have had the biggest hits from 1960 to 2010.  You will be presented with the song title and the year the song was #1, and the challenge is to choose the artist or group who performed the song.  brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.wm.wordfind.client": {
+    "category_term": "BRAIN",
+    "author_name": "Anthrological",
+    "title": "WordUp!",
+    "screenshots": true,
+    "package": "com.wm.wordfind.client",
+    "author_uri": "http://www.anthrological.com",
+    "description": "It’s fun to unlock doors, discover ancient secrets, and dispel urban myths. Hey, it’s also fun to find words hidden in a grid! This boggle like game is quick, fun, and you’ll end up being smarter than your friends.\n\nNote: WordUp! Upgrade (available in the market for $2.99) will turn off the ads in this free version.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.vivianaranha.checkers": {
+    "category_term": "BRAIN",
+    "author_name": "Aranha Infotech",
+    "title": "Checkers",
+    "screenshots": true,
+    "package": "com.vivianaranha.checkers",
+    "author_uri": "http://www.vivianaranha.com",
+    "description": "3.5 Removed popover ads\n\n3.0 Offline Working - Game Fixed\n* Both Versions available until developers fix issues\n\nEach player starts with 12 pieces on the three rows closest to their own side. The row closest to each player is called the \"King Row\". The red color moves first.\n\nHave Fun",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.movietriviadisney": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Movie Trivia: Disney",
+    "screenshots": true,
+    "package": "com.alaskajim.movietriviadisney",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "Disney movie trivia quiz game will test your knowledge of the animated and live-action movies Disney is famous for: Cinderella, Snow White, Treasure Island, Mary Poppins, Beauty & The Beast, and modern Pixar movies like Toy Story and The Incredibles.  Also some questions on classic characters like Mickey Mouse. brettsmovies",
+    "category_label": "Brain & Puzzle"
+  },
+  "me.zed_0xff.android.alchemy": {
+    "category_term": "BRAIN",
+    "author_name": "Andrey 'Zed' Zaikin",
+    "title": "Alchemy",
+    "screenshots": true,
+    "package": "me.zed_0xff.android.alchemy",
+    "author_uri": "http://zed.0xff.me",
+    "description": "You have only four basic elements: Fire, Water, Earth and Air. Combine them and their products to get more than 200 new elements. You can create a Life, Beer, Vampires, Skyscrapers and much more..\n\n1.9:\n* less ads\n* 330 elements\n* new languages\n* many bugs/FCs fixed\n* Premium Version (tap on 'View more applications' below)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.applimobile.powervocab": {
+    "category_term": "BRAIN",
+    "author_name": "Applimobile.com",
+    "title": "Power Vocab",
+    "screenshots": true,
+    "package": "com.applimobile.powervocab",
+    "author_uri": "http://applimobile.com/",
+    "description": "New in 3.5: REMOVED ALL ADS. \n\nPlay Power Vocab and build a cutting edge vocabulary! You will master challenging words using an adaptive software. Get a lifelong critical skill without paying 1000s. Includes word search, spelling game, several quiz types & pronunciation. No ads.",
+    "category_label": "Brain & Puzzle"
+  },
+  "cn.bluesky.neatreversi": {
+    "category_term": "BRAIN",
+    "author_name": "Bluesky Studio",
+    "title": "Reversi",
+    "screenshots": true,
+    "package": "cn.bluesky.neatreversi",
+    "author_uri": "http://www.chat-chat.net",
+    "description": "A neat and smart reversi game. Play with machine AI or other players over internet. There is lots of interesting strategy in this game, Sometimes you seem to be winning then suddenly lose at the end. Keep trying and you may one day become master \n\n-Sound effects.\n-Smooth animation.\n-Undo and redo.\n-Play over internet.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.pineconesoft.comparator": {
+    "category_term": "BRAIN",
+    "author_name": "Find Differences",
+    "title": "Find Differences",
+    "screenshots": true,
+    "package": "com.pineconesoft.comparator",
+    "author_uri": "http://www.finddifferences.com/",
+    "description": "Compare two images and spot five differences between them. Improve attention skills and exercise brain while playing this completely free arcade game with over 60 levels. \n\nUse your 5 hints and earn more for every 1000 points!\n\nFind the difference!",
+    "category_label": "Brain & Puzzle"
+  },
+  "zok.android.numbers": {
+    "category_term": "BRAIN",
+    "author_name": "anahoret (Ivan Trusov)",
+    "title": "Kids Numbers and Math Lite",
+    "screenshots": true,
+    "package": "zok.android.numbers",
+    "author_uri": "http://androidgamesforkids.com",
+    "description": "Kids Numbers and Math Lite helps preschool-aged kids learn numbers and basic math skills.\nNumbers are spoken in kid-friendly English, Japanese, French, German, Spanish.\n\nYour kids will enjoy the following activities:\n-learning numbers\n-choose max/min number\n-addition\n-subtraction\n-advanced exercises\n-find a match",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.virtuesoft.android.hangman": {
+    "category_term": "BRAIN",
+    "author_name": "Yongkai Lei",
+    "title": "Hangman Classic Free",
+    "screenshots": true,
+    "package": "com.virtuesoft.android.hangman",
+    "author_uri": "http://virtuesoft.com",
+    "description": "Hangman is a classic word puzzle game. This hangman game comes with three classic themes that bring back old memory.\n\nThemes:\nPencil on paper\nChalk on blackboard\nParchment\n\nWord Lists:\nEnglish words, Animal, food & drink, fruit & veg, sports, family, colors, music, flowers, weapon, weather, SAT, GRE vocabulary and more",
+    "category_label": "Brain & Puzzle"
+  },
+  "us.sourcio.android.puzzle.cartoon": {
+    "category_term": "BRAIN",
+    "author_name": "PlayGameSite.com",
+    "title": "170 Cartoon Puzzles!",
+    "screenshots": true,
+    "package": "us.sourcio.android.puzzle.cartoon",
+    "author_uri": "http://www.playgamesite.com",
+    "description": "170 puzzles from your favorite movie!\n\nNEW:settings,ads remover:works for ALL puzzles! \n\nIt's intended for brain training, education and review for video purchases. All artwork retain their copyright and were collected from  publicly accessible sites, modified and provided FREE under fair use for personal enjoyment.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.eekgames.worddrop": {
+    "category_term": "BRAIN",
+    "author_name": "Ben Garrett",
+    "title": "Word Drop",
+    "screenshots": true,
+    "package": "com.eekgames.worddrop",
+    "author_uri": "http://www.eekgames.com",
+    "description": "Word Drop is word-finding puzzle that combines some elements of Scrabble and Boggle, with a dash of Bejeweled. Valid words boost your score and the dwindling timer; used letters disappear and new ones drop down from above.\n\nHave fun!\n\n2.9: \n - added option to disable auto-word-submit (for players who use \"tap\" mode)",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.ammisoftware.MemoryTestPro": {
+    "category_term": "BRAIN",
+    "author_name": "agilefusion",
+    "title": "Memory Test Pro",
+    "screenshots": true,
+    "package": "com.ammisoftware.MemoryTestPro",
+    "author_uri": "http://www.agilefusion.com",
+    "description": "Memory Test Pro is a great new version of the well known memory game.  Find all of the matching pairs in the least amount of steps. \n\nIn the new version:\n- New graphics\n- New layouts and sets\n- New sounds\n- Highscores\n\nIn v 5.1.0\n- Added new sets!",
+    "category_label": "Brain & Puzzle"
+  },
+  "zok.android.dots.xmas": {
+    "category_term": "BRAIN",
+    "author_name": "anahoret (Ivan Trusov)",
+    "title": "Kids Connect the Dots Xmas",
+    "screenshots": true,
+    "package": "zok.android.dots.xmas",
+    "author_uri": "http://androidgamesforkids.com",
+    "description": "Christmas version of our popular game \"Kids Connect the Dots\".\nThis is a dot-to-dot kids game for preschool-age kids.\nKids join all the dots and reveal colorful image that is sure to excite your kids.\n\n25 puzzles.\n\nThis kids game will teach your kids to recognize numbers and letters of the alphabet in a kid-friendly way.",
+    "category_label": "Brain & Puzzle"
+  },
+  "cn.bluesky.fourinaline": {
+    "category_term": "BRAIN",
+    "author_name": "Bluesky Studio",
+    "title": "Connect 4",
+    "screenshots": true,
+    "package": "cn.bluesky.fourinaline",
+    "author_uri": "http://www.chat-chat.net",
+    "description": "Also named \"Four in a line\". The goal is to connect a line of four horizontal,vertical,or diagonal chips before your opponent does. Tap one the row you wish to drop your chip in. \nPlay with machine AI with 4 difficulty levels, or play over internet with other players.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.virtuesoft.wordsearch": {
+    "category_term": "BRAIN",
+    "author_name": "JiuzhangTech Ltd",
+    "title": "WordSearch Unlimited Free",
+    "screenshots": true,
+    "package": "com.virtuesoft.wordsearch",
+    "author_uri": "http://jiuzhangtech.com",
+    "description": "WordSearch Unlimited is one of the best word puzzle games in the market.\nPlay unlimited high quality puzzles, with themes you like. \n\nThemes:\nNote Paper\nBlackboard\nParchment\nBlue Sky\nChristmas\nCustomized\n\nWord lists:\nEnglish, Animals, Food & Drink, Fruit & Veg, Family, Colors, Body Parts, Sports, Transports, Music and More.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.mkb.usacapitals": {
+    "category_term": "BRAIN",
+    "author_name": "Mansoor Babar",
+    "title": "USA Capitals",
+    "screenshots": true,
+    "package": "com.mkb.usacapitals",
+    "author_uri": "http://www.mansoorbabar.com",
+    "description": "Test your knowledge of the capitals of the 50 states.  Improve with Study and Practice modes or take on the Challenge. You can guess both capitals and states.\n\nAre you ready for the challenge?",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.ecrodameus.mazelite": {
+    "category_term": "BRAIN",
+    "author_name": "Ecrodaemus",
+    "title": "Thumb Maze 3",
+    "screenshots": true,
+    "package": "com.ecrodameus.mazelite",
+    "author_uri": "http://www.ecrodaemus.com",
+    "description": "Thumb Maze 3 is all new and way better. We've taken your suggestions and added trackball/accelerometer support. Zoom controls let you see more of the maze. Gameplay is now divided into Attack Mode, where you compete for speed, and Free Play, where you solve random mazes for fun.\n \n6-26-2010 - Minor update.",
+    "category_label": "Brain & Puzzle"
+  },
+  "zok.android.shapes": {
+    "category_term": "BRAIN",
+    "author_name": "anahoret (Ivan Trusov)",
+    "title": "Kids Shape Puzzle Lite",
+    "screenshots": true,
+    "package": "zok.android.shapes",
+    "author_uri": "http://androidgamesforkids.com/",
+    "description": "Kids Shape Puzzle is an educational and entertaining  kids game for preschool-age kids.\nKids slide the puzzle pieces into place and reveal the image.\nYour kids will gain cognitive and fine motor skills in a kid-friendly way.\n\nKids Shape Puzzle Lite contains 20 puzzles to try it out before you buy the full version.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.movietrivia1990sactors": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "1990s Movie Trivia: Actors",
+    "screenshots": true,
+    "package": "com.alaskajim.movietrivia1990sactors",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "This movie trivia game will challenge you to match actors and actresses with the popular (and not-so-popular) movies from the 1990s.  400 questions include the major actors of the 1990s: Kevin Coster, Johnny Depp, Tom Cruise, Robert De Niro, Richard Gere, Tom Hanks, Jim Carrey, Mel Gibson, and more. brettsmovies",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.shanefulmer.algebratutor": {
+    "category_term": "BRAIN",
+    "author_name": "Shane Fulmer",
+    "title": "Algebra Tutor",
+    "screenshots": true,
+    "package": "com.shanefulmer.algebratutor",
+    "author_uri": "http://www.mathvine.com/support/algebratutor.html",
+    "description": "Practice simple algebra equations!\n- One and two step equations (ex: x + 3 \\u003d 5)\n- Distributive property equations (ex: 3(2x + 4) \\u003d 12)\n- Simple factorable quadratic equations (ex: x^2 + 3x + 2 \\u003d 0)\n- Walk through the detailed steps to solve \n\n1.5: Added some simplification problems.\n1.51: Bug fixes.\nMore to come soon!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.rockmusic": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Rock Music Trivia",
+    "screenshots": true,
+    "package": "com.alaskajim.rockmusic",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "Rock music trivia game will focus only on rock & roll... no pop, dance, country or r&b here!  Both mainstream and alternative rock songs, albums and artists of the past 5 decades are included: The Beatles, Nirvana, Pink Floyd, Rolling Stones, Led Zeppelin, Queen, Santana, Journey, Smashing Pumpkins, & many more. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.teamsoft.blockedtrafficfree": {
+    "category_term": "BRAIN",
+    "author_name": "Team 5 Soft",
+    "title": "Blocked Traffic Free",
+    "screenshots": true,
+    "package": "com.teamsoft.blockedtrafficfree",
+    "author_uri": "http://www.team5soft.com",
+    "description": "The goal of the game is to get a car on third line out of a box by moving the other cars out of its way. Cars can not enter Construction areas.\n\nGame has:\n\n* 160 positions (Easy & Medium)\n* (!) 6 graphic themes\n* Min moves and undo move\n* (!) Solutions \n\n(!) New features\n\nWe also recommend Funny Test & Red Button apps.",
+    "category_label": "Brain & Puzzle"
+  },
+  "nl.jsource.pimpam.android": {
+    "category_term": "BRAIN",
+    "author_name": "jSource",
+    "title": "PimPam",
+    "screenshots": true,
+    "package": "nl.jsource.pimpam.android",
+    "author_uri": "http://pimpam.jsource.nl",
+    "description": "Veel Nederlanders zijn opgegroeid met het klassieke gezelschapsspel 'Pim pam pet'. PimPam is een moderne variant hierop en tevens de eerste Nederlandse game voor android.\n\nMet PimPam heb je het perfecte spel voor een ouderwets gezellige avond met vrienden en/of familie.\n\nNieuw in 1.2:\n - Ondersteuning nieuwe scherm formaten",
+    "category_label": "Brain & Puzzle"
+  },
+  "artfulbits.aiMinesweeper": {
+    "category_term": "BRAIN",
+    "author_name": "ArtfulBits Inc.",
+    "title": "aiMinesweeper (minesweeper)",
+    "screenshots": true,
+    "package": "artfulbits.aiMinesweeper",
+    "author_uri": "http://www.artfulbits.com",
+    "description": "Changes:\n- online high-scores; \n- direct install of skins from app\n- configurable sounds and vibro\n\nMinesweeper is a mobile version of one the best single-player logical games ever made. The game is still very popular among players of different age and social origin. Enjoy.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.dps.iqTester": {
+    "category_term": "BRAIN",
+    "author_name": "DPS",
+    "title": "IQ Tester",
+    "screenshots": true,
+    "package": "com.dps.iqTester",
+    "author_uri": "http://mobile.kelenit.com/",
+    "description": "Let's find out how high your IQ is with \"IQ Tester\". With neatly designed questions and randomized answers,this IQ Test helps you to position your IQ level.\nIn case of any problem,please e-mail us.\n\n*The most popular IQ Test for Android*\n\nOver 1.5 MILLION downloads!\n\nNew:\n-MORE questions\n-TWITTER support\n-global TopList",
+    "category_label": "Brain & Puzzle"
+  },
+  "monkeypunch.android.hellokittypuzzle": {
+    "category_term": "BRAIN",
+    "author_name": "MonkeyPunch",
+    "title": "Hèllo Kìtty Puzzle : Jigsaw",
+    "screenshots": true,
+    "package": "monkeypunch.android.hellokittypuzzle",
+    "author_uri": "http://monkeypunchandroid.blogspot.com",
+    "description": "For the Kids!\n\nPlay this puzzle game with Hèllo Kìtty and her friends like Keroppì.\n\nDrag the JigSaw / photo pieces to the right places in order to recreate the image!\n\nGame contains: \n- 40 levels of 3x3 puzzles\n- 35 ,, of 4x4 ,,\n\n**Froyo compatible**",
+    "category_label": "Brain & Puzzle"
+  },
+  "cz.romario.opensudoku": {
+    "category_term": "BRAIN",
+    "author_name": "Roman Mašek",
+    "title": "OpenSudoku",
+    "screenshots": true,
+    "package": "cz.romario.opensudoku",
+    "author_uri": "http://opensudoku.eu",
+    "description": "OpenSudoku is an open source sudoku game. \n\nFeatures:\n- Several input modes (finger-friendly, numpad in the bottom of screen etc.)\n- Puzzles can be downloaded from web or entered by hand\n- Game time and history\n- Export to sdcard\n- Themes\n\nAny suggestions? Go to http://opensudoku.eu, your feedback is welcome",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.feasy.tris2.colorblocks": {
+    "category_term": "BRAIN",
+    "author_name": "GameBox",
+    "title": "Tetrīs",
+    "screenshots": true,
+    "package": "com.feasy.tris2.colorblocks",
+    "author_uri": "http://market.android.com/search?q=pub:%22GameBox%22",
+    "description": "This is a new experience game, And is also one of the best games released in  the android Market so far yet you might not be familiar with it. Oh yeah, and it’s a whole lot of fun.\n\nEnjoy it!\n\n#Feature:\n - Touch Screen & Fling\n - Classic game music\n - Global Score\n\n#update: 10-10\n - Global Score & Ranking",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.jiuzhangtech.rushhour": {
+    "category_term": "BRAIN",
+    "author_name": "JiuzhangTech Ltd",
+    "title": "Traffic Jam Free",
+    "screenshots": true,
+    "package": "com.jiuzhangtech.rushhour",
+    "author_uri": "http://jiuzhangtech.com",
+    "description": "Traffic Jam is a very addictive puzzle game. The objective of the game is to get the yellow car out of the traffic jam. Sound simple, but incredible challenging at the difficult level.\n\nThe game contains 5000 levels, guarantee hours of entertainment. \n\n3 Themes included:\n- Car park\n- Harbor\n- Ice block\n- Plain block",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.games.HangManGame": {
+    "category_term": "BRAIN",
+    "author_name": "citdeveloper",
+    "title": "HangMan",
+    "screenshots": true,
+    "package": "com.games.HangManGame",
+    "author_uri": "http://www.caprusit.com",
+    "description": "New in this version:\n1.  Added more words in all the Sports and Animal categories.\n\nHint:\nFor more categories, press Menu and select your choice of category.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.google.android.chess": {
+    "category_term": "BRAIN",
+    "author_name": "Aart Bik",
+    "title": "Chess for Android",
+    "screenshots": true,
+    "package": "com.google.android.chess",
+    "author_uri": "http://aartbik.blogspot.com/",
+    "description": "Chess application with touch screen, trackball, or keyboard input. Highlights valid user moves and last played engine move. Supports full game navigation buttons, FEN/PGN export to clipboard, and save/load as files. Engine plays at various levels. Also imports UCI engines. Manual at: http://www.aartbik.com/MISC/amenu.html",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.labpixies.flood": {
+    "category_term": "BRAIN",
+    "author_name": "LabPixies",
+    "title": "Flood-It!",
+    "screenshots": true,
+    "package": "com.labpixies.flood",
+    "author_uri": "http://www.labpixies.com",
+    "description": "Flood It! is a simple yet addictive strategy game in which you have to flood the whole game board with one color in less than the allowed steps. Try to flood-it in the least amount of steps!\nIn this version: \n1. Cool game skins\n2. Three board sizes\n3. User statistics\nSounds simple? Lets see what you can do...",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.monkeyfly.sounds.familyguymario": {
+    "category_term": "BRAIN",
+    "author_name": "PLAY FISH",
+    "title": "FamilyG Sounds & Ringtones",
+    "screenshots": true,
+    "package": "com.monkeyfly.sounds.familyguymario",
+    "author_uri": "http://www.google.com",
+    "description": "Featuring 36 sounds!\n\nFeaturing Peter,Stewie  and Quagmire!\n\nClick the Button To Save as a ringtone or notification!!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.xoise.mancala": {
+    "category_term": "BRAIN",
+    "author_name": "Xoise Solutions",
+    "title": "Mancala",
+    "screenshots": true,
+    "package": "com.xoise.mancala",
+    "author_uri": "http://www.g1games.com/",
+    "description": "Classic Mancala (Kalah variant).\n\nGame does NOT cheat. You can make multiple moves if your last piece ends up in your mancala.\n\nFeatures\n- 1-player or 2-player\n- Instructions\n- Online high scores\n- Local game history stats\n- Choose number of stones\n- Multiple animation speeds\n- Multiple difficulty levels",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.alaskajim.songlyrics1980s": {
+    "category_term": "BRAIN",
+    "author_name": "Brett Plummer",
+    "title": "Song Lyrics Trivia - 1980s",
+    "screenshots": true,
+    "package": "com.alaskajim.songlyrics1980s",
+    "author_uri": "http://www.MusicTriviaMaster.com",
+    "description": "Song Lyrics Trivia of the 1980s will quiz your knowledge of your favorite rock and pop songs from 1980-1989.  The game resembles the classic \"who sings it,\" but with 80s lyrics instead of audio.  Featured artists include: Madonna, Michael Jackson, The Police, INXS, Depeche Mode, Bon Jovi, and Cyndi Lauper. brettsmusic",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.nix.game.mahjong": {
+    "category_term": "BRAIN",
+    "author_name": "Magma Mobile",
+    "title": "Mahjong",
+    "screenshots": true,
+    "package": "com.nix.game.mahjong",
+    "author_uri": "http://m.androlib.com/",
+    "description": "Mahjong is a free solitaire game where the player is challenged to eliminate all pieces from the board.\n\nFind matching pairs of images from the end lines of the game pyramid of pieces. \n\nMahjong involves skill, strategy, and calculation, as well as a certain degree of luck.\n\nIF YOU LIKE IT, PLEASE RATE IT. THANKS.",
+    "category_label": "Brain & Puzzle"
+  }
+}

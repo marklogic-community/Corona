@@ -1,0 +1,1062 @@
+{
+  "com.zillow.android.zillowmap": {
+    "category_term": "LIFESTYLE",
+    "author_name": "Zillow.com",
+    "title": "Zillow Real Estate",
+    "screenshots": true,
+    "package": "com.zillow.android.zillowmap",
+    "author_uri": "http://www.zillow.com/android",
+    "description": "See Zestimate® home values, local real estate including homes for sale, rentals, and more. Use voice search, plus GPS, to search for homes as you talk, walk or drive.\n-Filter real estate by home type (for sale, rental), price, beds, and more\n-Save searches and favorite homes\n-Full-screen color photos",
+    "category_label": "Lifestyle"
+  },
+  "com.scvngr.android.app": {
+    "category_term": "CASUAL",
+    "author_name": "SCVNGR",
+    "title": "SCVNGR",
+    "screenshots": true,
+    "package": "com.scvngr.android.app",
+    "author_uri": "http://scvngr.com",
+    "description": "SCVNGR is a game about going places, doing challenges and earning points. You'll discover cool new places to go, find fun new things to do and share your activity with your friends.\n\nNow with over 12,000 places offering rewards just for playing SCVNGR there!\n\nkeywords: scavenger, scvgnr",
+    "category_label": "Casual"
+  },
+  "com.oanda.fxtrade": {
+    "category_term": "FINANCE",
+    "author_name": "OANDA Corporation",
+    "title": "OANDA fxTrade for Android",
+    "screenshots": true,
+    "package": "com.oanda.fxtrade",
+    "author_uri": "http://www.oanda.com",
+    "description": "Get the tight spreads and trading advantages of OANDA’s innovative forex platform in an Android forex trading app. One-tap trading on 54 currency pairs and 4 metal pairs. Live streaming interbank rate feed; charts in portrait or landscape views. Limit orders: take profit, stop loss, trailing stops, lower and upper bounds.",
+    "category_label": "Finance"
+  },
+  "com.outfit7.talkingtompro": {
+    "category_term": "ENTERTAINMENT",
+    "author_name": "Outfit7 Ltd.",
+    "title": "Talking Tom Cat",
+    "screenshots": true,
+    "package": "com.outfit7.talkingtompro",
+    "author_uri": "http://outfit7.com/contact/android/",
+    "description": "Tom is your pet, he responds to touch and repeats you in a funny voice.\n\nYou can pet and poke him or grab his tail. Paid features: cymbals, cake, bird, farting and no ads.\n\nRecord videos of him and share them on YouTube/Facebook or e-mail.",
+    "category_label": "Entertainment"
+  },
+  "com.chordbot.demo.gui": {
+    "category_term": "MULTIMEDIA",
+    "author_name": "Lars Careliusson",
+    "title": "Chordbot Lite",
+    "screenshots": true,
+    "package": "com.chordbot.demo.gui",
+    "author_uri": "http://chordbot.com",
+    "description": "Chordbot lets you create and play advanced chord progressions on your phone. Useful for songwriting experiments or as accompaniment for your guitar/saxophone/theremin solos.\n\nThe full version has more comping styles and lets you save/export your songs. Audio demos on chordbot.com",
+    "category_label": "Multimedia"
+  },
+  "com.jazanwild.cos3d1": {
+    "category_term": "COMICS",
+    "author_name": "CARNIVAL COMICS",
+    "title": "3D CARNIVAL OF SOULS #1",
+    "screenshots": true,
+    "package": "com.jazanwild.cos3d1",
+    "author_uri": "http://www.carnivalcomics.com",
+    "description": "It's a 3D Carnival!\n\nCarnival Comics welcomes you to the new age of 3D comics for your mobile phones! \n \nYou will need a pair of Red / Blue 3D glasses to enjoy all the fun and games. Jazan Wild's Carnival Of Souls is The World 's First 3D Mobile Comic. Put on your glasses & hold on tight!",
+    "category_label": "Comics"
+  },
+  "kz.mek.DialerOne": {
+    "category_term": "COMMUNICATION",
+    "author_name": "Yermek Zhumagulov",
+    "title": "Dialer One",
+    "screenshots": true,
+    "package": "kz.mek.DialerOne",
+    "author_uri": "http://code.google.com/p/dialerone/",
+    "description": "Dialer One is smart multilingual T9 like dialer application.\n\n*Speed dial\n*Call log grouped by contact\n*Send contact\n*Customizable\n*Swipe between screens\n*Tone dial\n*Export calls\n*Simultaneous search on calls and contacts on two languages",
+    "category_label": "Communication"
+  },
+  "com.google.android.youtube": {
+    "category_term": "MULTIMEDIA",
+    "author_name": "Google Inc.",
+    "title": "YouTube",
+    "screenshots": true,
+    "package": "com.google.android.youtube",
+    "author_uri": "http://www.google.com/support/youtube/bin/topic.py?hl=en&topic=29422",
+    "description": "Experience the latest and best version of the official YouTube app, which offers:\n\n- Beautiful new UI design\n- In-page playback (read comments while video is playing!)\n- Personalized homescreen video feed\n- Brand new player controls\n- Rotate-for-fullscreen playback",
+    "category_label": "Multimedia"
+  },
+  "com.directv.dvrscheduler": {
+    "category_term": "ENTERTAINMENT",
+    "author_name": "DIRECTV Inc.",
+    "title": "DIRECTV",
+    "screenshots": true,
+    "package": "com.directv.dvrscheduler",
+    "author_uri": "http://forums.directv.com",
+    "description": "Not at home? No problem. With DIRECTV you can easily set your home DVR from your mobile device. Browse shows and movies or search the guide up to 14 days in advance.\n\nOrder movies or events in front of your TV without a phone line.\n\nIt’s easy. It’s fun, It’s free. Compliments of DIRECTV.\n*Optimized for Android 1.6 and above",
+    "category_label": "Entertainment"
+  },
+  "com.pelago.whrrl": {
+    "category_term": "SOCIAL",
+    "author_name": "Pelago, Inc.",
+    "title": "Whrrl",
+    "screenshots": true,
+    "package": "com.pelago.whrrl",
+    "author_uri": "http://whrrl.com",
+    "description": "Whrrl makes exploring the REAL WORLD easy - rather than finding ideas, the right ideas find you. How? Join Societies, people with shared interests, to exchange recommendations. Whrrl already has 4,000+ Societies. Are you a music fan? A foodie? Create your own! Watch our recs engine power smarter ideas based on your activity",
+    "category_label": "Social"
+  },
+  "com.concretesoftware.acessolitaire2_mcg": {
+    "category_term": "CARDS",
+    "author_name": "Concrete Software, Inc.",
+    "title": "Aces Solitaire Pack 2",
+    "screenshots": true,
+    "package": "com.concretesoftware.acessolitaire2_mcg",
+    "author_uri": "http://www.concretesoftware.com",
+    "description": "Play the 40 most popular solitaire games - Klondike, Free Cell, Spider, Pyramid, Forty Thieves, Scorpion and more! This game is loaded with features – tons of stats, online leaderboards, and enhanced graphics. Accurate controls, quality game play, and ongoing support make this one of the best Android games of the year!",
+    "category_label": "Cards & Casino"
+  },
+  "com.realarcade.NCIS": {
+    "category_term": "BRAIN",
+    "author_name": "GameHouse",
+    "title": "NCIS: The TV Game - SALE!",
+    "screenshots": true,
+    "package": "com.realarcade.NCIS",
+    "author_uri": "http://mobile.realarcade.com/",
+    "description": "Put criminals behind bars as an NCIS agent in a gripping game based on the TV show. Join the Major Case Response Team led by Special Agent Leroy Jethro Gibbs on thrilling cases where following your gut instinct is as important as the evidence before you.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.yahoo.mobile.client.android.fantasyfootball": {
+    "category_term": "SPORTS",
+    "author_name": "Yahoo! Inc.",
+    "title": "Yahoo! Fantasy Football '10",
+    "screenshots": true,
+    "package": "com.yahoo.mobile.client.android.fantasyfootball",
+    "author_uri": "http://mobile.yahoo.com/fantasy-football/android",
+    "description": "Yahoo! Fantasy Football, the Web’s #1 Fantasy Football game, comes to Android.  Stay on top of your team wherever you are with the Y! Fantasy Football ’10 app.\n\nUpdated in Version 1.2\n- Bug fixes and enhancements",
+    "category_label": "Sports"
+  },
+  "com.twitter.android": {
+    "category_term": "SOCIAL",
+    "author_name": "Twitter, Inc.",
+    "title": "Twitter",
+    "screenshots": true,
+    "package": "com.twitter.android",
+    "author_uri": "http://bit.ly/TwitterForAndroidHelp",
+    "description": "Discover what’s happening right now, anywhere in the world with the official Twitter for Android app.\n\nRealtime search, trending topics and maps show whats happening now.\n\nTweet, send DMs, share photos, videos and links to your friends and the world.",
+    "category_label": "Social"
+  },
+  "com.socratica.mobile.chemistry": {
+    "category_term": "REFERENCE",
+    "author_name": "Socratica, LLC",
+    "title": "Periodic Table",
+    "screenshots": true,
+    "package": "com.socratica.mobile.chemistry",
+    "author_uri": "http://www.socratica.com",
+    "description": "Learn the periodic table of elements with Socratica. Over 30 facts about each element for reference. Audio clips to help with pronunciation. Test yourself with quiz mode. Find elements by table, search or index.\n\nRelease notes:\n- Enabled move to SD card\n- Added Wikipedia links for each element\n- Bug fix for Droid phones",
+    "category_label": "Reference"
+  },
+  "com.tumblr": {
+    "category_term": "SOCIAL",
+    "author_name": "Tumblr",
+    "title": "Tumblr",
+    "screenshots": true,
+    "package": "com.tumblr",
+    "author_uri": "http://tumblr.com",
+    "description": "Tumblr for Android. The easiest way to blog.\n\nFeatures:\n\n• Post to Tumblr. Support for Text, Photo, Link, Chat, Quote, Audio and Video. Set advanced post options and edit, too.\n• Built-in Dashboard. View, like and reblog posts.\n• View your blogs. See your posts, drafts and queue.\n• Landscape support.\n• Share menu support.",
+    "category_label": "Social"
+  },
+  "com.adobe.flashplayer": {
+    "category_term": "TOOLS",
+    "author_name": "Adobe Systems",
+    "title": "Flash Player 10.1",
+    "screenshots": true,
+    "package": "com.adobe.flashplayer",
+    "author_uri": "http://www.adobe.com/go/cd1",
+    "description": "ATTENTION: Please install the current Flash Player (ver.10.1.105.6) to ensure that the runtime loads properly with future OS updates. By clicking “Install” I agree to the License Agreement terms at http://adobe.com/go/eum. Manage your privacy settings at https://settings.adobe.com/flashplayer/mobile.",
+    "category_label": "Tools"
+  },
+  "com.logmein.ignitionpro.android": {
+    "category_term": "PRODUCTIVITY",
+    "author_name": "LogMeIn, Inc.",
+    "title": "LogMeIn Ignition",
+    "screenshots": true,
+    "package": "com.logmein.ignitionpro.android",
+    "author_uri": "http://www.logmein.com/android",
+    "description": "If it’s on your computer, it’s in the palm of your hand. Remotely access computers from your Android device, and never worry about leaving anything behind. Directly control your Mac or PC, all your apps and all your files – with a simple click. \n\nYou agree to T&C by buying this app – ignitiontc.logmein.com",
+    "category_label": "Productivity"
+  },
+  "com.dictionary": {
+    "category_term": "REFERENCE",
+    "author_name": "Dictionary.com, LLC",
+    "title": "Dictionary.com",
+    "screenshots": true,
+    "package": "com.dictionary",
+    "author_uri": "http://www.dictionary.com",
+    "description": "New:\nBug fixes\n\nThe Dictionary.com app delivers trusted reference content from Dictionary.com and Thesaurus.com. The app includes phonetic and audio pronunciations, spelling suggestions and our popular Word of the Day.\n\n375,000 words & definitions\n300,000 synonyms & antonyms\nWord of the Day home screen widget",
+    "category_label": "Reference"
+  },
+  "com.treemolabs.apps.cnet": {
+    "category_term": "NEWS",
+    "author_name": "CBS Interactive, Inc.",
+    "title": "CNET News",
+    "screenshots": true,
+    "package": "com.treemolabs.apps.cnet",
+    "author_uri": "http://www.cnet.com",
+    "description": "**Includes Android Atlas!**\nStay on top of the latest technology news and trends with the CNET News app. Now available for free in the Android Market, the CNET News app delivers award-winning coverage of the consumer technology world. Get tech news from your favorite CNET editors and quickly learn what’s hot and what’s not!",
+    "category_label": "News & Weather"
+  },
+  "gbis.gbandroid": {
+    "category_term": "TRAVEL",
+    "author_name": "GasBuddy.com",
+    "title": "GasBuddy - Find Cheap Gas",
+    "screenshots": true,
+    "package": "gbis.gbandroid",
+    "author_uri": "http://www.gasbuddy.com",
+    "description": "Giving you the most comprehensive real-time gas prices and helping you find the cheapest prices in your area. Report gas prices and get a chance to win free gas! Gas prices for the US and Canada.\n\nv1.09\n* new keyboard for reporting prices\n* improved resolution of images\n* all states and provinces included for the prize draw",
+    "category_label": "Travel"
+  },
+  "com.waze": {
+    "category_term": "TRAVEL",
+    "author_name": "waze",
+    "title": "Waze: Community GPS navigation",
+    "screenshots": true,
+    "package": "com.waze",
+    "author_uri": "http://www.waze.com",
+    "description": "A social driving navigation app that connects you to other drivers for all the real-time road information you need... every time you drive!\n\nFeatures:\n* Turn-by turn navigation that learns as you drive\n* Real-time traffic updates\n* Personalized alternative routes\n* 4SQR, Facebook and Twitter integrations\n* And more...",
+    "category_label": "Travel"
+  },
+  "com.zumobi.android.motortrend": {
+    "category_term": "NEWS",
+    "author_name": "The Zumobi Network",
+    "title": "MOTOR TREND",
+    "screenshots": true,
+    "package": "com.zumobi.android.motortrend",
+    "author_uri": "http://www.zumobi.com",
+    "description": "Get all the latest automotive news, vehicle reviews, videos, photos, and much more direct from MOTOR TREND online to your Android device. Includes coverage of the world’s biggest auto shows, daily auto news updates and road tests of the newest and flashiest cars. Search \"Zumobi\" for more great apps on The Zumobi Network.",
+    "category_label": "News & Weather"
+  },
+  "com.bazaarlabs.miso": {
+    "category_term": "SOCIAL",
+    "author_name": "Bazaar Labs",
+    "title": "Miso",
+    "screenshots": true,
+    "package": "com.bazaarlabs.miso",
+    "author_uri": "http://gomiso.com",
+    "description": "What are you watching?\n\nUse Miso to check-in to what you're watching and earn points & badges!  Add your Facebook & Twitter accounts to share & connect with friends.\n\nSee what your friends are watching in your Miso stream, like & comment, and chat about shows.\n\nFollow us on Twitter @gomiso!",
+    "category_label": "Social"
+  },
+  "com.People": {
+    "category_term": "ENTERTAINMENT",
+    "author_name": "TI Media Solutions Inc.",
+    "title": "PEOPLE Celeb News",
+    "screenshots": true,
+    "package": "com.People",
+    "author_uri": "http://www.people.com",
+    "description": "Get up-to-the minute breaking celebrity news direct from PEOPLE magazine reporting bureaus across the country. Enjoy hundreds of your favorite celebrity photos both on and off the red carpet. Plus, get instant access to 200+ PEOPLE.com celebrity profiles with news, photos and bios capturing their life defining moments.",
+    "category_label": "Entertainment"
+  },
+  "com.google.android.maps.mytracks": {
+    "category_term": "LIFESTYLE",
+    "author_name": "My Tracks Team at Google",
+    "title": "My Tracks",
+    "screenshots": true,
+    "package": "com.google.android.maps.mytracks",
+    "author_uri": "http://mytracks.appspot.com",
+    "description": "My Tracks records your GPS tracks and shows live statistics such as time, speed, distance, and elevation – while hiking, cycling, running or participating in other outdoor activities. Once recorded, you can share your tracks, upload them to Google Spreadsheets, visualize them on Google My Maps and share with friends.",
+    "category_label": "Lifestyle"
+  },
+  "com.aol.mobile.moviefone": {
+    "category_term": "ENTERTAINMENT",
+    "author_name": "AOL Mobile",
+    "title": "Moviefone - Movies & Showtimes",
+    "screenshots": true,
+    "package": "com.aol.mobile.moviefone",
+    "author_uri": "http://www.moviefone.com/",
+    "description": "Hello, and welcome to Moviefone...for Android! Find Movies and Showtimes near you, view movie trailers and get movie info. Ready to go to the movies? Get maps and directions to theaters with a single tap.\n\nDo you have an Android device with a hi-res screen? Moviefone is ready for a close-up!",
+    "category_label": "Entertainment"
+  },
+  "com.glu.android.dh3d": {
+    "category_term": "ARCADE",
+    "author_name": "Glu Mobile",
+    "title": "Deer Hunter 3D",
+    "screenshots": true,
+    "package": "com.glu.android.dh3d",
+    "author_uri": "http://www.glu.com/",
+    "description": "Set your sights on deer, moose, bighorn sheep, bears and more with true-to-life senses and behaviors that are modeled from real animals. Hunt in 30 scenic 3D environments around the world with changing seasons and weather conditions. Unlock weapons and more!",
+    "category_label": "Arcade & Action"
+  },
+  "com.tripadvisor.tripadvisor": {
+    "category_term": "TRAVEL",
+    "author_name": "TripAdvisor",
+    "title": "TripAdvisor",
+    "screenshots": true,
+    "package": "com.tripadvisor.tripadvisor",
+    "author_uri": "http://www.tripadvisor.com/help",
+    "description": "Plan and have the perfect trip! Find the best places to eat, sleep, and play.\n\n• Browse 40+ million reviews & opinions\n• Write a review of any hotel, restaurant or attraction\n• View photos\n• See what's nearby with Near Me Now\n• Get advice in travel forums\n* Requires Internet access -- Wi-Fi speeds may be slower *",
+    "category_label": "Travel"
+  },
+  "com.glu.android.ghero6": {
+    "category_term": "CASUAL",
+    "author_name": "Glu Mobile",
+    "title": "Guitar Hero™: Warriors of Rock",
+    "screenshots": true,
+    "package": "com.glu.android.ghero6",
+    "author_uri": "http://www.glu.com/",
+    "description": "OPENFEINT ENABLED! \n\nTransform into a Rock Warrior in Guitar Hero™: Warriors of Rock. Master setlists in the all-new Career/Quest Mode until you're ready to face The Beast! Dig deep into rock opuses by bands like the Rolling Stones, Aerosmith, and Slash (feat. Ian Astbury).",
+    "category_label": "Casual"
+  },
+  "com.google.android.apps.shopper": {
+    "category_term": "SHOPPING",
+    "author_name": "Google Inc.",
+    "title": "Google Shopper",
+    "screenshots": true,
+    "package": "com.google.android.apps.shopper",
+    "author_uri": "http://www.google.com/mobile/shopper",
+    "description": "Shopper recognizes products by cover art, barcode scanning, voice and text search. Find local and online prices, reviews, specs, and more. Star your favorites and share with friends.\n\nCurrently U.S. and U.K. prices only.\n\nNew:\n* Lots of small bug fixes\n* Better compatibility with the Dell Streak and Motorola Charm",
+    "category_label": "Shopping"
+  },
+  "com.papaya.papayaandroidfarm_hd": {
+    "category_term": "CASUAL",
+    "author_name": "Papaya Mobile Inc.",
+    "title": "Papaya Farm HD",
+    "screenshots": true,
+    "package": "com.papaya.papayaandroidfarm_hd",
+    "author_uri": "http://papayamobile.com",
+    "description": "Are you ready to try the best farmville? Cool animations, gorgeous interfaces, cute cabbage and flowers…Come to create the coolest virtual space by growing fruits and veggies and exploring with your friends. Try it for free now!",
+    "category_label": "Casual"
+  },
+  "com.thedeck.android.app": {
+    "category_term": "SOCIAL",
+    "author_name": "TweetDeck Inc",
+    "title": "TweetDeck",
+    "screenshots": true,
+    "package": "com.thedeck.android.app",
+    "author_uri": "http://tweetdeck.com",
+    "description": "TweetDeck is your mobile browser for staying in touch with what's happening on Twitter, Facebook, Foursquare and Buzz. TweetDeck makes it easy to stay up to date and organized no matter where you are.\n\nTIP: Touch the column header to jump to the top!\n\nMore info: http://bit.ly/deFnGO",
+    "category_label": "Social"
+  },
+  "com.amazon.kindle": {
+    "category_term": "REFERENCE",
+    "author_name": "Amazon Mobile",
+    "title": "Kindle for Android",
+    "screenshots": true,
+    "package": "com.amazon.kindle",
+    "author_uri": "http://www.amazon.com/kindleapps",
+    "description": "Read over 700,000* Kindle books, including thousands of free books.\n\nNew to v1.1:\n-Search inside your books\n-Edit notes and highlights and have them synchronized across your devices\n-Look up words on Wikipedia and Dictionary.com\n-Lock screen orientation while reading\n\n*Book availability may vary for non-US customers",
+    "category_label": "Reference"
+  },
+  "com.medpagetoday.medpage": {
+    "category_term": "HEALTH",
+    "author_name": "MedpageToday LLC",
+    "title": "MedPage Today Mobile",
+    "screenshots": true,
+    "package": "com.medpagetoday.medpage",
+    "author_uri": "http://www.medpagetoday.com",
+    "description": "Puts breaking medical news and CME/CE credits at your fingertips, with daily coverage of over 30 specialties and annual coverage of over 60 meetings and symposia.\n\nWritten for physicians and other healthcare professionals.\n\nFeatures:\n\n- Breaking medical news\n- Audio reports\n- Video reports\n- Free CME/CE posttests\n\nmedpage",
+    "category_label": "Health"
+  },
+  "com.google.android.apps.googlevoice": {
+    "category_term": "COMMUNICATION",
+    "author_name": "Google Inc.",
+    "title": "Google Voice",
+    "screenshots": true,
+    "package": "com.google.android.apps.googlevoice",
+    "author_uri": "http://www.google.com/support/mobile/bin/answer.py?hl=en&answer=174821",
+    "description": "Place calls and send text messages showing your Google number. Listen to voicemail and read transcripts. Currently only available in the US. \n\nNEW: Search your voicemail transcripts and text messages. \n\nIMPORTANT: You must open Google Voice at least once after upgrading to route calls.",
+    "category_label": "Communication"
+  },
+  "com.google.android.googlequicksearchbox": {
+    "category_term": "TOOLS",
+    "author_name": "Google Inc.",
+    "title": "Google Search",
+    "screenshots": true,
+    "package": "com.google.android.googlequicksearchbox",
+    "author_uri": "http://www.google.com",
+    "description": "Search the web and your phone with the official Google Search app. Get phone search results plus query and web site suggestions as you type, and instant results for weather, stock quotes, local businesses, and more!\n\nWhat's new in v1.1.2: \n- Bugfixes\n- Small screen, LDPI support",
+    "category_label": "Tools"
+  },
+  "com.fivemobile.thescore": {
+    "category_term": "SPORTS",
+    "author_name": "Score Media Ventures Inc.",
+    "title": "ScoreMobile for Android",
+    "screenshots": true,
+    "package": "com.fivemobile.thescore",
+    "author_uri": "http://www.thescore.com/scoremobile/",
+    "description": "ScoreMobile for Android provides up-to-the-minute scores, boxscores, fantasy stats, standings, news, betting odds, blogs and video.\n\nFollow NFL & NCAA Football, NBA, NCAAB, MLB, NHL, PGA, NASCAR, EPL, Serie A, MLS, CFL, Tennis, F1 & more!\n\n-Add the widget to your home screen\n-Choose your Favorite Teams\n-TV coverage",
+    "category_label": "Sports"
+  },
+  "com.samalyse.free.tapemachine": {
+    "category_term": "MULTIMEDIA",
+    "author_name": "Samalyse",
+    "title": "TapeMachine Free Recorder",
+    "screenshots": true,
+    "package": "com.samalyse.free.tapemachine",
+    "author_uri": "http://tapemachine.samalyse.com",
+    "description": "TapeMachine is a high-quality sound recorder and editor, featuring a powerful waveform display.\n\n- WAV, AIFF, FLAC\n- zoom + scratch\n- edit, trim + undo\n- export selection\n- record when locked\n- input gain\n- send by mail\n\nBuy for OGG and to remove the 1min limit.\n\n*Please* report any issue by email.\n\nChangeLog on website",
+    "category_label": "Multimedia"
+  },
+  "com.box.android": {
+    "category_term": "PRODUCTIVITY",
+    "author_name": "Box.net",
+    "title": "Box.net",
+    "screenshots": true,
+    "package": "com.box.android",
+    "author_uri": "http://www.box.net",
+    "description": "Box for Android lets you easily view, access and share files:\n\n*Browse files on Box.\n*View documents, media & other files (5GB Free).\n*Share links to files.\n*Upload files from your device.\n*Search through files.\n\nBox’s web-based service also lets you share, manage and collaborate on content online. Visit www.box.net.",
+    "category_label": "Productivity"
+  },
+  "com.boom": {
+    "category_term": "HEALTH",
+    "author_name": "Nike, Inc.",
+    "title": "Nike BOOM",
+    "screenshots": true,
+    "package": "com.boom",
+    "author_uri": "http://nike.com",
+    "description": "Nike BOOM syncs your music to your workouts adding motivation from your sport's top athletes and coaches. Pick your sport, workout type (such as Intervals), total time and a playlist. Then get blasts of motivation from the best in the game. Tell your Facebook friends you’re using BOOM and get props from them in real time.",
+    "category_label": "Health"
+  },
+  "com.callpod.android_apps.keeper": {
+    "category_term": "TOOLS",
+    "author_name": "Callpod Inc",
+    "title": "Keeper Password & Data Vault",
+    "screenshots": true,
+    "package": "com.callpod.android_apps.keeper",
+    "author_uri": "http://callpod.com/mobile",
+    "description": "* INSTALL SECURITY UPDATE 11/13/10\n\nKeeper® is the most secure app for storing your passwords and secret information using military 128-bit AES encryption.\n\nBasic features are FREE on your phone!\n\nPremium features (Mac/PC software, backup/restore) are 30-day trial.\n\nAfter 30 days, premium features can be purchased $29.99/yr",
+    "category_label": "Tools"
+  },
+  "com.eamobile.tetris": {
+    "category_term": "BRAIN",
+    "author_name": "EA Mobile",
+    "title": "Tetris ®",
+    "screenshots": true,
+    "package": "com.eamobile.tetris",
+    "author_uri": "http://www.eamobile.com",
+    "description": "NOW ON ANDROID! Discover why millions around the world have made the TETRIS® game the biggest blockbuster in mobile gaming history.  Play on and on with touchscreen ease in Marathon Mode, or get a new twist in Magic Mode, featuring 5 power-ups – Wrecking Ball, Minimizer, Bubble Wrap, Magic Crayon, and Smashdown!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.theonion.onn": {
+    "category_term": "NEWS",
+    "author_name": "The Onion.",
+    "title": "Onion News Network",
+    "screenshots": true,
+    "package": "com.theonion.onn",
+    "author_uri": "http://www.theonion.com",
+    "description": "Watch the entire Onion News Network video catalog for free with The Onion's first Android app.\n\nSee the latest videos, sort by show, access popular segments, editors picks and search ONN's vast archives.\n\nVersion 1.0.19: Added ability to move to SD card, Editor's Picks playlists updated more frequently.",
+    "category_label": "News & Weather"
+  },
+  "com.droidhen.game.superman": {
+    "category_term": "ARCADE",
+    "author_name": "DroidHen",
+    "title": "City Jump",
+    "screenshots": true,
+    "package": "com.droidhen.game.superman",
+    "author_uri": "http://droidhenapps2.appspot.com/",
+    "description": "City Jump is executing mysterious task, jumping between buildings, to avoid obstacles on the wall, to kill all enemies on the way.\n\n* Tap screen to jump\n* Kill enemy by jumping in the air\n* Avoid hurdles on walls\n* POW UP when killing 3 enemies of the same kind.\n\n1.0.4: better graphics and framerate.",
+    "category_label": "Arcade & Action"
+  },
+  "com.kayak.android": {
+    "category_term": "TRAVEL",
+    "author_name": "KAYAK",
+    "title": "Kayak Flight and Hotel Search",
+    "screenshots": true,
+    "package": "com.kayak.android",
+    "author_uri": "http://kayak.com",
+    "description": "Travel search by Kayak. Find Hotel Rates, Cheap Flights and Airline Tickets on Kayak.com. \nGet Hotel Deals, Cheap Airfare and Book Cheap Tickets without Fees. Free Track Flight Status from flightstats.  Free itinerary management, and calendar integration for trips.  Google maps integration for hotels, airports, and trips.",
+    "category_label": "Travel"
+  },
+  "com.target.ui": {
+    "category_term": "SHOPPING",
+    "author_name": "Target Corporation",
+    "title": "Target",
+    "screenshots": true,
+    "package": "com.target.ui",
+    "author_uri": "http://target.com/mobile",
+    "description": "The Target app: Tools to make shopping simple. \n• Search & Browse\n• Weekly Ad\n• Find a Store\n• Set Your Store\n• Barcode Scanner",
+    "category_label": "Shopping"
+  },
+  "org.cohortor.gstrings.tyd": {
+    "category_term": "TOOLS",
+    "author_name": "cohortor.org",
+    "title": "Tuner - gStrings+",
+    "screenshots": true,
+    "package": "org.cohortor.gstrings.tyd",
+    "author_uri": "http://cohortor.org/gstrings",
+    "description": "gStrings is a chromatic tuner app measuring sound pitch and intensity of the violin, viola, violoncello, bass, guitar, piano and wind instruments.\n\nThis version has a few special treats (adjustable range nonlinear scale, doubled processing power) not found in the free version.\n\nEnjoy!",
+    "category_label": "Tools"
+  },
+  "com.google.android.apps.updates.widget": {
+    "category_term": "SOCIAL",
+    "author_name": "Google Inc.",
+    "title": "Google Buzz widget",
+    "screenshots": true,
+    "package": "com.google.android.apps.updates.widget",
+    "author_uri": "http://buzz.google.com",
+    "description": "Post buzz from your home screen!\n\n* Quickly post buzz publicly or privately\n* Add photos to your post from the camera or gallery\n* Share your location or place\n* Quickly access buzz.google.com\n\nAdd to your homescreen by selecting Menu\\u003eAdd\\u003eWidgets\\u003eGoogle Buzz\n\nAdded a fix for an orientation problem in G1",
+    "category_label": "Social"
+  },
+  "com.picplz.rangefinder": {
+    "category_term": "SOCIAL",
+    "author_name": "picplz.com",
+    "title": "picplz",
+    "screenshots": true,
+    "package": "com.picplz.rangefinder",
+    "author_uri": "http://picplz.com",
+    "description": "Picplz is a fun and social way to share your life through photos. Take a great photo to show your friends what you're doing.\n\nStyle your photos w/ FREE photo EFFECTS! vintage 70s, black & white, Hipstamatic toy camera, +more!\n\nEASY SHARING on Facebook, Twitter & Foursquare\n\nFOLLOW your friends & see what they are posting",
+    "category_label": "Social"
+  },
+  "com.capigami.outofmilk": {
+    "category_term": "SHOPPING",
+    "author_name": "Capigami",
+    "title": "Out of Milk",
+    "screenshots": true,
+    "package": "com.capigami.outofmilk",
+    "author_uri": "http://www.outofmilkapp.com/",
+    "description": "Shopping List, Spice Rack & To-Do List in a intuitive and easy-to-use app.\n\n* Multiple Shopping & To-Do Lists\n* Scan or manually enter items in your Shopping Lists\n* Shopping List History\n* Spice Rack lets you inventory your spices meaning you always know what is in your cabinet\n* To-Do Lists\n* Share your lists",
+    "category_label": "Shopping"
+  },
+  "com.netgate.android.tt": {
+    "category_term": "TRAVEL",
+    "author_name": "Pageonce",
+    "title": "Pageonce Travel",
+    "screenshots": true,
+    "package": "com.netgate.android.tt",
+    "author_uri": "http://www.pageonce.com",
+    "description": "Manage all your travel details in one place with full itineraries at a glance, push notifications when flight information changes, live weather reports, route maps and hotel and car rental information.\n1.2:\n- Landscape support.\n- Few UI bug fixes.",
+    "category_label": "Travel"
+  },
+  "com.groupon": {
+    "category_term": "SHOPPING",
+    "author_name": "Groupon, Inc.",
+    "title": "Groupon",
+    "screenshots": true,
+    "package": "com.groupon",
+    "author_uri": "http://www.groupon.com",
+    "description": "Groupon features one unbeatable Daily Deal on the best stuff to do in cities across the U.S. With our app you can buy and use your Groupons with ease. Never print another Groupon!\n\nDeals are currently offered in 150+ cities!  Don't see yours?  Send us an email and let us know!",
+    "category_label": "Shopping"
+  },
+  "com.ellismarkov.moblox": {
+    "category_term": "ARCADE",
+    "author_name": "Ellis Markov",
+    "title": "Moblox",
+    "screenshots": true,
+    "package": "com.ellismarkov.moblox",
+    "author_uri": "http://www.ellismarkov.com/moblox",
+    "description": "Moblox is a physics puzzle game featuring 120 brain teasing levels.\n\nThe purpose is to make the green blocks fall from the platforms, easy? Sure but, as you go along levels, new kinds of block will come to make your task harder!\n\n1.2:\n- 30 new levels\n- openfeint\n\n1.2.2:\n- fixes\n\nNote: Desactivate OpenFeint if the game crash",
+    "category_label": "Arcade & Action"
+  },
+  "com.wyse.pocketcloudfull": {
+    "category_term": "PRODUCTIVITY",
+    "author_name": "Wyse Technology Inc",
+    "title": "Wyse PocketCloud RDP/VNC/View",
+    "screenshots": true,
+    "package": "com.wyse.pocketcloudfull",
+    "author_uri": "http://www.wyse.com/products/software/pocketcloud/android/",
+    "description": "*Intro Price*\nPocketCloud enables secure and remote desktop access to your Windows PC, Mac, VM or TS from your mobile device. Login from anywhere!\n-Intuitive interface\n-Pinch-to-Zoom\n-VNC, RDP and VMware View\n-Sound (Windows Pro, Ult. & Ent. only)\n-Extended resolutions for RDP\n-Auto Discovery (Beta) w/ 128-bit encryption",
+    "category_label": "Productivity"
+  },
+  "com.accesslane.livewallpaper.turkeys": {
+    "category_term": "THEMES",
+    "author_name": "Access Lane, Inc.",
+    "title": "Turkey Run Live Wallpaper",
+    "screenshots": true,
+    "package": "com.accesslane.livewallpaper.turkeys",
+    "author_uri": "http://www.accesslane.com",
+    "description": "Thanksgiving's coming and the turkeys are starting to RUN!!  Tap the turkeys to knock them out.  \n\nSettings for:\n - Turkey Speed\n - Counter for the # of knock-outs\n - Choosing a Background\n\n\nUSAGE:  Home \\u003e Menu \\u003e Wallpaper \\u003e Live Wallpapers\n\nNOT COMPATIBLE with all phones, check for Live Wallpapers menu first(see above)",
+    "category_label": "Themes"
+  },
+  "org.urbian.android.tools.vintagecam": {
+    "category_term": "MULTIMEDIA",
+    "author_name": "Urbian, Inc.",
+    "title": "Retro Camera",
+    "screenshots": true,
+    "package": "org.urbian.android.tools.vintagecam",
+    "author_uri": "http://www.urbian.biz/apps",
+    "description": "With Retro Camera you'll take delicious old-school pics your friends will drool over. 5 cameras, 5 sets of vintage vignetting, film scratch, black and white & cross processing effects for that off-the-hip analog look. Inspired by the Lomo, Holga, Polaroid, Diana, the toy cameras and Hipstamatic. Instant Nostalgia now free.",
+    "category_label": "Multimedia"
+  },
+  "com.alleylabs.MeteorBlitz": {
+    "category_term": "ARCADE",
+    "author_name": "Alley Labs",
+    "title": "Meteor Blitz",
+    "screenshots": true,
+    "package": "com.alleylabs.MeteorBlitz",
+    "author_uri": "http://meteorblitz.alleylabs.com/",
+    "description": "The highest rated space shooter ever.\n\n\"Meteor Blitz is one of the highest quality space shooters we've seen...highly recommended\"\n- Arnold Kim, Touch Arcade\n\n\"Meteor Blitz is the complete package in every way. Gorgeous visuals, skill-based shooting, perfect controls... look no further.\"\n- Shawn Leonard, Slide To Play",
+    "category_label": "Arcade & Action"
+  },
+  "com.bestbuy.android": {
+    "category_term": "SHOPPING",
+    "author_name": "Best Buy, Inc.",
+    "title": "Best Buy",
+    "screenshots": true,
+    "package": "com.bestbuy.android",
+    "author_uri": "http://m.bestbuy.com",
+    "description": "For Android (v1.6 or later)- View the weekly ad. Scan mobile codes and UPCs to get more information about Best Buy products. Compare products. View ratings and reviews. Locate stores. Purchase products for in-store pickup or delivery. \n\nNeed help?  We’re available 24/7 at 1-888-BEST-BUY (1-888-237-8289).\n\nbestbuy\nBestbuy",
+    "category_label": "Shopping"
+  },
+  "com.ridecharge.android.taximagic": {
+    "category_term": "TRAVEL",
+    "author_name": "RideCharge, Inc.",
+    "title": "Taxi Magic",
+    "screenshots": true,
+    "package": "com.ridecharge.android.taximagic",
+    "author_uri": "http://taximagic.com",
+    "description": "Free taxi booking nationwide with the award-winning Taxi Magic app.\nDirect integration to taxi dispatch systems - no phone call needed. Find taxis based on your location, book a ride in a few quick taps, and track your taxi on a map.\nNew in 1.6.4:\n- UI improvements for new phones & bug fixes",
+    "category_label": "Travel"
+  },
+  "com.medicalproductions.ifitness": {
+    "category_term": "HEALTH",
+    "author_name": "Medical Productions",
+    "title": "iFitness",
+    "screenshots": true,
+    "package": "com.medicalproductions.ifitness",
+    "author_uri": "http://medicalprod.com/ifitness.html",
+    "description": "*LIMITED TIME SALE* Hit iPhone app is now available for Android! Achieve your goal of getting and staying fit with iFitness!\n\niFitness provides 300 exercises, text and video instruction, over 20 routines, logging and graphing abilities - all within the palm of your hand. Track your weight, import your iPhone data, and more!",
+    "category_label": "Health"
+  },
+  "com.mippin.android.app.autoexpress": {
+    "category_term": "LIFESTYLE",
+    "author_name": "mippin.com",
+    "title": "Auto Express (Official)",
+    "screenshots": true,
+    "package": "com.mippin.android.app.autoexpress",
+    "author_uri": "http://www.autoexpress.co.uk",
+    "description": "The Official Auto Express Android App. Auto Express is one of the UK's leading car magazines.\n\nAll the latest car news and reviews along with the best road tests and products. \n\nApplication and Home Screen Widget.\n\nCheck out the news from every international motor show\n\nv1.0.2: Speed & Froyo improvements.",
+    "category_label": "Lifestyle"
+  },
+  "com.ebay.mobile": {
+    "category_term": "SHOPPING",
+    "author_name": "eBay Mobile",
+    "title": "Official eBay Android App",
+    "screenshots": true,
+    "package": "com.ebay.mobile",
+    "author_uri": "http://mobile.ebay.com",
+    "description": "**New For 1.2**\n-The app is now available in more countries\n-Performance enhancements\n-Improved reliability of notifications\n\nHelp & Feedback: http://getsatisfaction.com/ebaymobile\n\nFeatures:voice search, alerts, advanced search, leaving feedback, PayPal payments, messages, deals, view seller's other items, and more.",
+    "category_label": "Shopping"
+  },
+  "com.hotrod.reference.spiritofseventysix": {
+    "category_term": "REFERENCE",
+    "author_name": "Ken Hunt",
+    "title": "United States Constitution",
+    "screenshots": true,
+    "package": "com.hotrod.reference.spiritofseventysix",
+    "author_uri": "http://sites.google.com/site/androiddevelopmentproject/",
+    "description": "The full, unedited, text of the US Constitution. Drill down by article, section or amendment. Scroll sections by Dpad or trackball. Includes:\n\n- Searchability\n- Ratification Dates\n- Bios of the signers\n- Constitution timeline\n- Declaration of Independence\n- Articles of Confederation\n- Gettysburg address\n\nMuch more!!",
+    "category_label": "Reference"
+  },
+  "sts.pl": {
+    "category_term": "ARCADE",
+    "author_name": "Spacetime Studios",
+    "title": "Pocket Legends BETA (3D MMO)",
+    "screenshots": true,
+    "package": "sts.pl",
+    "author_uri": "http://pocketlegends.com",
+    "description": "ANDROID BETA CLIENT\n\n\"World of Warcraft in your pocket\" - Yahoo! Tech\n\nIssues: support@spacetimestudios.com\n\nInfo and exclusive giveaways:\n\nhttp://twitter.com/pocketlegends\nwww.facebook.com/pocketlegends\n\nBeta Forums: http://bit.ly/dCg3aF \n\nPocket Legends is on-the-go gameplay with hundreds of thousands of people worldwide.",
+    "category_label": "Arcade & Action"
+  },
+  "com.requiem.gemslinger": {
+    "category_term": "BRAIN",
+    "author_name": "Requiem Software Labs, Inc",
+    "title": "Gem Slinger",
+    "screenshots": true,
+    "package": "com.requiem.gemslinger",
+    "author_uri": "http://www.requiemsoftwarelabs.com/",
+    "description": "Put your quick reflexes and puzzle-solving skills to the test as you race against the clock with Gem Slinger! Draw back the bow to create clusters of 3 or more gems to clear the board before the wall comes crashing down on you! Multiple skill settings for more challenging play!\n\nRank with the best on our online scoreboard!",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.rdio.android.ui": {
+    "category_term": "MULTIMEDIA",
+    "author_name": "Rdio",
+    "title": "Rdio",
+    "screenshots": true,
+    "package": "com.rdio.android.ui",
+    "author_uri": "http://www.rdio.com",
+    "description": "Rdio is a new social music subscription service -- follow friends and other people with great musical taste, and find new music to listen to.\n\nSync songs, albums and playlists to your Android phone and listen when you're offline.\n\nTry it for free at www.rdio.com\n\nFull Changelog:\nhttp://bit.ly/rdio_android_changelog",
+    "category_label": "Multimedia"
+  },
+  "basesign.alltie": {
+    "category_term": "LIFESTYLE",
+    "author_name": "basesign",
+    "title": "Easy Tie",
+    "screenshots": true,
+    "package": "basesign.alltie",
+    "author_uri": "http://www.basesign.de",
+    "description": "Easy Tie is an app that shows you step-by-step how to tie a necktie.\nKnots included:\n-Simple Knot\n-Double K.\n-Small K.\n-Half Windsor K.\n-Windsor K.\n-Saint Andrew K.\n-Pratt K.\n-Neoclassical K.\n-Cross K.\n-Atlantic K.\n-Bow Tie\n\nv1.6: ready for FroYo, new descriptions for 5 different collars, 3 new knots",
+    "category_label": "Lifestyle"
+  },
+  "com.bloomberg.android": {
+    "category_term": "FINANCE",
+    "author_name": "Bloomberg LP",
+    "title": "Bloomberg",
+    "screenshots": true,
+    "package": "com.bloomberg.android",
+    "author_uri": "http://bloomberg.com",
+    "description": "Get business/finance news, market data and stock tracking tools from the most trusted source financial professionals around the world rely upon. Get comprehensive news coverage along with easy-to-understand charts and graphs that illustrate the impact of important business trends and issues.",
+    "category_label": "Finance"
+  },
+  "com.espn.score_center": {
+    "category_term": "SPORTS",
+    "author_name": "ESPN Inc",
+    "title": "ESPN ScoreCenter",
+    "screenshots": true,
+    "package": "com.espn.score_center",
+    "author_uri": "http://espn.go.com/",
+    "description": "Never miss another goal, pitch, basket, try, touchdown or wicket. Whether you follow the NFL or the Premier League, the Ashes or MLB, NASCAR, or Formula One, ScoreCenter offers the most comprehensive sports coverage available on your Android device.\n\nUpdate 1.0.5: Internal bug fixes.",
+    "category_label": "Sports"
+  },
+  "com.mspot.android.aria": {
+    "category_term": "MULTIMEDIA",
+    "author_name": "mSpot, Inc.",
+    "title": "Music",
+    "screenshots": true,
+    "package": "com.mspot.android.aria",
+    "author_uri": "http://mspot.com",
+    "description": "Imagine iTunes music in the cloud! The smartest way to get music on your phone.\n\nUpload music from your PC/Mac, then play or auto sync music across phone and desktop browsers.\n\n* Listen to music from SD card, or stream only\n* Wireless auto-sync keeps your music up to date\n* Free music sampler from emerging artists",
+    "category_label": "Multimedia"
+  },
+  "com.polarbit.RecklessRacing": {
+    "category_term": "ARCADE",
+    "author_name": "polarbit",
+    "title": "Reckless Racing",
+    "screenshots": true,
+    "package": "com.polarbit.RecklessRacing",
+    "author_uri": "http://www.polarbit.com",
+    "description": "THE DIRT-ROAD RACER YOU’VE BEEN WAITING FOR! Reckless Racing combines the finest in traditional top-down racing gameplay with state-of-the-art graphic environments. Skid, slip, and slide with precision controls, and challenge friends in online multiplayer modes. Hold on tight and get ready to go! Yeehaw!",
+    "category_label": "Arcade & Action"
+  },
+  "com.bfs.papertoss": {
+    "category_term": "CASUAL",
+    "author_name": "Backflip Studios Inc.",
+    "title": "Paper Toss",
+    "screenshots": true,
+    "package": "com.bfs.papertoss",
+    "author_uri": "http://www.backflipstudios.com",
+    "description": "The hit mobile casual game is now available for Android! Toss a ball of paper into a trash can in six office themed levels of varying difficulty.\n\nGame includes:\n-6 Gorgeous Levels\n-Global Online Leaderboards\n-Hi-Res graphics for newer devices\n\nNew: Even sharper graphics on all Hi-Res devices, fixed half-screen issue",
+    "category_label": "Casual"
+  },
+  "com.yodamap.votermap": {
+    "category_term": "NEWS",
+    "author_name": "YodaLab",
+    "title": "VoterMap",
+    "screenshots": true,
+    "package": "com.yodamap.votermap",
+    "author_uri": "http://yodamap.com/",
+    "description": "It is Election time! At least in the U.S.\n\nVoterMap is the map based forum for political discussion, anywhere in the world.\n\nPost and comment on current issues: Pres. Obama, Elections, Tea Party, Democrats, Republicans, Mosque at Ground Zero, Immigration, Abortion, local and regional issues.\n\nDebate with others and vote!",
+    "category_label": "News & Weather"
+  },
+  "com.spiceloop.camerafun": {
+    "category_term": "ENTERTAINMENT",
+    "author_name": "SpiceLoop",
+    "title": "Camera Fun Pro",
+    "screenshots": true,
+    "package": "com.spiceloop.camerafun",
+    "author_uri": "http://www.spiceloop.com",
+    "description": "Camera Fun - The most entertaining Android camera app! Guaranteed!\n\nThe ONLY Android app to apply LIVE Photoshop lens to your Android camera. See effects BEFORE you click a picture\n\nGet Camera Fun NOW - see it to believe it! To try trial version, search for Camera Fun Free\n\n19 Lens Included: Canvas, Sketch, Sepia, etc",
+    "category_label": "Entertainment"
+  },
+  "com.zoodles.kidmode": {
+    "category_term": "BRAIN",
+    "author_name": "Zoodles",
+    "title": "Kid Mode: Kids Games + Videos",
+    "screenshots": true,
+    "package": "com.zoodles.kidmode",
+    "author_uri": "http://www.Zoodles.com",
+    "description": "KIDS GAMES ONLY AVAILABLE ON PHONES W/ FLASH\n\nENABLE THE HOME LOCK FEATURE IN SETTINGS\n\nKid Mode gives kids ages 2-8 fun educational kids games & kids videos that adapt to every kids age.\n\n- Kids are safe & independent\n- Great kids videos on all phones\n- Fun kids games on phones w/ Flash\n- Kids learn, kids play, kids grow!",
+    "category_label": "Brain & Puzzle"
+  },
+  "si.modula.android.instantheartrate": {
+    "category_term": "HEALTH",
+    "author_name": "Modula d.o.o.",
+    "title": "Instant Heart Rate",
+    "screenshots": true,
+    "package": "si.modula.android.instantheartrate",
+    "author_uri": "http://www.instantheartrate.com/support",
+    "description": "Measures your heart rate using the built-in camera.\n\nPlace your finger gently over the camera. Hold it steady for at least 10 seconds. Your current heart rate will be shown on the display.\n\n1.5.0 Brings social sharing features.\n\nIf you have problems updating go to: http://www.instantheartrate.com/android_market_issues.jsp",
+    "category_label": "Health"
+  },
+  "com.halfbrick.fruitninja": {
+    "category_term": "ARCADE",
+    "author_name": "Halfbrick",
+    "title": "Fruit Ninja",
+    "screenshots": true,
+    "package": "com.halfbrick.fruitninja",
+    "author_uri": "http://www.halfbrick.com",
+    "description": "The worldwide smash hit iPhone game Fruit Ninja has now arrived for Android! Over 2 million copies sold, and counting!\n\nFruit Ninja is a juicy action with squishy, splatty and satisfying fruit carnage\n\nv1.3.3 Critical fixes:\n-Fixed crash / Force Close issues with Android 1.6",
+    "category_label": "Arcade & Action"
+  },
+  "com.realarcade.DOJ": {
+    "category_term": "ARCADE",
+    "author_name": "GameHouse",
+    "title": "Doodle Jump",
+    "screenshots": true,
+    "package": "com.realarcade.DOJ",
+    "author_uri": "http://gamehouse.com/",
+    "description": "LIMITED TIME SALE! $.99 until November 17th! Act Now!\n\nUPDATE IS HERE! New Themes! Bugs Fixed!\n\nWARNING:Insanely Addictive! Jump, jump, jump to the top, top, top with the runaway hit now on Android! Guide the Doodler on a springy journey using springs, jet packs and more. Avoid baddies and blast them with your nose balls!",
+    "category_label": "Arcade & Action"
+  },
+  "net.robotcomics.android.robot13.e1": {
+    "category_term": "COMICS",
+    "author_name": "Robot Comics",
+    "title": "Robot 13",
+    "screenshots": true,
+    "package": "net.robotcomics.android.robot13.e1",
+    "author_uri": "http://www.robotcomics.net",
+    "description": "In 1939, something was pulled up from the ocean depths off the coast of Spain; what it was and where it originated from were a mystery to the fishermen who found it, but all the surviving members of that crew agree on one thing: whatever it was, it saved their lives. By THOMAS HALL & DANIEL BRADFORD. A ROBOT COMICS release.",
+    "category_label": "Comics"
+  },
+  "com.kalicinscy.wallpaper.starfield": {
+    "category_term": "THEMES",
+    "author_name": "We Like CAPS!",
+    "title": "Starfield 3D Live Wallpaper",
+    "screenshots": true,
+    "package": "com.kalicinscy.wallpaper.starfield",
+    "author_uri": "",
+    "description": "A stunning 3D starfield.\n\nDouble-tap to engage warp engines!\n\nFixed for Droid (hopefully)!\n\nv1.1: added optional background, smoother lines rendering\n\n--\nPlease do not redistribute.",
+    "category_label": "Themes"
+  },
+  "si.simplabs.diet2go": {
+    "category_term": "HEALTH",
+    "author_name": "SimpLabs",
+    "title": "Diet2Go",
+    "screenshots": true,
+    "package": "si.simplabs.diet2go",
+    "author_uri": "http://www.diet2goapp.com",
+    "description": "Diet2Go is the first of its kind weight-loss application for your Android!\n\n                 ★ ★ ★ ★ ★\n\nFEATURES\n★ Your personal weight-loss manager\n★ The largest collection of diet plans\n★ Personalized weight-loss estimates\n★ Innovative meal reminders\n★ Complete grocery lists\n★ Forum\n★ Lots of tips\n\nThanks for good reviews",
+    "category_label": "Health"
+  },
+  "com.glympse.android.glympse": {
+    "category_term": "SOCIAL",
+    "author_name": "Share your where",
+    "title": "Glympse",
+    "screenshots": true,
+    "package": "com.glympse.android.glympse",
+    "author_uri": "http://glympse.com",
+    "description": "\"Glympse: The Coolest Thing Your Smartphone Can Do\"\n-FastCompany\n\nGlympse is the easy way to safely share your location in realtime. No sign-up needed. No social network to manage. Just send a Glympse to anyone via email, SMS, Facebook, or Twitter. Your location is only shared for the duration you specify and then stops.",
+    "category_label": "Social"
+  },
+  "com.wolfram.android.alpha": {
+    "category_term": "REFERENCE",
+    "author_name": "Wolfram Alpha, LLC",
+    "title": "WolframAlpha",
+    "screenshots": true,
+    "package": "com.wolfram.android.alpha",
+    "author_uri": "http://www.wolframalpha.com",
+    "description": "Wolfram|Alpha: Get answers. Access expert knowledge. Wherever you are.\n\nLearn how much vitamin C is in ice cream. Compute solutions to difficult trig and calculus problems. Finally crack that crossword puzzle. Discover what's overhead as you gaze up at the stars.\n\nGet insight and understanding into any facet of your life.",
+    "category_label": "Reference"
+  },
+  "com.vervv.ledgerist_paid": {
+    "category_term": "FINANCE",
+    "author_name": "Vervv",
+    "title": "Ledgerist",
+    "screenshots": true,
+    "package": "com.vervv.ledgerist_paid",
+    "author_uri": "http://twitter.com/vervv",
+    "description": "Now with multiple currencies!\n\nLedgerist is a simple and intuitive checkbook register for all your financial accounts. An easy-to-understand interface combined with powerful features—including repeating transactions, advanced sorting and filtering, and backup—makes keeping track of your personal finances easier than ever.",
+    "category_label": "Finance"
+  },
+  "fishnoodle.storm_free": {
+    "category_term": "THEMES",
+    "author_name": "KittehFace Software",
+    "title": "Thunderstorm Live Wallpaper",
+    "screenshots": true,
+    "package": "fishnoodle.storm_free",
+    "author_uri": "http://www.kittehface.com/p/live-wallpapers.html#thunderstorm",
+    "description": "A spectacular backdrop of storm clouds, lightning, and rain!\n\nIf you enjoy this wallpaper, please buy Thunderstorm Donation, so we can keep making more of these!\n\nTO USE: Home-\\u003eMenu-\\u003eWallpapers-\\u003eLive Wallpapers",
+    "category_label": "Themes"
+  },
+  "com.epocrates": {
+    "category_term": "HEALTH",
+    "author_name": "Epocrates, Inc.",
+    "title": "Epocrates",
+    "screenshots": true,
+    "package": "com.epocrates",
+    "author_uri": "http://www.epocrates.com",
+    "description": "Get quick access to reliable drug information with the #1 mobile drug reference, Epocrates Rx! You can tap into multiple clinical tools in one easy-to-use application. Join more than 1.1M healthcare professionals who rely on Epocrates’ innovative clinical products to make more confident decisions at the point of care.",
+    "category_label": "Health"
+  },
+  "com.shazam.encore.android": {
+    "category_term": "MULTIMEDIA",
+    "author_name": "Shazam Entertainment Limited",
+    "title": "Shazam Encore",
+    "screenshots": true,
+    "package": "com.shazam.encore.android",
+    "author_uri": "http://www.shazam.com",
+    "description": "Enjoy the ultimate music journey with our premium App – Shazam Encore - and identify music anywhere.\n\nWith Encore you can enjoy exclusive features including unlimited tagging, Recommendations, launch a station with LastFM and Pandora plus Shazam’s core functionality to discover, buy* and share music.",
+    "category_label": "Multimedia"
+  },
+  "au.com.phil.abduction2": {
+    "category_term": "CASUAL",
+    "author_name": "Psym Mobile",
+    "title": "Abduction! 2",
+    "screenshots": true,
+    "package": "au.com.phil.abduction2",
+    "author_uri": "http://www.psym-mobile.com",
+    "description": "The cow is back! Jump your way to the top of over 120 levels in 15 colourful and varied landscapes. \n\nNow with Feint achievements and global leaderboard!\n\nHTC Hero/Eris/MyTouch/G1/Dream/Magic users: Unable to start levels? You may need to select \"disable map\" in the options",
+    "category_label": "Casual"
+  },
+  "com.melodis.midomiMusicIdentifier.freemium": {
+    "category_term": "MULTIMEDIA",
+    "author_name": "SoundHound Inc.",
+    "title": "SoundHound",
+    "screenshots": true,
+    "package": "com.melodis.midomiMusicIdentifier.freemium",
+    "author_uri": "http://www.soundhound.com",
+    "description": "SoundHound is instant music search & discovery.\n\n♪ The world's fastest music recognition on tunes playing from a speaker\n♪ The world's only singing and humming search\n♪ Instant lyrics and artist info\n\n* Full version of SoundHound is available in the Market as SoundHound ∞\n\nTags: Sound Hound Music Sing Song ID Tag",
+    "category_label": "Multimedia"
+  },
+  "com.google.android.voicesearch": {
+    "category_term": "TOOLS",
+    "author_name": "Google Inc.",
+    "title": "Voice Search",
+    "screenshots": true,
+    "package": "com.google.android.voicesearch",
+    "author_uri": "http://www.google.com/mobile/voice-actions/",
+    "description": "Quickly search your phone, the web, and nearby locations by speaking, instead of typing. Call your contacts, get directions, and control your phone with Voice Actions.\n\nNote: Voice Actions is only available in US English for now.",
+    "category_label": "Tools"
+  },
+  "com.ups.mobile.android": {
+    "category_term": "PRODUCTIVITY",
+    "author_name": "UPS",
+    "title": "UPS Mobile",
+    "screenshots": true,
+    "package": "com.ups.mobile.android",
+    "author_uri": "http://www.ups.com/android",
+    "description": "UPS Mobile lets you manage your shipments.  Without logging in, you can get tracking details, find UPS locations, estimate costs and delivery times. After logging in with your my UPS ID, you can send, save, and nickname shipments. If you need an ID, visit ups.com/gettingstarted.\nV1.0.3: Provides enhanced tracking details",
+    "category_label": "Productivity"
+  },
+  "com.paypal.android.p2pmobile": {
+    "category_term": "FINANCE",
+    "author_name": "PayPal Mobile",
+    "title": "PayPal",
+    "screenshots": true,
+    "package": "com.paypal.android.p2pmobile",
+    "author_uri": "https://www.paypal.com/mobile",
+    "description": "Send money to your friends and family, transfer money between PayPal and your bank account, and lots more. You can even use it to manage your PayPal account. \"Bump\" feature is a fun new way to send money.\n\nVer.2.2:\nTransfer money to your PayPal account from your bank. Link a credit card to your PayPal account.",
+    "category_label": "Finance"
+  },
+  "com.Time": {
+    "category_term": "NEWS",
+    "author_name": "TI Media Solutions Inc.",
+    "title": "TIME Mobile",
+    "screenshots": true,
+    "package": "com.Time",
+    "author_uri": "http://www.time.com",
+    "description": "Get the latest news, read opinion and analysis from TIME influential bloggers, and browse through award-winning photography and TIME’s hugely popular Lists.\nV1.2: Added tapping on title bar to take user to the home screen, Fixed size of small widget, trackball scrolling, navigation issues and photos not loading correctly",
+    "category_label": "News & Weather"
+  },
+  "com.pocketools.stockalert": {
+    "category_term": "FINANCE",
+    "author_name": "Pocketools.com",
+    "title": "Stock Alert",
+    "screenshots": true,
+    "package": "com.pocketools.stockalert",
+    "author_uri": "http://www.pocketools.com",
+    "description": "2.1.6 - Bug fix for DOW Jones\n\n\nKnown Android issue - Widgets don't work if app is moved to SD card.\n\n\n- Multiple Widgets\n- Commodities Tab\n- Move2SD\n- Default Settings\n- New Version is ad supported\n\n- Add Stocks/Currencies from World Exchanges\n- Sends alerts to your phone when your stock/currency hits a certain price",
+    "category_label": "Finance"
+  },
+  "com.squareup": {
+    "category_term": "FINANCE",
+    "author_name": "Square, Inc.",
+    "title": "Square",
+    "screenshots": true,
+    "package": "com.squareup",
+    "author_uri": "https://squareup.com/",
+    "description": "Quickly and securely accept card and cash payments for your business, service, charity – even to sell your couch. Expedite payments using a free Square card reader. Sign up in the app. Sign on to squareup.com to manage your sales & receipts.",
+    "category_label": "Finance"
+  },
+  "com.touchtype.swiftkey": {
+    "category_term": "PRODUCTIVITY",
+    "author_name": "TouchType Ltd. US",
+    "title": "SwiftKey Keyboard",
+    "screenshots": true,
+    "package": "com.touchtype.swiftkey",
+    "author_uri": "http://www.swiftkey.net",
+    "description": "SwiftKey Keyboard uses AI technology to make typing SMART, FAST and PERSONAL!\n\n- Predicts next words\n- Auto-learns & auto-corrects\n- Voice-to-text, multi-touch\n- Bilingual predictions\n\nUS, GB, ES, FR, DE, IT, NL, PT, SV\n\n'SwiftKey Free' trial also on Market\n\nSee swiftkey.net/changelog or get help @ support.swiftkey.net",
+    "category_label": "Productivity"
+  },
+  "com.rovio.angrybirds": {
+    "category_term": "ARCADE",
+    "author_name": "Rovio Mobile",
+    "title": "Angry Birds",
+    "screenshots": true,
+    "package": "com.rovio.angrybirds",
+    "author_uri": "http://www.rovio.com",
+    "description": "The survival of the Angry Birds is at stake. Dish out revenge on the greedy pigs who stole their eggs. Use the unique powers of each bird to destroy the pigs’ fortresses. Angry Birds features challenging physics-based gameplay and hours of replay value. Each of the 195 levels requires logic, skill, and force to solve.",
+    "category_label": "Arcade & Action"
+  },
+  "com.anahoret.android.shapes": {
+    "category_term": "BRAIN",
+    "author_name": "anahoret",
+    "title": "Kids Shape Puzzle",
+    "screenshots": true,
+    "package": "com.anahoret.android.shapes",
+    "author_uri": "http://androidgamesforkids.com",
+    "description": "Kids Shape Puzzle is an educational and entertaining  kids game for preschool-age kids.\n\nThrill your kids with over 90 puzzles.\n\nKids slide the puzzle pieces into place and reveal the image.\nYour kids will gain cognitive and fine motor skills in a kid-friendly way.",
+    "category_label": "Brain & Puzzle"
+  },
+  "com.vlingo.client": {
+    "category_term": "PRODUCTIVITY",
+    "author_name": "Vlingo Corp.",
+    "title": "Vlingo: Words to Action",
+    "screenshots": true,
+    "package": "com.vlingo.client",
+    "author_uri": "http://www.vlingo.com",
+    "description": "Now with the InCar beta, Vlingo is the first & only way to send/receive messages, make calls, & get directions completely hands free!\n\nVlingo's intelligent voice application turns your words into actions.  Speak to send texts & emails, web search, update Facebook/Twitter/foursquare, find & call any business & much more.",
+    "category_label": "Productivity"
+  },
+  "com.gwhizmobile.vocab": {
+    "category_term": "REFERENCE",
+    "author_name": "gWhiz Mobile",
+    "title": "Kaplan GRE Exam Vocabulary",
+    "screenshots": true,
+    "package": "com.gwhizmobile.vocab",
+    "author_uri": "http://www.gWhizMobile.com",
+    "description": "Over 500 flashcards covering need-to-know GRE vocabulary words.  This app will help you  succeed on the verbal section of the GRE.  With this application you can study and test your knowledge on the go.\n\nIncludes:\n- definitions\n- phonetic pronunciations\n- parts of speech\n- sample sentences\n\n1.5 bug fix",
+    "category_label": "Reference"
+  },
+  "com.zumobi.nfl09": {
+    "category_term": "SPORTS",
+    "author_name": "The Zumobi Network",
+    "title": "Sporting News Pro Football",
+    "screenshots": true,
+    "package": "com.zumobi.nfl09",
+    "author_uri": "http://www.zumobi.com",
+    "description": "NFL fans: Stay on top of team news, schedules, standings and real-time scores with Sporting News Pro Football.  Customize for your favorite team and stay connected on the go. \n\nv2.5 has been given a fresh look along with adding team and player pages, Twitter and more.\n\n*v2.5.1 fixes crashes and cache issue.*",
+    "category_label": "Sports"
+  },
+  "com.gamefly.android.gamecenter": {
+    "category_term": "ENTERTAINMENT",
+    "author_name": "GameFly",
+    "title": "GameCenter Games, News & Video",
+    "screenshots": true,
+    "package": "com.gamefly.android.gamecenter",
+    "author_uri": "http://www.gamefly.com/gamecenter",
+    "description": "GameFly GameCenter is the ultimate video games app for Android. All for FREE!\n\n-Get info on 7,000+ games for Xbox 360, PS3, PS2, Wii, DS, and more\n-Up-to-the-minute video game news -User & critic reviews -Screenshots & trailers\n-Cheats & codes\n-GameFly members can manage and keep games from their GameQ\n-GameFly Free Trial",
+    "category_label": "Entertainment"
+  },
+  "com.tf.thinkdroid.amlite": {
+    "category_term": "PRODUCTIVITY",
+    "author_name": "ThinkFree Mobile",
+    "title": "ThinkFree Office Mobile Viewer",
+    "screenshots": true,
+    "package": "com.tf.thinkdroid.amlite",
+    "author_uri": "http://www.thinkfree.com",
+    "description": "ThinkFree Office Mobile Viewer v2.0\n\n-View MS Office docs(Word/Excel/Powerpoint)\n-Send/View email attachments\n-Seamless integration with ThinkFree Online\n-Support Google Docs",
+    "category_label": "Productivity"
+  },
+  "com.huffingtonpost.android": {
+    "category_term": "NEWS",
+    "author_name": "The Huffington Post",
+    "title": "HuffingtonPost.com",
+    "screenshots": true,
+    "package": "com.huffingtonpost.android",
+    "author_uri": "http://www.huffingtonpost.com/",
+    "description": "Take the Huffington Post with you via your Android, and get the latest news and opinion - even when you're on the go. \n\nWhats new in this update:\n  * The breaking news background service has been revamped, its more efficient and doesn't hog resources\n  * Fixed a bug that would crash the app.",
+    "category_label": "News & Weather"
+  },
+  "com.frosteam.amtalee": {
+    "category_term": "BRAIN",
+    "author_name": "frosteam",
+    "title": "Amtalee",
+    "screenshots": true,
+    "package": "com.frosteam.amtalee",
+    "author_uri": "http://sites.google.com/site/frosteammobile/home",
+    "description": "Addictive puzzle game. Figure out a way to guide the block through obstacles and let it slide into exit. Use switches to toggle bridges. After several easy levels real fun begins, where reaching the exit won't be as easy anymore.\n\n1.0.19 View control improvements.",
+    "category_label": "Brain & Puzzle"
+  }
+}
