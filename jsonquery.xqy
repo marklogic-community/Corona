@@ -13,7 +13,7 @@ let $query :=
 return
     if($requestMethod = ("GET", "POST"))
     then
-        let $docs := xdmp:eval(jsonpath:parse($query))
-        let $jsonDocs := for $doc in $docs return json:xmlToJson($doc)
+        let $docs := jsonpath:execute($query)
+        let $jsonDocs := for $doc in $docs return json:xmlToJSON($doc)
         return concat("{""count"":", count($jsonDocs) , ", ""results"":[", string-join($jsonDocs, ","), "]}")
     else ()

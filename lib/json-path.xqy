@@ -3,18 +3,29 @@ module namespace jsonpath="http://marklogic.com/json-path";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare function jsonpath:execute(
+    $json as xs:string
+) as element(json)*
+{
+    let $tree := json:jsonToXML($json)/json
+    return
+        if(exists($tree/fulltext))
+        then jsonpath:executeFulltext($tree)
+        else xdmp:eval(jsonpath:parsePath($tree))
+};
+
 declare function jsonpath:parse(
     $json as xs:string
-)
+) as xs:string
 {
-    let $tree := json:jsonToXML($json, true())/json
+    let $tree := json:jsonToXML($json)/json
     return
         if(exists($tree/fulltext))
         then jsonpath:parseFulltext($tree)
         else jsonpath:parsePath($tree)
 };
 
-declare function jsonpath:parsePath(
+declare private function jsonpath:parsePath(
     $tree as element(json)
 ) as xs:string
 {
@@ -49,7 +60,7 @@ declare function jsonpath:parsePath(
         else $path
 };
 
-declare function jsonpath:extractPosition(
+declare private function jsonpath:extractPosition(
     $tree as element(json)
 ) as xs:string?
 {
@@ -65,7 +76,7 @@ declare function jsonpath:extractPosition(
     return $position 
 };
 
-declare function jsonpath:validatePosition(
+declare private function jsonpath:validatePosition(
     $position as xs:string?
 ) as xs:boolean
 {
@@ -80,7 +91,7 @@ declare function jsonpath:validatePosition(
     ) = 0
 };
 
-declare function jsonpath:processStep(
+declare private function jsonpath:processStep(
     $step as element()
 ) as xs:string
 {
@@ -93,7 +104,7 @@ declare function jsonpath:processStep(
     else ""
 };
 
-declare function jsonpath:generatePredicate(
+declare private function jsonpath:generatePredicate(
     $step as element()
 ) as xs:string
 {
@@ -139,14 +150,28 @@ declare function jsonpath:generatePredicate(
 };
 
 
-declare function jsonpath:parseFulltext(
+declare private function jsonpath:parseFulltext(
+    $tree as element(json)
+) as xs:string
+{
+    let $cts := jsonpath:dispatchFulltextStep($tree/fulltext)
+    let $options := jsonpath:extractOptions($tree/fulltext, "search")
+    let $position := jsonpath:extractPosition($tree)
+    let $weight := jsonpath:extractWeight($tree)
+    return
+        if(exists($position))
+        then concat("cts:search(/json, ", $cts, ", ", xdmp:describe($options), ", ", $weight, ")", "[", $position, "]")
+        else concat("cts:search(/json, ", $cts, ", ", xdmp:describe($options), ", ", $weight, ")")
+};
+
+declare private function jsonpath:executeFulltext(
     $tree as element(json)
 )
 {
     let $cts := jsonpath:dispatchFulltextStep($tree/fulltext)
     let $options := jsonpath:extractOptions($tree/fulltext, "search")
     let $position := jsonpath:extractPosition($tree)
-    let $weight := xs:double(($tree/fulltext/weight[@type = "number"], 1.0)[1])
+    let $weight := jsonpath:extractWeight($tree)
     let $bits := tokenize($position, " to ")
     let $positionLow := $bits[1]
     let $positionHigh := $bits[2]
@@ -164,7 +189,14 @@ declare function jsonpath:parseFulltext(
         else cts:search(/json, $cts, $options, $weight)
 };
 
-declare function jsonpath:dispatchFulltextStep(
+declare private function jsonpath:extractWeight(
+    $tree as element(json)
+) as xs:double
+{
+    xs:double(($tree/fulltext/weight[@type = "number"], 1.0)[1])
+};
+
+declare private function jsonpath:dispatchFulltextStep(
     $step as element()
 )
 {
@@ -187,7 +219,7 @@ declare function jsonpath:dispatchFulltextStep(
     return jsonpath:processFulltextStep($precedent)
 };
 
-declare function jsonpath:processFulltextStep(
+declare private function jsonpath:processFulltextStep(
     $step as element()
 )
 {
@@ -211,7 +243,7 @@ declare function jsonpath:processFulltextStep(
     default return ()
 };
 
-declare function jsonpath:handleFulltextAndNot(
+declare private function jsonpath:handleFulltextAndNot(
     $step as element(andNot)
 )
 {
@@ -221,7 +253,7 @@ declare function jsonpath:handleFulltextAndNot(
     return cts:and-not-query(jsonpath:dispatchFulltextStep($positive), jsonpath:dispatchFulltextStep($negative))
 };
 
-declare function jsonpath:handleFulltextRange(
+declare private function jsonpath:handleFulltextRange(
     $step as element(range)
 )
 {
@@ -233,7 +265,7 @@ declare function jsonpath:handleFulltextRange(
     return cts:element-range-query(xs:QName($key), $operator, $value, jsonpath:extractOptions($step, "range"), $weight)
 };
 
-declare function jsonpath:handleFulltextEquals(
+declare private function jsonpath:handleFulltextEquals(
     $step as element(equals)
 )
 {
@@ -244,7 +276,7 @@ declare function jsonpath:handleFulltextEquals(
     return cts:element-value-query(xs:QName($key), $string, jsonpath:extractOptions($step, "word"), $weight)
 };
 
-declare function jsonpath:handleFulltextContains(
+declare private function jsonpath:handleFulltextContains(
     $step as element(contains)
 )
 {
@@ -255,14 +287,14 @@ declare function jsonpath:handleFulltextContains(
     return cts:element-word-query(xs:QName($key), $string, jsonpath:extractOptions($step, "word"), $weight)
 };
 
-declare function jsonpath:handleFulltextCollection(
+declare private function jsonpath:handleFulltextCollection(
     $step as element(collection)
 )
 {
     cts:collection-query(jsonpath:stringOrArrayToSet($step))
 };
 
-declare function jsonpath:handleFulltextGeo(
+declare private function jsonpath:handleFulltextGeo(
     $step as element(geo)
 )
 {
@@ -283,28 +315,28 @@ declare function jsonpath:handleFulltextGeo(
         else ()
 };
 
-declare function jsonpath:handleFulltextGeoPoint(
+declare private function jsonpath:handleFulltextGeoPoint(
     $step as element()
 )
 {
     cts:point($step/latitude, $step/longitude)
 };
 
-declare function jsonpath:handleFulltextGeoCircle(
+declare private function jsonpath:handleFulltextGeoCircle(
     $step as element(circle)
 )
 {
     cts:circle($step/radius, jsonpath:handleFulltextGeoPoint($step))
 };
 
-declare function jsonpath:handleFulltextGeoBox(
+declare private function jsonpath:handleFulltextGeoBox(
     $step as element(box)
 )
 {
     cts:box($step/south, $step/west, $step/north, $step/east)
 };
 
-declare function jsonpath:handleFulltextGeoPolygon(
+declare private function jsonpath:handleFulltextGeoPolygon(
     $step as element(polygon)
 )
 {
@@ -314,7 +346,7 @@ declare function jsonpath:handleFulltextGeoPolygon(
     )
 };
 
-declare function jsonpath:stringOrArrayToSet(
+declare private function jsonpath:stringOrArrayToSet(
     $item as element()
 )
 {
@@ -325,7 +357,7 @@ declare function jsonpath:stringOrArrayToSet(
         return string($i)
 };
 
-declare function jsonpath:extractOptions(
+declare private function jsonpath:extractOptions(
     $item as element(),
     $optionSet as xs:string
 ) as xs:string*

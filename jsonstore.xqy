@@ -45,7 +45,7 @@ let $collections := xdmp:get-request-field("collection", ())
 let $quality := xs:integer(xdmp:get-request-field("quality", "0"))
 
 let $bodyContent := xdmp:get-request-body("text")
-let $documentBody := json:jsonToXML($bodyContent, true())
+let $documentBody := json:jsonToXML($bodyContent)
 
 return
     if($requestMethod = "GET")

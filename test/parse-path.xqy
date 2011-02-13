@@ -7,6 +7,8 @@ let $json := "{ key: ""id"", value: [""0596000405"", ""123456789""], comparison:
 
 let $json := "{ key: ""book"", value:{innerKey:""id"", value: [""0596000405"", ""123456789""]}, comparison: ""="", or: [{key: ""id"", value: ""0596000405""}, {key: ""other_id"", value: ""0596000405""}], and: [{key: ""id"", value: ""0596000405""}, {key: ""other_id"", value: ""0596000405""}], position: ""1 to last()"" }"
 
+let $json := "{ key: ""book"", value:{innerKey:""id"", value: [""0596000405"", ""123456789""]}, or: [{key: ""id"", value: ""0596000405""}, {key: ""other_id"", value: ""0596000405""}], position: ""1 to 10"" }"
+
 let $json := "{ fulltext: {
         or: [
             { equals: {

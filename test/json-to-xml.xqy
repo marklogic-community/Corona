@@ -68,4 +68,4 @@ let $json := "{ fulltext: {
     }
 }"
 
-return json:jsonToXML($json, true())
+return json:jsonToXML($json)

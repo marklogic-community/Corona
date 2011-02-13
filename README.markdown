@@ -4,7 +4,7 @@ ___
 ## Files
  - lib/json.xqy - Has two public functions:
    - jsonToXML - parses a JSON string into XML that can be stored in MarkLogic
-   - xmlToJson - parses the generated XML into a JSON string
+   - xmlToJSON - parses the generated XML into a JSON string
  - lib/json-path.xqy - Tinkering with ways to query the stored JSON
  - jsonquery.xqy - A REST endpoint for querying JSON documents
  - jsonstore.xqy - A REST endpoint for storing, managing and retrieving JSON documents

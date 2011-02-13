@@ -12,9 +12,11 @@ XXX:
     * Convert wide encoded unicode chars: \uFFFF\uFFFF
     * Convert \n to newlines
 :)
+
+declare variable $json:DEBUG as xs:boolean := false();
+
 declare function json:jsonToXML(
-    $json as xs:string,
-    $asXML as xs:boolean
+    $json as xs:string
 )
 {
     let $bits := string-to-codepoints(replace($json, "\n", ""))
@@ -28,13 +30,11 @@ declare function json:jsonToXML(
         then 1
         else $typeEndLocation
     let $xmlString := string-join((json:typeToElement("json", $type), json:dispatch($location), "</json>"), "")
-    return
-        if($asXML)
-        then xdmp:unquote($xmlString)
-        else $xmlString
+    let $debug := if($json:DEBUG) then xdmp:log($xmlString) else ()
+    return xdmp:unquote($xmlString)
 };
 
-declare function json:dispatch(
+declare private function json:dispatch(
     $location as xs:integer
 ) as  xs:string*
 {
@@ -67,7 +67,7 @@ declare function json:dispatch(
 
 (: Javascript object handling :)
 
-declare function json:startObject(
+declare private function json:startObject(
     $location as xs:integer
 ) as xs:string*
 {
@@ -78,7 +78,7 @@ declare function json:startObject(
         else (xdmp:set($typeStack, ($typeStack, "object")), json:startObjectKey($location))
 };
 
-declare function json:endObject(
+declare private function json:endObject(
     $location as xs:integer
 ) as xs:string*
 {
@@ -90,7 +90,7 @@ declare function json:endObject(
         else (json:endObjectKey(), json:dispatch($location + 1))
 };
 
-declare function json:startObjectKey(
+declare private function json:startObjectKey(
     $location as xs:integer
 ) as xs:string*
 {
@@ -117,7 +117,7 @@ declare function json:startObjectKey(
     )
 };
 
-declare function json:endObjectKey(
+declare private function json:endObjectKey(
 ) as xs:string*
 {
     let $latestObjectName := $keyObjectStack[last()]
@@ -125,7 +125,7 @@ declare function json:endObjectKey(
     return concat("</", $latestObjectName, ">")
 };
 
-declare function json:buildObjectValue(
+declare private function json:buildObjectValue(
     $location as xs:integer
 ) as xs:string*
 {
@@ -153,7 +153,7 @@ declare function json:buildObjectValue(
 
 (: Javascript array handling :)
 
-declare function json:startArray(
+declare private function json:startArray(
     $location as xs:integer
 ) as xs:string*
 {
@@ -164,7 +164,7 @@ declare function json:startArray(
         else (xdmp:set($typeStack, ($typeStack, "array")), json:startArrayItem($location))
 };
 
-declare function json:endArray(
+declare private function json:endArray(
     $location as xs:integer
 ) as xs:string*
 {
@@ -176,7 +176,7 @@ declare function json:endArray(
         else (json:endArrayItem(), json:dispatch($location + 1))
 };
 
-declare function json:startArrayItem(
+declare private function json:startArrayItem(
     $location as xs:integer
 ) as xs:string*
 {
@@ -204,7 +204,7 @@ declare function json:startArrayItem(
     )
 };
 
-declare function json:endArrayItem(
+declare private function json:endArrayItem(
 ) as xs:string*
 {
     "</item>"
@@ -213,7 +213,7 @@ declare function json:endArrayItem(
 
 (: Helper functions :)
 
-declare function json:getType(
+declare private function json:getType(
     $location as xs:integer
 )
 {
@@ -235,7 +235,7 @@ declare function json:getType(
         else "number"
 };
 
-declare function json:typeToElement(
+declare private function json:typeToElement(
     $elementName as xs:string,
     $type as xs:string
 ) as xs:string
@@ -249,7 +249,7 @@ declare function json:typeToElement(
     else concat("<", $elementName, " type='", $type, "'>")
 };
 
-declare function json:readCharsUntil(
+declare private function json:readCharsUntil(
     $location as xs:integer,
     $stopChars as xs:string+
 )
@@ -285,7 +285,7 @@ declare function json:readCharsUntil(
             return ($newLocation, concat($currentBit, $value))
 };
 
-declare function json:readCharsUntilNot(
+declare private function json:readCharsUntilNot(
     $location as xs:integer,
     $ignoreChar as xs:string
 ) as xs:integer
@@ -298,14 +298,14 @@ declare function json:readCharsUntilNot(
 
 
 
-declare function json:xmlToJson(
+declare function json:xmlToJSON(
     $element as element()
 ) as xs:string
 {
     json:processElement($element)
 };
 
-declare function json:processElement(
+declare private function json:processElement(
     $element as element()
 ) as xs:string
 {
@@ -322,7 +322,7 @@ declare function json:processElement(
     else concat('"', json:escape($element), '"')
 };
 
-declare function json:outputObject(
+declare private function json:outputObject(
     $element as element()
 ) as xs:string
 {
@@ -332,7 +332,7 @@ declare function json:outputObject(
     return concat("{", string-join($keyValues, ","), "}")
 };
 
-declare function json:outputArray(
+declare private function json:outputArray(
     $element as element()
 ) as xs:string
 {
@@ -343,7 +343,7 @@ declare function json:outputArray(
 };
 
 (: Need to backslash escape any double quotes, backslashes, and newlines :)
-declare function json:escape(
+declare private function json:escape(
     $string as xs:string
 ) as xs:string
 {
