@@ -6,8 +6,7 @@ ___
    - jsonToXML - parses a JSON string into XML that can be stored in MarkLogic
    - xmlToJson - parses the generated XML into a JSON string
  - lib/json-path.xqy - Tinkering with ways to query the stored JSON
- - lib/query-xml.xqy - Supporting library
- - jsonsearch.xqy - Very simple REST endpoint that returns JSON documents that have key/value pairs that match the GET variables in the request
+ - jsonquery.xqy - A REST endpoint for querying JSON documents
  - jsonstore.xqy - A REST endpoint for storing, managing and retrieving JSON documents
 
 ## Capabilities of jsonstore.xqy
