@@ -8,9 +8,7 @@ declare variable $typeStack as xs:string* := ();
 (:
 XXX:
     * Sanitize element names
-    * Escape XML chars
     * Convert wide encoded unicode chars: \uFFFF\uFFFF
-    * Convert \n to newlines
 :)
 
 declare variable $json:DEBUG as xs:boolean := false();
@@ -254,35 +252,29 @@ declare private function json:readCharsUntil(
     $stopChars as xs:string+
 )
 {
-    let $unescapedUnicode := ()
-    let $escaped := false()
-    let $location :=
-        if($jsonBits[$location] eq "\")
-        then 
-            if($jsonBits[$location + 1] eq "u")
-            then
-                let $hex := string-join($jsonBits[$location + 2 to $location + 5], "")
-                let $set := xdmp:set($unescapedUnicode, codepoints-to-string(xdmp:hex-to-integer($hex)))
-                return $location + 5
-            else
-                let $set := xdmp:set($escaped, true())
-                return $location + 1
-        else $location
-    let $currentBit := ($unescapedUnicode, $jsonBits[$location])[1]
-    let $currentBit :=
-        if($currentBit eq "<")
-        then "&amp;lt;"
-        else if($currentBit eq "&amp;")
-        then "&amp;amp;"
-        else $currentBit
-    return
-        if($currentBit = $stopChars and not($escaped))
-        then ($location, "")
-        else 
-            let $deepValues := json:readCharsUntil($location + 1, $stopChars)
-            let $newLocation := $deepValues[1]
-            let $value := $deepValues[2]
-            return ($newLocation, concat($currentBit, $value))
+    if($jsonBits[$location] = $stopChars)
+    then ($location, "")
+    else
+        let $newLocation := $location
+        let $stringBits :=
+
+            let $continue := true()
+            let $lastReadLocation := -1
+            for $something in ($location to count($jsonBits))
+            where $something > $lastReadLocation and $continue
+            return
+                let $parts := json:unescapeIfUnicodeChar($something)
+                let $set := xdmp:set($lastReadLocation, $parts[1])
+                let $currentBit := json:escapeChar($parts[2])
+                where $continue
+                return 
+                    if($currentBit = $stopChars and not($parts[3]))
+                    then xdmp:set($continue, false())
+                    else (
+                        $currentBit,
+                        xdmp:set($newLocation, $lastReadLocation)
+                    )
+        return ($newLocation + 1 , string-join($stringBits, ""))
 };
 
 declare private function json:readCharsUntilNot(
@@ -293,6 +285,49 @@ declare private function json:readCharsUntilNot(
     if($jsonBits[$location] ne $ignoreChar)
     then $location
     else json:readCharsUntilNot($location + 1, $ignoreChar)
+};
+
+declare private function json:escapeChar(
+    $char as xs:string
+) as xs:string
+{
+    if($char eq "<")
+    then "&amp;lt;"
+    else if($char eq "&amp;")
+    then "&amp;amp;"
+    else $char
+};
+
+(:
+returns the real location to operate off of as the first item in the
+sequence, the unescaped char as the second and if it was escaped as the third
+:)
+declare private function json:unescapeIfUnicodeChar(
+    $startingLocation as xs:integer
+)
+{
+    let $unescapedString := ()
+    let $escaped := false()
+    let $newLocation :=
+        if($jsonBits[$startingLocation] eq "\")
+        then
+            if($jsonBits[$startingLocation + 1] eq "u")
+            then
+                let $hex := string-join($jsonBits[$startingLocation + 2 to $startingLocation + 5], "")
+                let $set := xdmp:set($unescapedString, codepoints-to-string(xdmp:hex-to-integer($hex)))
+                return $startingLocation + 5
+            else if($jsonBits[$startingLocation + 1] eq "n")
+            then 
+                let $set := xdmp:set($unescapedString, codepoints-to-string(10))
+                return $startingLocation + 1
+            else
+                let $set := xdmp:set($escaped, true())
+                let $set := xdmp:set($unescapedString, $jsonBits[$startingLocation + 1])
+                return $startingLocation + 1
+        else $startingLocation
+
+    let $finalChar := ($unescapedString, $jsonBits[$newLocation])[1]
+    return ($newLocation, $finalChar, $escaped)
 };
 
 
