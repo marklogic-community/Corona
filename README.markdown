@@ -4,6 +4,7 @@ The MLJSON project is a set of libraries and REST endpoints to enable the MarkLo
 Developers can
 
 [MarkLogic Server](http://developer.marklogic.com)
+
  - High-performance, scalable database for unstructured information
  - "NoSQL" datastore (no tables, rows, columns) - just documents and unique IDs (URIs).
  - Uses XML datamodel for documents, query-able via XQuery, XSLT, XPath
