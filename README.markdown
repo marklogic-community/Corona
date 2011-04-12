@@ -4,17 +4,17 @@ The MLJSON project is a set of libraries and REST endpoints to enable the MarkLo
 Developers can
 
 [MarkLogic Server](http://developer.marklogic.com)
-- High-performance, scalable database for unstructured information
-- "NoSQL" datastore (no tables, rows, columns) - just documents and unique IDs (URIs).
-- Uses XML datamodel for documents, query-able via XQuery, XSLT, XPath
-- Uses search-engine techniques to efficiently expose real-time search of text (and any structure)
-- ACID-compliant CRUD (Create, Read, Update, Delete)
+  -  High-performance, scalable database for unstructured information
+  - "NoSQL" datastore (no tables, rows, columns) - just documents and unique IDs (URIs).
+  - Uses XML datamodel for documents, query-able via XQuery, XSLT, XPath
+  - Uses search-engine techniques to efficiently expose real-time search of text (and any structure)
+  - ACID-compliant CRUD (Create, Read, Update, Delete)
 
 [JSON](http://json.org)
-- JavaScript Object Notation
-- A lightweight data-encoding and interchange format
-- Native to JavaScript, now widely utilized across languages
-- Commonly used for passing data to web browsers
+  -  JavaScript Object Notation
+  -  A lightweight data-encoding and interchange format
+  -  Native to JavaScript, now widely utilized across languages
+  -  Commonly used for passing data to web browsers
 
 ## Design goal
 Enable developers to store and query JSON inside MarkLogic (without knowledge of XQuery, XSLT, or XPath)
