@@ -15,7 +15,7 @@ The MLJSON project is a set of libraries and REST endpoints to enable the MarkLo
   - Native to JavaScript, now widely utilized across languages
   - Commonly used for passing data to web browsers
 
-## Design goal
+#### Design goal
 Enable developers to store and search/query JSON inside MarkLogic (without knowledge of XQuery, XSLT, or XPath)
 
 #### Design considerations: 
@@ -30,7 +30,7 @@ MLJSON exposes REST endpoints that allow a developer to
 easily store and retrieve JSON documents from the database ([CRUD]).  It also
 exposes a very powerful query interface that uses a native JSON syntax:
 
-Query Using native JSON syntax 
+Query using native JSON syntax 
 - Don't expose the XML internals to users 
 - Support full range of MarkLogic indexes
 
