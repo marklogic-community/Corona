@@ -1,31 +1,31 @@
 # MLJSON - A JSON Facade on top of MarkLogic
 
 The MLJSON project is a set of libraries and REST endpoints to enable the MarkLogic Server to become an advanced JSON store.
-Developers can
 
-#### [MarkLogic Server](http://developer.marklogic.com)
+#### [MarkLogic Server]
  - High-performance, scalable database for unstructured information
  - "NoSQL" datastore (no tables, rows, columns) - just documents and unique IDs (URIs).
  - Uses XML datamodel for documents, query-able via XQuery, XSLT, XPath
- - Uses search-engine techniques to efficiently expose real-time search of text (and any structure)
+ - Uses search-engine techniques to efficiently expose real-time fulltext search 
  - ACID-compliant CRUD (Create, Read, Update, Delete)
 
-#### [JSON](http://json.org)
+#### [JSON]
   - JavaScript Object Notation
   - A lightweight data-encoding and interchange format
   - Native to JavaScript, now widely utilized across languages
   - Commonly used for passing data to web browsers
 
 ## Design goal
-Enable developers to store and query JSON inside MarkLogic (without knowledge of XQuery, XSLT, or XPath)
+Enable developers to store and search/query JSON inside MarkLogic (without knowledge of XQuery, XSLT, or XPath)
 
-## Design considerations: 
+#### Design considerations: 
 1. Approach things from a JSON angle
 - Create the XML to match the JSON, not vice-versa 
 2. Make good use of MarkLogic indexes
 - Craft the XML so it's fast to query
 3. XML representation of JSON is an implementation detail - users only need think in terms of JSON
 
+#### Overview
 MLJSON exposes REST endpoints that allow a developer to
 easily store and retrieve JSON documents from the database ([CRUD]).  It also
 exposes a very powerful query interface that uses a native JSON syntax:
@@ -37,6 +37,10 @@ Query Using native JSON syntax
 This query interface allows the user to find documents via "path" expressions as
 well as full text search expressions.  For those familiar with MarkLogic, it
 exposes all of the functionality found in the [CTS search functions].
+
+#### Presentation
+Here are some [slides] from a presentation on MLJSON given at XML Prague 2011.
+
 ___
 
 ## Files
@@ -102,6 +106,9 @@ ___
    - Get the document quality
  - Some real tests
 
-  [MarkLogic]: http://marklogic.com
+  [MarkLogic]: http://developer.marklogic.com
+  [MarkLogic Server]: http://developer.marklogic.com
   [CRUD]: http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
   [CTS search functions]: http://developer.marklogic.com/pubs/4.2/apidocs/cts-query.html
+  [JSON]: http://json.org
+  [slides]: http://www.xmlprague.cz/2011/presentations/jason-hunter-mljson.pdf
