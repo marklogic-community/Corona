@@ -1,4 +1,25 @@
-#### The mljson project is a set of libraries and REST endpoints to enable the [MarkLogic] Server to become an advanced JSON store.
+#### The MLJSON project is a set of libraries and REST endpoints to enable the [MarkLogic] Server to become an advanced JSON store.
+
+The primary goal of the MLJSON project is to expose the tremendously powerful
+document database and search engine features of [MarkLogic] to developers
+without the need to learn XQuery.  Given that JSON is commonly used for 
+serialization of objects and data along with the fact that most languages have
+support for it makes it a very powerful format.  The JSON format combined with
+the scalability of MarkLogic is extremely appealing.
+
+Externally facing, MLJSON exposes REST endpoints that allow a developer to
+easily store and retrieve JSON documents from the database ([CRUD]).  It also
+exposes a very powerful query interface via specially constructed JSON objects.
+This query interface allows the user to find documents via path expressions as
+well as full text search expressions.  For those familiar with MarkLogic, it
+exposes all of the functionality found in the [CTS search functions].
+
+Internally, the library converts the JSON into XML that MarkLogic can
+efficiently store and query.  While this format is intended to only be used
+internally, there has been interest in exposing an API to XQuery developers
+that would allow for the construction and modification of JSON documents stored
+in the database.
+
 ___
 
 ## Files
@@ -68,3 +89,5 @@ ___
  - Some real tests
 
   [MarkLogic]: http://marklogic.com
+  [CRUD]: http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
+  [CTS search functions]: http://developer.marklogic.com/pubs/4.2/apidocs/cts-query.html
