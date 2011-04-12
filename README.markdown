@@ -75,11 +75,8 @@ ___
 
 ## TODO
  - lib/json.xqy:
-   - Convert \n to newlines
    - Convert wide encoded unicode chars: \uFFFF\uFFFF
    - Sanitize element names
- - lib/json-path.xqy:
-   - Almost everything
  - jsonstore.xqy:
    - Move a document
    - Copy a document
