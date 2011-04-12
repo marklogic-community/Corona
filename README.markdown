@@ -1,15 +1,15 @@
 # MLJSON - A JSON Facade on top of MarkLogic
 
-The MLJSON project is a set of libraries and REST endpoints to enable the MarkLogic Server to become an advanced JSON store.
+The MLJSON project is a set of libraries and REST endpoints to enable the [MarkLogic Server] to become an advanced [JSON] store.
 
-#### [MarkLogic Server] ####
+#### MarkLogic  ####
  - High-performance, scalable database for unstructured information
  - "NoSQL" datastore (no tables, rows, columns) - just documents and unique IDs (URIs).
  - Uses XML datamodel for documents, query-able via XQuery, XSLT, XPath
  - Uses search-engine techniques to efficiently expose real-time fulltext search 
  - ACID-compliant CRUD (Create, Read, Update, Delete)
 
-#### [JSON] ####
+#### JSON ####
   - JavaScript Object Notation
   - A lightweight data-encoding and interchange format
   - Native to JavaScript, now widely utilized across languages
