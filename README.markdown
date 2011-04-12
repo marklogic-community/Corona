@@ -1,25 +1,42 @@
-#### The MLJSON project is a set of libraries and REST endpoints to enable the MarkLogic Server to become an advanced JSON store.
+# MLJSON - A JSON Facade on top of MarkLogic
 
-The primary goal of the MLJSON project is to expose the tremendously powerful
-document database and search engine features of [MarkLogic] to developers
-without the need to learn XQuery.  Given that JSON is commonly used for 
-serialization of objects and data along with the fact that most languages have
-support for it makes it a very powerful format.  The JSON format combined with
-the scalability of MarkLogic is extremely appealing.
+The MLJSON project is a set of libraries and REST endpoints to enable the MarkLogic Server to become an advanced JSON store.
+Developers can
 
-Externally facing, MLJSON exposes REST endpoints that allow a developer to
+[MarkLogic Server](http://developer.marklogic.com)
+- High-performance, scalable database for unstructured information
+- "NoSQL" datastore (no tables, rows, columns) - just documents and unique IDs (URIs).
+- Uses XML datamodel for documents, query-able via XQuery, XSLT, XPath
+- Uses search-engine techniques to efficiently expose real-time search of text (and any structure)
+- ACID-compliant CRUD (Create, Read, Update, Delete)
+
+[JSON](http://json.org)
+- JavaScript Object Notation
+- A lightweight data-encoding and interchange format
+- Native to JavaScript, now widely utilized across languages
+- Commonly used for passing data to web browsers
+
+## Design goal
+Enable developers to store and query JSON inside MarkLogic (without knowledge of XQuery, XSLT, or XPath)
+
+## Design considerations: 
+1. Approach things from a JSON angle
+- Create the XML to match the JSON, not vice-versa 
+2. Make good use of MarkLogic indexes
+- Craft the XML so it's fast to query
+3. XML representation of JSON is an implementation detail - users only need think in terms of JSON
+
+MLJSON exposes REST endpoints that allow a developer to
 easily store and retrieve JSON documents from the database ([CRUD]).  It also
-exposes a very powerful query interface via specially constructed JSON objects.
-This query interface allows the user to find documents via path expressions as
+exposes a very powerful query interface that uses a native JSON syntax:
+
+Query Using native JSON syntax 
+- Don't expose the XML internals to users 
+- Support full range of MarkLogic indexes
+
+This query interface allows the user to find documents via "path" expressions as
 well as full text search expressions.  For those familiar with MarkLogic, it
 exposes all of the functionality found in the [CTS search functions].
-
-Internally, the library converts the JSON into XML that MarkLogic can
-efficiently store and query.  While this format is intended to only be used
-internally, there has been interest in exposing an API to XQuery developers
-that would allow for the construction and modification of JSON documents stored
-in the database.
-
 ___
 
 ## Files
