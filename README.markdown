@@ -1,4 +1,4 @@
-#### The MLJSON project is a set of libraries and REST endpoints to enable the [MarkLogic] Server to become an advanced JSON store.
+#### The MLJSON project is a set of libraries and REST endpoints to enable the MarkLogic Server to become an advanced JSON store.
 
 The primary goal of the MLJSON project is to expose the tremendously powerful
 document database and search engine features of [MarkLogic] to developers
