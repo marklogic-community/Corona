@@ -1,391 +1,297 @@
+xquery version "1.0";
+
 module namespace json="http://marklogic.com/json";
+declare default function namespace "http://marklogic.com/json";
 
-declare default function namespace "http://www.w3.org/2005/xpath-functions";
-declare variable $jsonBits as xs:string* := ();
-declare variable $keyObjectStack as xs:string* := ();
-declare variable $typeStack as xs:string* := ();
-
-(:
-XXX:
-    * Sanitize element names
-    * Convert wide encoded unicode chars: \uFFFF\uFFFF
-:)
-
-declare variable $json:DEBUG as xs:boolean := false();
-
-declare function json:jsonToXML(
-    $json as xs:string
-)
+declare function jsonToXML($json as xs:string)
 {
-    let $bits := string-to-codepoints(replace($json, "\n", ""))
-    let $set := xdmp:set($jsonBits, for $bit in $bits return codepoints-to-string($bit))
-
-    let $typeBits := json:getType(1)
-    let $type := $typeBits[1]
-    let $typeEndLocation := $typeBits[2]
-    let $location :=
-        if($type = ("object", "array", "string", "number"))
-        then 1
-        else $typeEndLocation
-    let $xmlString := string-join((json:typeToElement("json", $type), json:dispatch($location), "</json>"), "")
-    let $debug := if($json:DEBUG) then xdmp:log($xmlString) else ()
-    return xdmp:unquote($xmlString)
+  let $res := _parseValue(_tokenize($json))
+  return
+    if(fn:exists(fn:remove($res,1))) then fn:error()
+    else document { element json {
+      $res[1]/@*,
+      $res[1]/node()
+    }}
 };
 
-declare private function json:dispatch(
-    $location as xs:integer
-) as  xs:string*
+declare (:private:) function _parseValue($tokens as element(token)*)
 {
-    let $currentBit := $jsonBits[$location]
-    where exists($currentBit)
-    return
-        if($currentBit eq "{" (:":))
-        then json:startObject($location)
-        else if($currentBit eq "}")
-        then json:endObject($location)
-        else if($currentBit eq ":")
-        then json:buildObjectValue($location + 1)
-        else if($currentBit eq "[")
-        then json:startArray($location)
-        else if($currentBit eq "]")
-        then json:endArray($location)
-        else if($currentBit eq "," and $typeStack[last()] eq "object")
-        then (json:endObjectKey(), json:startObjectKey($location + 1))
-        else if($currentBit eq "," and $typeStack[last()] eq "array")
-        then (json:endArrayItem(), json:startArrayItem($location + 1))
-        else if($currentBit eq """")
-        then json:readCharsUntil($location + 1, """")[2]
-        else
-            (: XXX - Encode unicode :)
-            if($currentBit eq "\")
-            then json:dispatch($location + 2)
-            else json:dispatch($location + 1)
+  let $token := $tokens[1]
+  let $tokens := fn:remove($tokens,1)
+  return
+    if($token/@t = "lbrace") then (
+      let $res := _parseObject($tokens)
+      let $tokens := fn:remove($res,1)
+      return (
+        element res {
+          attribute type { "object" },
+          $res[1]/node()
+        },
+        $tokens
+      )
+    ) else if ($token/@t = "lsquare") then (
+      let $res := _parseArray($tokens)
+      let $tokens := fn:remove($res,1)
+      return (
+        element res {
+          attribute type { "array" },
+          $res[1]/node()
+        },
+        $tokens
+      )
+    ) else if ($token/@t = "number") then (
+      element res {
+        attribute type { "number" },
+        text { $token }
+      },
+      $tokens
+    ) else if ($token/@t = "string") then (
+      element res {
+        attribute type { "string" },
+        text { _unescapeJSONString($token) }
+      },
+      $tokens
+    ) else if ($token/@t = "true" or $token/@t = "false") then (
+      element res {
+        attribute boolean { $token }
+      },
+      $tokens
+    ) else if ($token/@t = "null") then (
+      element res {
+        attribute type { "null" }
+      },
+      $tokens
+    ) else fn:error(xs:QName("json:PARSE01"),
+      fn:concat("Unexpected token: ", fn:string($token/@t), " (""", fn:string($token), """)"))
 };
 
-
-(: Javascript object handling :)
-
-declare private function json:startObject(
-    $location as xs:integer
-) as xs:string*
+declare (:private:) function _parseObject($tokens as element(token)*)
 {
-    let $location := json:readCharsUntilNot($location + 1, " ")
-    return
-        if($jsonBits[$location] eq "}")
-        then (xdmp:set($typeStack, ($typeStack, "emptyobject")), json:endObject($location))
-        else (xdmp:set($typeStack, ($typeStack, "object")), json:startObjectKey($location))
+  let $token1 := $tokens[1]
+  let $tokens := fn:remove($tokens,1)
+  return
+    if(fn:not($token1/@t = "string")) then fn:error() else
+      let $token2 := $tokens[1]
+      let $tokens := fn:remove($tokens,1)
+      return
+        if(fn:not($token2/@t = "colon")) then fn:error() else
+          let $res := _parseValue($tokens)
+          let $tokens := fn:remove($res,1)
+          let $pair := element { _escapeNCName($token1) } {
+            $res[1]/@*,
+            $res[1]/node()
+          }
+          let $token := $tokens[1]
+          let $tokens := fn:remove($tokens,1)
+          return
+            if($token/@t = "comma") then (
+              let $res := _parseObject($tokens)
+              let $tokens := fn:remove($res,1)
+              return (
+                element res {
+                  $pair,
+                  $res[1]/node()
+                },
+                $tokens
+              )
+            ) else if($token/@t = "rbrace") then (
+              element res {
+                $pair
+              },
+              $tokens
+            ) else fn:error(xs:QName("json:PARSE02"),
+              fn:concat("Unexpected token: ", fn:string($token/@t), " (""", fn:string($token), """)"))
 };
 
-declare private function json:endObject(
-    $location as xs:integer
-) as xs:string*
+declare (:private:) function _parseArray($tokens as element(token)*)
 {
-    let $isEmpty := $typeStack[last()] eq "emptyobject"
-    let $set := xdmp:set($typeStack, $typeStack[1 to last() - 1])
-    return
-        if($isEmpty)
-        then json:dispatch($location + 1)
-        else (json:endObjectKey(), json:dispatch($location + 1))
+  let $res := _parseValue($tokens)
+  let $tokens := fn:remove($res,1)
+  let $item := element item {
+    $res[1]/@*,
+    $res[1]/node()
+  }
+  let $token := $tokens[1]
+  let $tokens := fn:remove($tokens,1)
+  return
+    if($token/@t = "comma") then (
+      let $res := _parseArray($tokens)
+      let $tokens := fn:remove($res,1)
+      return (
+        element res {
+          $item,
+          $res[1]/node()
+        },
+        $tokens
+      )
+    ) else if($token/@t = "rsquare") then (
+      element res {
+        $item
+      },
+      $tokens
+    ) else fn:error()
 };
 
-declare private function json:startObjectKey(
-    $location as xs:integer
-) as xs:string*
+declare (:private:) function _tokenize($json as xs:string)
+  as element(token)*
 {
-    let $location := json:readCharsUntilNot($location, " ")
-
-    let $valueBits := 
-        if($jsonBits[$location] eq """")
-        then json:readCharsUntil($location + 1, """")
-        else json:readCharsUntil($location, ":")
-    let $location :=
-        if($jsonBits[$location] eq """")
-        then $valueBits[1] + 1
-        else $valueBits[1]
-    let $keyName := $valueBits[2]
-
-    let $typeBits := json:getType($location + 1)
-    let $type := $typeBits[1]
-    let $set := xdmp:set($keyObjectStack, ($keyObjectStack, $keyName))
-    return (
-        json:typeToElement($keyName, $type),
-        if($type = ("null", "boolean:true", "boolean:false"))
-        then json:dispatch($typeBits[2])
-        else json:dispatch($location)
-    )
+  let $tokens := ("\{", "\}", "\[", "\]", ":", ",", "true", "false", "null", "\s+",
+    '"([^"\\]|\\"|\\\\|\\/|\\b|\\f|\\n|\\r|\\t|\\u[A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9])*"',
+    "-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?")
+  let $regex := fn:string-join(for $t in $tokens return fn:concat("(",$t,")"),"|")
+  for $match in fn:analyze-string($json, $regex)/*
+  return
+    if($match/self::*:non-match) then _token("error", fn:string($match))
+    else if($match/*:group/@nr = 1) then _token("lbrace", fn:string($match))
+    else if($match/*:group/@nr = 2) then _token("rbrace", fn:string($match))
+    else if($match/*:group/@nr = 3) then _token("lsquare", fn:string($match))
+    else if($match/*:group/@nr = 4) then _token("rsquare", fn:string($match))
+    else if($match/*:group/@nr = 5) then _token("colon", fn:string($match))
+    else if($match/*:group/@nr = 6) then _token("comma", fn:string($match))
+    else if($match/*:group/@nr = 7) then _token("true", fn:string($match))
+    else if($match/*:group/@nr = 8) then _token("false", fn:string($match))
+    else if($match/*:group/@nr = 9) then _token("null", fn:string($match))
+    else if($match/*:group/@nr = 10) then () (:ignore whitespace:)
+    else if($match/*:group/@nr = 11) then
+      let $v := fn:string($match)
+      let $len := fn:string-length($v)
+      return _token("string", fn:substring($v, 2, $len - 2))
+    else if($match/*:group/@nr = 13) then _token("number", fn:string($match))
+    else _token("error", fn:string($match))
 };
 
-declare private function json:endObjectKey(
-) as xs:string*
+declare (:private:) function _token($t, $value)
 {
-    let $latestObjectName := $keyObjectStack[last()]
-    let $set := xdmp:set($keyObjectStack, $keyObjectStack[1 to last() - 1])
-    return concat("</", $latestObjectName, ">")
+  <token t="{$t}">{ fn:string($value) }</token>
 };
 
-declare private function json:buildObjectValue(
-    $location as xs:integer
-) as xs:string*
-{
-    let $location := json:readCharsUntilNot($location, " ")
-    let $currentBit := $jsonBits[$location]
-    return
-        if($currentBit eq ("[", "{") (:":))
-        then json:dispatch($location)
-        else
-            let $deepValues :=
-                if($currentBit eq """")
-                then json:readCharsUntil($location + 1, ("""", "}"))
-                else json:readCharsUntil($location, (",", "}"))
-            let $location :=
-                if($currentBit eq """")
-                then $deepValues[1] + 1
-                else $deepValues[1]
-            let $normalizedValue :=
-                if($currentBit eq """")
-                then $deepValues[2]
-                else normalize-space($deepValues[2])
-            return ($normalizedValue, json:dispatch($location))
-};
-
-
-(: Javascript array handling :)
-
-declare private function json:startArray(
-    $location as xs:integer
-) as xs:string*
-{
-    let $location := json:readCharsUntilNot($location + 1, " ")
-    return
-        if($jsonBits[$location] eq "]")
-        then (xdmp:set($typeStack, ($typeStack, "emptyarray")), json:endArray($location))
-        else (xdmp:set($typeStack, ($typeStack, "array")), json:startArrayItem($location))
-};
-
-declare private function json:endArray(
-    $location as xs:integer
-) as xs:string*
-{
-    let $isEmpty := $typeStack[last()] eq "emptyarray"
-    let $set := xdmp:set($typeStack, $typeStack[1 to last() - 1])
-    return
-        if($isEmpty)
-        then json:dispatch($location + 1)
-        else (json:endArrayItem(), json:dispatch($location + 1))
-};
-
-declare private function json:startArrayItem(
-    $location as xs:integer
-) as xs:string*
-{
-    let $location := json:readCharsUntilNot($location, " ")
-    let $typeBits := json:getType($location)
-    let $type := $typeBits[1]
-    let $typeEndLocation := $typeBits[2]
-    return (
-        json:typeToElement("item", $type),
-        if($type = ("null", "boolean:false", "boolean:true"))
-        then json:dispatch($typeEndLocation)
-        else if($type = ("object", "array"))
-        then json:dispatch($location)
-        else
-            let $valueBits := 
-                if($jsonBits[$location] eq """")
-                then json:readCharsUntil($location + 1, ("""", "]"))
-                else json:readCharsUntil($location, (",", "]"))
-
-            let $location :=
-                if($jsonBits[$location] eq """")
-                then $valueBits[1] + 1
-                else $valueBits[1]
-            return ($valueBits[2], json:dispatch($location))
-    )
-};
-
-declare private function json:endArrayItem(
-) as xs:string*
-{
-    "</item>"
-};
-
-
-(: Helper functions :)
-
-declare private function json:getType(
-    $location as xs:integer
-)
-{
-    let $location := json:readCharsUntilNot($location, " ")
-    let $currentBit := $jsonBits[$location]
-    return
-        if($currentBit eq """")
-        then "string"
-        else if($currentBit eq "[")
-        then "array"
-        else if($currentBit eq "{" (:":))
-        then "object"
-        else if(string-join($jsonBits[$location to $location + 3], "") eq "null")
-        then ("null", $location + 4)
-        else if(string-join($jsonBits[$location to $location + 3], "") eq "true")
-        then ("boolean:true", $location + 4)
-        else if(string-join($jsonBits[$location to $location + 4], "") eq "false")
-        then ("boolean:false", $location + 5)
-        else "number"
-};
-
-declare private function json:typeToElement(
-    $elementName as xs:string,
-    $type as xs:string
-) as xs:string
-{
-    if($type eq "null")
-    then concat("<", $elementName, " type='null'>")
-    else if($type eq "boolean:true")
-    then concat("<", $elementName, " boolean='true'>")
-    else if($type eq "boolean:false")
-    then concat("<", $elementName, " boolean='false'>")
-    else concat("<", $elementName, " type='", $type, "'>")
-};
-
-declare private function json:readCharsUntil(
-    $location as xs:integer,
-    $stopChars as xs:string+
-)
-{
-    if($jsonBits[$location] = $stopChars)
-    then ($location, "")
-    else
-        let $newLocation := $location
-        let $stringBits :=
-
-            let $continue := true()
-            let $lastReadLocation := -1
-            for $something in ($location to count($jsonBits))
-            where $something > $lastReadLocation and $continue
-            return
-                let $parts := json:unescapeIfUnicodeChar($something)
-                let $set := xdmp:set($lastReadLocation, $parts[1])
-                let $currentBit := json:escapeChar($parts[2])
-                where $continue
-                return 
-                    if($currentBit = $stopChars and not($parts[3]))
-                    then xdmp:set($continue, false())
-                    else (
-                        $currentBit,
-                        xdmp:set($newLocation, $lastReadLocation)
-                    )
-        return ($newLocation + 1 , string-join($stringBits, ""))
-};
-
-declare private function json:readCharsUntilNot(
-    $location as xs:integer,
-    $ignoreChar as xs:string
-) as xs:integer
-{
-    if($jsonBits[$location] ne $ignoreChar)
-    then $location
-    else json:readCharsUntilNot($location + 1, $ignoreChar)
-};
-
-declare private function json:escapeChar(
-    $char as xs:string
-) as xs:string
-{
-    if($char eq "<")
-    then "&amp;lt;"
-    else if($char eq "&amp;")
-    then "&amp;amp;"
-    else $char
-};
-
-(:
-returns the real location to operate off of as the first item in the
-sequence, the unescaped char as the second and if it was escaped as the third
-:)
-declare private function json:unescapeIfUnicodeChar(
-    $startingLocation as xs:integer
-)
-{
-    let $unescapedString := ()
-    let $escaped := false()
-    let $newLocation :=
-        if($jsonBits[$startingLocation] eq "\")
-        then
-            if($jsonBits[$startingLocation + 1] eq "u")
-            then
-                let $hex := string-join($jsonBits[$startingLocation + 2 to $startingLocation + 5], "")
-                let $set := xdmp:set($unescapedString, codepoints-to-string(xdmp:hex-to-integer($hex)))
-                return $startingLocation + 5
-            else if($jsonBits[$startingLocation + 1] eq "n")
-            then 
-                let $set := xdmp:set($unescapedString, codepoints-to-string(10))
-                return $startingLocation + 1
-            else
-                let $set := xdmp:set($escaped, true())
-                let $set := xdmp:set($unescapedString, $jsonBits[$startingLocation + 1])
-                return $startingLocation + 1
-        else $startingLocation
-
-    let $finalChar := ($unescapedString, $jsonBits[$newLocation])[1]
-    return ($newLocation, $finalChar, $escaped)
-};
-
-
-
-
-declare function json:xmlToJSON(
+declare function xmlToJSON(
     $element as element()
 ) as xs:string
 {
-    json:processElement($element)
+  fn:string-join(processElement($element),"")
 };
 
-declare private function json:processElement(
-    $element as element()
-) as xs:string
+declare (:private:) function processElement($element as element())
+  as xs:string*
 {
-    if($element/@type = "object")
-    then json:outputObject($element)
-    else if($element/@type = "array")
-    then json:outputArray($element)
-    else if($element/@type = "null")
-    then "null"
-    else if(exists($element/@boolean))
-    then xs:string($element/@boolean)
-    else if($element/@type = "number")
-    then xs:string($element)
-    else concat('"', json:escape($element), '"')
+  if($element/@type = "object") then outputObject($element)
+  else if($element/@type = "array") then outputArray($element)
+  else if($element/@type = "null") then "null"
+  else if(fn:exists($element/@boolean)) then xs:string($element/@boolean)
+  else if($element/@type = "number") then xs:string($element)
+  else ('"', _escapeJSONString($element), '"')
 };
 
-declare private function json:outputObject(
-    $element as element()
-) as xs:string
+declare (:private:) function outputObject($element as element())
+  as xs:string*
 {
-    let $keyValues :=
-        for $child in $element/*
-        return concat('"', local-name($child), '":', json:processElement($child))
-    return concat("{", string-join($keyValues, ","), "}")
+  "{",
+  for $child at $pos in $element/*
+  return (
+    if($pos = 1) then () else ",",
+    '"', _unescapeNCName(fn:local-name($child)), '":', processElement($child)
+  ),
+  "}"
 };
 
-declare private function json:outputArray(
-    $element as element()
-) as xs:string
+declare (:private:) function outputArray($element as element())
+  as xs:string*
 {
-    let $values :=
-        for $child in $element/*
-        return json:processElement($child)
-    return concat("[", string-join($values, ","), "]")
+  "[",
+  for $child at $pos in $element/*
+  return (
+    if($pos = 1) then () else ",",
+    processElement($child)
+  ),
+  "]"
+};
+
+declare (:private:) function _decodeHexChar($val as xs:integer)
+  as xs:integer
+{
+  let $tmp := $val - 48 (: '0' :)
+  let $tmp := if($tmp <= 9) then $tmp else $tmp - (65-48) (: 'A'-'0' :)
+  let $tmp := if($tmp <= 15) then $tmp else $tmp - (97-65) (: 'a'-'A' :)
+  return $tmp
+};
+
+declare (:private:) function _decodeHexStringHelper($chars as xs:integer*, $acc as xs:integer)
+  as xs:integer
+{
+  if(fn:empty($chars)) then $acc
+  else _decodeHexStringHelper(fn:remove($chars,1), ($acc * 16) + _decodeHexChar($chars[1]))
+};
+
+declare (:private:) function _decodeHexString($val as xs:string)
+  as xs:integer
+{
+  _decodeHexStringHelper(fn:string-to-codepoints($val), 0)
+};
+
+declare (:private:) function _unescapeJSONString($val as xs:string)
+  as xs:string
+{
+  fn:string-join(
+    let $regex := '[^\\]+|(\\")|(\\\\)|(\\/)|(\\b)|(\\f)|(\\n)|(\\r)|(\\t)|(\\u[A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9])'
+    for $match in fn:analyze-string($val, $regex)/*
+    return 
+      if($match/*:group/@nr = 1) then """"
+      else if($match/*:group/@nr = 2) then "\"
+      else if($match/*:group/@nr = 3) then "/"
+      (: else if($match/*:group/@nr = 4) then "&#x08;" :)
+      (: else if($match/*:group/@nr = 5) then "&#x0C;" :)
+      else if($match/*:group/@nr = 6) then "&#x0A;"
+      else if($match/*:group/@nr = 7) then "&#x0D;"
+      else if($match/*:group/@nr = 8) then "&#x09;"
+      else if($match/*:group/@nr = 9) then
+        fn:codepoints-to-string(_decodeHexString(fn:substring($match, 3)))
+      else fn:string($match)
+  ,"")
 };
 
 (: Need to backslash escape any double quotes, backslashes, and newlines :)
-declare private function json:escape(
-    $string as xs:string
-) as xs:string
+declare (:private:) function _escapeJSONString($string as xs:string)
+  as xs:string
 {
-    let $string := replace($string, "\\", "\\\\")
-    let $string := replace($string, """", "\\""")
-    let $string := replace($string, codepoints-to-string((13, 10)), "\\n")
-    let $string := replace($string, codepoints-to-string(13), "\\n")
-    let $string := replace($string, codepoints-to-string(10), "\\n")
+    let $string := fn:replace($string, "\\", "\\\\")
+    let $string := fn:replace($string, """", "\\""")
+    let $string := fn:replace($string, fn:codepoints-to-string((13, 10)), "\\n")
+    let $string := fn:replace($string, fn:codepoints-to-string(13), "\\n")
+    let $string := fn:replace($string, fn:codepoints-to-string(10), "\\n")
     return $string
 };
+
+declare (:private:) function _encodeHexStringHelper($num as xs:integer, $digits as xs:integer)
+  as xs:string*
+{
+  if($digits > 1) then _encodeHexStringHelper($num idiv 16, $digits - 1) else (),
+  ("0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F")[$num mod 16 + 1]
+};
+
+declare (:private:) function _escapeNCName($val as xs:string)
+  as xs:string
+{
+  fn:string-join(
+    let $regex := ':|_|(\i)|(\c)|.'
+    for $match at $pos in fn:analyze-string($val, $regex)/*
+    return
+      if($match/*:group/@nr = 1 or
+        ($match/*:group/@nr = 2 and $pos != 1)) then fn:string($match)
+      else ("_", _encodeHexStringHelper(fn:string-to-codepoints($match), 4))
+  ,"")
+};
+
+declare (:private:) function _unescapeNCName($val as xs:string)
+  as xs:string
+{
+  fn:string-join(
+    let $regex := '(_[A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9])|[^_]+'
+    for $match at $pos in fn:analyze-string($val, $regex)/*
+    return
+      if($match/*:group/@nr = 1) then
+        fn:codepoints-to-string(_decodeHexString(fn:substring($match, 2)))
+      else fn:string($match)
+  ,"")
+};
+
