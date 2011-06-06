@@ -1,6 +1,6 @@
 xquery version "1.0-ml";
 
-import module namespace json="http://marklogic.com/json" at "/data/lib/json.xqy";
+import module namespace json="http://marklogic.com/json" at "/lib/json.xqy";
 
 (: Working :)
 let $json := "[""hello"",""world"", [], {}, null, false, true]"
