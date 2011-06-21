@@ -1,0 +1,64 @@
+// Empty/raw datatypes
+true
+false
+null
+[]
+{}
+
+// Various numbers
+[-1]
+[1.2]
+
+// General array with all data types
+["hello", 0, [], {}, null, false, true]
+
+// Nested objects
+{"foo":1, "bar":{"baz":2, "yaz":3}}
+
+// Nested objects with trailing key/value
+{"foo":1, "em":{"a":"b"}, "bar":"aa"}
+
+// Nested arrays
+[1, 2, 3, [4, 5, [7, 8, 9], 6]]
+
+// Nested arrays with trailing values
+[1, 2, 3, [4, 5, [7, 8, 9], 6], 10]
+
+// UTF-8
+{"text":"は 2010/11/4 at 5:50 AM に 6'45"/km のペースで 8.42 km を走りました http://go.nike.com/9rlcovd"}
+
+// Escaped UTF-8
+{"text":"\u3050\u3089\u307e\u3041\u3067\u3061\u3085\u306d\u2665\u304a\u306f\u3088\u3046\u3067\u3059\uff01"}
+
+// Empty values
+{"foo":"", "bar":""}
+
+// Escaped quotes
+{"foo":"\"bar\""}
+
+// Newline
+{"foo":"bar\nbaz"}
+
+// Could use more tests around escaping odd characters in key names that can't be used as an element name
+// Escaping invalid xml element names
+'{"f•o":"bar"}'
+
+// Escaping our invalid xml element name escaping
+{"_foo":"bar"}
+
+// Empty key name (about to check in a fix)
+{"":"bar"}
+
+
+// Failure tests
+
+// Missing commas
+[1 2]
+{"foo" "bar"}
+
+// Missing closing brace/bracket
+[1, 2
+{"foo" "bar"
+
+// Invalid number
+[1.2.2]

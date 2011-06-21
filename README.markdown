@@ -47,24 +47,38 @@ ___
  - lib/json.xqy - Has two public functions:
    - jsonToXML - parses a JSON string into XML that can be stored in MarkLogic
    - xmlToJSON - parses the generated XML into a JSON string
- - lib/json-path.xqy - Tinkering with ways to query the stored JSON
+ - lib/json-query.xqy - Tinkering with ways to query the stored JSON
  - jsonquery.xqy - A REST endpoint for querying JSON documents
  - jsonstore.xqy - A REST endpoint for storing, managing and retrieving JSON documents
 
 ## Capabilities of jsonstore.xqy
 #### Insert a JSON document
- - Request type: PUT
+ - Request type: PUT or POST
  - Request body should be the JSON document
  - Example: jsonstore.xqy?uri=/foo/bar.json
- - Optional: When inserting a document you can set permissions, collections and a document quality.
+ - Optional: When inserting a document you can set permissions, properties, collections and a document quality.
    - jsonstore.xqy?uri=/foo/bar.json&permission=public:read&permission=admin:write
+   - jsonstore.xqy?uri=/foo/bar.json&property=key:value&property=published:false
    - jsonstore.xqy?uri=/foo/bar.json&collection=public&collection=published
    - jsonstore.xqy?uri=/foo/bar.json&quality=10
    - jsonstore.xqy?uri=/foo/bar.json&permission=public:read&collection=public&quality=10
 
+ - Notes:
+   - You can set multiple permissions, properties and collections by including multiple definitions in your request, as shown above
+   - Permissions must follow a <role>:<capability> pattern where capability is one of read, update or execute
+   - Properties must follow a <key>:<value> pattern where the key is alphanumeric and starts with a letter
+
 #### Get a JSON document
  - Request type: GET
  - Example: jsonstore.xqy?uri=/foo/bar.json
+ - Optional: To fetch metadat associated about the document, specify what you'd like to include in the response.
+   - jsonstore.xqy?uri=/foo/bar.json?include=content - Simply returns the document as supplied via the PUT (default)
+   - jsonstore.xqy?uri=/foo/bar.json?include=permissions - Returns the permissions on the document
+   - jsonstore.xqy?uri=/foo/bar.json?include=collections - Returns the collections on the document
+   - jsonstore.xqy?uri=/foo/bar.json?include=properties - Returns the properties on the document
+   - jsonstore.xqy?uri=/foo/bar.json?include=quality - Returns the quality of the document
+   - jsonstore.xqy?uri=/foo/bar.json?include=content&include=permissions&include=quality - Returns the content, permissions and quality of the document
+   - jsonstore.xqy?uri=/foo/bar.json?include=all - Returns the content along with all of its metadata
 
 #### Delete a JSON document
  - Request type: DELETE
@@ -74,11 +88,6 @@ ___
  - Request type: POST
  - Properties are **not** held inside the JSON document, properties are stored outside of the document and don't effect the stored document at all.  They are best thought of as metadata about the document but should be avoided if possible due to storage overhead.
  - Example: jsonstore.xqy?uri=/foo/bar.json&property=publishState:final&property=needsEditorial:false
-
-#### Get a property of a document
- - Request type: GET
- - Returns the value of a property that has been set on a document.
- - Example: jsonstore.xqy?uri=/foo/bar.json&property=publishState
 
 #### Set permissions on a document
  - Request type: POST
@@ -95,15 +104,9 @@ ___
  - Example: jsonstore.xqy?uri=/foo/bar.json&quality=10
 
 ## TODO
- - lib/json.xqy:
-   - Convert wide encoded unicode chars: \uFFFF\uFFFF
-   - Sanitize element names
  - jsonstore.xqy:
    - Move a document
    - Copy a document
-   - Get the document permissions
-   - Get the document collections
-   - Get the document quality
  - Some real tests
 
   [MarkLogic]: http://developer.marklogic.com
