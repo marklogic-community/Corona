@@ -93,7 +93,6 @@ $(document).ready(function(){
     for (var i = validJSON.length - 1; i >= 0; i--) {
       if (validJSON[i].path) { 
         parsingOk(validJSON[i].json, validJSON[i].path) } }
-  // REST
-  // Update Functions
+  // Missing REST
+  // Missing Update Functions
 })
-
