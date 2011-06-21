@@ -83,6 +83,7 @@ validJSON = [
   , "path": '(/json[book//id = ("0596000405", "123456789")][id = "0596000405" or other_id = "0596000405"])[1 to 10]' }
 ]
 
+// TODO: UTF-8 params not working with qunit
 $(document).ready(function(){
   module("Isomorphic") ;
     // Missing Invalid JSON
