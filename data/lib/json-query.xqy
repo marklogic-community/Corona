@@ -23,7 +23,7 @@ declare function jsonquery:execute(
     $json as xs:string
 ) as element(json)*
 {
-    let $tree := json:jsonToXML($json)/json
+    let $tree := json:jsonToXML($json)
     return
         if(exists($tree/fulltext))
         then jsonquery:executeFulltext($tree)
@@ -34,7 +34,7 @@ declare function jsonquery:parse(
     $json as xs:string
 ) as xs:string
 {
-    let $tree := json:jsonToXML($json)/json
+    let $tree := json:jsonToXML($json)
     return
         if(exists($tree/fulltext))
         then jsonquery:parseFulltext($tree)

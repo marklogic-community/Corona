@@ -17,6 +17,8 @@ limitations under the License.
 xquery version "1.0-ml";
 
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
+import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
+import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
 
 declare option xdmp:mapping "false";
 
@@ -36,8 +38,9 @@ declare option xdmp:mapping "false";
     Get a document and metadata (GET)       /jsonstore.xqy?uri=http://foo/bar&include=(all|content|collections|properties|permissions|quality)
 :)
 
+let $params := rest:process-request(endpoints:request("/data/jsonstore.xqy"))
+let $uri := map:get($params, "uri")
 let $requestMethod := xdmp:get-request-method()
-let $uri := xdmp:get-request-field("uri", ())[1]
 let $bodyContent := xdmp:get-request-body("text")
 
 where exists($uri)
