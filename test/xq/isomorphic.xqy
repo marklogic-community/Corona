@@ -9,7 +9,7 @@ declare variable $transformed :=
 declare variable $valid := $json = $transformed ;
 
 try {
-$valid,
+$transformed,
 if( $valid ) then () else 
   xdmp:log( ("Got: ", $transformed, "Expected: ", $json ) ) }
 catch ( $e ) {
