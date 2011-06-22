@@ -67,6 +67,7 @@ change the URL structure or add in more rules if need be there.
  - data/lib/json-query.xqy - Tinkering with ways to query the stored JSON
 
 ## REST Capabilities
+### Document management
 #### Insert a JSON document
  - Request type: PUT or POST
  - Request body should be the JSON document
@@ -117,6 +118,11 @@ change the URL structure or add in more rules if need be there.
 #### Set the quality of a document
  - Request type: POST
  - Example: /data/store/foo/bar.json&quality=10
+
+### Server information
+Information about the MarkLogic server version, hardware and index settings can be obtained with an info request.
+ - Request type: GET
+ - Example: /data/info
 
 ## TODO
  - Move a document
