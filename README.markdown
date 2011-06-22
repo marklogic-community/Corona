@@ -45,7 +45,8 @@ ___
 
 ## Installation
 
-Installing MLJSON is fairly simple
+Installing MLJSON is fairly simple:
+
 1. If you don't have a HTTP server configured in MarkLogic, create one
 2. Set the URL rewriter for the HTTP server to: /data/lib/rewriter.xqy
 3. Download the MLJSON source and unzip it underneath the document directory that you configured in the MarkLogic HTTP server
