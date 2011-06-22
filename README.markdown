@@ -43,25 +43,40 @@ Here are some [slides] from a presentation on MLJSON given at XML Prague 2011.
 
 ___
 
-## Files
- - lib/json.xqy - Has two public functions:
+## Installation
+
+Installing MLJSON is fairly simple
+1. If you don't have a HTTP server configured in MarkLogic, create one
+2. Set the URL rewriter for the HTTP server to: /data/lib/rewriter.xqy
+3. Download the MLJSON source and unzip it underneath the document directory that you configured in the MarkLogic HTTP server
+
+Feel free to remove the README and LICENSE files along with the test directory.
+But keep the config and data directories structured as they are. You can
+augment the functionality of MLJSON by writing your own XQuery and having it
+live alongside the MLJSON files.
+
+The URL rewritter is configured in the config/endpoints.xqy file. You can
+change the URL structure or add in more rules if need be there.
+
+### Files relevant to the end user
+ - data/lib/rewriter.xqy - A URL rewriter for the REST calls
+ - config/endpoints.xqy - Configuration for the REST endpoints
+ - data/lib/json.xqy - Has two public functions:
    - jsonToXML - parses a JSON string into XML that can be stored in MarkLogic
    - xmlToJSON - parses the generated XML into a JSON string
- - lib/json-query.xqy - Tinkering with ways to query the stored JSON
- - jsonquery.xqy - A REST endpoint for querying JSON documents
- - jsonstore.xqy - A REST endpoint for storing, managing and retrieving JSON documents
+ - data/lib/json-query.xqy - Tinkering with ways to query the stored JSON
 
-## Capabilities of jsonstore.xqy
+## REST Capabilities
 #### Insert a JSON document
  - Request type: PUT or POST
  - Request body should be the JSON document
- - Example: jsonstore.xqy?uri=/foo/bar.json
+ - Example: /data/store/foo/bar.json - Will insert the document in the database with a uri of "/foo/bar.json"
  - Optional: When inserting a document you can set permissions, properties, collections and a document quality.
-   - jsonstore.xqy?uri=/foo/bar.json&permission=public:read&permission=admin:write
-   - jsonstore.xqy?uri=/foo/bar.json&property=key:value&property=published:false
-   - jsonstore.xqy?uri=/foo/bar.json&collection=public&collection=published
-   - jsonstore.xqy?uri=/foo/bar.json&quality=10
-   - jsonstore.xqy?uri=/foo/bar.json&permission=public:read&collection=public&quality=10
+   - /data/store/foo/bar.json&permission=public:read&permission=admin:write
+   - /data/store/foo/bar.json&property=key:value&property=published:false
+   - /data/store/foo/bar.json&collection=public&collection=published
+   - /data/store/foo/bar.json&quality=10
+   - /data/store/foo/bar.json&permission=public:read&collection=public&quality=10
 
  - Notes:
    - You can set multiple permissions, properties and collections by including multiple definitions in your request, as shown above
@@ -70,44 +85,42 @@ ___
 
 #### Get a JSON document
  - Request type: GET
- - Example: jsonstore.xqy?uri=/foo/bar.json
- - Optional: To fetch metadat associated about the document, specify what you'd like to include in the response.
-   - jsonstore.xqy?uri=/foo/bar.json?include=content - Simply returns the document as supplied via the PUT (default)
-   - jsonstore.xqy?uri=/foo/bar.json?include=permissions - Returns the permissions on the document
-   - jsonstore.xqy?uri=/foo/bar.json?include=collections - Returns the collections on the document
-   - jsonstore.xqy?uri=/foo/bar.json?include=properties - Returns the properties on the document
-   - jsonstore.xqy?uri=/foo/bar.json?include=quality - Returns the quality of the document
-   - jsonstore.xqy?uri=/foo/bar.json?include=content&include=permissions&include=quality - Returns the content, permissions and quality of the document
-   - jsonstore.xqy?uri=/foo/bar.json?include=all - Returns the content along with all of its metadata
+ - Example: /data/store/foo/bar.json - Get the document with a uri of "/foo/bar.json"
+ - Optional: To fetch metadata associated about the document, specify what you'd like to include in the response.
+   - /data/store/foo/bar.json?include=content - Simply returns the document as supplied via the PUT (default)
+   - /data/store/foo/bar.json?include=permissions - Returns the permissions on the document
+   - /data/store/foo/bar.json?include=collections - Returns the collections on the document
+   - /data/store/foo/bar.json?include=properties - Returns the properties on the document
+   - /data/store/foo/bar.json?include=quality - Returns the quality of the document
+   - /data/store/foo/bar.json?include=content&include=permissions&include=quality - Returns the content, permissions and quality of the document
+   - /data/store/foo/bar.json?include=all - Returns the content along with all of its metadata
 
 #### Delete a JSON document
  - Request type: DELETE
- - Example: jsonstore.xqy?uri=/foo/bar.json
+ - Example: /data/store/foo/bar.json - Delete the document with a uri of "/foo/bar.json"
 
 #### Set a property on a document
  - Request type: POST
  - Properties are **not** held inside the JSON document, properties are stored outside of the document and don't effect the stored document at all.  They are best thought of as metadata about the document but should be avoided if possible due to storage overhead.
- - Example: jsonstore.xqy?uri=/foo/bar.json&property=publishState:final&property=needsEditorial:false
+ - Example: /data/store/foo/bar.json&property=publishState:final&property=needsEditorial:false
 
 #### Set permissions on a document
  - Request type: POST
  - When setting permissions on a document, all of the existing permissions are overwritten.
- - Example: jsonstore.xqy?uri=/foo/bar.json&permission=public:read&permission=admin:write
+ - Example: /data/store/foo/bar.json&permission=public:read&permission=admin:write
 
 #### Set collections on a document
  - Request type: POST
  - When setting collections on a document, all of the existing collections are overwritten.
- - Example: jsonstore.xqy?uri=/foo/bar.json&collection=public&collection=published
+ - Example: /data/store/foo/bar.json&collection=public&collection=published
 
 #### Set the quality of a document
  - Request type: POST
- - Example: jsonstore.xqy?uri=/foo/bar.json&quality=10
+ - Example: /data/store/foo/bar.json&quality=10
 
 ## TODO
- - jsonstore.xqy:
-   - Move a document
-   - Copy a document
- - Some real tests
+ - Move a document
+ - Copy a document
 
   [MarkLogic]: http://developer.marklogic.com
   [MarkLogic Server]: http://developer.marklogic.com
