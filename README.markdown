@@ -74,11 +74,11 @@ change the URL structure or add in more rules if need be there.
  - Request body should be the JSON document
  - Example: /data/store/foo/bar.json - Will insert the document in the database with a uri of "/foo/bar.json"
  - Optional: When inserting a document you can set permissions, properties, collections and a document quality.
-   - /data/store/foo/bar.json&permission=public:read&permission=admin:write
-   - /data/store/foo/bar.json&property=key:value&property=published:false
-   - /data/store/foo/bar.json&collection=public&collection=published
-   - /data/store/foo/bar.json&quality=10
-   - /data/store/foo/bar.json&permission=public:read&collection=public&quality=10
+   - /data/store/foo/bar.json?permission=public:read&permission=admin:write
+   - /data/store/foo/bar.json?property=key:value&property=published:false
+   - /data/store/foo/bar.json?collection=public&collection=published
+   - /data/store/foo/bar.json?quality=10
+   - /data/store/foo/bar.json?permission=public:read&collection=public&quality=10
 
  - Notes:
    - You can set multiple permissions, properties and collections by including multiple definitions in your request, as shown above
@@ -104,21 +104,21 @@ change the URL structure or add in more rules if need be there.
 #### Set a property on a document
  - Request type: POST
  - Properties are **not** held inside the JSON document, properties are stored outside of the document and don't effect the stored document at all.  They are best thought of as metadata about the document but should be avoided if possible due to storage overhead.
- - Example: /data/store/foo/bar.json&property=publishState:final&property=needsEditorial:false
+ - Example: /data/store/foo/bar.json?property=publishState:final&property=needsEditorial:false
 
 #### Set permissions on a document
  - Request type: POST
  - When setting permissions on a document, all of the existing permissions are overwritten.
- - Example: /data/store/foo/bar.json&permission=public:read&permission=admin:write
+ - Example: /data/store/foo/bar.json?permission=public:read&permission=admin:write
 
 #### Set collections on a document
  - Request type: POST
  - When setting collections on a document, all of the existing collections are overwritten.
- - Example: /data/store/foo/bar.json&collection=public&collection=published
+ - Example: /data/store/foo/bar.json?collection=public&collection=published
 
 #### Set the quality of a document
  - Request type: POST
- - Example: /data/store/foo/bar.json&quality=10
+ - Example: /data/store/foo/bar.json?quality=10
 
 ### Server information
 Information about the MarkLogic server version, hardware and index settings can be obtained with an info request.
