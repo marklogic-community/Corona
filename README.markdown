@@ -121,6 +121,7 @@ change the URL structure or add in more rules if need be there.
 
 ### Server information
 Information about the MarkLogic server version, hardware and index settings can be obtained with an info request.
+
  - Request type: GET
  - Example: /data/info
 
