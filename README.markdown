@@ -120,6 +120,17 @@ change the URL structure or add in more rules if need be there.
  - Request type: POST
  - Example: /data/store/foo/bar.json?quality=10
 
+### Key/Value queries
+The key/value query endpoint allows you to easily grab the first document that
+contains the key/value combination. Multple keys are and'd together and
+multiple values for the same key are or'd together.
+
+ - Request type: GET
+ - Examples:
+   - /data/kvquery?foo=bar - Document that has a 'foo' key with a value of 'bar'
+   - /data/kvquery?foo=bar&baz=yaz - Document that has a 'foo' key with a value of 'bar' and a 'baz' key with a value of 'yaz'
+   - /data/kvquery?foo=bar&foo=bar - Document that has a 'foo' key with a value of 'bar' or 'baz'
+
 ### Server information
 Information about the MarkLogic server version, hardware and index settings can be obtained with an info request.
 

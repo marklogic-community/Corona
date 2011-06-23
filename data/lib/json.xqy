@@ -299,7 +299,7 @@ declare private function json:encodeHexStringHelper(
     ("0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F")[$num mod 16 + 1]
 };
 
-declare private function json:escapeNCName(
+declare function json:escapeNCName(
     $val as xs:string
 ) as xs:string
 {
@@ -316,7 +316,7 @@ declare private function json:escapeNCName(
         , "")
 };
 
-declare private function json:unescapeNCName(
+declare function json:unescapeNCName(
     $val as xs:string
 ) as xs:string
 {

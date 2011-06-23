@@ -26,6 +26,9 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="POST"/>
     </request>
 
+    <!-- Key value queryies -->
+    <request uri="^/data/kvquery(/)?$" endpoint="/data/kvquery.xqy" user-params="allow"/>
+
     <!-- Info request -->
     <request uri="^/data/info(/)?$" endpoint="/data/info.xqy" user-params="ignore"/>
 </options>;

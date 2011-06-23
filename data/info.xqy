@@ -53,7 +53,7 @@ let $json :=
             where string-length(string($index/*:namespace-uri)) = 0
             return <item type="object">
                 <type type="string">{ string($index/*:scalar-type) }</type>
-                <key type="string">{ $key }</key>
+                <key type="string">{ json:unescapeNCName($key) }</key>
                 { if($index/*:scalar-type = "string") then <collation type="string">{ string($index/*:collation) }</collation> else () }
             </item>
         }</keyValueRanges>
@@ -64,11 +64,11 @@ let $json :=
                 <name type="string">{ string($field/*:name) }</name>
                 <includedKeys type="array">{
                     for $key in tokenize(string($field/*:included-elements), " ")
-                    return <item type="string">{ $key }</item>
+                    return <item type="string">{ json:unescapeNCName($key) }</item>
                 }</includedKeys>
                 <excludedKeys type="array">{
                     for $key in tokenize(string($field/*:excluded-elements), " ")
-                    return <item type="string">{ $key }</item>
+                    return <item type="string">{ json:unescapeNCName($key) }</item>
                 }</excludedKeys>
             </item>
         }</fields>
