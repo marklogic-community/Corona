@@ -17,6 +17,7 @@ limitations under the License.
 xquery version "1.0-ml";
 
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
+import module namespace manage="http://marklogic.com/mljson/manage" at "lib/manage.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 
 declare option xdmp:mapping "false";
@@ -59,18 +60,8 @@ let $json :=
         }</keyValueRanges>
         <fields type="array">{
             for $field in admin:database-get-fields($config, $database)
-            where string-length(string($field/*:name))
-            return <item type="object">
-                <name type="string">{ string($field/*:name) }</name>
-                <includedKeys type="array">{
-                    for $key in tokenize(string($field/*:included-elements), " ")
-                    return <item type="string">{ json:unescapeNCName($key) }</item>
-                }</includedKeys>
-                <excludedKeys type="array">{
-                    for $key in tokenize(string($field/*:excluded-elements), " ")
-                    return <item type="string">{ json:unescapeNCName($key) }</item>
-                }</excludedKeys>
-            </item>
+            where string-length($field/*:field-name) > 0
+            return manage:fieldDefinitionToJsonXml($field)
         }</fields>
     </indexes>
     <settings type="object">

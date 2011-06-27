@@ -31,6 +31,14 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 
     <!-- Info request -->
     <request uri="^/data/info(/)?$" endpoint="/data/info.xqy" user-params="ignore"/>
+
+    <request uri="^/data/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/data/manage/field.xqy" user-params="allow">
+        <uri-param name="name" as="string">$1</uri-param>
+        <http method="GET"/>
+        <http method="POST"/>
+        <http method="PUT"/>
+        <http method="DELETE"/>
+    </request>
 </options>;
 
 declare function endpoints:options(

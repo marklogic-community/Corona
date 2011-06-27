@@ -20,6 +20,7 @@ module namespace reststore="http://marklogic.com/reststore";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 import module namespace json="http://marklogic.com/json" at "json.xqy";
+import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 
 (:
     Functions to retrieve request information
@@ -90,7 +91,7 @@ declare function reststore:getDocument(
 ) as xs:string
 {
     if(empty(doc($uri)))
-    then reststore:error(404, "Document not found")
+    then common:error(404, "Document not found")
     else
 
     if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
@@ -139,7 +140,7 @@ declare function reststore:insertDocument(
             json:jsonToXML($content)
         }
         catch ($e) {
-            reststore:error(500, "Invalid JSON"),
+            common:error(500, "Invalid JSON"),
             xdmp:log($e)
         }
     return (
@@ -152,11 +153,11 @@ declare function reststore:insertDocument(
 
 declare function reststore:deleteDocument(
     $uri as xs:string
-) as empty-sequence()
+) as xs:string?
 {
     if(exists(doc($uri)))
     then xdmp:document-delete($uri)
-    else reststore:error(404, "Document not found")
+    else common:error(404, "Document not found")
 };
 
 declare function reststore:setProperties(
@@ -258,19 +259,4 @@ declare private function reststore:getDocumentQuality(
 ) as element(quality)
 {
     <quality type="number">{ xdmp:document-get-quality($uri) }</quality>
-};
-
-declare private function reststore:error(
-    $statusCode as xs:integer,
-    $message as xs:string
-) as xs:string
-{
-    let $set := xdmp:set-response-code($statusCode, $message)
-    let $add := xdmp:add-response-header( "Date", string(current-dateTime()) )
-    return <json type="object">
-        <error type="object">
-            <code type="number">{ $statusCode }</code>
-            <message type="string">{ $message }</message>
-        </error>
-    </json>
 };
