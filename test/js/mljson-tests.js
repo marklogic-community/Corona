@@ -139,6 +139,44 @@ $(document).ready(function() {
         mljson.jsonFromServerTest(mljson.validJSON[i]);
     }
 
+    module("JSON Construction");
+    asyncTest("Array construction", function() {
+        $.ajax({
+            url: "/test/xq/array-construction.xqy",
+            success: function() {
+                ok(true, "Array construction");
+            },
+            error: function() {
+                ok(false, "Array construction");
+            },
+            complete: function() { start(); }
+        });
+    });
+    asyncTest("Object construction", function() {
+        $.ajax({
+            url: "/test/xq/object-construction.xqy",
+            success: function() {
+                ok(true, "Object construction");
+            },
+            error: function() {
+                ok(false, "Object construction");
+            },
+            complete: function() { start(); }
+        });
+    });
+    asyncTest("Object construction duplicate key should fail", function() {
+        $.ajax({
+            url: "/test/xq/object-construction-dup-keys.xqy",
+            success: function() {
+                ok(false, "Object construction duplicate key should fail");
+            },
+            error: function() {
+                ok(true, "Object construction duplicate key should fail");
+            },
+            complete: function() { start(); }
+        });
+    });
+
     // Missing REST
     // Missing Update Functions
 });

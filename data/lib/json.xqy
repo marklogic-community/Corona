@@ -32,6 +32,118 @@ declare function json:jsonToXML(
     return <json>{ $value/(@type, @boolean), $value/node() }</json>
 };
 
+declare function json:document(
+    $value as item()
+) as element(json)
+{
+    <json>{
+        json:untypedToJSONType($value)/(@*, node())
+    }</json>
+};
+
+declare function json:o(
+) as element(item)
+{
+    json:object(())
+};
+
+declare function json:object(
+) as element(item)
+{
+    json:object(())
+};
+
+declare function json:o(
+    $keyValues as item()*
+) as element(item)
+{
+    json:object($keyValues)
+};
+
+declare function json:object(
+    $keyValues as item()*
+) as element(item)
+{
+    let $keys := map:map()
+    let $check :=
+        for $i at $pos in $keyValues
+        where $pos mod 2 != 0
+        return (
+            if(not($i castable as xs:string))
+            then error(xs:QName("json:OBJECTKEY"), concat("The object key at location ", ceiling($pos div 2), " isn't a string"))
+            else (),
+            if(map:get($keys, string($i)))
+            then error(xs:QName("json:OBJECTKEY"), concat("The object key at location ", ceiling($pos div 2), " is a duplicate"))
+            else (),
+            map:put($keys, string($i), true())
+        )
+    return
+        <item type="object">{
+            for $key at $pos in $keyValues
+            return
+                if($pos mod 2 != 0)
+                then element { json:escapeNCName($key) } { json:untypedToJSONType($keyValues[$pos + 1])/(@*, node()) }
+                else ()
+        }</item>
+};
+
+declare function json:a(
+) as element(item)
+{
+    json:array(())
+};
+
+declare function json:array(
+) as element(item)
+{
+    json:array(())
+};
+
+declare function json:a(
+    $items as item()*
+) as element(item)
+{
+    json:array($items)
+};
+
+declare function json:array(
+    $items as item()*
+) as element(item)
+{
+    <item type="array">{
+        for $item in $items
+        return json:untypedToJSONType($item)
+    }</item>
+};
+
+declare function json:null(
+) as element(item)
+{
+    <item type="null"/>
+};
+
+declare private function json:untypedToJSONType(
+    $value as item()?
+) as element(item)
+{
+    <item>{
+        if(exists($value))
+        then
+            if($value instance of element(item) or $value instance of element(json))
+            then $value/(@*, node())
+            else if($value instance of xs:boolean and $value = true())
+            then attribute boolean { "true" }
+            else if($value instance of xs:boolean and $value = false())
+            then attribute boolean { "false" }
+            else if($value instance of xs:integer or $value instance of xs:decimal)
+            then (attribute type { "number" }, string($value))
+            else if($value instance of xs:string)
+            then (attribute type { "string" }, string($value))
+            else (attribute type { "string" }, xdmp:quote($value))
+        else attribute type { "null" }
+    }</item>
+};
+
 declare private function json:parseValue(
     $tokens as element(token)*,
     $position as xs:integer
