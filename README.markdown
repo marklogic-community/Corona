@@ -62,9 +62,13 @@ change the URL structure or add in more rules if need be there.
 ### Files relevant to the end user
  - data/lib/rewriter.xqy - A URL rewriter for the REST calls
  - config/endpoints.xqy - Configuration for the REST endpoints
- - data/lib/json.xqy - Has two public functions:
+ - data/lib/json.xqy - Library module for handling JSON, see comments inside file for details on each function
    - jsonToXML - parses a JSON string into XML that can be stored in MarkLogic
    - xmlToJSON - parses the generated XML into a JSON string
+   - document - constructs a JSON document
+   - object - constructs a JSON object
+   - array - constructs a JSON array
+   - null - constructs a JSON null
  - data/lib/json-query.xqy - Tinkering with ways to query the stored JSON
 
 ## REST Capabilities
