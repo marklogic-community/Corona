@@ -30,11 +30,13 @@ declare function common:error(
     let $set := xdmp:set-response-code($statusCode, $message)
     let $add := xdmp:add-response-header("Date", string(current-dateTime()))
     let $response :=
-        <json type="object">
-            <error type="object">
-                <code type="number">{ $statusCode }</code>
-                <message type="string">{ $message }</message>
-            </error>
-        </json>
+        json:document(
+            json:object((
+                "error", json:object((
+                    "code", $statusCode,
+                    "message", $message
+                ))
+            ))
+        )
     return json:xmlToJSON($response)
 };

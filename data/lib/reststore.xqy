@@ -96,23 +96,25 @@ declare function reststore:getDocument(
 
     if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
     then json:xmlToJSON(doc($uri)/*)
-    else json:xmlToJSON(<json type="object">{(
-        if($includeContent)
-        then <content>{ doc($uri)/(@*, *) }</content>
-        else (),
-        if($includeCollections)
-        then reststore:getDocumentCollections($uri)
-        else (),
-        if($includeProperties)
-        then reststore:getDocumentProperties($uri)
-        else (),
-        if($includePermissions)
-        then reststore:getDocumentPermissions($uri)
-        else (),
-        if($includeQuality)
-        then reststore:getDocumentQuality($uri)
-        else ()
-    )}</json>)
+    else json:xmlToJSON(json:document(
+        json:object((
+            if($includeContent)
+            then ("content", doc($uri)/json)
+            else (),
+            if($includeCollections)
+            then ("collections", reststore:getDocumentCollections($uri))
+            else (),
+            if($includeProperties)
+            then ("properties", reststore:getDocumentProperties($uri))
+            else (),
+            if($includePermissions)
+            then ("permissions", reststore:getDocumentPermissions($uri))
+            else (),
+            if($includeQuality)
+            then ("quality", reststore:getDocumentQuality($uri))
+            else ()
+        ))
+    ))
 };
 
 declare function reststore:insertDocument(
@@ -205,30 +207,30 @@ declare function reststore:setQuality(
 
 declare private function reststore:getDocumentCollections(
     $uri as xs:string
-) as element(collections)
+) as element(item)
 {
-    <collections type="array">{
+    json:array(
         for $collection in xdmp:document-get-collections($uri)
-        return <item type="string">{ $collection }</item>
-    }</collections>
+        return $collection
+    )
 };
 
 declare private function reststore:getDocumentProperties(
     $uri as xs:string
-) as element(properties)
+) as element(item)
 {
-    <properties type="array">{
+    json:object(
         for $property in xdmp:document-properties($uri)/prop:properties/*
         where namespace-uri($property) = "http://marklogic.com/reststore"
-        return <item type="object">{ element { local-name($property) } { string($property) } }</item>
-    }</properties>
+        return (local-name($property), string($property))
+    )
 };
 
 declare private function reststore:getDocumentPermissions(
     $uri as xs:string
-) as element(permissions)
+) as element(item)
 {
-    <permissions type="array">{
+    json:array(
         let $permMap := map:map()
         let $populate :=
             for $permission in xdmp:document-get-permissions($uri)
@@ -244,19 +246,15 @@ declare private function reststore:getDocumentPermissions(
             ", (
                 xs:QName("roleId"), xs:unsignedLong($key)
             ), <options xmlns="xdmp:eval"><database>{ xdmp:security-database() }</database></options>)
-        let $capabilities :=
-            for $i in map:get($permMap, $key)
-            return <item type="string">{ $i }</item>
-        return <item type="object">{ element { $role } {
-            attribute type { "array" },
-            $capabilities
-        } }</item>
-    }</permissions>
+        return json:object((
+            $role, json:array(map:get($permMap, $key))
+        ))
+    )
 };
 
 declare private function reststore:getDocumentQuality(
     $uri as xs:string
-) as element(quality)
+) as xs:decimal
 {
-    <quality type="number">{ xdmp:document-get-quality($uri) }</quality>
+    xdmp:document-get-quality($uri)
 };

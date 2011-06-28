@@ -29,17 +29,17 @@ declare function manage:fieldDefinitionToJsonXml(
     $field as element(db:field)
 ) as element(item)
 {
-    <item type="object">
-        <name type="string">{ string($field/db:field-name) }</name>
-        <includedKeys type="array">{
+    json:object((
+        "name", string($field/db:field-name),
+        "includedKeys", json:array(
             for $include in $field/db:included-elements/db:included-element
             for $key in tokenize(string($include/db:localname), " ")
-            return <item type="string">{ json:unescapeNCName($key) }</item>
-        }</includedKeys>
-        <excludedKeys type="array">{
+            return json:unescapeNCName($key)
+        ),
+        "excludedKeys", json:array(
             for $include in $field/db:excluded-elements/db:exclude-element
             for $key in tokenize(string($include/db:localname), " ")
-            return <item type="string">{ json:unescapeNCName($key) }</item>
-        }</excludedKeys>
-    </item>
+            return json:unescapeNCName($key)
+        )
+    ))
 };

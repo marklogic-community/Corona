@@ -25,48 +25,49 @@ declare option xdmp:mapping "false";
 let $config := admin:get-configuration()
 let $database := xdmp:database()
 let $json :=
-<json type="object">
-    <version type="string">{ xdmp:version() }</version>
-    <architecture type="string">{ xdmp:architecture() }</architecture>
-    <platform type="string">{ xdmp:platform() }</platform>
-    <hosts type="array">{
-        for $host in xdmp:hosts()
-        return <item type="object">
-            <id type="number">{ $host }</id>
-            <name type="string">{ xdmp:host-name($host) }</name>
-        </item>
-    }</hosts>
-    <indexes type="object">
-        <stemming type="string">{ admin:database-get-stemmed-searches($config, $database) }</stemming>
-        <uris boolean="{ admin:database-get-uri-lexicon($config, $database) }"/>
-        <collectionLexicon boolean="{ admin:database-get-collection-lexicon($config, $database) }"/>
-        <caseSensitive boolean="{ admin:database-get-fast-case-sensitive-searches($config, $database) }"/>
-        <diacriticSensitive boolean="{ admin:database-get-fast-diacritic-sensitive-searches($config, $database) }"/>
-        <keyValueCharacters boolean="{ admin:database-get-fast-element-character-searches($config, $database) }"/>
-        <keyValueWords boolean="{ admin:database-get-fast-element-word-searches($config, $database) }"/>
-        <keyValuePhrases boolean="{ admin:database-get-fast-element-phrase-searches($config, $database) }"/>
-        <keyValueTrailingWildcards boolean="{ admin:database-get-fast-element-trailing-wildcard-searches($config, $database) }"/>
-        <geo type="array">
-        </geo>
-        <keyValueRanges type="array">{
-            for $index in admin:database-get-range-element-indexes($config, $database)
-            for $key in tokenize(string($index/*:localname), " ")
-            where string-length(string($index/*:namespace-uri)) = 0
-            return <item type="object">
-                <type type="string">{ string($index/*:scalar-type) }</type>
-                <key type="string">{ json:unescapeNCName($key) }</key>
-                { if($index/*:scalar-type = "string") then <collation type="string">{ string($index/*:collation) }</collation> else () }
-            </item>
-        }</keyValueRanges>
-        <fields type="array">{
-            for $field in admin:database-get-fields($config, $database)
-            where string-length($field/*:field-name) > 0
-            return manage:fieldDefinitionToJsonXml($field)
-        }</fields>
-    </indexes>
-    <settings type="object">
-        <directoryCreation type="string">{ admin:database-get-directory-creation($config, $database) }</directoryCreation>
-    </settings>
-</json>
+json:document(
+    json:object((
+        "version", xdmp:version(),
+        "architecture", xdmp:architecture(),
+        "platform", xdmp:platform(),
+        "hosts", json:array((
+            for $host in xdmp:hosts()
+            return json:object((
+                "id", $host,
+                "name", xdmp:host-name($host)
+            ))
+        )),
+        "indexes", json:object((
+            "stemming", admin:database-get-stemmed-searches($config, $database),
+            "uris", admin:database-get-uri-lexicon($config, $database),
+            "collectionLexicon", admin:database-get-collection-lexicon($config, $database),
+            "caseSensitive", admin:database-get-fast-case-sensitive-searches($config, $database),
+            "diacriticSensitive", admin:database-get-fast-diacritic-sensitive-searches($config, $database),
+            "keyValueCharacters", admin:database-get-fast-element-character-searches($config, $database),
+            "keyValueWords", admin:database-get-fast-element-word-searches($config, $database),
+            "keyValuePhrases", admin:database-get-fast-element-phrase-searches($config, $database),
+            "keyValueTrailingWildcards", admin:database-get-fast-element-trailing-wildcard-searches($config, $database),
+            "geo", json:array(),
+            "keyValueRanges", json:array(
+                for $index in admin:database-get-range-element-indexes($config, $database)
+                for $key in tokenize(string($index/*:localname), " ")
+                where string-length(string($index/*:namespace-uri)) = 0
+                return json:object((
+                    "type", string($index/*:scalar-type),
+                    "key", json:unescapeNCName($key),
+                    if($index/*:scalar-type = "string") then ("collation", string($index/*:collation)) else ()
+                )
+            )),
+            "fields", json:array(
+                for $field in admin:database-get-fields($config, $database)
+                where string-length($field/*:field-name) > 0
+                return manage:fieldDefinitionToJsonXml($field)
+            )
+        )),
+        "settings", json:object((
+            "directoryCreation", admin:database-get-directory-creation($config, $database)
+        ))
+    ))
+)
 
 return json:xmlToJSON($json)
