@@ -27,7 +27,11 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Key value queryies -->
-    <request uri="^/data/kvquery(/)?$" endpoint="/data/kvquery.xqy" user-params="allow"/>
+    <request uri="^/data/kvquery(/|/(\d+)/?|/(\d+)/(\d+)/?)?$" endpoint="/data/kvquery.xqy" user-params="allow">
+        <uri-param name="__MLJSONURL__:index">$2</uri-param>
+        <uri-param name="__MLJSONURL__:start">$3</uri-param>
+        <uri-param name="__MLJSONURL__:end">$4</uri-param>
+    </request>
 
     <!-- Info request -->
     <request uri="^/data/info(/)?$" endpoint="/data/info.xqy" user-params="ignore"/>

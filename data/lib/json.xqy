@@ -14,6 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 :)
 
+(:
+    TODO:
+        Create cts wrappers for the following functions:
+        cts:element-child-geospatial-query
+        cts:element-geospatial-query
+        cts:element-pair-geospatial-query
+        cts:element-query
+        cts:element-range-query
+        cts:element-value-query
+        cts:element-word-query
+        cts:field-word-query
+        cts:word-query
+:)
+
 xquery version "1.0-ml";
 
 module namespace json="http://marklogic.com/json";

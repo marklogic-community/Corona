@@ -16,165 +16,66 @@ limitations under the License.
 
 module namespace jsonquery="http://marklogic.com/json-query";
 
+import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-declare function jsonquery:execute(
-    $json as xs:string
-) as element(json)*
-{
-    let $tree := json:jsonToXML($json)
-    return
-        if(exists($tree/fulltext))
-        then jsonquery:executeFulltext($tree)
-        else xdmp:eval(jsonquery:parsePath($tree))
-};
 
 declare function jsonquery:parse(
     $json as xs:string
 ) as xs:string
 {
     let $tree := json:jsonToXML($json)
-    return
-        if(exists($tree/fulltext))
-        then jsonquery:parseFulltext($tree)
-        else jsonquery:parsePath($tree)
-};
-
-declare private function jsonquery:parsePath(
-    $tree as element(json)
-) as xs:string
-{
-    let $basicPredicate := jsonquery:processStep($tree)
-    let $path :=
-        if($basicPredicate != "")
-        then concat("/json[", $basicPredicate, "]")
-        else "/json"
-
-    let $orPredicate := string-join(
-            for $item in $tree/or[@type = "array"]/item
-            return jsonquery:processStep($item)
-        , " or ")
-    let $path :=
-        if($orPredicate != "")
-        then concat($path, "[", $orPredicate, "]")
-        else $path
-
-    let $andPredicate := string-join(
-            for $item in $tree/and[@type = "array"]/item
-            return jsonquery:processStep($item)
-        , " and ")
-    let $path :=
-        if($andPredicate != "")
-        then concat($path, "[", $andPredicate, "]")
-        else $path
-
-    let $position := jsonquery:extractPosition($tree)
-    return
-        if(exists($position))
-        then concat("(", $path, ")[", $position, "]")
-        else $path
-};
-
-declare private function jsonquery:processStep(
-    $step as element()
-) as xs:string
-{
-    if($step/@type = "number")
-    then string($step)
-    else if($step/@type = "string")
-    then concat("""", string($step), """")
-    else if($step/@type = "object")
-    then concat(if(local-name($step) = "json" or local-name($step/..) = ("or", "and")) then "" else "/", jsonquery:generatePredicate($step))
-    else ""
-};
-
-declare private function jsonquery:generatePredicate(
-    $step as element()
-) as xs:string
-{
-    let $key := $step/key[@type = "string"]
-    let $innerKey := $step/innerKey[@type = "string"]
-    let $key :=
-        if(exists($innerKey) and local-name($step) = "json" and empty($key))
-        then concat("//", string($innerKey))
-        else if(exists($innerKey) and empty($key))
-        then concat("/", string($innerKey))
-        else $key
-    let $value := $step/value
-    let $operator := string(($step/comparison, "=")[1])
-    return
-        if(exists($key) and exists($value))
-        then
-            if($value/@type = "string")
-            then concat(string($key), " ", $operator, " """, string($value), """")
-            else if($value/@type = "number")
-            then concat(string($key), " ", $operator, " ", string($value))
-            else if($value/@type = "array")
-            then
-                let $bits :=
-                    for $item in $value/item
-                    where $item/@type = ("string", "number")
-                    return jsonquery:processStep($item)
-                let $raw := concat(string($key), " = (", string-join($bits,  ", "), ")")
-                return
-                    if($operator = "!=")
-                    then concat("not(", $raw, ")")
-                    else $raw
-            else if($value/@type = "object")
-            then
-                if(empty($value//value) and local-name($value/..) = "json")
-                then concat("exists(", $key, jsonquery:processStep($value), ")")
-                else concat($key, jsonquery:processStep($value))
-            else ""
-        else if(exists($key) and empty($value) and local-name($key/..) = "json")
-        then concat("exists(", $key, ")")
-        else if(exists($key) and empty($value))
-        then string($key)
-        else ""
-};
-
-
-declare private function jsonquery:parseFulltext(
-    $tree as element(json)
-) as xs:string
-{
-    let $cts := jsonquery:dispatchFulltextStep($tree/fulltext)
-    let $options := jsonquery:extractOptions($tree/fulltext, "search")
-    let $position := jsonquery:extractPosition($tree)
+    let $cts := jsonquery:dispatch($tree/query)
+    let $options := jsonquery:extractOptions($tree, "search")
+    let $start := jsonquery:extractStartIndex($tree)
+    let $end := jsonquery:extractEndIndex($tree)
     let $weight := jsonquery:extractWeight($tree)
     return
-        if(exists($position))
-        then concat("cts:search(/json, ", $cts, ", ", xdmp:describe($options), ", ", $weight, ")", "[", $position, "]")
+        if(exists($start) and exists($end))
+        then concat("cts:search(/json, ", $cts, ", ", xdmp:describe($options), ", ", $weight, ")", "[", $start, " to ", $end, "]")
+        else if(exists($start))
+        then concat("cts:search(/json, ", $cts, ", ", xdmp:describe($options), ", ", $weight, ")", "[", $start, "]")
         else concat("cts:search(/json, ", $cts, ", ", xdmp:describe($options), ", ", $weight, ")")
 };
 
-declare private function jsonquery:executeFulltext(
-    $tree as element(json)
+declare function jsonquery:execute(
+    $json as xs:string
 )
 {
-    let $cts := jsonquery:dispatchFulltextStep($tree/fulltext)
-    let $options := jsonquery:extractOptions($tree/fulltext, "search")
-    let $position := jsonquery:extractPosition($tree)
+    let $tree := json:jsonToXML($json)
+    let $cts := jsonquery:dispatch($tree/query)
+    let $options := jsonquery:extractOptions($tree, "search")
+    let $start := jsonquery:extractStartIndex($tree)
+    let $end := jsonquery:extractEndIndex($tree)
     let $weight := jsonquery:extractWeight($tree)
-    let $bits := tokenize($position, " to ")
-    let $positionLow := $bits[1]
-    let $positionHigh := $bits[2]
     let $debug :=
         if($tree/debug[@boolean = "true"])
         then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
         else ()
-    return
-        if(exists($positionLow) and empty($positionHigh))
-        then cts:search(/json, $cts, $options, $weight)[xs:integer($positionLow)]
-        else if(exists($positionLow) and exists($positionHigh) and $positionHigh = "last()")
-        then cts:search(/json, $cts, $options, $weight)[xs:integer($positionLow) to last()]
-        else if(exists($positionLow) and exists($positionHigh))
-        then cts:search(/json, $cts, $options, $weight)[xs:integer($positionLow) to xs:integer($positionHigh)]
+
+    let $results :=
+        if(exists($start) and exists($end))
+        then cts:search(/json, $cts, $options, $weight)[$start to $end]
+        else if(exists($start))
+        then cts:search(/json, $cts, $options, $weight)[$start]
         else cts:search(/json, $cts, $options, $weight)
+
+    let $total :=
+        if(exists($results[1]))
+        then cts:remainder($results[1]) + $start - 1
+        else 0
+
+    let $end :=
+        if($end > $total)
+        then $total
+        else $end
+
+    return common:outputMultipleDocs($results, $start, $end, $total)
 };
 
-declare private function jsonquery:dispatchFulltextStep(
+declare private function jsonquery:dispatch(
     $step as element()
 )
 {
@@ -194,44 +95,44 @@ declare private function jsonquery:dispatchFulltextStep(
         $step/box[@type = "object"],
         $step/polygon[@type = "array"]
     )[1]
-    return jsonquery:processFulltextStep($precedent)
+    return jsonquery:process($precedent)
 };
 
-declare private function jsonquery:processFulltextStep(
+declare private function jsonquery:process(
     $step as element()
 )
 {
     typeswitch($step)
-    case element(item) return jsonquery:dispatchFulltextStep($step)
-    case element(and) return cts:and-query(for $item in $step/item[@type = "object"] return jsonquery:processFulltextStep($item))
-    case element(or) return cts:or-query(for $item in $step/item[@type = "object"] return jsonquery:processFulltextStep($item))
-    case element(not) return cts:not-query(jsonquery:dispatchFulltextStep($step))
-    case element(andNot) return jsonquery:handleFulltextAndNot($step)
-    case element(property) return cts:properties-query(jsonquery:dispatchFulltextStep($step))
-    case element(range) return jsonquery:handleFulltextRange($step)
-    case element(equals) return jsonquery:handleFulltextEquals($step)
-    case element(contains) return jsonquery:handleFulltextContains($step)
-    case element(collection) return jsonquery:handleFulltextCollection($step)
-    case element(geo) return jsonquery:handleFulltextGeo($step)
-    case element(region) return for $item in $step/item[@type = "object"] return jsonquery:processFulltextStep($item)
-    case element(point) return jsonquery:handleFulltextGeoPoint($step)
-    case element(circle) return jsonquery:handleFulltextGeoCircle($step)
-    case element(box) return jsonquery:handleFulltextGeoBox($step)
-    case element(polygon) return jsonquery:handleFulltextGeoPolygon($step)
+    case element(item) return jsonquery:dispatch($step)
+    case element(and) return cts:and-query(for $item in $step/item[@type = "object"] return jsonquery:process($item))
+    case element(or) return cts:or-query(for $item in $step/item[@type = "object"] return jsonquery:process($item))
+    case element(not) return cts:not-query(jsonquery:dispatch($step))
+    case element(andNot) return jsonquery:handleAndNot($step)
+    case element(property) return cts:properties-query(jsonquery:dispatch($step))
+    case element(range) return jsonquery:handleRange($step)
+    case element(equals) return jsonquery:handleEquals($step)
+    case element(contains) return jsonquery:handleContains($step)
+    case element(collection) return jsonquery:handleCollection($step)
+    case element(geo) return jsonquery:handleGeo($step)
+    case element(region) return for $item in $step/item[@type = "object"] return jsonquery:process($item)
+    case element(point) return jsonquery:handleGeoPoint($step)
+    case element(circle) return jsonquery:handleGeoCircle($step)
+    case element(box) return jsonquery:handleGeoBox($step)
+    case element(polygon) return jsonquery:handleGeoPolygon($step)
     default return ()
 };
 
-declare private function jsonquery:handleFulltextAndNot(
+declare private function jsonquery:handleAndNot(
     $step as element(andNot)
 ) as cts:and-not-query?
 {
     let $positive := $step/positive[@type = "object"]
     let $negative := $step/negative[@type = "object"]
     where exists($positive) and exists($negative)
-    return cts:and-not-query(jsonquery:dispatchFulltextStep($positive), jsonquery:dispatchFulltextStep($negative))
+    return cts:and-not-query(jsonquery:dispatch($positive), jsonquery:dispatch($negative))
 };
 
-declare private function jsonquery:handleFulltextRange(
+declare private function jsonquery:handleRange(
     $step as element(range)
 ) as cts:query?
 {
@@ -254,7 +155,7 @@ declare private function jsonquery:handleFulltextRange(
         return cts:element-range-query(xs:QName($key), $operator, $value, jsonquery:extractOptions($step, "range"), $weight)
 };
 
-declare private function jsonquery:handleFulltextEquals(
+declare private function jsonquery:handleEquals(
     $step as element(equals)
 ) as cts:element-value-query?
 {
@@ -265,7 +166,7 @@ declare private function jsonquery:handleFulltextEquals(
     return cts:element-value-query(xs:QName($key), $string, jsonquery:extractOptions($step, "word"), $weight)
 };
 
-declare private function jsonquery:handleFulltextContains(
+declare private function jsonquery:handleContains(
     $step as element(contains)
 ) as cts:element-word-query?
 {
@@ -276,14 +177,14 @@ declare private function jsonquery:handleFulltextContains(
     return cts:element-word-query(xs:QName($key), $string, jsonquery:extractOptions($step, "word"), $weight)
 };
 
-declare private function jsonquery:handleFulltextCollection(
+declare private function jsonquery:handleCollection(
     $step as element(collection)
 ) as cts:collection-query
 {
     cts:collection-query(jsonquery:stringOrArrayToSet($step))
 };
 
-declare private function jsonquery:handleFulltextGeo(
+declare private function jsonquery:handleGeo(
     $step as element(geo)
 ) as cts:query?
 {
@@ -296,15 +197,15 @@ declare private function jsonquery:handleFulltextGeo(
     where exists($key) or (exists($latKey) and exists($longKey))
     return
         if(exists($parent) and exists($latKey) and exists($longKey))
-        then cts:element-pair-geospatial-query(xs:QName($parent), xs:QName($latKey), xs:QName($longKey), jsonquery:processFulltextStep($step/region), jsonquery:extractOptions($step, "geo"), $weight)
+        then cts:element-pair-geospatial-query(xs:QName($parent), xs:QName($latKey), xs:QName($longKey), jsonquery:process($step/region), jsonquery:extractOptions($step, "geo"), $weight)
         else if(exists($parent) and exists($key))
-        then cts:element-child-geospatial-query(xs:QName($parent), xs:QName($key), jsonquery:processFulltextStep($step/region), jsonquery:extractOptions($step, "geo"), $weight)
+        then cts:element-child-geospatial-query(xs:QName($parent), xs:QName($key), jsonquery:process($step/region), jsonquery:extractOptions($step, "geo"), $weight)
         else if(exists($key))
-        then cts:element-geospatial-query(xs:QName($key), jsonquery:processFulltextStep($step/region), jsonquery:extractOptions($step, "geo"), $weight)
+        then cts:element-geospatial-query(xs:QName($key), jsonquery:process($step/region), jsonquery:extractOptions($step, "geo"), $weight)
         else ()
 };
 
-declare private function jsonquery:handleFulltextGeoPoint(
+declare private function jsonquery:handleGeoPoint(
     $step as element()
 ) as cts:point?
 {
@@ -313,16 +214,16 @@ declare private function jsonquery:handleFulltextGeoPoint(
     else ()
 };
 
-declare private function jsonquery:handleFulltextGeoCircle(
+declare private function jsonquery:handleGeoCircle(
     $step as element(circle)
 ) as cts:circle?
 {
     if(exists($step/radius) and exists($step/latitude) and exists($step/longitude))
-    then cts:circle($step/radius, jsonquery:handleFulltextGeoPoint($step))
+    then cts:circle($step/radius, jsonquery:handleGeoPoint($step))
     else ()
 };
 
-declare private function jsonquery:handleFulltextGeoBox(
+declare private function jsonquery:handleGeoBox(
     $step as element(box)
 ) as cts:box
 {
@@ -331,13 +232,13 @@ declare private function jsonquery:handleFulltextGeoBox(
     else ()
 };
 
-declare private function jsonquery:handleFulltextGeoPolygon(
+declare private function jsonquery:handleGeoPolygon(
     $step as element(polygon)
 ) as cts:polygon
 {
     cts:polygon(
         for $point in $step/item
-        return jsonquery:handleFulltextGeoPoint($point)
+        return jsonquery:handleGeoPoint($point)
     )
 };
 
@@ -502,36 +403,23 @@ declare private function jsonquery:extractWeight(
     $tree as element(json)
 ) as xs:double
 {
-    xs:double(($tree/fulltext/weight[@type = "number"], 1.0)[1])
+    xs:double(($tree/weight[@type = "number"], 1.0)[1])
 };
 
-declare private function jsonquery:extractPosition(
+declare private function jsonquery:extractStartIndex(
     $tree as element(json)
-) as xs:string?
+) as xs:integer
 {
-    let $position := normalize-space($tree/position)
-    let $position :=
-        if(empty($tree/position) or $position = "1 to last()")
-        then ()
-        else $position
-    let $validatePosition :=
-        if(not(jsonquery:validatePosition($position)))
-        then error(xs:QName("JSON-INVALID-POSITION"), concat("Invalid position: '", $position, "'. Positions must be either integers, a range of integers (eg: 1 to 10). In place of an integer a position can also use the function 'last()'."))
-        else ()
-    return $position 
+    if(exists($tree/start) and $tree/start castable as xs:integer)
+    then xs:integer($tree/start)
+    else 1
 };
 
-declare private function jsonquery:validatePosition(
-    $position as xs:string?
-) as xs:boolean
+declare private function jsonquery:extractEndIndex(
+    $tree as element(json)
+) as xs:integer?
 {
-    if(empty($position) or $position = "1 to last()" or $position castable as xs:integer)
-    then true()
-    else if(count(tokenize($position, " to ")) > 2)
-    then false()
-    else count(
-        for $bit in tokenize($position, " to ")
-        where not($bit = "last()" or $bit castable as xs:integer)
-        return 1
-    ) = 0
+    if(exists($tree/end) and $tree/end castable as xs:integer)
+    then xs:integer($tree/end)
+    else ()
 };

@@ -16,10 +16,50 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
+
+declare option xdmp:mapping "false";
+
+let $index := xdmp:get-request-field("__MLJSONURL__:index")
+let $index :=
+    if($index castable as xs:integer)
+    then xs:integer($index)
+    else 1
+
+let $start := xdmp:get-request-field("__MLJSONURL__:start")
+let $start :=
+    if($start castable as xs:integer)
+    then xs:integer($start)
+    else $index
+
+let $end := xdmp:get-request-field("__MLJSONURL__:end")
+let $end :=
+    if($end castable as xs:integer)
+    then xs:integer($end)
+    else $start
 
 let $query := cts:and-query(
     for $key in xdmp:get-request-field-names()
+    where not(starts-with($key, "__MLJSONURL__:"))
     return cts:element-value-query(xs:QName(json:escapeNCName($key)), xdmp:get-request-field($key))
 )
-return json:xmlToJSON(cts:search(/json, $query)[1])
+
+let $results :=
+    if(exists($start) and exists($end) and $end > $start)
+    then cts:search(/json, $query)[$start to $end]
+    else if(exists($start))
+    then cts:search(/json, $query)[$start]
+    else ()
+
+let $total :=
+    if(exists($results[1]))
+    then cts:remainder($results[1]) + $start - 1
+    else 0
+
+let $end :=
+    if($end > $total)
+    then $total
+    else $end
+
+return common:outputMultipleDocs($results, $start, $end, $total)

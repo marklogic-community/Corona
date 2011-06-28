@@ -40,3 +40,33 @@ declare function common:error(
         )
     return json:xmlToJSON($response)
 };
+
+declare function common:outputMultipleDocs(
+    $docs as element(json)*,
+    $start as xs:integer,
+    $end as xs:integer?,
+    $total as xs:integer
+) as xs:string
+{
+    let $end :=
+        if(empty($end))
+        then $start
+        else $end
+
+    return json:xmlToJSON(
+        json:object((
+            "meta", json:object((
+                "start", $start,
+                "end", $end,
+                "total", $total
+            )),
+            "results", json:array(
+                for $doc in $docs
+                return json:object((
+                    "uri", base-uri($doc),
+                    "data", $doc
+                ))
+            )
+        ))
+    )
+};
