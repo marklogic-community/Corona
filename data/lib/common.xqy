@@ -42,7 +42,7 @@ declare function common:error(
 };
 
 declare function common:outputMultipleDocs(
-    $docs as element(json)*,
+    $docs as element(json:json)*,
     $start as xs:integer,
     $end as xs:integer?,
     $total as xs:integer

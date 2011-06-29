@@ -58,11 +58,11 @@ return
         let $add :=
             for $include in $includes
             let $include := json:escapeNCName($include)
-            let $el := admin:database-included-element((), $include, 1, (), "", "")
+            let $el := admin:database-included-element("http://marklogic.com/json", $include, 1, (), "", "")
             return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
         let $add :=
             for $exclude in $excludes
-            let $el := admin:database-excluded-element((), $exclude)
+            let $el := admin:database-excluded-element("http://marklogic.com/json", $exclude)
             return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
         return admin:save-configuration($config)
     )

@@ -42,14 +42,14 @@ let $end :=
 let $query := cts:and-query(
     for $key in xdmp:get-request-field-names()
     where not(starts-with($key, "__MLJSONURL__:"))
-    return cts:element-value-query(xs:QName(json:escapeNCName($key)), xdmp:get-request-field($key))
+    return cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), xdmp:get-request-field($key))
 )
 
 let $results :=
     if(exists($start) and exists($end) and $end > $start)
-    then cts:search(/json, $query)[$start to $end]
+    then cts:search(/json:json, $query)[$start to $end]
     else if(exists($start))
-    then cts:search(/json, $query)[$start]
+    then cts:search(/json:json, $query)[$start]
     else ()
 
 let $total :=

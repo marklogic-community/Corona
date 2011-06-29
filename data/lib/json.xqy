@@ -52,7 +52,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 :)
 declare function json:jsonToXML(
     $json as xs:string
-) as element(json)
+) as element(json:json)
 {
     let $tokens := json:tokenize($json)
     let $value := json:parseValue($tokens, 1)
@@ -60,7 +60,7 @@ declare function json:jsonToXML(
         if(xs:integer($value/@position) != fn:count($tokens) + 1)
         then json:outputError($tokens, xs:integer($value/@position), "Unhandled tokens")
         else ()
-    return <json>{ $value/(@type, @boolean), $value/node() }</json>
+    return <json:json>{ $value/(@type, @boolean), $value/node() }</json:json>
 };
 
 (:
@@ -109,11 +109,11 @@ declare function json:xmlToJSON(
 :)
 declare function json:document(
     $value as item()
-) as element(json)
+) as element(json:json)
 {
-    <json>{
+    <json:json>{
         json:untypedToJSONType($value)/(@*, node())
-    }</json>
+    }</json:json>
 };
 
 (:
@@ -133,7 +133,7 @@ declare function json:document(
 :)
 declare function json:object(
     $keyValues as item()*
-) as element(item)
+) as element(json:item)
 {
     let $keys := map:map()
     let $check :=
@@ -149,30 +149,30 @@ declare function json:object(
             map:put($keys, string($i), true())
         )
     return
-        <item type="object">{
+        <json:item type="object">{
             for $key at $pos in $keyValues
             return
                 if($pos mod 2 != 0)
-                then element { json:escapeNCName($key) } { json:untypedToJSONType($keyValues[$pos + 1])/(@*, node()) }
+                then element { xs:QName(concat("json:", json:escapeNCName($key))) } { json:untypedToJSONType($keyValues[$pos + 1])/(@*, node()) }
                 else ()
-        }</item>
+        }</json:item>
 };
 
 declare function json:o(
     $keyValues as item()*
-) as element(item)
+) as element(json:item)
 {
     json:object($keyValues)
 };
 
 declare function json:object(
-) as element(item)
+) as element(json:item)
 {
     json:object(())
 };
 
 declare function json:o(
-) as element(item)
+) as element(json:item)
 {
     json:object(())
 };
@@ -193,29 +193,29 @@ declare function json:o(
 :)
 declare function json:array(
     $items as item()*
-) as element(item)
+) as element(json:item)
 {
-    <item type="array">{
+    <json:item type="array">{
         for $item in $items
         return json:untypedToJSONType($item)
-    }</item>
+    }</json:item>
 };
 
 declare function json:a(
     $items as item()*
-) as element(item)
+) as element(json:item)
 {
     json:array($items)
 };
 
 declare function json:array(
-) as element(item)
+) as element(json:item)
 {
     json:array(())
 };
 
 declare function json:a(
-) as element(item)
+) as element(json:item)
 {
     json:array(())
 };
@@ -230,9 +230,9 @@ declare function json:a(
         json:object(("foo", json:null())) -> {"foo": null}
 :)
 declare function json:null(
-) as element(item)
+) as element(json:item)
 {
-    <item type="null"/>
+    <json:item type="null"/>
 };
 
 
@@ -241,12 +241,12 @@ declare function json:null(
 :)
 declare private function json:untypedToJSONType(
     $value as item()?
-) as element(item)
+) as element(json:item)
 {
-    <item>{
+    <json:item>{
         if(exists($value))
         then
-            if($value instance of element(item) or $value instance of element(json))
+            if($value instance of element(json:item) or $value instance of element(json:json))
             then $value/(@*, node())
             else if($value instance of xs:boolean and $value = true())
             then attribute boolean { "true" }
@@ -258,7 +258,7 @@ declare private function json:untypedToJSONType(
             then (attribute type { "string" }, string($value))
             else (attribute type { "string" }, xdmp:quote($value))
         else attribute type { "null" }
-    }</item>
+    }</json:item>
 };
 
 declare private function json:processElement(
@@ -329,7 +329,7 @@ declare private function json:parseArray(
                 let $value := json:parseValue($tokens, $index)
                 let $set := xdmp:set($finalLocation, xs:integer($value/@position))
                 let $test := json:shouldBeOneOf($tokens, $finalLocation, ("comma", "rsquare"), "Expected either a comma or closing array")
-                return <item>{ $value/(@type, @boolean), $value/node() }</item>
+                return <json:item>{ $value/(@type, @boolean), $value/node() }</json:item>
 
     return <value type="array" position="{ $finalLocation }">{ $items }</value>
 };
@@ -369,7 +369,7 @@ declare private function json:parseObject(
                 let $set := xdmp:set($finalLocation, xs:integer($value/@position))
                 let $test := json:shouldBeOneOf($tokens, $finalLocation, ("comma", "rbrace"), "Expected either a comma or closing object")
 
-                return element { $key } { $value/(@type, @boolean), $value/node() }
+                return element { xs:QName(concat("json:", $key)) } { $value/(@type, @boolean), $value/node() }
 
     return <value type="object" position="{ $finalLocation }">{ $items }</value>
 };
@@ -476,7 +476,7 @@ declare private function json:outputObject(
 ) as xs:string*
 {
     "{",
-        for $child at $pos in $element/*
+        for $child at $pos in $element/json:*
         return (
             if($pos = 1) then () else ",",
             '"', json:unescapeNCName(fn:local-name($child)), '":', json:processElement($child)
@@ -489,7 +489,7 @@ declare private function json:outputArray(
 ) as xs:string*
 {
     "[",
-        for $child at $pos in $element/*
+        for $child at $pos in $element/json:item
         return (
             if($pos = 1) then () else ",",
             json:processElement($child)

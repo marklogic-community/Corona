@@ -27,7 +27,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare function manage:fieldDefinitionToJsonXml(
     $field as element(db:field)
-) as element(item)
+) as element(json:item)
 {
     json:object((
         "name", string($field/db:field-name),

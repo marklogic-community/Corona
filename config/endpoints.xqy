@@ -43,6 +43,16 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="PUT"/>
         <http method="DELETE"/>
     </request>
+
+    <!--
+    <request uri="^/data/manage/range/([A-Za-z0-9-]+)(/)?$" endpoint="/data/manage/range.xqy" user-params="allow">
+        <uri-param name="name" as="string">$1</uri-param>
+        <http method="GET"/>
+        <http method="POST"/>
+        <http method="PUT"/>
+        <http method="DELETE"/>
+    </request>
+    -->
 </options>;
 
 declare function endpoints:options(
