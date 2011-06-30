@@ -229,6 +229,7 @@ in the value of the key.
 
 #### Delete a mapping
 Deletes the mapping.
+
  - Request type: DELETE
  - Example:
    - /data/manage/map/author
