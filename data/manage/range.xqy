@@ -62,8 +62,8 @@ return
 
     else if($requestMethod = ("PUT", "POST"))
     then
-        if(exists(prop:get(concat("index-", $name))))
-        then common:error(500, concat("An index, field or alias with the name '", $name, "' already exists"))
+        if(exists(manage:validateIndexName($name)))
+        then common:error(500, manage:validateIndexName($name))
         else (
             if(empty($existing))
             then 

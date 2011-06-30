@@ -59,6 +59,19 @@ declare function manage:rangeDefinitionToJsonXml(
     ))
 };
 
+declare function manage:validateIndexName(
+    $name as xs:string?
+) as xs:string?
+{
+    if(empty($name) or string-length($name) = 0)
+    then "Must provide a name for the index"
+    else if(not(matches($name, "^[0-9A-Za-z_-]+$")))
+    then "Index names can only contain alphanumeric, dash and underscore characters"
+    else if(exists(prop:get(concat("index-", $name))))
+    then concat("An index, field or alias with the name '", $name, "' already exists")
+    else ()
+};
+
 declare function manage:jsonTypeToSchemaType(
     $type as xs:string?
 ) as xs:string?
