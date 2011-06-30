@@ -34,50 +34,61 @@ let $requestMethod := xdmp:get-request-method()
 
 let $database := xdmp:database()
 let $config := admin:get-configuration()
+
+let $property := prop:get(concat("index-", $name))
+let $property :=
+    if(starts-with($property, concat("range/", $name, "/")))
+    then $property
+    else ()
+
+let $bits := tokenize($property, "/")
+let $key := xdmp:get-request-field("key", $bits[3])
+let $type := xdmp:get-request-field("type", $bits[4])
+let $operator := xdmp:get-request-field("operator", $bits[5])
+let $xsType := manage:jsonTypeToSchemaType($type)
+
+let $existingIndexes := admin:database-get-range-element-indexes($config, $database)
 let $existing :=
-    try {
-        admin:database-get-field($config, $database, $name)
-    }
-    catch ($e) {()}
+    for $index in $existingIndexes
+    where $index/*:scalar-type = $xsType and $index/*:namespace-uri = "http://marklogic.com/json" and $index/*:localname = $key
+    return $index
 
 return
     if($requestMethod = "GET")
     then
         if(exists($existing))
-        then json:xmlToJSON(manage:fieldDefinitionToJsonXml($existing))
-        else common:error(404, "Field not found")
+        then json:xmlToJSON(manage:rangeDefinitionToJsonXml($existing, $name, $operator))
+        else common:error(404, "Range index not found")
 
     else if($requestMethod = ("PUT", "POST"))
-    then 
+    then
         if(exists(prop:get(concat("index-", $name))))
         then common:error(500, concat("An index, field or alias with the name '", $name, "' already exists"))
         else (
-            if(exists($existing))
-            then xdmp:set($config, admin:database-delete-field($config, $database, $name))
+            if(empty($existing))
+            then 
+                let $colation :=
+                    if($xsType = "string")
+                    then "http://marklogic.com/collation/"
+                    else ""
+                let $index := admin:database-range-element-index($xsType, "http://marklogic.com/json", $key, $colation, false())
+                let $config := admin:database-add-range-element-index($config, $database, $index)
+                return admin:save-configuration($config)
             else (),
 
-            let $setProp := prop:set(concat("index-", $name), concat("field/", $name))
-            let $config := admin:database-add-field($config, $database, admin:database-field($name, false()))
-            let $includes := xdmp:get-request-field("include")
-            let $excludes := xdmp:get-request-field("exclude")
-            let $add :=
-                for $include in $includes
-                let $include := json:escapeNCName($include)
-                let $el := admin:database-included-element("http://marklogic.com/json", $include, 1, (), "", "")
-                return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
-            let $add :=
-                for $exclude in $excludes
-                let $el := admin:database-excluded-element("http://marklogic.com/json", $exclude)
-                return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
-            return admin:save-configuration($config)
+            prop:set(concat("index-", $name), concat("range/", $name, "/", $key, "/", $type, "/", $operator))
         )
 
     else if($requestMethod = "DELETE")
     then
         if(exists($existing))
-        then (
-            admin:save-configuration(admin:database-delete-field($config, $database, $name)),
-            prop:delete(concat("index-", $name))
-        )
-        else common:error(404, "Field not found")
+        then
+            let $propertiesForIndex := manage:getPropertiesAssociatedWithRangeIndex($existing)
+            let $deleteIndex :=
+                if(count($propertiesForIndex) = 1)
+                then admin:save-configuration(admin:database-delete-range-element-index($config, $database, $existing))
+                else ()
+            return prop:delete(concat("index-", $name))
+        else common:error(404, "Range index not found")
     else ()
+

@@ -48,16 +48,7 @@ json:document(
             "keyValuePhrases", admin:database-get-fast-element-phrase-searches($config, $database),
             "keyValueTrailingWildcards", admin:database-get-fast-element-trailing-wildcard-searches($config, $database),
             "geo", json:array(),
-            "keyValueRanges", json:array(
-                for $index in admin:database-get-range-element-indexes($config, $database)
-                for $key in tokenize(string($index/*:localname), " ")
-                where string-length(string($index/*:namespace-uri)) = 0
-                return json:object((
-                    "type", string($index/*:scalar-type),
-                    "key", json:unescapeNCName($key),
-                    if($index/*:scalar-type = "string") then ("collation", string($index/*:collation)) else ()
-                )
-            )),
+            "ranges", json:array(manage:getRangeDefinitions()),
             "fields", json:array(
                 for $field in admin:database-get-fields($config, $database)
                 where string-length($field/*:field-name) > 0
