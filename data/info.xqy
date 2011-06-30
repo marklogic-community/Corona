@@ -57,6 +57,9 @@ json:document(
         )),
         "settings", json:object((
             "directoryCreation", admin:database-get-directory-creation($config, $database)
+        )),
+        "statistics", json:object((
+            "documentCount", xdmp:estimate(collection())
         ))
     ))
 )

@@ -135,7 +135,71 @@ multiple values for the same key are or'd together.
    - /data/kvquery?foo=bar&baz=yaz - Document that has a 'foo' key with a value of 'bar' and a 'baz' key with a value of 'yaz'
    - /data/kvquery?foo=bar&foo=bar - Document that has a 'foo' key with a value of 'bar' or 'baz'
 
-### Server information
+## Index management
+### Fields
+A field groups together a number of keys so their values are treated as one
+block of text.  Lets say you have two keys, "first_name" and "last_name" that
+you'd like to query as though they were one key "name".  Creating a field
+called "name" that includes both "first_name" and "last_name" is an easy way to
+accomplish this.
+
+#### Get info about a field
+Returns what keys are included and excluded in a field.
+
+ - Request type: GET
+ - Example:
+    - /data/manage/field/my_field_name
+
+#### Create a field
+Creates a field in the database. Fields can not share the same name as range
+indexes or aliases, they must be unique. If the value of the incluced key is an
+object, you can exclude child keys in that object by adding an exclude
+parameter in the request.
+
+ - Request type: PUT|POST
+ - Examples:
+   - /data/manage/field/my_field_name?include=first_name&include=last_name
+   - /data/manage/field/my_field_name?include=first_name&include=last_name&exclude=middle_name
+
+#### Delete a field
+Deletes the field.
+
+ - Request type: PUT|POST
+ - Example:
+   - /data/manage/field/my_field_name
+
+### Range indexes
+A range index allows you to perform queries over a range of values.  For
+example, if you want to fetch all documents where the "pub_date" is after
+2011-01-01, you would add a range index on the "pub_date" key.
+
+#### Get info about a range index
+Returns information about how a range index is configured.
+
+ - Request type: GET
+ - Example:
+   - /data/manage/range/publication-date
+
+#### Create a range index
+Creates a range index in the database. Range indexes can not share the same name as fields
+or aliases, they must be unique. You must specify the key to create the range
+index on, the datatype (number, string or date) and the operator (eq, ne, lt,
+le, gt or ge).
+
+ - Request type: PUT|POST
+ - Examples:
+   - /data/manage/range/date?key=pub_date&datatype=date&operator=eq
+   - /data/manage/range/date-before?key=pub_date&datatype=date&operator=lt
+   - /data/manage/range/date-after?key=pub_date&datatype=date&operator=gt
+
+#### Delete a range index
+Deletes the range index.
+
+ - Request type: DELETE
+ - Example:
+    - /data/manage/range/date-before
+
+## Server information
 Information about the MarkLogic server version, hardware and index settings can be obtained with an info request.
 
  - Request type: GET
