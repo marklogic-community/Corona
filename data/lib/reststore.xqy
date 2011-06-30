@@ -99,7 +99,7 @@ declare function reststore:getDocument(
     else json:xmlToJSON(json:document(
         json:object((
             if($includeContent)
-            then ("content", doc($uri)/json)
+            then ("content", doc($uri)/json:json)
             else (),
             if($includeCollections)
             then ("collections", reststore:getDocumentCollections($uri))
@@ -207,7 +207,7 @@ declare function reststore:setQuality(
 
 declare private function reststore:getDocumentCollections(
     $uri as xs:string
-) as element(item)
+) as element(json:item)
 {
     json:array(
         for $collection in xdmp:document-get-collections($uri)
@@ -217,7 +217,7 @@ declare private function reststore:getDocumentCollections(
 
 declare private function reststore:getDocumentProperties(
     $uri as xs:string
-) as element(item)
+) as element(json:item)
 {
     json:object(
         for $property in xdmp:document-properties($uri)/prop:properties/*
@@ -228,7 +228,7 @@ declare private function reststore:getDocumentProperties(
 
 declare private function reststore:getDocumentPermissions(
     $uri as xs:string
-) as element(item)
+) as element(json:item)
 {
     json:array(
         let $permMap := map:map()
