@@ -11,7 +11,7 @@ declare option xdmp:mapping "false";
 declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 <options xmlns="http://marklogic.com/appservices/rest">
     <!-- Manage documents in the database -->
-    <request uri="^/data/store/(.+)$" endpoint="/data/jsonstore.xqy" user-params="allow">
+    <request uri="^/data/store/(.+)$" endpoint="/data/store.xqy" user-params="allow">
         <uri-param name="uri" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST"/>
@@ -19,11 +19,19 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <!-- Querying the database -->
-    <request uri="^/data/query(/)?$" endpoint="/data/jsonquery.xqy">
+    <!-- Custom queries -->
+    <request uri="^/data/customquery(/)?$" endpoint="/data/customquery.xqy">
         <param name="q" required="true"/>
         <http method="GET"/>
         <http method="POST"/>
+    </request>
+
+    <!-- Query strings -->
+    <request uri="^/data/query(/|/(\d+)/?|/(\d+)/(\d+)/?)?$" endpoint="/data/query.xqy">
+        <uri-param name="__MLJSONURL__:index">$2</uri-param>
+        <uri-param name="__MLJSONURL__:start">$3</uri-param>
+        <uri-param name="__MLJSONURL__:end">$4</uri-param>
+        <param name="q" required="true"/>
     </request>
 
     <!-- Key value queryies -->

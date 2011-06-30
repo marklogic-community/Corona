@@ -124,6 +124,7 @@ change the URL structure or add in more rules if need be there.
  - Request type: POST
  - Example: /data/store/foo/bar.json?quality=10
 
+## Querying the database
 ### Key/Value queries
 The key/value query endpoint allows you to easily grab the first document that
 contains the key/value combination. Multple keys are and'd together and
@@ -134,6 +135,21 @@ multiple values for the same key are or'd together.
    - /data/kvquery?foo=bar - Document that has a 'foo' key with a value of 'bar'
    - /data/kvquery?foo=bar&baz=yaz - Document that has a 'foo' key with a value of 'bar' and a 'baz' key with a value of 'yaz'
    - /data/kvquery?foo=bar&foo=bar - Document that has a 'foo' key with a value of 'bar' or 'baz'
+
+### Query strings
+Coming soon.
+
+ - Request type: GET
+ - Examples:
+   - /data/query?q=foo+bar
+   - /data/query?q=author:Chomsky+censorship
+
+### Custom queries
+Implemented, needs lots more documentation.
+
+ - Request type: GET|POST
+ - Examples:
+   - /data/customquery?q={"key": "foo", "value": "bar"}
 
 ## Index management
 ### Fields

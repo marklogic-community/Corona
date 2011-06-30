@@ -22,23 +22,7 @@ import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/c
 
 declare option xdmp:mapping "false";
 
-(:
-    TODO:
-    Copy a document (POST)                  /jsonstore.xqy?uri=http://foo/bar    copyto=http://foo/bar/baz
-    Move a document (POST)                  /jsonstore.xqy?uri=http://foo/bar    moveto=http://foo/bar/baz
-
-    DONE:
-    Set the document properties (POST)      /jsonstore.xqy?uri=http://foo/bar    property=key:value&property=foo:bar
-    Set the document permissions (POST)     /jsonstore.xqy?uri=http://foo/bar    permission=role:capability&permission=foo:read
-    Set the document collections (POST)     /jsonstore.xqy?uri=http://foo/bar    collection=name&collection=bar
-    Set the document quality (POST)         /jsonstore.xqy?uri=http://foo/bar    quality=10
-    Insert a document (PUT|POST)            /jsonstore.xqy?uri=http://foo/bar
-    Delete a document (DELETE)              /jsonstore.xqy?uri=http://foo/bar
-    Get a document (GET)                    /jsonstore.xqy?uri=http://foo/bar
-    Get a document and metadata (GET)       /jsonstore.xqy?uri=http://foo/bar&include=(all|content|collections|properties|permissions|quality)
-:)
-
-let $params := rest:process-request(endpoints:request("/data/jsonstore.xqy"))
+let $params := rest:process-request(endpoints:request("/data/store.xqy"))
 let $uri := map:get($params, "uri")
 let $requestMethod := xdmp:get-request-method()
 let $bodyContent := xdmp:get-request-body("text")
