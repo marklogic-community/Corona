@@ -152,7 +152,7 @@ Returns what keys are included and excluded in a field.
 
 #### Create a field
 Creates a field in the database. Fields can not share the same name as range
-indexes or aliases, they must be unique. If the value of the incluced key is an
+indexes or mappings, they must be unique. If the value of the incluced key is an
 object, you can exclude child keys in that object by adding an exclude
 parameter in the request.
 
@@ -182,7 +182,7 @@ Returns information about how a range index is configured.
 
 #### Create a range index
 Creates a range index in the database. Range indexes can not share the same name as fields
-or aliases, they must be unique. You must specify the key to create the range
+or mappings, they must be unique. You must specify the key to create the range
 index on, the datatype (number, string or date) and the operator (eq, ne, lt,
 le, gt or ge).
 
@@ -198,6 +198,40 @@ Deletes the range index.
  - Request type: DELETE
  - Example:
     - /data/manage/range/date-before
+
+### Key mapping
+A key mapping configures a key in the database to a keyword used when quering.
+For example, let's say there is a key in the database of "author_name" that
+needs to be exposed to query strings as "author" (eg: "author:Chomsky censorship").
+To allow this, simply create a mapping named "author" with a key of "author_name"
+and a mode of either "equals" or "contains".
+
+#### Get info about a mapping
+Returns information about how a mapping is configured.
+
+ - Request type: GET
+ - Example:
+   - /data/manage/map/
+
+#### Create a mapping
+Creates a mapping that can be used in query strings. Mappings can not share the
+same name as fields or range indexes, they must be unique. You must specify the
+key that the mapping maps to and the mode of the mapping (either equals or
+contains). A mode of equals means that the supplied keyword in the query
+(Chomsky in the example above) must be equal to the value of the specified key.
+A mode of contains means that the supplied keyword has to be present somewhere
+in the value of the key.
+
+ - Request type: PUT|POST
+ - Examples:
+   - /data/manage/map/author?key=author_name&mode=equals
+   - /data/manage/map/author?key=author_name&mode=contains
+
+#### Delete a mapping
+Deletes the mapping.
+ - Request type: DELETE
+ - Example:
+   - /data/manage/map/author
 
 ## Server information
 Information about the MarkLogic server version, hardware and index settings can be obtained with an info request.
