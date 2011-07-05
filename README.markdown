@@ -71,9 +71,8 @@ change the URL structure or add in more rules if need be there.
    - null - constructs a JSON null
  - data/lib/json-query.xqy - Tinkering with ways to query the stored JSON
 
-## REST Capabilities
-### Document management
-#### Insert a JSON document
+## Document management
+### Insert a JSON document
  - Request type: PUT or POST
  - Request body should be the JSON document
  - Example: /data/store/foo/bar.json - Will insert the document in the database with a uri of "/foo/bar.json"
@@ -89,7 +88,7 @@ change the URL structure or add in more rules if need be there.
    - Permissions must follow a <role>:<capability> pattern where capability is one of read, update or execute
    - Properties must follow a <key>:<value> pattern where the key is alphanumeric and starts with a letter
 
-#### Get a JSON document
+### Get a JSON document
  - Request type: GET
  - Example: /data/store/foo/bar.json - Get the document with a uri of "/foo/bar.json"
  - Optional: To fetch metadata associated about the document, specify what you'd like to include in the response.
@@ -101,26 +100,26 @@ change the URL structure or add in more rules if need be there.
    - /data/store/foo/bar.json?include=content&include=permissions&include=quality - Returns the content, permissions and quality of the document
    - /data/store/foo/bar.json?include=all - Returns the content along with all of its metadata
 
-#### Delete a JSON document
+### Delete a JSON document
  - Request type: DELETE
  - Example: /data/store/foo/bar.json - Delete the document with a uri of "/foo/bar.json"
 
-#### Set a property on a document
+### Set a property on a document
  - Request type: POST
  - Properties are **not** held inside the JSON document, properties are stored outside of the document and don't effect the stored document at all.  They are best thought of as metadata about the document but should be avoided if possible due to storage overhead.
  - Example: /data/store/foo/bar.json?property=publishState:final&property=needsEditorial:false
 
-#### Set permissions on a document
+### Set permissions on a document
  - Request type: POST
  - When setting permissions on a document, all of the existing permissions are overwritten.
  - Example: /data/store/foo/bar.json?permission=public:read&permission=admin:write
 
-#### Set collections on a document
+### Set collections on a document
  - Request type: POST
  - When setting collections on a document, all of the existing collections are overwritten.
  - Example: /data/store/foo/bar.json?collection=public&collection=published
 
-#### Set the quality of a document
+### Set the quality of a document
  - Request type: POST
  - Example: /data/store/foo/bar.json?quality=10
 
@@ -255,10 +254,6 @@ Information about the MarkLogic server version, hardware and index settings can 
 
  - Request type: GET
  - Example: /data/info
-
-## TODO
- - Move a document
- - Copy a document
 
   [MarkLogic]: http://developer.marklogic.com
   [MarkLogic Server]: http://developer.marklogic.com

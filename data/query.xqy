@@ -16,10 +16,15 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace parser="http://marklogic.com/mljson/query-parser" at "lib/query-parser.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 
 declare option xdmp:mapping "false";
+
+let $requestMethod := xdmp:get-request-method()
+let $query := xdmp:get-request-field("q", "")[1]
+let $include := xdmp:get-request-field("include", "content")
 
 let $index := xdmp:get-request-field("__MLJSONURL__:index")
 let $index :=
@@ -39,11 +44,7 @@ let $end :=
     then xs:integer($end)
     else $start
 
-let $query := cts:and-query(
-    for $key in xdmp:get-request-field-names()
-    where not(starts-with($key, "__MLJSONURL__:"))
-    return cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), xdmp:get-request-field($key))
-)
+let $query := parser:parse($query)
 
 let $results :=
     if(exists($start) and exists($end) and $end > $start)
@@ -62,4 +63,7 @@ let $end :=
     then $total
     else $end
 
-return common:outputMultipleDocs($results, $start, $end, $total, ("content"), $query)
+return
+    if($requestMethod = "GET")
+    then common:outputMultipleDocs($results, $start, $end, $total, $include, $query)
+    else ()

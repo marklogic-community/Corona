@@ -205,7 +205,7 @@ declare function reststore:setQuality(
 
 
 
-declare private function reststore:getDocumentCollections(
+declare function reststore:getDocumentCollections(
     $uri as xs:string
 ) as element(json:item)
 {
@@ -215,7 +215,7 @@ declare private function reststore:getDocumentCollections(
     )
 };
 
-declare private function reststore:getDocumentProperties(
+declare function reststore:getDocumentProperties(
     $uri as xs:string
 ) as element(json:item)
 {
@@ -226,7 +226,7 @@ declare private function reststore:getDocumentProperties(
     )
 };
 
-declare private function reststore:getDocumentPermissions(
+declare function reststore:getDocumentPermissions(
     $uri as xs:string
 ) as element(json:item)
 {
@@ -252,7 +252,7 @@ declare private function reststore:getDocumentPermissions(
     )
 };
 
-declare private function reststore:getDocumentQuality(
+declare function reststore:getDocumentQuality(
     $uri as xs:string
 ) as xs:decimal
 {

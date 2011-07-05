@@ -52,7 +52,7 @@ return
     then 
         if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name))
-        else prop:set(concat("index-", $name), concat("alias/", $name, "/", $key, "/", $mode))
+        else prop:set(concat("index-", $name), concat("map/", $name, "/", $key, "/", $mode))
 
     else if($requestMethod = "DELETE")
     then
