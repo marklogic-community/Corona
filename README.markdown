@@ -124,7 +124,7 @@ change the URL structure or add in more rules if need be there.
  - Example: /data/store/foo/bar.json?quality=10
 
 ## Querying the database
-[Documentation here](wiki)
+[Documentation here](mljson/wiki)
 
 ## Index management
 ### Fields
