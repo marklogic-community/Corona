@@ -44,7 +44,11 @@ let $property :=
 let $bits := tokenize($property, "/")
 let $key := xdmp:get-request-field("key", $bits[3])
 let $type := xdmp:get-request-field("type", $bits[4])
-let $operator := xdmp:get-request-field("operator", $bits[5])
+(: If the type is boolean, the operator should always be equality :)
+let $operator :=
+    if($type = "boolean")
+    then "eq"
+    else xdmp:get-request-field("operator", $bits[5])
 let $xsType := manage:jsonTypeToSchemaType($type)
 
 let $existingIndexes := admin:database-get-range-element-indexes($config, $database)
@@ -65,8 +69,14 @@ return
         if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name))
         else (
-            if(empty($existing))
-            then 
+            if(exists($existing))
+            then ()
+            else if($type = "boolean")
+            then
+                let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, (), "boolean", "", false())
+                let $config := admin:database-add-range-element-attribute-index($config, $database, $index)
+                return admin:save-configuration($config)
+            else
                 let $colation :=
                     if($xsType = "string")
                     then "http://marklogic.com/collation/"
@@ -74,8 +84,7 @@ return
                 let $index := admin:database-range-element-index($xsType, "http://marklogic.com/json", $key, $colation, false())
                 let $config := admin:database-add-range-element-index($config, $database, $index)
                 return admin:save-configuration($config)
-            else (),
-
+            ,
             prop:set(concat("index-", $name), concat("range/", $name, "/", $key, "/", $type, "/", $operator))
         )
 
