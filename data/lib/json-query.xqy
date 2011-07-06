@@ -27,7 +27,7 @@ declare function jsonquery:parse(
 ) as xs:string
 {
     let $tree := json:jsonToXML($json)
-    let $cts := jsonquery:dispatch($tree/query)
+    let $cts := jsonquery:dispatch($tree)
     let $options := jsonquery:extractOptions($tree, "search")
     let $start := jsonquery:extractStartIndex($tree)
     let $end := jsonquery:extractEndIndex($tree)
@@ -46,7 +46,7 @@ declare function jsonquery:execute(
 ) as xs:string
 {
     let $tree := json:jsonToXML($json)
-    let $cts := jsonquery:dispatch($tree/json:query)
+    let $cts := jsonquery:dispatch($tree)
     let $options := jsonquery:extractOptions($tree, "search")
     let $start := jsonquery:extractStartIndex($tree)
     let $end := jsonquery:extractEndIndex($tree)
@@ -137,23 +137,23 @@ declare private function jsonquery:handleRange(
     $step as element(json:range)
 ) as cts:query?
 {
-    if(exists($step/json:from[@type = "string"]) and exists($step/json:to[@type = "string"]))
+    if(exists($step/json:from) and exists($step/json:to))
     then
-        let $key := $step/json:key[@type = "string"]
+        let $name := $step/json:name[@type = "string"]
         let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
         let $options := jsonquery:extractOptions($step, "range")
-        where exists($key)
+        where exists($name)
         return cts:and-query((
-            cts:element-range-query(xs:QName(concat("json:", $key)), ">=", $step/json:from, $options, $weight),
-            cts:element-range-query(xs:QName(concat("json:", $key)), "<=", $step/json:to, $options, $weight)
+            common:indexNameToRangeQuery(string($name), $step/json:to, "<=", $options, $weight),
+            common:indexNameToRangeQuery(string($name), $step/json:from, ">=", $options, $weight)
         ))
     else
-        let $key := $step/json:key[@type = "string"]
-        let $operator := ($step/json:operator[@type = "string"][. = ("=", "!=", "<", ">", "<=", ">=")], "=")[1]
-        let $value := jsonquery:stringOrArrayToSet($step/json:value)
+        let $operator := common:humanOperatorToMathmatical(string($step/json:operator[@type = "string"]))
+        let $name := $step/json:name[@type = "string"]
+        let $values := jsonquery:stringOrArrayToSet($step/json:value, false())
         let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-        where exists($key) and exists($value)
-        return cts:element-range-query(xs:QName(concat("json:", $key)), $operator, $value, jsonquery:extractOptions($step, "range"), $weight)
+        where exists($name) and exists($values)
+        return common:indexNameToRangeQuery(string($name), $values, $operator, jsonquery:extractOptions($step, "range"), $weight)
 };
 
 declare private function jsonquery:handleEquals(
@@ -161,10 +161,14 @@ declare private function jsonquery:handleEquals(
 ) as cts:element-value-query?
 {
     let $key := $step/json:key[@type = "string"]
-    let $string := jsonquery:stringOrArrayToSet($step/json:string)
+    let $values := jsonquery:stringOrArrayToSet($step/json:value, true())
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    where exists($key) and exists($string)
-    return cts:element-value-query(xs:QName(concat("json:", $key)), $string, jsonquery:extractOptions($step, "word"), $weight)
+    let $QName := xs:QName(concat("json:", json:escapeNCName($key)))
+    where exists($key) and exists($values)
+    return 
+        if($step/json:value/@type = "boolean" or ($step/json:value/@type = "array" and count($step/json:value/json:item/@boolean) = count($step/json:value/json:item)))
+        then cts:element-attribute-value-query($QName, xs:QName("boolean"), $values, jsonquery:extractOptions($step, "word"), $weight)
+        else cts:element-value-query($QName, $values, jsonquery:extractOptions($step, "word"), $weight)
 };
 
 declare private function jsonquery:handleContains(
@@ -172,17 +176,17 @@ declare private function jsonquery:handleContains(
 ) as cts:element-word-query?
 {
     let $key := $step/json:key[@type = "string"]
-    let $string := jsonquery:stringOrArrayToSet($step/json:string)
+    let $strings := jsonquery:stringOrArrayToSet($step/json:string, true())
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    where exists($key) and exists($string)
-    return cts:element-word-query(xs:QName(concat("json:", $key)), $string, jsonquery:extractOptions($step, "word"), $weight)
+    where exists($key) and exists($strings)
+    return cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($key))), $strings, jsonquery:extractOptions($step, "word"), $weight)
 };
 
 declare private function jsonquery:handleCollection(
     $step as element(json:collection)
 ) as cts:collection-query
 {
-    cts:collection-query(jsonquery:stringOrArrayToSet($step))
+    cts:collection-query(jsonquery:stringOrArrayToSet($step, true()))
 };
 
 declare private function jsonquery:handleGeo(
@@ -198,11 +202,11 @@ declare private function jsonquery:handleGeo(
     where exists($key) or (exists($latKey) and exists($longKey))
     return
         if(exists($parent) and exists($latKey) and exists($longKey))
-        then cts:element-pair-geospatial-query(xs:QName(concat("json:", $parent)), xs:QName(concat("json:", $latKey)), xs:QName(concat("json:", $longKey)), jsonquery:process($step/json:region), jsonquery:extractOptions($step, "geo"), $weight)
+        then cts:element-pair-geospatial-query(xs:QName(concat("json:", $parent)), xs:QName(concat("json:", json:escapeNCName($latKey))), xs:QName(concat("json:", json:escapeNCName($longKey))), jsonquery:process($step/json:region), jsonquery:extractOptions($step, "geo"), $weight)
         else if(exists($parent) and exists($key))
-        then cts:element-child-geospatial-query(xs:QName(concat("json:", $parent)), xs:QName(concat("json:", $key)), jsonquery:process($step/json:region), jsonquery:extractOptions($step, "geo"), $weight)
+        then cts:element-child-geospatial-query(xs:QName(concat("json:", $parent)), xs:QName(concat("json:", json:escapeNCName($key))), jsonquery:process($step/json:region), jsonquery:extractOptions($step, "geo"), $weight)
         else if(exists($key))
-        then cts:element-geospatial-query(xs:QName(concat("json:", $key)), jsonquery:process($step/json:region), jsonquery:extractOptions($step, "geo"), $weight)
+        then cts:element-geospatial-query(xs:QName(concat("json:", json:escapeNCName($key))), jsonquery:process($step/json:region), jsonquery:extractOptions($step, "geo"), $weight)
         else ()
 };
 
@@ -244,14 +248,23 @@ declare private function jsonquery:handleGeoPolygon(
 };
 
 declare private function jsonquery:stringOrArrayToSet(
-    $item as element()
+    $item as element(),
+    $forceAsString as xs:boolean
 ) as xs:string*
 {
-    if($item/@type = "string")
-    then string($item)
+    if($item/@type = "array")
+    then
+        for $i in $item/json:item[@type = ("string", "number", "boolean")]
+        return
+            if($forceAsString)
+            then string($i)
+            else common:castFromJSONType($i)
+    else if($item/@type = "object")
+    then ()
     else
-        for $i in $item/json:item[@type = "string"]
-        return string($i)
+        if($forceAsString)
+        then string($item)
+        else common:castFromJSONType($item)
 };
 
 declare private function jsonquery:extractOptions(
@@ -332,7 +345,7 @@ declare private function jsonquery:extractOptions(
     )
     else ()
     ,
-    if($optionSet = "search")
+    if($optionSet = "geo")
     then (
         if(exists($item/json:coordinateType[@type = "string"]))
         then 

@@ -3,6 +3,7 @@ xquery version "1.0-ml";
 module namespace parser = "http://marklogic.com/mljson/query-parser";
 
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
+import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
@@ -236,34 +237,35 @@ declare private function parser:constraintQuery(
     return
         if($bits[1] = "field")
         then cts:field-word-query($bits[2], $value)
+
         else if($bits[1] = "map")
         then 
             if($bits[4] = "equals")
-            then cts:element-value-query(xs:QName(concat("json:", $bits[3])), $value)
+            then
+                if($value = ("true", "false"))
+                then cts:or-query((
+                    cts:element-value-query(xs:QName(concat("json:", $bits[3])), $value),
+                    cts:element-attribute-value-query(xs:QName(concat("json:", $bits[3])), xs:QName("boolean"), $value)
+                ))
+                else cts:element-value-query(xs:QName(concat("json:", $bits[3])), $value)
             else cts:element-word-query(xs:QName(concat("json:", $bits[3])), $value)
+
         else if($bits[1] = "range")
         then
-            let $value :=
-                if($bits[4] = "number" and $value castable as xs:decimal)
-                then xs:decimal($value)
-                (: XXX - need to do something for dates when we have them supported as a type :)
-                else $value
-            let $QName := xs:QName(concat("json:", $bits[3]))
-            let $operator :=
-                if($bits[5] = "eq")
-                then "="
-                else if($bits[5] = "ne")
-                then "!="
-                else if($bits[5] = "lt")
-                then "<"
-                else if($bits[5] = "le")
-                then "<="
-                else if($bits[5] = "gt")
-                then ">"
-                else if($bits[5] = "ge")
-                then ">="
-                else "="
-            return cts:element-range-query($QName, $operator, $value, "collation=http://marklogic.com/collation/")
+            if($bits[4] = "boolean")
+            then
+                let $QName := xs:QName(concat("json:", $bits[3]))
+                let $value := common:castFromJSONType($value, $bits[4])
+                return cts:element-attribute-range-query($QName, xs:QName("boolean"), "=", $value)
+            else
+                let $QName := xs:QName(concat("json:", $bits[3]))
+                let $value := common:castFromJSONType($value, $bits[4])
+                let $operator := common:humanOperatorToMathmatical($bits[5])
+                let $options :=
+                    if($bits[4] = "string")
+                    then "collation=http://marklogic.com/collation/"
+                    else ()
+                return cts:element-range-query($QName, $operator, $value, $options)
         else parser:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)
 };
 
