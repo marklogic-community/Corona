@@ -41,8 +41,15 @@ let $end :=
 
 let $query := cts:and-query(
     for $key in xdmp:get-request-field-names()
+    let $value := xdmp:get-request-field($key)
     where not(starts-with($key, "__MLJSONURL__:"))
-    return cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), xdmp:get-request-field($key))
+    return
+        if($value = ("true", "false"))
+        then cts:or-query((
+            cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), $value),
+            cts:element-attribute-value-query(xs:QName(concat("json:", json:escapeNCName($key))), xs:QName("boolean"), $value)
+        ))
+        else cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), $value)
 )
 
 let $results :=
