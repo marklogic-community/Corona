@@ -41,8 +41,6 @@ exposes all of the functionality found in the [CTS search functions].
 #### Presentation
 Here are some [slides] from a presentation on MLJSON given at XML Prague 2011.
 
-___
-
 ## Installation
 
 Installing MLJSON is fairly simple:
