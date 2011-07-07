@@ -71,7 +71,7 @@ change the URL structure or add in more rules if need be there.
    - null - constructs a JSON null
  - data/lib/json-query.xqy - Tinkering with ways to query the stored JSON
 
-## Documentation
+## API Documentation
 [Check the wiki for documentation on how to store, index and query the documents.](mljson/wiki)
 
   [MarkLogic]: http://developer.marklogic.com
