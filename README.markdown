@@ -70,7 +70,7 @@ change the URL structure or add in more rules if need be there.
  - data/lib/json-query.xqy - Tinkering with ways to query the stored JSON
 
 ## API Documentation
-[Check the wiki for documentation on how to store, index and query the documents.](mljson/wiki)
+[Check the wiki for documentation on how to store, index and query the documents.](https://github.com/marklogic/mljson/wiki)
 
   [MarkLogic]: http://developer.marklogic.com
   [MarkLogic Server]: http://developer.marklogic.com
