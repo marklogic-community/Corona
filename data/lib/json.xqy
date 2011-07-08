@@ -31,6 +31,9 @@ limitations under the License.
 xquery version "1.0-ml";
 
 module namespace json="http://marklogic.com/json";
+
+import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare function json:jsonToXML(
@@ -294,19 +297,25 @@ declare private function json:parseValue(
                 if(empty($castAs) or $enableExtensions = false())
                 then <value type="string" position="{ $position + 1 }">{ $string }</value>
                 else if($castAs = "xml")
-                then <value position="{ $position + 1 }">{
-                    try {(
-                        attribute type { "xml" },
+                then <value type="xml" position="{ $position + 1 }">{
+                    try {
                         xdmp:unquote($string)
-                    )}
-                    catch ($e) {(
-                        attribute type { "string" },
-                        $string
-                    )}
+                    }
+                    catch ($e) {
+                        json:outputError($tokens, $position, "The string was told to be treated as XML however, it isn't valid XML")
+                    }
                 }</value>
                 else if($castAs = "date")
-                (: XXX - add parsing for other date formats here :)
-                then <value type="date" position="{ $position + 1 }">{ $string }</value>
+                then <value type="date" position="{ $position + 1 }">{
+                    let $parsed := dateparser:parse($string)
+                    return
+                        if(exists($parsed))
+                        then (
+                            attribute normalized-date { $parsed },
+                            $string
+                        )
+                        else json:outputError($tokens, $position, concat("The string ", $string, " was told to be treated as a date however, it couldn't be parsed"))
+                }</value>
                 else <value type="string" position="{ $position + 1 }">{ $string }</value>
 
         else if($token/@t = "true" or $token/@t = "false")
@@ -348,7 +357,7 @@ declare private function json:parseArray(
                 let $value := json:parseValue($tokens, $index, $castAs, $enableExtensions)
                 let $set := xdmp:set($finalLocation, xs:integer($value/@position))
                 let $test := json:shouldBeOneOf($tokens, $finalLocation, ("comma", "rsquare"), "Expected either a comma or closing array")
-                return <json:item>{ $value/(@type, @boolean), $value/node() }</json:item>
+                return <json:item>{ $value/(@type, @boolean, @normalized-date), $value/node() }</json:item>
 
     return <value type="array" position="{ $finalLocation }">{ $items }</value>
 };
@@ -401,7 +410,7 @@ declare private function json:parseObject(
                 let $set := xdmp:set($finalLocation, xs:integer($value/@position))
                 let $test := json:shouldBeOneOf($tokens, $finalLocation, ("comma", "rbrace"), "Expected either a comma or closing object")
 
-                return element { xs:QName(concat("json:", $key)) } { $value/(@type, @boolean), $value/node() }
+                return element { xs:QName(concat("json:", $key)) } { $value/(@type, @boolean, @normalized-date), $value/node() }
 
     return <value type="object" position="{ $finalLocation }">{ $items }</value>
 };
