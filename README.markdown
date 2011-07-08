@@ -41,8 +41,6 @@ exposes all of the functionality found in the [CTS search functions].
 #### Presentation
 Here are some [slides] from a presentation on MLJSON given at XML Prague 2011.
 
-___
-
 ## Installation
 
 Installing MLJSON is fairly simple:
@@ -71,8 +69,8 @@ change the URL structure or add in more rules if need be there.
    - null - constructs a JSON null
  - data/lib/json-query.xqy - Tinkering with ways to query the stored JSON
 
-## Documentation
-[Check the wiki for documentation on how to store, index and query the documents.](mljson/wiki)
+## API Documentation
+[Check the wiki for documentation on how to store, index and query the documents.](https://github.com/marklogic/mljson/wiki)
 
   [MarkLogic]: http://developer.marklogic.com
   [MarkLogic Server]: http://developer.marklogic.com
