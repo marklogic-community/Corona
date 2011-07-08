@@ -26,7 +26,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
     <format>
         <ignore>\w+</ignore>
         <whitespace/>
-        <month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec</month>
+        <month>\w+</month>
         <whitespace/>
         <day>\d\d</day>
         <whitespace/>
@@ -48,7 +48,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
     <format>
         <day>\d\d</day>
         <string>-</string>
-        <month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec</month>
+        <month>\w+</month>
         <string>-</string>
         <year>\d\d\d\d</year>
         <whitespace/>
@@ -67,7 +67,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
         <whitespace/>
         <day>\d\d</day>
         <whitespace/>
-        <month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec</month>
+        <month>\w+</month>
         <whitespace/>
         <year>\d\d\d\d</year>
         <whitespace/>
@@ -84,7 +84,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
     <format>
         <day>\d\d</day>
         <whitespace/>
-        <month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec</month>
+        <month>\w+</month>
         <whitespace/>
         <year>\d\d\d\d</year>
         <whitespace/>
@@ -99,7 +99,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
 
     (: Apr 16 13:49:06 2003 +0200 :)
     <format>
-        <month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec</month>
+        <month>\w+</month>
         <whitespace/>
         <day>\d\d</day>
         <whitespace/>
@@ -116,7 +116,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
 
     (: Aug 04 11:44:58 EDT 2003 :)
     <format>
-        <month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec</month>
+        <month>\w+</month>
         <whitespace/>
         <day>\d\d</day>
         <whitespace/>
@@ -135,7 +135,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
     <format>
         <day>\d\d?</day>
         <whitespace/>
-        <month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec</month>
+        <month>\w+</month>
         <whitespace/>
         <year>\d\d</year>
         <whitespace/>
