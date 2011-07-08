@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 :)
 
+
 xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
+import module namespace dateparser="http://marklogic.com/dateparser" at "lib/date-parser.xqy";
 
 declare option xdmp:mapping "false";
 
@@ -42,13 +44,23 @@ let $end :=
 let $query := cts:and-query(
     for $key in xdmp:get-request-field-names()
     let $value := xdmp:get-request-field($key)
+    let $castAs := json:castAs($key, true())
     where not(starts-with($key, "__MLJSONURL__:"))
     return
-        if($value = ("true", "false"))
+        if($castAs = "date")
+        then
+            let $date := dateparser:parse($value)
+            return
+                if(empty($date))
+                then cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), $value)
+                else cts:element-attribute-value-query(xs:QName(concat("json:", json:escapeNCName($key))), xs:QName("normalized-date"), $date)
+
+        else if($value = ("true", "false"))
         then cts:or-query((
             cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), $value),
             cts:element-attribute-value-query(xs:QName(concat("json:", json:escapeNCName($key))), xs:QName("boolean"), $value)
         ))
+
         else cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), $value)
 )
 

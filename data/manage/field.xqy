@@ -67,6 +67,7 @@ return
                 return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
             let $add :=
                 for $exclude in $excludes
+                let $exclude := json:escapeNCName($exclude)
                 let $el := admin:database-excluded-element("http://marklogic.com/json", $exclude)
                 return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
             return admin:save-configuration($config)

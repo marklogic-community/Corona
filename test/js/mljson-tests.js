@@ -125,6 +125,70 @@ mljson.validJSON = [
     {
         "json": {"false": "false"},
         "purpose": "false as a key/value"
+    },
+    {
+        "json": {"foo::xml": "<foo><bar/></foo>"},
+        "purpose": "Cast an object value as XML"
+    },
+    {
+        "json": {"foo::date": "Thu Jul 07 2011 11:05:42 GMT-0700 (PDT)"},
+        "purpose": "Date parsing: Thu Jul 07 2011 11:05:42 GMT-0700 (PDT)"
+    },
+    {
+        "json": {"foo::date": "25-Oct-2004 17:06:46 -0500"},
+        "purpose": "Date parsing: 25-Oct-2004 17:06:46 -0500"
+    },
+    {
+        "json": {"foo::date": "Mon, 23 Sep 0102 23:14:26 +0900"},
+        "purpose": "Date parsing: Mon, 23 Sep 0102 23:14:26 +0900"
+    },
+    {
+        "json": {"foo::date": "30 Jun 2006 09:39:08 -0500"},
+        "purpose": "Date parsing: 30 Jun 2006 09:39:08 -0500"
+    },
+    {
+        "json": {"foo::date": "Apr 16 13:49:06 2003 +0200"},
+        "purpose": "Date parsing: Apr 16 13:49:06 2003 +0200"
+    },
+    {
+        "json": {"foo::date": "Aug 04 11:44:58 EDT 2003"},
+        "purpose": "Date parsing: Aug 04 11:44:58 EDT 2003"
+    },
+    {
+        "json": {"foo::date": "4 Jan 98 0:41 EDT"},
+        "purpose": "Date parsing: 4 Jan 98 0:41 EDT"
+    },
+    {
+        "json": {"foo::date": "08-20-2007"},
+        "purpose": "Date parsing: 08-20-2007"
+    },
+    {
+        "json": {"foo::date": "08-20-07"},
+        "purpose": "Date parsing: 08-20-07"
+    },
+    {
+        "json": {"foo::date": "2007/08/20"},
+        "purpose": "Date parsing: 2007/08/20"
+    },
+    {
+        "json": {"foo::date": "07/08/20"},
+        "purpose": "Date parsing: 07/08/20"
+    },
+    {
+        "json": {"foo::date": "08/20/2007"},
+        "purpose": "Date parsing: 08/20/2007"
+    },
+    {
+        "json": {"foo::date": "08/20/07"},
+        "purpose": "Date parsing: 08/20/07"
+    },
+    {
+        "json": {"foo::date": "20070920"},
+        "purpose": "Date parsing: 20070920"
+    },
+    {
+        "json": {"foo::date": "December 20th, 2005"},
+        "purpose": "Date parsing: December 20th, 2005"
     }
 ];
 
@@ -143,8 +207,9 @@ $(document).ready(function() {
     asyncTest("Array construction", function() {
         $.ajax({
             url: "/test/xq/array-construction.xqy",
-            success: function() {
-                ok(true, "Array construction");
+            success: function(data) {
+                ok(true, "Array construction success");
+                deepEqual(JSON.parse(data), [1,1.2,true,false,null,[],{"foo":"bar"}], "Constructed array comparison");
             },
             error: function() {
                 ok(false, "Array construction");
@@ -155,8 +220,9 @@ $(document).ready(function() {
     asyncTest("Object construction", function() {
         $.ajax({
             url: "/test/xq/object-construction.xqy",
-            success: function() {
-                ok(true, "Object construction");
+            success: function(data) {
+                ok(true, "Object construction success");
+                deepEqual(JSON.parse(data), {"intvalue":1,"floatvalue":1.2,"boolvalue":true,"nullvalue":null,"arrayvalue":[1,2,3],"objectvalue":{"foo":"bar"},"datevalue::date":"July 8th, 2011","xmlvalue::xml":"","notrailingvalue":null}, "Constructed object comparison");
             },
             error: function() {
                 ok(false, "Object construction");
@@ -176,9 +242,6 @@ $(document).ready(function() {
             complete: function() { start(); }
         });
     });
-
-    // Missing REST
-    // Missing Update Functions
 });
 
 
@@ -190,7 +253,7 @@ mljson.jsonFromServer = function(test, success, error) {
     asyncTest(test.purpose, function() {
         $.ajax({
             url: '/test/xq/isomorphic.xqy',
-            data: 'json=' + jsonString,
+            data: {"json": jsonString},
             method: 'POST',
             success: success,
             error: error,
@@ -215,6 +278,6 @@ mljson.jsonFromServerTest = function(test) {
         function(data, t, j) {
             deepEqual(JSON.parse(data), test.json, test.purpose);
         },
-        function(j, t, e) { ok(false, test.purpose); } 
+        function(j, t, e) { ok(false, e); console.log(e); } 
     );
 };

@@ -165,6 +165,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
         <string>/</string>
         <day>\d\d</day>
     </format>,
+
     (: 08/20/2007 :)
     (: 08/20/07 :)
     <format>

@@ -144,11 +144,11 @@ declare private function jsonquery:handleRange(
         let $options := jsonquery:extractOptions($step, "range")
         where exists($name)
         return cts:and-query((
-            common:indexNameToRangeQuery(string($name), $step/json:to, "<=", $options, $weight),
-            common:indexNameToRangeQuery(string($name), $step/json:from, ">=", $options, $weight)
+            common:indexNameToRangeQuery(string($name), $step/json:to, "le", $options, $weight),
+            common:indexNameToRangeQuery(string($name), $step/json:from, "ge", $options, $weight)
         ))
     else
-        let $operator := common:humanOperatorToMathmatical(string($step/json:operator[@type = "string"]))
+        let $operator := string($step/json:operator[@type = "string"])
         let $name := $step/json:name[@type = "string"]
         let $values := jsonquery:stringOrArrayToSet($step/json:value, false())
         let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])

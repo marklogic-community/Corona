@@ -18,6 +18,7 @@ xquery version "1.0-ml";
 
 module namespace common="http://marklogic.com/mljson/common";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
+import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
@@ -62,9 +63,18 @@ declare function common:castFromJSONType(
 {
     if($value/@type = "number" and $value castable as xs:double)
     then xs:double($value)
+
     else if(exists($value/@boolean))
     then $value/@boolean = "true"
-    (: XXX - need to handle type of date at some point :)
+
+    else if($value/@type = "date" and exists($value/@normalized-date))
+    then xs:dateTime($value/@normalized-date)
+    else if($value/@type = "date")
+    then dateparser:parse(string($value))
+
+    else if($value/@type = "xml")
+    then $value/*
+
     else xs:string($value)
 };
 
@@ -99,7 +109,7 @@ declare function common:indexNameToRangeQuery(
     let $bits := tokenize($prop, "/")
     let $key := $bits[3]
     let $type := $bits[4]
-    let $operator := $bits[5]
+    let $operator := common:humanOperatorToMathmatical(($operatorOverride, $bits[5])[1])
     let $values := 
         for $value in $values
         return common:castFromJSONType($value)
@@ -108,7 +118,11 @@ declare function common:indexNameToRangeQuery(
     return 
         if($values/@type = "boolean" or ($values/@type = "array" and count($values/json:item/@boolean) = count($values/json:item)))
         then cts:element-attribute-range-query($QName, xs:QName("boolean"), "=", $values, $options, $weight)
-        else cts:element-range-query($QName, ($operatorOverride, $operator)[1], $values, $options, $weight)
+
+        else if($values/@type = "date" or ($values/@type = "array" and count($values/json:item/@normalized-date) = count($values/json:item)))
+        then cts:element-attribute-range-query($QName, xs:QName("normalized-date"), $operator, $values, $options, $weight)
+
+        else cts:element-range-query($QName, $operator, $values, $options, $weight)
 };
 
 declare function common:outputMultipleDocs(

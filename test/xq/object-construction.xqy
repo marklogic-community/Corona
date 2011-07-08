@@ -27,6 +27,8 @@ let $doc := json:document(
         "nullvalue", json:null(),
         "arrayvalue", json:array((1, 2, 3)),
         "objectvalue", json:object(("foo", "bar")),
+        "datevalue::date", json:date("July 8th, 2011"),
+        "xmlvalue::xml", json:xml(<foo><bar/></foo>),
         "notrailingvalue"
     ))
 )

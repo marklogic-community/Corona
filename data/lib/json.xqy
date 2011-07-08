@@ -36,13 +36,6 @@ import module namespace dateparser="http://marklogic.com/dateparser" at "date-pa
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-declare function json:jsonToXML(
-    $json as xs:string
-) as element(json:json)
-{
-    json:jsonToXML($json, true())
-};
-
 (:
     Converts a JSON string into an XML document that is highly indexable by
     MarkLogic. The XML that is generated is intended to be treated like a black
@@ -72,6 +65,13 @@ declare function json:jsonToXML(
         then json:outputError($tokens, xs:integer($value/@position), "Unhandled tokens")
         else ()
     return <json:json>{ $value/(@type, @boolean), $value/node() }</json:json>
+};
+
+declare function json:jsonToXML(
+    $json as xs:string
+) as element(json:json)
+{
+    json:jsonToXML($json, true())
 };
 
 (:
@@ -232,6 +232,41 @@ declare function json:a(
 };
 
 (:
+    Because JSON doesn't have a date datatype, we have to do some special
+    things. This function will accept either an xs:dateTime, xs:date or a date
+    string.  In the case of a date string, an attempt will be made to parse the
+    string into an xs:dateTime.  If the string cannot be parsed an error is thrown.
+:)
+declare function json:date(
+    $value as xs:anySimpleType
+) as element(json:item)
+{
+    let $value :=
+        if($value instance of xs:dateTime or $value instance of xs:date)
+        then string($value)
+        else if($value instance of xs:string)
+        then $value
+        else error(xs:QName("json:INVALID-DATE"), concat("Invalid date: ", xdmp:quote($value)))
+    let $date := dateparser:parse($value)
+    return
+        if(empty($date))
+        then error(xs:QName("json:INVALID-DATE"), concat("Invalid date: ", $value))
+        else <json:item normalized-date="{ $date }" type="date">{ $value }</json:item>
+};
+
+(:
+    Because JSON doesn't have an xml datatype, we have to do some special
+    things to get it to work.  When serialized out as JSON the xml will appear
+    as a string but internally it is represented as an xml tree.
+:)
+declare function json:xml(
+    $value as element()
+) as element(json:item)
+{
+    <json:item type="xml">{ xdmp:quote($value) }</json:item>
+};
+
+(:
     Because XQuery doesn't have a stict null value, this function allows us to
     construct a JSON null. This can be useful if you need objects or arrays
     with null values.
@@ -259,14 +294,18 @@ declare private function json:untypedToJSONType(
         then
             if($value instance of element(json:item) or $value instance of element(json:json))
             then $value/(@*, node())
+
             else if($value instance of xs:boolean and $value = true())
             then attribute boolean { "true" }
             else if($value instance of xs:boolean and $value = false())
             then attribute boolean { "false" }
+
             else if($value instance of xs:integer or $value instance of xs:decimal)
             then (attribute type { "number" }, string($value))
+
             else if($value instance of xs:string)
             then (attribute type { "string" }, string($value))
+
             else (attribute type { "string" }, xdmp:quote($value))
         else attribute type { "null" }
     }</json:item>
@@ -393,19 +432,8 @@ declare private function json:parseObject(
                 let $test := json:shouldBeOneOf($tokens, $index + 1, "colon", "Expected a colon")
                 let $test := json:shouldBeOneOf($tokens, $index + 2, ("lbrace", "lsquare", "string", "number", "true", "false", "null"), "Expected an array, object, string, number, boolean or null")
 
-                let $keyBits :=
-                    if($enableExtensions)
-                    then tokenize($tokens[$index], "::")
-                    else $tokens[$index]
-                let $numKeyBits := count($keyBits)
-                let $key :=
-                    if($numKeyBits > 1)
-                    then json:escapeNCName(string-join($keyBits[1 to $numKeyBits - 1], "::"))
-                    else json:escapeNCName($tokens[$index])
-                let $castAs :=
-                    if($numKeyBits > 1)
-                    then $keyBits[last()][. = ("xml", "date")]
-                    else ()
+                let $key := json:escapeNCName($tokens[$index])
+                let $castAs := json:castAs($tokens[$index], $enableExtensions)
                 let $value := json:parseValue($tokens, $index + 2, $castAs, $enableExtensions)
                 let $set := xdmp:set($finalLocation, xs:integer($value/@position))
                 let $test := json:shouldBeOneOf($tokens, $finalLocation, ("comma", "rbrace"), "Expected either a comma or closing object")
@@ -531,18 +559,12 @@ declare private function json:outputObject(
 {
     "{",
         for $child at $pos in $element/json:*
-        let $key :=
-            if($child/@type = "xml" or ($child/@type = "array" and $child//json:item/@type = "xml"))
-            then concat(json:unescapeNCName(local-name($child)), "::xml")
-            else if($child/@type = "date" or ($child/@type = "array" and $child//json:item/@type = "date"))
-            then concat(json:unescapeNCName(local-name($child)), "::date")
-            else json:unescapeNCName(local-name($child))
         return (
             if($pos = 1)
             then ()
             else ","
             ,
-            '"', $key, '":', json:processElement($child)
+            '"', json:unescapeNCName(local-name($child)), '":', json:processElement($child)
         ),
     "}"
 };
@@ -619,4 +641,19 @@ declare function json:unescapeNCName(
                 then codepoints-to-string(xdmp:hex-to-integer(substring($match, 2)))
                 else string($match)
       , "")
+};
+
+declare function json:castAs(
+    $key as xs:string,
+    $enableExtensions as xs:boolean
+) as xs:string?
+{
+    let $keyBits :=
+        if($enableExtensions)
+        then tokenize($key, "::")
+        else $key
+    return
+        if(count($keyBits) > 1)
+        then $keyBits[last()][. = ("xml", "date")]
+        else ()
 };

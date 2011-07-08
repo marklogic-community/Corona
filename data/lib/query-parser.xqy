@@ -257,6 +257,14 @@ declare private function parser:constraintQuery(
                 let $QName := xs:QName(concat("json:", $bits[3]))
                 let $value := common:castFromJSONType($value, $bits[4])
                 return cts:element-attribute-range-query($QName, xs:QName("boolean"), "=", $value)
+
+            else if($bits[4] = "date")
+            then
+                let $QName := xs:QName(concat("json:", $bits[3]))
+                let $value := common:castFromJSONType($value, $bits[4])
+                let $operator := common:humanOperatorToMathmatical($bits[5])
+                return cts:element-attribute-range-query($QName, xs:QName("normalized-date"), $operator, $value)
+
             else
                 let $QName := xs:QName(concat("json:", $bits[3]))
                 let $value := common:castFromJSONType($value, $bits[4])

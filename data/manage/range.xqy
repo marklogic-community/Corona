@@ -70,20 +70,29 @@ return
         then common:error(500, manage:validateIndexName($name))
         else (
             if(exists($existing))
-            then ()
+            then common:error(500, "Range index with this configuration already exists")
+            else if($type = "string")
+            then
+                let $index := admin:database-range-element-index("string", "http://marklogic.com/json", $key, "http://marklogic.com/collation/", false())
+                let $config := admin:database-add-range-element-index($config, $database, $index)
+                return admin:save-configuration($config)
+            else if($type = "date")
+            then
+                let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, (), "normalized-date", "", false())
+                let $config := admin:database-add-range-element-attribute-index($config, $database, $index)
+                return admin:save-configuration($config)
+            else if($type = "number")
+            then
+                let $index := admin:database-range-element-index("decimal", "http://marklogic.com/json", $key, "", false())
+                let $config := admin:database-add-range-element-index($config, $database, $index)
+                return admin:save-configuration($config)
             else if($type = "boolean")
             then
                 let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, (), "boolean", "", false())
                 let $config := admin:database-add-range-element-attribute-index($config, $database, $index)
                 return admin:save-configuration($config)
             else
-                let $colation :=
-                    if($xsType = "string")
-                    then "http://marklogic.com/collation/"
-                    else ""
-                let $index := admin:database-range-element-index($xsType, "http://marklogic.com/json", $key, $colation, false())
-                let $config := admin:database-add-range-element-index($config, $database, $index)
-                return admin:save-configuration($config)
+                ()
             ,
             prop:set(concat("index-", $name), concat("range/", $name, "/", $key, "/", $type, "/", $operator))
         )
