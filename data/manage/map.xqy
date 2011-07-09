@@ -27,7 +27,7 @@ import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/c
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/jsonstore.xqy"))
+let $params := rest:process-request(endpoints:request("/data/manage/map.xqy"))
 let $name := map:get($params, "name")
 let $key := map:get($params, "key")
 let $mode := map:get($params, "mode")
