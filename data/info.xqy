@@ -53,6 +53,18 @@ json:document(
                 for $field in admin:database-get-fields($config, $database)
                 where string-length($field/*:field-name) > 0
                 return manage:fieldDefinitionToJsonXml($field)
+            ),
+            "mappings", json:array(
+                for $map in manage:getMappingProperties()
+                let $bits := tokenize($map, "/")
+                let $name := $bits[2]
+                let $key := json:unescapeNCName($bits[3])
+                let $mode := $bits[3]
+                return json:object((
+                    "name", $name,
+                    "key", $key,
+                    "mode", $mode
+                ))
             )
         )),
         "settings", json:object((

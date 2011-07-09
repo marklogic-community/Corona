@@ -94,6 +94,15 @@ declare function manage:getRangeIndexProperties(
     return $value
 };
 
+declare function manage:getMappingProperties(
+) as xs:string*
+{
+    for $key in prop:all()
+    let $value := prop:get($key)
+    where starts-with($key, "index-") and starts-with($value, "map/")
+    return $value
+};
+
 declare function manage:getPropertiesAssociatedWithRangeIndex(
     $index as element(db:range-element-index)
 ) as xs:string*
