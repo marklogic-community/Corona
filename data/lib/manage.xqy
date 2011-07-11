@@ -46,7 +46,7 @@ declare function manage:fieldDefinitionToJsonXml(
 };
 
 declare function manage:rangeDefinitionToJsonXml(
-    $index as element(db:range-element-index),
+    $index as element(),
     $name as xs:string,
     $operator as xs:string
 ) as element(json:item)
@@ -104,14 +104,14 @@ declare function manage:getMappingProperties(
 };
 
 declare function manage:getPropertiesAssociatedWithRangeIndex(
-    $index as element(db:range-element-index)
+    $index as element()
 ) as xs:string*
 {
     for $value in manage:getRangeIndexProperties()
     let $bits := tokenize($value, "/")
     let $key := $bits[3]
     let $type := $bits[4]
-    where $index/*:scalar-type = manage:jsonTypeToSchemaType($type) and $index/*:namespace-uri = "http://marklogic.com/json" and $index/*:localname = $key
+    where $index/*:scalar-type = manage:jsonTypeToSchemaType($type) and $index/(*:namespace-uri, *:parent-namespace-uri) = "http://marklogic.com/json" and $index/(*:localname, *:parent-localname) = $key
     return $value
 };
 
@@ -119,17 +119,23 @@ declare function manage:getRangeDefinitions(
 ) as element(json:item)*
 {
     let $config := admin:get-configuration()
-    let $existingIndexes := admin:database-get-range-element-indexes($config, xdmp:database())
+    let $existingElementIndexes := admin:database-get-range-element-indexes($config, xdmp:database())
+    let $existingAttributeIndexes := admin:database-get-range-element-attribute-indexes($config, xdmp:database())
 
     for $value in manage:getRangeIndexProperties()
     let $bits := tokenize($value, "/")
     let $name := $bits[2]
     let $key := $bits[3]
-    let $type := $bits[4]
+    let $type := manage:jsonTypeToSchemaType($bits[4])
     let $operator := $bits[5]
-    let $index :=
-        for $index in $existingIndexes
-        where $index/*:scalar-type = manage:jsonTypeToSchemaType($type) and $index/*:namespace-uri = "http://marklogic.com/json" and $index/*:localname = $key
+    let $index := (
+        for $index in $existingElementIndexes
+        where $index/db:scalar-type = $type and $index/db:namespace-uri = "http://marklogic.com/json" and $index/db:localname = $key
         return $index
+        ,
+        for $index in $existingAttributeIndexes
+        where $index/db:scalar-type = $type and $index/db:parent-namespace-uri = "http://marklogic.com/json" and $index/db:parent-localname = $key
+        return $index
+    )
     return manage:rangeDefinitionToJsonXml($index, $name, $operator)
 };

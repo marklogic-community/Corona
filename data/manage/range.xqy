@@ -28,8 +28,8 @@ import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/manage/range.xqy"))
-let $name := map:get($params, "name")
+(: let $params := rest:process-request(endpoints:request("/data/manage/range.xqy")) :)
+let $name := xdmp:get-request-field("name")[1]
 let $requestMethod := xdmp:get-request-method()
 
 let $database := xdmp:database()
@@ -42,20 +42,24 @@ let $property :=
     else ()
 
 let $bits := tokenize($property, "/")
-let $key := xdmp:get-request-field("key", $bits[3])
-let $type := xdmp:get-request-field("type", $bits[4])
+let $key := xdmp:get-request-field("key", $bits[3])[1]
+let $type := xdmp:get-request-field("type", $bits[4])[1]
 (: If the type is boolean, the operator should always be equality :)
 let $operator :=
     if($type = "boolean")
     then "eq"
-    else xdmp:get-request-field("operator", $bits[5])
+    else xdmp:get-request-field("operator", $bits[5])[1]
 let $xsType := manage:jsonTypeToSchemaType($type)
 
-let $existingIndexes := admin:database-get-range-element-indexes($config, $database)
-let $existing :=
-    for $index in $existingIndexes
+let $existing := (
+    for $index in admin:database-get-range-element-indexes($config, $database)
     where $index/*:scalar-type = $xsType and $index/*:namespace-uri = "http://marklogic.com/json" and $index/*:localname = $key
     return $index
+    ,
+    for $index in admin:database-get-range-element-attribute-indexes($config, $database)
+    where $index/*:scalar-type = $xsType and $index/*:parent-namespace-uri = "http://marklogic.com/json" and $index/*:parent-localname = $key
+    return $index
+)
 
 return
     if($requestMethod = "GET")
@@ -64,7 +68,7 @@ return
         then json:xmlToJSON(manage:rangeDefinitionToJsonXml($existing, $name, $operator))
         else common:error(404, "Range index not found")
 
-    else if($requestMethod = ("PUT", "POST"))
+    else if($requestMethod = "POST")
     then
         if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name))
@@ -104,7 +108,10 @@ return
             let $propertiesForIndex := manage:getPropertiesAssociatedWithRangeIndex($existing)
             let $deleteIndex :=
                 if(count($propertiesForIndex) = 1)
-                then admin:save-configuration(admin:database-delete-range-element-index($config, $database, $existing))
+                then
+                    if(local-name($existing) = "range-element-index")
+                    then admin:save-configuration(admin:database-delete-range-element-index($config, $database, $existing))
+                    else admin:save-configuration(admin:database-delete-range-element-attribute-index($config, $database, $existing))
                 else ()
             return prop:delete(concat("index-", $name))
         else common:error(404, "Range index not found")

@@ -47,7 +47,7 @@ return
         then json:xmlToJSON(manage:fieldDefinitionToJsonXml($existing))
         else common:error(404, "Field not found")
 
-    else if($requestMethod = ("PUT", "POST"))
+    else if($requestMethod = "POST")
     then 
         if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name))
@@ -56,7 +56,6 @@ return
             then xdmp:set($config, admin:database-delete-field($config, $database, $name))
             else (),
 
-            let $setProp := prop:set(concat("index-", $name), concat("field/", $name))
             let $config := admin:database-add-field($config, $database, admin:database-field($name, false()))
             let $includes := xdmp:get-request-field("include")
             let $excludes := xdmp:get-request-field("exclude")
@@ -71,6 +70,8 @@ return
                 let $el := admin:database-excluded-element("http://marklogic.com/json", $exclude)
                 return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
             return admin:save-configuration($config)
+            ,
+            prop:set(concat("index-", $name), concat("field/", $name))
         )
 
     else if($requestMethod = "DELETE")

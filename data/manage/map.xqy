@@ -27,10 +27,10 @@ import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/c
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/manage/map.xqy"))
-let $name := map:get($params, "name")
-let $key := map:get($params, "key")
-let $mode := map:get($params, "mode")
+(: let $params := rest:process-request(endpoints:request("/data/manage/map.xqy")) :)
+let $name := xdmp:get-request-field("name")[1]
+let $key := xdmp:get-request-field("key")[1]
+let $mode := xdmp:get-request-field("mode")[1]
 let $requestMethod := xdmp:get-request-method()
 
 let $existing := prop:get(concat("index-", $name))
@@ -48,9 +48,11 @@ return
             )))
         else common:error(404, "Alias not found")
 
-    else if($requestMethod = ("PUT", "POST"))
+    else if($requestMethod = "POST")
     then 
-        if(exists(manage:validateIndexName($name)))
+        if(not($mode = ("equals", "contains")))
+        then common:error(500, "Map modes must be either 'equals' or 'contains'")
+        else if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name))
         else prop:set(concat("index-", $name), concat("map/", $name, "/", $key, "/", $mode))
 
