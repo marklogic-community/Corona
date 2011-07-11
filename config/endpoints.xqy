@@ -50,11 +50,10 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST"/>
-        <http method="PUT"/>
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/data/manage/range/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/range.xqy" user-params="allow">
+    <request uri="^/data/manage/range/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/range.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -62,24 +61,15 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="type" required="true"/>
             <param name="operator" required="true"/>
         </http>
-        <http method="PUT">
-            <param name="key" required="true"/>
-            <param name="type" required="true"/>
-            <param name="operator" required="true"/>
-        </http>
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/data/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/map.xqy" user-params="allow">
+    <request uri="^/data/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/map.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
             <param name="key" required="true"/>
-            <param name="mode" required="true" values="contains|equality"/>
-        </http>
-        <http method="PUT">
-            <param name="key" required="true"/>
-            <param name="mode" required="true" values="contains|equality"/>
+            <param name="mode" required="true" values="contains|equals"/>
         </http>
         <http method="DELETE"/>
     </request>
