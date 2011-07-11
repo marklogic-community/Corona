@@ -437,12 +437,22 @@ as map:map
   (: Make sure we look at all params, not just top-level ones. :)
   let $allparam := ($req/rest:param, rest-impl:http($req, $method)/rest:param)
 
+  let $upset   := (rest-impl:http($req,$method)/@user-params,
+                   $req/@user-params,
+                   $req/parent::rest:options/@user-params)[1]
+
   let $map := map:map()
 
   (: Add the uri-param parameters to the map :)
   let $_   := if ($processing-endpoint)
               then
-                ()
+                if ($upset = "ignore")
+                then
+                  for $param in $req/rest:uri-param
+                  return
+                    map:put($map, $param/@name, map:get($user-params, $param/@name))
+                else
+                  ()
               else
                 for $param in $req/rest:uri-param
                 let $trace := rest-impl:log(concat("..", $uri, " :: ", $req/@uri, " :: ", $param))
@@ -486,23 +496,21 @@ as map:map
   (: Add extra parameters to the map :)
   let $from := distinct-values($allparam/@from)
 
-  let $upset   := (rest-impl:http($req,$method)/@user-params,
-                   $req/@user-params,
-                   $req/parent::rest:options/@user-params)[1]
-
   let $uparams := if ($upset = "ignore")
                   then
                     ()
                   else
                     for $name in map:keys($user-params)
-                    where not($name = $from) and empty($allparam[@name = $name])
+                    where $upset = "allow-dups"
+                          or (not($name = $from) and empty($allparam[@name = $name]))
                     return $name
 
   let $trace := rest-impl:log(concat("from: ", string-join($from, ",")))
   let $trace := rest-impl:log(concat("uprm: ", string-join($uparams, ",")))
 
   let $_   := for $name in $uparams
-              let $values := map:get($user-params, $name)
+              let $values := (if ($upset = "allow-dups") then map:get($map, $name) else (),
+                              map:get($user-params, $name))
               let $value
                 := for $value in $values
                    let $trace := rest-impl:log(concat("x ", $name, "=", $value))
@@ -524,11 +532,18 @@ declare private function rest-impl:uri-params-ok(
   $raise-errors as xs:boolean)
 as xs:boolean
 {
+  let $upset := (rest-impl:http($req,$method)/@user-params,
+                 $req/@user-params,
+                 $req/parent::rest:options/@user-params)[1]
   let $errors
-    := for $param in ($req/rest:uri-param, rest-impl:http($req,$method)/rest:uri-param)
-       where exists(map:get($user-params, $param/@name))
-       return
-         rest-impl:no-match($raise-errors, $rest-impl:INVALIDPARAM, $param/@name)
+    := if ($upset = "allow-dups")
+       then
+         ()
+       else
+         for $param in ($req/rest:uri-param, rest-impl:http($req,$method)/rest:uri-param)
+         where exists(map:get($user-params, $param/@name))
+         return
+           rest-impl:no-match($raise-errors, $rest-impl:INVALIDPARAM, $param/@name)
   return
     empty($errors)
 };
