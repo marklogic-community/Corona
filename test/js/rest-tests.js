@@ -24,7 +24,20 @@ mljson.removeIndexes = function(info, callback) {
     var removeIndex = function(pos) {
         var index = indexes[pos];
         if(index === undefined) {
-            callback.call();
+            asyncTest("Check for no indexes", function() {
+                $.ajax({
+                    url: '/data/info',
+                    success: function(data) {
+                        var info = JSON.parse(data);
+                        ok(info.indexes.fields.length === 0 && info.indexes.mappings.length === 0 && info.indexes.ranges.length === 0, "All indexes removed");
+                        callback.call();
+                    },
+                    error: function() {
+                        ok(false, "Could not fetch server info");
+                    },
+                    complete: function() { start(); }
+                });
+            });
             return;
         }
 
@@ -35,6 +48,7 @@ mljson.removeIndexes = function(info, callback) {
                 type: 'DELETE',
                 success: function() {
                     processingPosition++;
+                    ok(true, "Removed the " + index.name + " index");
                     removeNextIndex();
                 },
                 error: function(j, t, error) {
@@ -50,6 +64,169 @@ mljson.removeIndexes = function(info, callback) {
     removeNextIndex();
 };
 
+mljson.addIndexes = function(callback) {
+    // These are the index to try and create
+    var indexes = [
+        {
+            "type": "field",
+            "pluralType": "fields",
+            "name": "field1",
+            "includes": ["included1", "included2"],
+            "excludes": ["excluded1"],
+            "shouldSucceed": true,
+            "purpose": "General field creation",
+        },
+        {
+            "type": "map",
+            "pluralType": "mappings",
+            "name": "map1",
+            "key": "name1",
+            "mode": "contains",
+            "shouldSucceed": true,
+            "purpose": "General map creation"
+        },
+        {
+            "type": "range",
+            "pluralType": "ranges",
+            "name": "range1",
+            "key": "date1",
+            "datatype": "date",
+            "operator": "gt",
+            "shouldSucceed": true,
+            "purpose": "General range creation"
+        },
+
+        {
+            "type": "field",
+            "pluralType": "fields",
+            "name": "field1",
+            "includes": [],
+            "excludes": [],
+            "shouldSucceed": false,
+            "purpose": "Making sure you can't have duplicate names when creating a field"
+        },
+        {
+            "type": "map",
+            "pluralType": "mappings",
+            "name": "field1",
+            "key": "name1",
+            "mode": "equals",
+            "shouldSucceed": false,
+            "purpose": "Making sure you can't have duplicate names when creating a map"
+        },
+        {
+            "type": "range",
+            "pluralType": "ranges",
+            "name": "field1",
+            "key": "name1",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": false,
+            "purpose": "Making sure you can't have duplicate names when creating a range"
+        }
+    ];
+
+    var compareIndexes = function(config, server) {
+        ok(config.type === server.type, "Index types match");
+
+        if(config.type === "map") {
+            ok(config.key === server.key, "Index keys match");
+            ok(config.mode === server.mode, "Index modes match");
+        }
+        else if(config.type === "range") {
+            ok(config.key === server.key, "Index keys match");
+            ok(config.datatype === server.type, "Index datatypes match");
+            ok(config.operator === server.operator, "Index operators match");
+        }
+        else if(config.type === "field") {
+            deepEqual(config.includes, server.includedKeys, "Index includes match");
+            deepEqual(config.includes, server.excludedKeys, "Index excludes match");
+        }
+    };
+    
+    var processingPosition = 0;
+
+    var addNextIndex = function() {
+        addIndex(processingPosition);
+    };
+
+    var addIndex = function(pos) {
+        var index = indexes[pos];
+
+        if(index === undefined) {
+            $.ajax({
+                url: '/data/info',
+                context: this,
+                success: function(data) {
+                    var info = JSON.parse(data);
+                    var i = 0;
+                    var j = 0;
+                    for (i = 0; i < indexes.length; i += 1) {
+                        var config = indexes[i];
+                        var foundIndex = false;
+                        for(j = 0; j < info.indexes["pluralType"].length; j += 1) {
+                            var server = info.indexes["pluralType"][j];
+                            if(server.name === config.name) {
+                                foundIndex = true;
+                                compareIndexes(config, server);
+                            }
+                        }
+                        if(!foundIndex) {
+                            ok(false, "Could not find newly added index");
+                        }
+                    }
+                },
+                error: function() {
+                    ok(false, "Could not check for added index");
+                },
+                complete: function() { start(); }
+            });
+            return;
+        }
+
+
+
+        asyncTest(index.purpose, function() {
+            var url = "/data/manage/" + index.type + "/" + index.name;
+            var data = {};
+            if(index.type === "map") {
+                data.key = index.key;
+                data.mode = index.mode;
+            }
+            else if(index.type === "field") {
+                data.include = index.includes;
+                data.exclude = index.excludes;
+            }
+            else if(index.type === "range") {
+                data.key = index.key;
+                data.type = index.datatype;
+                data.operator = index.operator;
+            }
+
+            $.ajax({
+                url: url,
+                data: data,
+                type: 'POST',
+                context: index,
+                success: function() {
+                    processingPosition++;
+                    addNextIndex();
+                },
+                error: function(j, t, error) {
+                    ok(!this.shouldSucceed, "Could not add index: " + error);
+                    processingPosition++;
+                    addNextIndex();
+                },
+                complete: function() {
+                    start();
+                }
+            });
+        });
+    };
+
+    addNextIndex();
+};
+
 $(document).ready(function() {
     module("Database setup");
     asyncTest("Database index setup", function() {
@@ -57,8 +234,7 @@ $(document).ready(function() {
             url: '/data/info',
             success: function(data) {
                 var info = JSON.parse(data);
-                mljson.removeIndexes(info, function() {
-                });
+                mljson.removeIndexes(info, mljson.addIndexes);
             },
             error: function() {
                 ok(false, "Could not fetch server info");
