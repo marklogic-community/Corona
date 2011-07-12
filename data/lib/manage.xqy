@@ -38,7 +38,7 @@ declare function manage:fieldDefinitionToJsonXml(
             return json:unescapeNCName($key)
         ),
         "excludedKeys", json:array(
-            for $include in $field/db:excluded-elements/db:exclude-element
+            for $include in $field/db:excluded-elements/db:excluded-element
             for $key in tokenize(string($include/db:localname), " ")
             return json:unescapeNCName($key)
         )
@@ -53,9 +53,24 @@ declare function manage:rangeDefinitionToJsonXml(
 {
     json:object((
         "name", $name,
-        "key", json:unescapeNCName(string($index/*:localname)),
-        "type", string($index/*:scalar-type),
+        "key", json:unescapeNCName(string(($index/*:parent-localname, $index/*:localname)[1])),
+        "type", manage:schemaTypeToJsonType(string($index/*:scalar-type)),
         "operator", $operator
+    ))
+};
+
+declare function manage:getJsonXmlForMap(
+    $property as xs:string
+) as element(json:item)
+{
+    let $bits := tokenize($property, "/")
+    let $name := $bits[2]
+    let $key := json:unescapeNCName($bits[3])
+    let $mode := $bits[4]
+    return json:object((
+        "name", $name,
+        "key", $key,
+        "mode", $mode
     ))
 };
 
@@ -82,6 +97,21 @@ declare function manage:jsonTypeToSchemaType(
     then "string"
     else if($type = "date")
     then "dateTime"
+    else "decimal"
+};
+
+declare function manage:schemaTypeToJsonType(
+    $type as xs:string?
+) as xs:string?
+{
+    if(empty($type))
+    then ()
+    else if($type = "string")
+    then "string"
+    else if($type = "dateTime")
+    then "date"
+    else if($type = "boolean")
+    then "boolean"
     else "decimal"
 };
 

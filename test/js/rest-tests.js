@@ -127,20 +127,18 @@ mljson.addIndexes = function(callback) {
     ];
 
     var compareIndexes = function(config, server) {
-        ok(config.type === server.type, "Index types match");
-
         if(config.type === "map") {
-            ok(config.key === server.key, "Index keys match");
-            ok(config.mode === server.mode, "Index modes match");
+            equals(config.key, server.key, "Index keys match");
+            equals(config.mode, server.mode, "Index modes match");
         }
         else if(config.type === "range") {
-            ok(config.key === server.key, "Index keys match");
-            ok(config.datatype === server.type, "Index datatypes match");
-            ok(config.operator === server.operator, "Index operators match");
+            equals(config.key, server.key, "Index keys match");
+            equals(config.datatype, server.type, "Index datatypes match");
+            equals(config.operator, server.operator, "Index operators match");
         }
         else if(config.type === "field") {
             deepEqual(config.includes, server.includedKeys, "Index includes match");
-            deepEqual(config.includes, server.excludedKeys, "Index excludes match");
+            deepEqual(config.excludes, server.excludedKeys, "Index excludes match");
         }
     };
     
@@ -154,37 +152,41 @@ mljson.addIndexes = function(callback) {
         var index = indexes[pos];
 
         if(index === undefined) {
-            $.ajax({
-                url: '/data/info',
-                context: this,
-                success: function(data) {
-                    var info = JSON.parse(data);
-                    var i = 0;
-                    var j = 0;
-                    for (i = 0; i < indexes.length; i += 1) {
-                        var config = indexes[i];
-                        var foundIndex = false;
-                        for(j = 0; j < info.indexes["pluralType"].length; j += 1) {
-                            var server = info.indexes["pluralType"][j];
-                            if(server.name === config.name) {
-                                foundIndex = true;
-                                compareIndexes(config, server);
+            asyncTest("Checking created indexes", function() {
+                $.ajax({
+                    url: '/data/info',
+                    context: this,
+                    success: function(data) {
+                        var info = JSON.parse(data);
+                        var i = 0;
+                        var j = 0;
+                        for (i = 0; i < indexes.length; i += 1) {
+                            var config = indexes[i];
+                            if(!config.shouldSucceed) {
+                                continue;
+                            }
+                            var foundIndex = false;
+                            for(j = 0; j < info.indexes[config.pluralType].length; j += 1) {
+                                var server = info.indexes[config.pluralType][j];
+                                if(server.name === config.name) {
+                                    foundIndex = true;
+                                    compareIndexes(config, server);
+                                }
+                            }
+                            if(!foundIndex) {
+                                ok(false, "Could not find newly added index");
                             }
                         }
-                        if(!foundIndex) {
-                            ok(false, "Could not find newly added index");
-                        }
-                    }
-                },
-                error: function() {
-                    ok(false, "Could not check for added index");
-                },
-                complete: function() { start(); }
+                        callback.call();
+                    },
+                    error: function() {
+                        ok(false, "Could not check for added index");
+                    },
+                    complete: function() { start(); }
+                });
             });
             return;
         }
-
-
 
         asyncTest(index.purpose, function() {
             var url = "/data/manage/" + index.type + "/" + index.name;
@@ -209,6 +211,7 @@ mljson.addIndexes = function(callback) {
                 type: 'POST',
                 context: index,
                 success: function() {
+                    ok(true, "Index was created");
                     processingPosition++;
                     addNextIndex();
                 },
@@ -227,6 +230,58 @@ mljson.addIndexes = function(callback) {
     addNextIndex();
 };
 
+mljson.insertDocuments = function() {
+    var documents = [
+        {
+            "name1": "Musical Animals",
+            "date1": "January 5th 1977",
+            "included1": "chicken",
+            "included2": {
+                "animal": "snake",
+                "excluded1": "mastodon"
+            },
+            "uri": "/document1.json"
+        }
+    ];
+    
+    var processingPosition = 0;
+
+    var insertNextDocument = function() {
+        addDocument(processingPosition);
+    };
+
+    var addDocument = function(pos) {
+        var doc = documents[pos];
+
+        if(doc === undefined) {
+            return;
+        }
+
+        asyncTest("Inserting document: " + doc.uri, function() {
+            $.ajax({
+                url: "/data/store" + doc.uri,
+                type: 'PUT',
+                data: JSON.stringify(doc),
+                success: function() {
+                    ok(true, "Inserted document");
+                    processingPosition++;
+                    insertNextDocument();
+                },
+                error: function(j, t, error) {
+                    ok(false, "Could not insert document");
+                    processingPosition++;
+                    insertNextDocument();
+                },
+                complete: function() {
+                    start();
+                }
+            });
+        });
+    };
+
+    insertNextDocument();
+};
+
 $(document).ready(function() {
     module("Database setup");
     asyncTest("Database index setup", function() {
@@ -234,7 +289,11 @@ $(document).ready(function() {
             url: '/data/info',
             success: function(data) {
                 var info = JSON.parse(data);
-                mljson.removeIndexes(info, mljson.addIndexes);
+                mljson.removeIndexes(info, function() {
+                    mljson.addIndexes(function() {
+                        mljson.insertDocuments();
+                    });
+                });
             },
             error: function() {
                 ok(false, "Could not fetch server info");

@@ -39,13 +39,7 @@ return
     if($requestMethod = "GET")
     then
         if(exists($existing))
-        then
-            let $bits := tokenize($existing, "/")
-            return json:xmlToJSON(json:object((
-                "name", $name,
-                "key", $bits[3],
-                "mode", $bits[4] 
-            )))
+        then manage:getJsonXmlForMap($existing)
         else common:error(404, "Alias not found")
 
     else if($requestMethod = "POST")

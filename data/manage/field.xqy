@@ -28,8 +28,8 @@ import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/manage/field.xqy"))
-let $name := map:get($params, "name")
+(: let $params := rest:process-request(endpoints:request("/data/manage/field.xqy")) :)
+let $name := xdmp:get-request-field("name")
 let $requestMethod := xdmp:get-request-method()
 
 let $database := xdmp:database()
@@ -57,8 +57,9 @@ return
             else (),
 
             let $config := admin:database-add-field($config, $database, admin:database-field($name, false()))
-            let $includes := xdmp:get-request-field("include")
-            let $excludes := xdmp:get-request-field("exclude")
+            (: Pretty hacky for the moment :)
+            let $includes := distinct-values((xdmp:get-request-field("include"), xdmp:get-request-field("include[]")))
+            let $excludes := distinct-values((xdmp:get-request-field("exclude"), xdmp:get-request-field("exclude[]")))
             let $add :=
                 for $include in $includes
                 let $include := json:escapeNCName($include)
