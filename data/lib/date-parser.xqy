@@ -188,7 +188,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
         <month>\w+</month>
         <whitespace/>
         <day>\d\d|\d?\dth|1st|2nd|3rd</day>
-        <string>,</string>
+        <string>,?</string>
         <whitespace/>
         <year>\d\d\d\d</year>
     </format>
