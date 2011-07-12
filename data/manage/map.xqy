@@ -33,14 +33,14 @@ let $key := xdmp:get-request-field("key")[1]
 let $mode := xdmp:get-request-field("mode")[1]
 let $requestMethod := xdmp:get-request-method()
 
-let $existing := prop:get(concat("index-", $name))
+let $existing := manage:getMap($name)
 
 return
     if($requestMethod = "GET")
     then
         if(exists($existing))
-        then manage:getJsonXmlForMap($existing)
-        else common:error(404, "Alias not found")
+        then json:xmlToJSON($existing)
+        else common:error(404, "Mapping not found")
 
     else if($requestMethod = "POST")
     then 
@@ -48,11 +48,11 @@ return
         then common:error(500, "Map modes must be either 'equals' or 'contains'")
         else if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name))
-        else prop:set(concat("index-", $name), concat("map/", $name, "/", $key, "/", $mode))
+        else manage:createMap($name, $key, $mode)
 
     else if($requestMethod = "DELETE")
     then
         if(exists($existing))
-        then prop:delete(concat("index-", $name))
-        else common:error(404, "Alias not found")
+        then manage:deleteMap($name)
+        else common:error(404, "Mapping not found")
     else ()

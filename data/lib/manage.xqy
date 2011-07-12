@@ -26,7 +26,220 @@ declare namespace db="http://marklogic.com/xdmp/database";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
-declare function manage:fieldDefinitionToJsonXml(
+
+declare function manage:validateIndexName(
+    $name as xs:string?
+) as xs:string?
+{
+    if(empty($name) or string-length($name) = 0)
+    then "Must provide a name for the index"
+    else if(not(matches($name, "^[0-9A-Za-z_-]+$")))
+    then "Index names can only contain alphanumeric, dash and underscore characters"
+    else if(exists(prop:get(concat("index-", $name))))
+    then concat("An index, field or alias with the name '", $name, "' already exists")
+    else ()
+};
+
+
+declare function manage:createField(
+    $name as xs:string,
+    $includes as xs:string*,
+    $excludes as xs:string*,
+    $config as element()
+) as empty-sequence()
+{
+    let $database := xdmp:database()
+    let $config := admin:database-add-field($config, $database, admin:database-field($name, false()))
+    let $add :=
+        for $include in $includes
+        let $include := json:escapeNCName($include)
+        let $el := admin:database-included-element("http://marklogic.com/json", $include, 1, (), "", "")
+        return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
+    let $add :=
+        for $exclude in $excludes
+        let $exclude := json:escapeNCName($exclude)
+        let $el := admin:database-excluded-element("http://marklogic.com/json", $exclude)
+        return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
+    return admin:save-configuration($config)
+    ,
+    prop:set(concat("index-", $name), concat("field/", $name))
+};
+
+declare function manage:deleteField(
+    $name as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    admin:save-configuration(admin:database-delete-field($config, xdmp:database(), $name)),
+    prop:delete(concat("index-", $name))
+};
+
+declare function manage:getField(
+    $name as xs:string,
+    $config as element()
+) as element(json:item)?
+{
+    let $database := xdmp:database()
+    let $def :=
+        try {
+            admin:database-get-field($config, $database, $name)
+        }
+        catch ($e) {()}
+    where exists($def)
+    return manage:fieldDefinitionToJsonXml($def)
+};
+
+declare function manage:getAllFields(
+    $config as element()
+) as element(json:item)*
+{
+    let $database := xdmp:database()
+    let $config := admin:get-configuration()
+    for $field in admin:database-get-fields($config, $database)
+    where string-length($field/*:field-name) > 0
+    return manage:fieldDefinitionToJsonXml($field)
+};
+
+
+declare function manage:createMap(
+    $name as xs:string,
+    $key as xs:string,
+    $mode as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("map/", $name, "/", $key, "/", $mode))
+};
+
+declare function manage:deleteMap(
+    $name as xs:string
+) as empty-sequence()
+{
+    prop:delete(concat("index-", $name))
+};
+
+declare function manage:getMap(
+    $name as xs:string
+) as element(json:item)?
+{
+    let $property := prop:get(concat("index-", $name))
+    let $bits := tokenize($property, "/")
+    let $name := $bits[2]
+    let $key := json:unescapeNCName($bits[3])
+    let $mode := $bits[4]
+    where $bits[1] = "map"
+    return json:object((
+        "name", $name,
+        "key", $key,
+        "mode", $mode
+    ))
+};
+
+declare function manage:getAllMaps(
+) as element(json:item)*
+{
+    for $key in prop:all()
+    let $value := prop:get($key)
+    where starts-with($key, "index-") and starts-with($value, "map/")
+    return manage:getMap(substring-after($key, "index-"))
+};
+
+
+declare function manage:createRange(
+    $name as xs:string,
+    $key as xs:string,
+    $type as xs:string,
+    $operator as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    let $operator :=
+        if($type = "boolean")
+        then "eq"
+        else $operator
+    return
+        if($type = "string")
+        then
+            let $index := admin:database-range-element-index("string", "http://marklogic.com/json", $key, "http://marklogic.com/collation/", false())
+            let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
+            return admin:save-configuration($config)
+        else if($type = "date")
+        then
+            let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, (), "normalized-date", "", false())
+            let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
+            return admin:save-configuration($config)
+        else if($type = "number")
+        then
+            let $index := admin:database-range-element-index("decimal", "http://marklogic.com/json", $key, "", false())
+            let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
+            return admin:save-configuration($config)
+        else if($type = "boolean")
+        then
+            let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, (), "boolean", "", false())
+            let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
+            return admin:save-configuration($config)
+        else
+            ()
+    ,
+    prop:set(concat("index-", $name), concat("range/", $name, "/", $key, "/", $type, "/", $operator))
+};
+
+declare function manage:deleteRange(
+    $name as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    let $database := xdmp:database()
+    let $property := prop:get(concat("index-", $name))
+    let $bits := tokenize($property, "/")
+    let $key := $bits[3]
+    let $type := manage:jsonTypeToSchemaType($bits[4])
+    let $existing := manage:getRangeDefinition($key, $type, $config)
+    let $propertiesForIndex := manage:getPropertiesAssociatedWithRangeIndex($existing)
+    where $bits[1] = "range"
+    return (
+        if(count($propertiesForIndex) = 1)
+        then
+            if(local-name($existing) = "range-element-index")
+            then admin:save-configuration(admin:database-delete-range-element-index($config, $database, $existing))
+            else admin:save-configuration(admin:database-delete-range-element-attribute-index($config, $database, $existing))
+        else ()
+        ,
+        prop:delete(concat("index-", $name))
+    )
+};
+
+declare function manage:getRange(
+    $name as xs:string,
+    $config as element()
+) as element(json:item)?
+{
+    let $property := prop:get(concat("index-", $name))
+    let $bits := tokenize($property, "/")
+    let $key := $bits[3]
+    let $type := manage:jsonTypeToSchemaType($bits[4])
+    let $operator :=
+        if($type = "boolean")
+        then "eq"
+        else $bits[5]
+    let $def := manage:getRangeDefinition($key, $type, $config)
+    where $bits[1] = "range"
+    return manage:rangeDefinitionToJsonXml($def, $name, $operator)
+};
+
+declare function manage:getAllRanges(
+    $config as element()
+) as element(json:item)*
+{
+    for $value in manage:getRangeIndexProperties()
+    let $bits := tokenize($value, "/")
+    return manage:getRange($bits[2], $config)
+};
+
+
+
+(: Private functions :)
+
+declare private function manage:fieldDefinitionToJsonXml(
     $field as element(db:field)
 ) as element(json:item)
 {
@@ -45,7 +258,24 @@ declare function manage:fieldDefinitionToJsonXml(
     ))
 };
 
-declare function manage:rangeDefinitionToJsonXml(
+declare private function manage:getRangeDefinition(
+    $key as xs:string,
+    $xsType as xs:string,
+    $config as element()
+) as element()?
+{
+    (
+        for $index in admin:database-get-range-element-indexes($config, xdmp:database())
+        where $index/*:scalar-type = $xsType and $index/*:namespace-uri = "http://marklogic.com/json" and $index/*:localname = $key
+        return $index
+        ,
+        for $index in admin:database-get-range-element-attribute-indexes($config, xdmp:database())
+        where $index/*:scalar-type = $xsType and $index/*:parent-namespace-uri = "http://marklogic.com/json" and $index/*:parent-localname = $key
+        return $index
+    )[1]
+};
+
+declare private function manage:rangeDefinitionToJsonXml(
     $index as element(),
     $name as xs:string,
     $operator as xs:string
@@ -59,35 +289,28 @@ declare function manage:rangeDefinitionToJsonXml(
     ))
 };
 
-declare function manage:getJsonXmlForMap(
-    $property as xs:string
-) as element(json:item)
+declare private function manage:getPropertiesAssociatedWithRangeIndex(
+    $index as element()
+) as xs:string*
 {
-    let $bits := tokenize($property, "/")
-    let $name := $bits[2]
-    let $key := json:unescapeNCName($bits[3])
-    let $mode := $bits[4]
-    return json:object((
-        "name", $name,
-        "key", $key,
-        "mode", $mode
-    ))
+    for $value in manage:getRangeIndexProperties()
+    let $bits := tokenize($value, "/")
+    let $key := $bits[3]
+    let $type := $bits[4]
+    where $index/*:scalar-type = manage:jsonTypeToSchemaType($type) and $index/(*:namespace-uri, *:parent-namespace-uri) = "http://marklogic.com/json" and $index/(*:localname, *:parent-localname) = $key
+    return $value
 };
 
-declare function manage:validateIndexName(
-    $name as xs:string?
-) as xs:string?
+declare private function manage:getRangeIndexProperties(
+) as xs:string*
 {
-    if(empty($name) or string-length($name) = 0)
-    then "Must provide a name for the index"
-    else if(not(matches($name, "^[0-9A-Za-z_-]+$")))
-    then "Index names can only contain alphanumeric, dash and underscore characters"
-    else if(exists(prop:get(concat("index-", $name))))
-    then concat("An index, field or alias with the name '", $name, "' already exists")
-    else ()
+    for $key in prop:all()
+    let $value := prop:get($key)
+    where starts-with($key, "index-") and starts-with($value, "range/")
+    return $value
 };
 
-declare function manage:jsonTypeToSchemaType(
+declare private function manage:jsonTypeToSchemaType(
     $type as xs:string?
 ) as xs:string?
 {
@@ -100,7 +323,7 @@ declare function manage:jsonTypeToSchemaType(
     else "decimal"
 };
 
-declare function manage:schemaTypeToJsonType(
+declare private function manage:schemaTypeToJsonType(
     $type as xs:string?
 ) as xs:string?
 {
@@ -113,59 +336,4 @@ declare function manage:schemaTypeToJsonType(
     else if($type = "boolean")
     then "boolean"
     else "decimal"
-};
-
-declare function manage:getRangeIndexProperties(
-) as xs:string*
-{
-    for $key in prop:all()
-    let $value := prop:get($key)
-    where starts-with($key, "index-") and starts-with($value, "range/")
-    return $value
-};
-
-declare function manage:getMappingProperties(
-) as xs:string*
-{
-    for $key in prop:all()
-    let $value := prop:get($key)
-    where starts-with($key, "index-") and starts-with($value, "map/")
-    return $value
-};
-
-declare function manage:getPropertiesAssociatedWithRangeIndex(
-    $index as element()
-) as xs:string*
-{
-    for $value in manage:getRangeIndexProperties()
-    let $bits := tokenize($value, "/")
-    let $key := $bits[3]
-    let $type := $bits[4]
-    where $index/*:scalar-type = manage:jsonTypeToSchemaType($type) and $index/(*:namespace-uri, *:parent-namespace-uri) = "http://marklogic.com/json" and $index/(*:localname, *:parent-localname) = $key
-    return $value
-};
-
-declare function manage:getRangeDefinitions(
-) as element(json:item)*
-{
-    let $config := admin:get-configuration()
-    let $existingElementIndexes := admin:database-get-range-element-indexes($config, xdmp:database())
-    let $existingAttributeIndexes := admin:database-get-range-element-attribute-indexes($config, xdmp:database())
-
-    for $value in manage:getRangeIndexProperties()
-    let $bits := tokenize($value, "/")
-    let $name := $bits[2]
-    let $key := $bits[3]
-    let $type := manage:jsonTypeToSchemaType($bits[4])
-    let $operator := $bits[5]
-    let $index := (
-        for $index in $existingElementIndexes
-        where $index/db:scalar-type = $type and $index/db:namespace-uri = "http://marklogic.com/json" and $index/db:localname = $key
-        return $index
-        ,
-        for $index in $existingAttributeIndexes
-        where $index/db:scalar-type = $type and $index/db:parent-namespace-uri = "http://marklogic.com/json" and $index/db:parent-localname = $key
-        return $index
-    )
-    return manage:rangeDefinitionToJsonXml($index, $name, $operator)
 };

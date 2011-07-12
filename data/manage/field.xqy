@@ -34,17 +34,13 @@ let $requestMethod := xdmp:get-request-method()
 
 let $database := xdmp:database()
 let $config := admin:get-configuration()
-let $existing :=
-    try {
-        admin:database-get-field($config, $database, $name)
-    }
-    catch ($e) {()}
+let $existing := manage:getField($name, $config)
 
 return
     if($requestMethod = "GET")
     then
         if(exists($existing))
-        then json:xmlToJSON(manage:fieldDefinitionToJsonXml($existing))
+        then json:xmlToJSON($existing)
         else common:error(404, "Field not found")
 
     else if($requestMethod = "POST")
@@ -56,31 +52,15 @@ return
             then xdmp:set($config, admin:database-delete-field($config, $database, $name))
             else (),
 
-            let $config := admin:database-add-field($config, $database, admin:database-field($name, false()))
             (: Pretty hacky for the moment :)
             let $includes := distinct-values((xdmp:get-request-field("include"), xdmp:get-request-field("include[]")))
             let $excludes := distinct-values((xdmp:get-request-field("exclude"), xdmp:get-request-field("exclude[]")))
-            let $add :=
-                for $include in $includes
-                let $include := json:escapeNCName($include)
-                let $el := admin:database-included-element("http://marklogic.com/json", $include, 1, (), "", "")
-                return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
-            let $add :=
-                for $exclude in $excludes
-                let $exclude := json:escapeNCName($exclude)
-                let $el := admin:database-excluded-element("http://marklogic.com/json", $exclude)
-                return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
-            return admin:save-configuration($config)
-            ,
-            prop:set(concat("index-", $name), concat("field/", $name))
+            return manage:createField($name, $includes, $excludes, $config)
         )
 
     else if($requestMethod = "DELETE")
     then
         if(exists($existing))
-        then (
-            admin:save-configuration(admin:database-delete-field($config, $database, $name)),
-            prop:delete(concat("index-", $name))
-        )
+        then manage:deleteField($name, $config)
         else common:error(404, "Field not found")
     else ()

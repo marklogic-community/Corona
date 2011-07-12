@@ -48,16 +48,9 @@ json:document(
             "keyValuePhrases", admin:database-get-fast-element-phrase-searches($config, $database),
             "keyValueTrailingWildcards", admin:database-get-fast-element-trailing-wildcard-searches($config, $database),
             "geo", json:array(),
-            "ranges", json:array(manage:getRangeDefinitions()),
-            "fields", json:array(
-                for $field in admin:database-get-fields($config, $database)
-                where string-length($field/*:field-name) > 0
-                return manage:fieldDefinitionToJsonXml($field)
-            ),
-            "mappings", json:array(
-                for $map in manage:getMappingProperties()
-                return manage:getJsonXmlForMap($map)
-            )
+            "ranges", json:array(manage:getAllRanges($config)),
+            "fields", json:array(manage:getAllFields($config)),
+            "mappings", json:array(manage:getAllMaps())
         )),
         "settings", json:object((
             "directoryCreation", admin:database-get-directory-creation($config, $database)
