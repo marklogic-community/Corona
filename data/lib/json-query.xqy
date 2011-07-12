@@ -22,6 +22,14 @@ import module namespace json="http://marklogic.com/json" at "json.xqy";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
+declare function jsonquery:getCTS(
+    $json as xs:string
+) as cts:query
+{
+    let $tree := json:jsonToXML($json)
+    return jsonquery:dispatch($tree)
+};
+
 declare function jsonquery:parse(
     $json as xs:string
 ) as xs:string

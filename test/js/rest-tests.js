@@ -89,7 +89,7 @@ mljson.addIndexes = function(callback) {
             "type": "range",
             "pluralType": "ranges",
             "name": "range1",
-            "key": "date1",
+            "key": "date1::date",
             "datatype": "date",
             "operator": "gt",
             "shouldSucceed": true,
@@ -234,7 +234,7 @@ mljson.insertDocuments = function() {
     var documents = [
         {
             "name1": "Musical Animals",
-            "date1": "January 5th 1977",
+            "date1::date": "January 5th 1977",
             "included1": "chicken",
             "included2": {
                 "animal": "snake",

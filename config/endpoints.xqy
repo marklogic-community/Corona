@@ -46,6 +46,14 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <!-- Info request -->
     <request uri="^/data/info(/)?$" endpoint="/data/info.xqy" user-params="ignore"/>
 
+    <!-- Facets -->
+    <request uri="^/data/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/data/facet.xqy">
+        <uri-param name="facets">$1</uri-param>
+        <param name="q" required="false"/>
+        <param name="customquery" required="false"/>
+    </request>
+
+    <!-- Index management -->
     <request uri="^/data/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/data/manage/field.xqy" user-params="allow">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
