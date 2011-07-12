@@ -152,6 +152,7 @@ declare function manage:createRange(
     $config as element()
 ) as empty-sequence()
 {
+    let $key := json:escapeNCName($key)
     let $operator :=
         if($type = "boolean")
         then "eq"
@@ -164,7 +165,7 @@ declare function manage:createRange(
             return admin:save-configuration($config)
         else if($type = "date")
         then
-            let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, (), "normalized-date", "", false())
+            let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, "", "normalized-date", "", false())
             let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
             return admin:save-configuration($config)
         else if($type = "number")
@@ -174,7 +175,7 @@ declare function manage:createRange(
             return admin:save-configuration($config)
         else if($type = "boolean")
         then
-            let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, (), "boolean", "", false())
+            let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, "", "boolean", "", false())
             let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
             return admin:save-configuration($config)
         else
@@ -209,30 +210,32 @@ declare function manage:deleteRange(
 };
 
 declare function manage:getRange(
-    $name as xs:string,
-    $config as element()
+    $name as xs:string
 ) as element(json:item)?
 {
     let $property := prop:get(concat("index-", $name))
     let $bits := tokenize($property, "/")
     let $key := $bits[3]
-    let $type := manage:jsonTypeToSchemaType($bits[4])
+    let $type := $bits[4]
     let $operator :=
         if($type = "boolean")
         then "eq"
         else $bits[5]
-    let $def := manage:getRangeDefinition($key, $type, $config)
     where $bits[1] = "range"
-    return manage:rangeDefinitionToJsonXml($def, $name, $operator)
+    return json:object((
+        "name", $name,
+        "key", json:unescapeNCName($key),
+        "type", $type,
+        "operator", $operator
+    ))
 };
 
 declare function manage:getAllRanges(
-    $config as element()
 ) as element(json:item)*
 {
     for $value in manage:getRangeIndexProperties()
     let $bits := tokenize($value, "/")
-    return manage:getRange($bits[2], $config)
+    return manage:getRange($bits[2])
 };
 
 
@@ -273,20 +276,6 @@ declare private function manage:getRangeDefinition(
         where $index/*:scalar-type = $xsType and $index/*:parent-namespace-uri = "http://marklogic.com/json" and $index/*:parent-localname = $key
         return $index
     )[1]
-};
-
-declare private function manage:rangeDefinitionToJsonXml(
-    $index as element(),
-    $name as xs:string,
-    $operator as xs:string
-) as element(json:item)
-{
-    json:object((
-        "name", $name,
-        "key", json:unescapeNCName(string(($index/*:parent-localname, $index/*:localname)[1])),
-        "type", manage:schemaTypeToJsonType(string($index/*:scalar-type)),
-        "operator", $operator
-    ))
 };
 
 declare private function manage:getPropertiesAssociatedWithRangeIndex(

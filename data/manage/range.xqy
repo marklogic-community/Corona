@@ -33,7 +33,7 @@ let $name := xdmp:get-request-field("name")[1]
 let $requestMethod := xdmp:get-request-method()
 
 let $config := admin:get-configuration()
-let $existing := manage:getRange($name, $config)
+let $existing := manage:getRange($name)
 
 return
     if($requestMethod = "GET")
