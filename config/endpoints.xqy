@@ -51,6 +51,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="facets">$1</uri-param>
         <param name="q" required="false"/>
         <param name="customquery" required="false"/>
+        <param name="limit" as="integer" required="false"/>
     </request>
 
     <!-- Index management -->

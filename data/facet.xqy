@@ -29,8 +29,7 @@ json:xmlToJSON(json:object(
     let $query := xdmp:get-request-field("q")[1]
     let $customQuery := xdmp:get-request-field("customquery")[1]
 
-    let $start := xs:integer(xdmp:get-request-field("__MLJSONURL__:start", "1"))
-    let $end := xs:integer(xdmp:get-request-field("__MLJSONURL__:end", "25"))
+    let $limit := xs:integer(xdmp:get-request-field("limit", "25"))
 
     let $query :=
         if(exists($query))
@@ -43,6 +42,12 @@ json:xmlToJSON(json:object(
     let $indexDef := manage:getRange($facet)
     where exists($indexDef)
     return (
-        $facet, json:array(json:rangeIndexValues($indexDef, $query, (), $start, $end))
+        $facet, json:array(
+            for $item in json:rangeIndexValues($indexDef, $query, (), $limit)
+            return json:object((
+                "value", $item,
+                "count", cts:frequency($item)
+            ))
+        )
     )
 ))

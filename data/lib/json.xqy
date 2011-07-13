@@ -288,29 +288,24 @@ declare function json:rangeIndexValues(
     $rangeDefinition as element(json:item),
     $query as cts:query?,
     $options as xs:string*,
-    $start as xs:integer?,
-    $end as xs:integer?
+    $limit as xs:integer?
 ) as xs:anyAtomicType*
 {
+    let $options := (
+        if(exists($limit))
+        then concat("limit=", $limit)
+        else (),
+        $options
+    )
     let $key := xs:QName(concat("json:", json:escapeNCName($rangeDefinition/json:key)))
     return
-        if(exists($start) and exists($end))
-        then
-            if($rangeDefinition/json:type = "date")
-            then cts:element-attribute-values($key, xs:QName("normalized-date"), (), ("type=dateTime", $options), $query)[$start to $end]
-            else if($rangeDefinition/json:type = "string")
-            then cts:element-values($key, (), ("type=string", $options), $query)[$start to $end]
-            else if($rangeDefinition/json:type = "number")
-            then cts:element-values($key, (), ("type=decimal", $options), $query)[$start to $end]
-            else ()
-        else
-            if($rangeDefinition/json:type = "date")
-            then cts:element-attribute-values($key, xs:QName("normalized-date"), (), ("type=dateTime", $options), $query)[$start to $end]
-            else if($rangeDefinition/json:type = "string")
-            then cts:element-values($key, (), ("type=string", $options), $query)[$start to $end]
-            else if($rangeDefinition/json:type = "number")
-            then cts:element-values($key, (), ("type=decimal", $options), $query)[$start to $end]
-            else ()
+        if($rangeDefinition/json:type = "date")
+        then cts:element-attribute-values($key, xs:QName("normalized-date"), (), ("type=dateTime", $options), $query)
+        else if($rangeDefinition/json:type = "string")
+        then cts:element-values($key, (), ("type=string", $options), $query)
+        else if($rangeDefinition/json:type = "number")
+        then cts:element-values($key, (), ("type=decimal", $options), $query)
+        else ()
 };
 
 
