@@ -192,17 +192,17 @@ declare function manage:deleteRange(
     let $database := xdmp:database()
     let $property := prop:get(concat("index-", $name))
     let $bits := tokenize($property, "/")
-    let $key := $bits[3]
+    let $key := json:escapeNCName($bits[3])
     let $type := manage:jsonTypeToSchemaType($bits[4])
     let $existing := manage:getRangeDefinition($key, $type, $config)
-    let $propertiesForIndex := manage:getPropertiesAssociatedWithRangeIndex($existing)
     where $bits[1] = "range"
     return (
-        if(count($propertiesForIndex) = 1)
-        then
+        if(exists($existing))
+        then (
             if(local-name($existing) = "range-element-index")
             then admin:save-configuration(admin:database-delete-range-element-index($config, $database, $existing))
             else admin:save-configuration(admin:database-delete-range-element-attribute-index($config, $database, $existing))
+        )
         else ()
         ,
         prop:delete(concat("index-", $name))
@@ -276,18 +276,6 @@ declare private function manage:getRangeDefinition(
         where $index/*:scalar-type = $xsType and $index/*:parent-namespace-uri = "http://marklogic.com/json" and $index/*:parent-localname = $key
         return $index
     )[1]
-};
-
-declare private function manage:getPropertiesAssociatedWithRangeIndex(
-    $index as element()
-) as xs:string*
-{
-    for $value in manage:getRangeIndexProperties()
-    let $bits := tokenize($value, "/")
-    let $key := $bits[3]
-    let $type := $bits[4]
-    where $index/*:scalar-type = manage:jsonTypeToSchemaType($type) and $index/(*:namespace-uri, *:parent-namespace-uri) = "http://marklogic.com/json" and $index/(*:localname, *:parent-localname) = $key
-    return $value
 };
 
 declare private function manage:getRangeIndexProperties(
