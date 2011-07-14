@@ -54,6 +54,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="q" required="false"/>
         <param name="customquery" required="false"/>
         <param name="limit" as="integer" required="false"/>
+        <param name="order" required="false" default="frequency" values="descending|ascending|frequency"/>
+        <param name="frequency" required="false" default="document" values="document|key"/>
     </request>
 
     <!-- Index management -->

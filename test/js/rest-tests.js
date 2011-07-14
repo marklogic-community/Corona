@@ -93,7 +93,17 @@ mljson.addIndexes = function(callback) {
             "datatype": "date",
             "operator": "gt",
             "shouldSucceed": true,
-            "purpose": "General range creation"
+            "purpose": "General range creation on a date"
+        },
+        {
+            "type": "range",
+            "pluralType": "ranges",
+            "name": "range2",
+            "key": "included1",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": true,
+            "purpose": "General range creation on a string"
         },
 
         {
@@ -241,6 +251,26 @@ mljson.insertDocuments = function() {
                 "excluded1": "mastodon"
             },
             "uri": "/document1.json"
+        },
+        {
+            "name1": "Other Musical Animals",
+            "date1::date": "January 5th 1977",
+            "included1": "duck",
+            "included2": {
+                "animal": "snake",
+                "excluded1": "mastodon"
+            },
+            "uri": "/document2.json"
+        },
+        {
+            "name1": "Other Musical Animals",
+            "date1::date": "January 7th 1977",
+            "included1": "duck",
+            "included2": {
+                "animal": "snake",
+                "excluded1": "mastodon"
+            },
+            "uri": "/document3.json"
         }
     ];
     

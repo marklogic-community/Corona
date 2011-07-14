@@ -30,6 +30,8 @@ json:xmlToJSON(json:object(
     let $customQuery := xdmp:get-request-field("customquery")[1]
 
     let $limit := xs:integer(xdmp:get-request-field("limit", "25"))
+    let $order := xdmp:get-request-field("order")[1]
+    let $frequency := xdmp:get-request-field("frequency")[1]
 
     let $query :=
         if(exists($query))
@@ -38,12 +40,21 @@ json:xmlToJSON(json:object(
         then jsonquery:getCTS($customQuery)
         else ()
 
+    let $options := (
+        if($order = "frequency")
+        then "frequency-order"
+        else $order,
+        if($frequency = "document")
+        then "fragment-frequency"
+        else "item-frequency"
+    )
+
     for $facet in $facets
     let $indexDef := manage:getRange($facet)
     where exists($indexDef)
     return (
         $facet, json:array(
-            for $item in json:rangeIndexValues($indexDef, $query, (), $limit)
+            for $item in json:rangeIndexValues($indexDef, $query, $options, $limit)
             return json:object((
                 "value", $item,
                 "count", cts:frequency($item)
