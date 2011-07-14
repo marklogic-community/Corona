@@ -25,6 +25,7 @@ declare option xdmp:mapping "false";
 let $requestMethod := xdmp:get-request-method()
 let $query := xdmp:get-request-field("q", "")[1]
 let $include := xdmp:get-request-field("include", "content")
+let $returnPath := xdmp:get-request-field("returnpath")
 
 let $index := xdmp:get-request-field("__MLJSONURL__:index")
 let $index :=
@@ -65,5 +66,5 @@ let $end :=
 
 return
     if($requestMethod = "GET")
-    then common:outputMultipleDocs($results, $start, $end, $total, $include, $query)
+    then common:outputMultipleDocs($results, $start, $end, $total, $include, $query, $returnPath)
     else ()

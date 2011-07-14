@@ -81,4 +81,4 @@ let $end :=
     then $total
     else $end
 
-return common:outputMultipleDocs($results, $start, $end, $total, ("content"), $query)
+return common:outputMultipleDocs($results, $start, $end, $total, ("content"), $query, ())

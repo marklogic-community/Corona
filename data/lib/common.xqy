@@ -18,6 +18,7 @@ xquery version "1.0-ml";
 
 module namespace common="http://marklogic.com/mljson/common";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
+import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
@@ -131,7 +132,8 @@ declare function common:outputMultipleDocs(
     $end as xs:integer?,
     $total as xs:integer,
     $include as xs:string*,
-    $query as cts:query?
+    $query as cts:query?,
+    $returnPath as xs:string?
 ) as xs:string
 {
     let $end :=
@@ -149,6 +151,10 @@ declare function common:outputMultipleDocs(
             "results", json:array(
                 for $doc in $docs
                 let $uri := base-uri($doc)
+                let $doc :=
+                    if(exists($returnPath))
+                    then path:select($doc, $returnPath)
+                    else $doc
                 return json:object((
                     "uri", $uri,
                     if($include = ("content", "all"))

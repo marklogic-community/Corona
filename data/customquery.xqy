@@ -23,6 +23,7 @@ declare option xdmp:mapping "false";
 
 let $requestMethod := xdmp:get-request-method()
 let $include := xdmp:get-request-field("include", "content")
+let $returnPath := xdmp:get-request-field("returnpath")
 let $query := string(xdmp:get-request-field("q", "{}")[1])
 let $query :=
     if(string-length(normalize-space($query)) = 0)
@@ -31,5 +32,5 @@ let $query :=
 
 return
     if($requestMethod = ("GET", "POST"))
-    then jsonquery:execute($query, $include)
+    then jsonquery:execute($query, $include, $returnPath)
     else ()

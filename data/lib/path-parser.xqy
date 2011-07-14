@@ -26,10 +26,21 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare function path:select(
     $doc as element(),
     $path as xs:string
-) as element()*
+) as element()
 {
-    let $tokens := path:tokenize($path)
-    return $doc/xdmp:value(path:constructPath($tokens))
+    if(string-length($path) = 0)
+    then $doc
+    else
+        let $tokens := path:tokenize($path)
+        let $parts :=
+            for $part in $doc/xdmp:value(path:constructPath($tokens))
+            return <json:item>{ $part/(@*, node()) }</json:item>
+        return
+            if(count($parts) = 0)
+            then json:null()
+            else if(count($parts) > 1)
+            then json:array($parts)
+            else $parts
 };
 
 declare private function path:tokenize(

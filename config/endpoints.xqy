@@ -23,6 +23,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <request uri="^/data/customquery(/)?$" endpoint="/data/customquery.xqy">
         <param name="q" required="true"/>
         <param name="include" repeatable="true" required="false"/>
+        <param name="returnpath" required="false"/>
         <http method="GET"/>
         <http method="POST"/>
     </request>
@@ -34,6 +35,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="__MLJSONURL__:end">$4</uri-param>
         <param name="q" required="true"/>
         <param name="include" repeatable="true" required="false"/>
+        <param name="returnpath" required="false"/>
     </request>
 
     <!-- Key value queryies -->

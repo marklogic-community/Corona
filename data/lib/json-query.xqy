@@ -50,7 +50,8 @@ declare function jsonquery:parse(
 
 declare function jsonquery:execute(
     $json as xs:string,
-    $include as xs:string*
+    $include as xs:string*,
+    $returnPath as xs:string?
 ) as xs:string
 {
     let $tree := json:jsonToXML($json)
@@ -81,7 +82,7 @@ declare function jsonquery:execute(
         then $total
         else $end
 
-    return common:outputMultipleDocs($results, $start, $end, $total, $include, $cts)
+    return common:outputMultipleDocs($results, $start, $end, $total, $include, $cts, $returnPath)
 };
 
 declare private function jsonquery:dispatch(
