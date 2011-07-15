@@ -107,7 +107,7 @@ declare function manage:createMap(
     $mode as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("map/", $name, "/", $key, "/", $mode))
+    prop:set(concat("index-", $name), concat("map/", $name, "/", json:escapeNCName($key), "/", $mode))
 };
 
 declare function manage:deleteMap(
@@ -181,7 +181,7 @@ declare function manage:createRange(
         else
             ()
     ,
-    prop:set(concat("index-", $name), concat("range/", $name, "/", $key, "/", $type, "/", $operator))
+    prop:set(concat("index-", $name), concat("range/", $name, "/", json:escapeNCName($key), "/", $type, "/", $operator))
 };
 
 declare function manage:deleteRange(
@@ -192,7 +192,7 @@ declare function manage:deleteRange(
     let $database := xdmp:database()
     let $property := prop:get(concat("index-", $name))
     let $bits := tokenize($property, "/")
-    let $key := json:escapeNCName($bits[3])
+    let $key := $bits[3]
     let $type := manage:jsonTypeToSchemaType($bits[4])
     let $existing := manage:getRangeDefinition($key, $type, $config)
     where $bits[1] = "range"
