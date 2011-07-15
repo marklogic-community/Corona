@@ -46,6 +46,27 @@ declare function common:error(
     return json:xmlToJSON($response)
 };
 
+declare function common:valuesForFacet(
+    $query as cts:query,
+    $facetName as xs:string
+) as xs:string*
+{
+    let $query := <foo>{ $query }</foo>/*
+    let $definition := prop:get(concat("index-", $facetName))
+    (: bits -> range, name, key, type, operator :)
+    let $bits := tokenize($definition, "/")
+    let $operator := if($bits[5]) then common:humanOperatorToMathmatical($bits[5]) else "="
+    where $bits[1] = "range"
+    return
+        if($bits[4] = "date")
+        then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName(concat("json:", $bits[3]))][cts:attribute = "normalized-date"][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
+        else if($bits[4] = "string")
+        then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $bits[3]))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
+        else if($bits[4] = "number")
+        then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $bits[3]))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:decimal")]/cts:value)
+        else ()
+};
+
 declare function common:castFromJSONType(
     $value as xs:anySimpleType,
     $type as xs:string

@@ -26,7 +26,7 @@ declare option xdmp:mapping "false";
 
 json:xmlToJSON(json:object(
     let $facets := tokenize(xdmp:get-request-field("facets")[1], ",")
-    let $query := xdmp:get-request-field("q")[1]
+    let $queryString := xdmp:get-request-field("q")[1]
     let $customQuery := xdmp:get-request-field("customquery")[1]
 
     let $limit := xs:integer(xdmp:get-request-field("limit", "25"))
@@ -34,8 +34,8 @@ json:xmlToJSON(json:object(
     let $frequency := xdmp:get-request-field("frequency")[1]
 
     let $query :=
-        if(exists($query))
-        then parser:parse($query)
+        if(exists($queryString))
+        then parser:parse($queryString)
         else if(exists($customQuery))
         then jsonquery:getCTS($customQuery)
         else ()

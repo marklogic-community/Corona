@@ -15,11 +15,19 @@ declare function parser:parse(
 	$query as xs:string
 ) as cts:query?
 {
+    parser:parse($query, ())
+};
+
+declare function parser:parse(
+	$query as xs:string,
+    $ignoreFacet as xs:string?
+) as cts:query?
+{
 	let $init := xdmp:set($GROUPING-INDEX, 0)
 	let $tokens := parser:tokenize($query)
 	let $grouped := parser:groupTokens($tokens, 1)
 	let $folded := parser:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
-	return parser:dispatchQueryTree($folded)
+	return parser:dispatchQueryTree($folded, $ignoreFacet)
 };
 
 declare private function parser:tokenize(
@@ -28,7 +36,7 @@ declare private function parser:tokenize(
 {
 	let $phraseMatch := '"[^"]+"'
 	let $wordMatch := "[\w,\*\?][\w\-,\*\?]*"
-	let $constraintMatch := "[A-Za-z_\-]+:"
+	let $constraintMatch := "[A-Za-z0-9_\-]+:"
 	let $tokens := (
 		"\(", "\)", $phraseMatch,
 		"\-", " AND ", " OR ", " NEAR ", " NEAR/\d+ ",
@@ -170,12 +178,13 @@ declare private function parser:extractSequence(
 
 
 declare private function parser:dispatchQueryTree(
-	$token as element()
+	$token as element(),
+    $ignoreFacet as xs:string?
 ) as cts:query*
 {
 	let $queries :=
 		for $term in $token/*
-		return parser:termToQuery($term)
+		return parser:termToQuery($term, $ignoreFacet)
 	return
 		if(count($queries) = 1 or local-name($token) = ("andQuery", "orQuery"))
 		then $queries
@@ -183,18 +192,19 @@ declare private function parser:dispatchQueryTree(
 };
 
 declare private function parser:termToQuery(
-	$term as element()
+	$term as element(),
+    $ignoreFacet as xs:string?
 ) as cts:query?
 {
 	typeswitch ($term)
-	case element(andQuery) return cts:and-query(parser:dispatchQueryTree($term))
-	case element(orQuery) return cts:or-query(parser:dispatchQueryTree($term))
-	case element(notQuery) return parser:notQuery($term)
-	case element(nearQuery) return parser:nearQuery($term)
-	case element(constraint) return parser:constraintQuery($term)
+	case element(andQuery) return cts:and-query(parser:dispatchQueryTree($term, $ignoreFacet))
+	case element(orQuery) return cts:or-query(parser:dispatchQueryTree($term, $ignoreFacet))
+	case element(notQuery) return parser:notQuery($term, $ignoreFacet)
+	case element(nearQuery) return parser:nearQuery($term, $ignoreFacet)
+	case element(constraint) return parser:constraintQuery($term, $ignoreFacet)
 	case element(term) return parser:wordQuery($term)
 	case element(phrase) return parser:wordQuery($term)
-	case element(group) return parser:dispatchQueryTree($term)
+	case element(group) return parser:dispatchQueryTree($term, $ignoreFacet)
 	case element(whitespace) return ()
 
 	default return xdmp:log(concat("Unhandled query token: ", xdmp:quote($term)))
@@ -208,22 +218,25 @@ declare private function parser:wordQuery(
 };
 
 declare private function parser:notQuery(
-	$term as element(notQuery)
+	$term as element(notQuery),
+    $ignoreFacet as xs:string?
 ) as cts:not-query
 {
-	cts:not-query(parser:dispatchQueryTree($term))
+	cts:not-query(parser:dispatchQueryTree($term, $ignoreFacet))
 };
 
 declare private function parser:nearQuery(
-	$term as element(notQuery)
+	$term as element(notQuery),
+    $ignoreFacet as xs:string?
 ) as cts:query
 {
-	cts:near-query(parser:dispatchQueryTree($term), $term/@distance)
+	cts:near-query(parser:dispatchQueryTree($term, $ignoreFacet), $term/@distance)
 };
 
 declare private function parser:constraintQuery(
-	$term as element(constraint)
-) as cts:query
+	$term as element(constraint),
+    $ignoreFacet as xs:string?
+) as cts:query?
 {
     (:
         bits:
@@ -234,6 +247,7 @@ declare private function parser:constraintQuery(
     let $value := string($term/value)
     let $definition := prop:get(concat("index-", $term/field))
     let $bits := tokenize($definition, "/")
+    where $term/field != $ignoreFacet
     return
         if($bits[1] = "field")
         then cts:field-word-query($bits[2], $value)
@@ -252,6 +266,7 @@ declare private function parser:constraintQuery(
 
         else if($bits[1] = "range")
         then
+            (: XXX - we can't make a range index on booleans :)
             if($bits[4] = "boolean")
             then
                 let $QName := xs:QName(concat("json:", $bits[3]))
