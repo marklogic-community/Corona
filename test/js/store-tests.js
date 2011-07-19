@@ -136,6 +136,9 @@ mljson.insertDocuments = function(prefix, withExtras) {
                                 if(withExtras === false) {
                                     mljson.addExtras(prefix, this);
                                 }
+                                else {
+                                    mljson.deleteDocument(prefix, this);
+                                }
                             },
                             error: function(j, t, error) {
                                 ok(false, "Could not fetch inserted document");
@@ -168,6 +171,7 @@ mljson.addExtras = function(prefix, doc) {
                     context: this,
                     success: function(data) {
                         mljson.compareDocuments(this, JSON.parse(data), true);
+                        mljson.deleteDocument(prefix, doc);
                     },
                     error: function(j, t, error) {
                         ok(false, "Could not fetch document");
@@ -179,6 +183,35 @@ mljson.addExtras = function(prefix, doc) {
             },
             error: function(j, t, error) {
                 ok(false, "Could not update document extras");
+            }
+        });
+    });
+};
+
+mljson.deleteDocument = function(prefix, doc) {
+    asyncTest("Deleting document: " + prefix + doc.uri, function() {
+        $.ajax({
+            url: mljson.constructURL(doc, prefix, false),
+            type: 'DELETE',
+            success: function() {
+                ok(true, "Deleted document");
+                $.ajax({
+                    url: "/data/store" + prefix + this.uri + "?include=all",
+                    type: 'GET',
+                    context: this,
+                    success: function(data) {
+                        ok(false, "Document not truly deleted");
+                    },
+                    error: function(j, t, error) {
+                        ok(true, "Document truly deleted");
+                    },
+                    complete: function() {
+                        start();
+                    }
+                });
+            },
+            error: function(j, t, error) {
+                ok(false, "Could not delete document");
             }
         });
     });
