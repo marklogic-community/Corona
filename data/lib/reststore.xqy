@@ -230,7 +230,7 @@ declare function reststore:getDocumentPermissions(
     $uri as xs:string
 ) as element(json:item)
 {
-    json:array(
+    json:object(
         let $permMap := map:map()
         let $populate :=
             for $permission in xdmp:document-get-permissions($uri)
@@ -246,9 +246,9 @@ declare function reststore:getDocumentPermissions(
             ", (
                 xs:QName("roleId"), xs:unsignedLong($key)
             ), <options xmlns="xdmp:eval"><database>{ xdmp:security-database() }</database></options>)
-        return json:object((
+        return (
             $role, json:array(map:get($permMap, $key))
-        ))
+        )
     )
 };
 
