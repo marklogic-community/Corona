@@ -263,7 +263,7 @@ declare function json:xml(
     $value as element()
 ) as element(json:item)
 {
-    <json:item type="xml">{ xdmp:quote($value) }</json:item>
+    <json:item type="xml">{ $value }</json:item>
 };
 
 (:
