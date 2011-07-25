@@ -193,6 +193,7 @@ mljson.deleteDocument = function(prefix, doc) {
         $.ajax({
             url: mljson.constructURL(doc, prefix, false),
             type: 'DELETE',
+            context: doc,
             success: function() {
                 ok(true, "Deleted document");
                 $.ajax({
