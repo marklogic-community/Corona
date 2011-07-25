@@ -25,7 +25,7 @@ declare option xdmp:mapping "false";
 let $params := rest:process-request(endpoints:request("/data/store.xqy"))
 let $uri := map:get($params, "uri")
 let $requestMethod := xdmp:get-request-method()
-let $bodyContent := xdmp:get-request-body("text")
+let $bodyContent := xdmp:get-request-body("text")/text()
 
 where exists($uri)
 return
@@ -40,6 +40,9 @@ return
         if(empty(doc($uri)) and exists($bodyContent))
         then reststore:insertDocument($uri, $bodyContent)
         else (
+            if(exists($bodyContent))
+            then reststore:updateDocumentContent($uri, $bodyContent)
+            else (),
             reststore:setProperties($uri, reststore:propertiesFromRequest()),
             reststore:setPermissions($uri, reststore:permissionsFromRequest()),
             reststore:setCollections($uri, reststore:collectionsFromRequest()),

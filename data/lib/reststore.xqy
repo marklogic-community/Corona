@@ -153,6 +153,21 @@ declare function reststore:insertDocument(
     )
 };
 
+declare function reststore:updateDocumentContent(
+    $uri as xs:string,
+    $content as xs:string
+) as xs:string?
+{
+    let $body := try {
+            json:jsonToXML($content)
+        }
+        catch ($e) {
+            common:error(500, "Invalid JSON"),
+            xdmp:log($e)
+        }
+    return xdmp:node-replace(doc($uri)/json:json, $body)
+};
+
 declare function reststore:deleteDocument(
     $uri as xs:string
 ) as xs:string?
