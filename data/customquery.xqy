@@ -16,13 +16,15 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-import module namespace jsonquery="http://marklogic.com/json-query" at "lib/json-query.xqy";
+import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 
 declare option xdmp:mapping "false";
 
 let $requestMethod := xdmp:get-request-method()
 let $include := xdmp:get-request-field("include", "content")
+let $start := xdmp:get-request-field("start")[1]
+let $end := xdmp:get-request-field("end")[1]
 let $returnPath := xdmp:get-request-field("returnpath")
 let $query := string(xdmp:get-request-field("q", "{}")[1])
 let $query :=
@@ -30,7 +32,10 @@ let $query :=
     then "{}"
     else $query
 
+let $start := if($start castable as xs:positiveInteger) then xs:positiveInteger($start) else 1
+let $end := if($end castable as xs:positiveInteger) then xs:positiveInteger($end) else ()
+
 return
     if($requestMethod = ("GET", "POST"))
-    then jsonquery:execute($query, $include, $returnPath)
+    then customquery:execute($query, $include, $start, $end, $returnPath)
     else ()

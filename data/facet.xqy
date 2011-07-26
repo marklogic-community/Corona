@@ -19,7 +19,7 @@ xquery version "1.0-ml";
 import module namespace manage="http://marklogic.com/mljson/manage" at "lib/manage.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
-import module namespace jsonquery="http://marklogic.com/json-query" at "lib/json-query.xqy";
+import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
 import module namespace parser="http://marklogic.com/mljson/query-parser" at "lib/query-parser.xqy";
 
 declare option xdmp:mapping "false";
@@ -37,7 +37,7 @@ json:xmlToJSON(json:object(
         if(exists($queryString))
         then parser:parse($queryString)
         else if(exists($customQuery))
-        then jsonquery:getCTS($customQuery)
+        then customquery:getCTS($customQuery)
         else ()
 
     let $options := (

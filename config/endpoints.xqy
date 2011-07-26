@@ -29,6 +29,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <!-- Custom queries -->
     <request uri="^/data/customquery(/)?$" endpoint="/data/customquery.xqy">
         <param name="q" required="true"/>
+        <param name="start" required="false"/>
+        <param name="end" required="false"/>
         <param name="include" repeatable="true" required="false"/>
         <param name="returnpath" required="false"/>
         <http method="GET"/>
