@@ -40,19 +40,19 @@ return
     then
         if(exists($existing))
         then json:xmlToJSON($existing)
-        else common:error(404, "Mapping not found")
+        else common:error(404, "Mapping not found", "json")
 
     else if($requestMethod = "POST")
     then 
         if(not($mode = ("equals", "contains")))
-        then common:error(500, "Map modes must be either 'equals' or 'contains'")
+        then common:error(500, "Map modes must be either 'equals' or 'contains'", "json")
         else if(exists(manage:validateIndexName($name)))
-        then common:error(500, manage:validateIndexName($name))
+        then common:error(500, manage:validateIndexName($name), "json")
         else manage:createMap($name, $key, $mode)
 
     else if($requestMethod = "DELETE")
     then
         if(exists($existing))
         then manage:deleteMap($name)
-        else common:error(404, "Mapping not found")
+        else common:error(404, "Mapping not found", "json")
     else ()

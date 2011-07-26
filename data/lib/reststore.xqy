@@ -20,7 +20,9 @@ module namespace reststore="http://marklogic.com/reststore";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 import module namespace json="http://marklogic.com/json" at "json.xqy";
+import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
+import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 
 (:
     Functions to retrieve request information
@@ -64,11 +66,12 @@ declare function reststore:qualityFromRequest(
         else ()
 };
 
+
 (:
-    Document management
+    JSON Document management
 :)
 
-declare function reststore:getDocument(
+declare function reststore:getJSONDocument(
     $uri as xs:string
 )
 {
@@ -78,10 +81,10 @@ declare function reststore:getDocument(
     let $properties := $includes = ("properties", "all")
     let $permissions := $includes = ("permissions", "all")
     let $quality := $includes = ("quality", "all")
-    return reststore:getDocument($uri, $content, $collections, $properties, $permissions, $quality)
+    return reststore:getJSONDocument($uri, $content, $collections, $properties, $permissions, $quality)
 };
 
-declare function reststore:getDocument(
+declare function reststore:getJSONDocument(
     $uri as xs:string,
     $includeContent as xs:boolean,
     $includeCollections as xs:boolean,
@@ -90,25 +93,25 @@ declare function reststore:getDocument(
     $includeQuality as xs:boolean
 ) as xs:string
 {
-    if(empty(doc($uri)))
-    then common:error(404, "Document not found")
+    if(empty(doc($uri)/json:json))
+    then common:error(404, "Document not found", "json")
     else
 
     if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-    then json:xmlToJSON(doc($uri)/*)
+    then json:xmlToJSON(doc($uri)/json:json)
     else json:xmlToJSON(json:document(
         json:object((
             if($includeContent)
             then ("content", doc($uri)/json:json)
             else (),
             if($includeCollections)
-            then ("collections", reststore:getDocumentCollections($uri))
+            then ("collections", reststore:getDocumentCollections($uri, "json"))
             else (),
             if($includeProperties)
-            then ("properties", reststore:getDocumentProperties($uri))
+            then ("properties", reststore:getDocumentProperties($uri, "json"))
             else (),
             if($includePermissions)
-            then ("permissions", reststore:getDocumentPermissions($uri))
+            then ("permissions", reststore:getDocumentPermissions($uri, "json"))
             else (),
             if($includeQuality)
             then ("quality", reststore:getDocumentQuality($uri))
@@ -117,7 +120,62 @@ declare function reststore:getDocument(
     ))
 };
 
-declare function reststore:insertDocument(
+declare function reststore:outputMultipleJSONDocs(
+    $docs as element(json:json)*,
+    $start as xs:integer,
+    $end as xs:integer?,
+    $total as xs:integer,
+    $include as xs:string*,
+    $query as cts:query?,
+    $returnPath as xs:string?
+) as xs:string
+{
+    let $end :=
+        if(empty($end))
+        then $start
+        else $end
+
+    return json:xmlToJSON(
+        json:object((
+            "meta", json:object((
+                "start", $start,
+                "end", $end,
+                "total", $total
+            )),
+            "results", json:array(
+                for $doc in $docs
+                let $uri := base-uri($doc)
+                let $doc :=
+                    if(exists($returnPath))
+                    then path:select($doc, $returnPath)
+                    else $doc
+                return json:object((
+                    "uri", $uri,
+                    if($include = ("content", "all"))
+                    then ("content", $doc)
+                    else (),
+                    if($include = ("collections", "all"))
+                    then ("collections", reststore:getDocumentCollections($uri, "json"))
+                    else (),
+                    if($include = ("properties", "all"))
+                    then ("properties", reststore:getDocumentProperties($uri, "json"))
+                    else (),
+                    if($include = ("permissions", "all"))
+                    then ("permissions", reststore:getDocumentPermissions($uri, "json"))
+                    else (),
+                    if($include = ("quality", "all"))
+                    then ("quality", reststore:getDocumentQuality($uri))
+                    else (),
+                    if($include = ("snippet", "all"))
+                    then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*)))
+                    else ()
+                ))
+            )
+        ))
+    )
+};
+
+declare function reststore:insertJSONDocument(
     $uri as xs:string,
     $content as xs:string
 ) as xs:string?
@@ -126,10 +184,10 @@ declare function reststore:insertDocument(
     let $properties := reststore:propertiesFromRequest()
     let $permissions := reststore:permissionsFromRequest()
     let $quality := reststore:qualityFromRequest()
-    return reststore:insertDocument($uri, $content, $collections, $properties, $permissions, $quality)
+    return reststore:insertJSONDocument($uri, $content, $collections, $properties, $permissions, $quality)
 };
 
-declare function reststore:insertDocument(
+declare function reststore:insertJSONDocument(
     $uri as xs:string,
     $content as xs:string,
     $collections as xs:string*,
@@ -142,7 +200,7 @@ declare function reststore:insertDocument(
             json:jsonToXML($content)
         }
         catch ($e) {
-            common:error(500, "Invalid JSON"),
+            common:error(500, "Invalid JSON", "json"),
             xdmp:log($e)
         }
     return (
@@ -153,7 +211,7 @@ declare function reststore:insertDocument(
     )
 };
 
-declare function reststore:updateDocumentContent(
+declare function reststore:updateJSONDocumentContent(
     $uri as xs:string,
     $content as xs:string
 ) as xs:string?
@@ -162,20 +220,202 @@ declare function reststore:updateDocumentContent(
             json:jsonToXML($content)
         }
         catch ($e) {
-            common:error(500, "Invalid JSON"),
+            common:error(500, "Invalid JSON", "json"),
             xdmp:log($e)
         }
-    return xdmp:node-replace(doc($uri)/json:json, $body)
+    let $existing := doc($uri)/json:json
+    let $test :=
+        if(empty($existing))
+        then common:error(404, concat("There is no JSON document to update at '", $uri, "'"), "json")
+        else ()
+    where exists($existing)
+    return xdmp:node-replace($existing, $body)
 };
 
-declare function reststore:deleteDocument(
+declare function reststore:deleteJSONDocument(
     $uri as xs:string
 ) as xs:string?
 {
-    if(exists(doc($uri)))
+    if(exists(doc($uri)/json:json))
     then xdmp:document-delete($uri)
-    else common:error(404, "Document not found")
+    else common:error(404, concat("There is no JSON document to delete at '", $uri, "'"), "json")
 };
+
+
+(:
+    XML Document management
+:)
+
+declare function reststore:getXMLDocument(
+    $uri as xs:string
+) as element()
+{
+    let $includes := xdmp:get-request-field("include", "content")
+    let $content := $includes = ("content", "all")
+    let $collections := $includes = ("collections", "all")
+    let $properties := $includes = ("properties", "all")
+    let $permissions := $includes = ("permissions", "all")
+    let $quality := $includes = ("quality", "all")
+    return reststore:getXMLDocument($uri, $content, $collections, $properties, $permissions, $quality)
+};
+
+declare function reststore:getXMLDocument(
+    $uri as xs:string,
+    $includeContent as xs:boolean,
+    $includeCollections as xs:boolean,
+    $includeProperties as xs:boolean,
+    $includePermissions as xs:boolean,
+    $includeQuality as xs:boolean
+) as element()
+{
+    if(empty(doc($uri)/*))
+    then common:error(404, "Document not found", "xml")
+    else
+
+    if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
+    then doc($uri)/*
+    else 
+        (: XXX - Will need to output in a real XML format :)
+        <response>{
+            reststore:outputXMLDocument($uri, doc($uri)/*, $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality)
+        }</response>
+};
+
+declare function reststore:outputMultipleXMLDocs(
+    $docs as element()*,
+    $start as xs:integer,
+    $end as xs:integer?,
+    $total as xs:integer,
+    $include as xs:string*,
+    $query as cts:query?,
+    $returnPath as xs:string?
+) as element()
+{
+    let $end :=
+        if(empty($end))
+        then $start
+        else $end
+    return 
+        <response>
+            <meta>
+                <start>{ $start }</start>
+                <end>{ $end }</end>
+                <total>{ $total }</total>
+            </meta>
+            <results>{
+                for $doc in $docs
+                let $uri := base-uri($doc)
+                let $content :=
+                    if(exists($returnPath))
+                    then path:select($doc, $returnPath)
+                    else $doc
+                return <result>{(
+                    reststore:outputXMLDocument($uri, $content, $include = ("content", "all"), $include = ("collections", "all"), $include = ("properties", "all"), $include = ("permissions", "all"), $include = ("quality", "all")),
+                    if($include = ("snippet", "all"))
+                    then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*)))
+                    else ()
+                )}</result>
+            }</results>
+        </response>
+};
+
+declare private function reststore:outputXMLDocument(
+    $uri as xs:string,
+    $content as element()?,
+    $includeContent as xs:boolean,
+    $includeCollections as xs:boolean,
+    $includeProperties as xs:boolean,
+    $includePermissions as xs:boolean,
+    $includeQuality as xs:boolean
+) as element()*
+{
+    if($includeContent)
+    then <content>{ $content }</content>
+    else (),
+    if($includeCollections)
+    then <collections>{ reststore:getDocumentCollections($uri, "xml") }</collections>
+    else (),
+    if($includeProperties)
+    then <properties>{ reststore:getDocumentProperties($uri, "xml") }</properties>
+    else (),
+    if($includePermissions)
+    then <permissions>{ reststore:getDocumentPermissions($uri, "xml") }</permissions>
+    else (),
+    if($includeQuality)
+    then <quality>{ reststore:getDocumentQuality($uri) }</quality>
+    else ()
+};
+
+declare function reststore:insertXMLDocument(
+    $uri as xs:string,
+    $content as xs:string
+) as element()?
+{
+    let $collections := reststore:collectionsFromRequest()
+    let $properties := reststore:propertiesFromRequest()
+    let $permissions := reststore:permissionsFromRequest()
+    let $quality := reststore:qualityFromRequest()
+    return reststore:insertXMLDocument($uri, $content, $collections, $properties, $permissions, $quality)
+};
+
+declare function reststore:insertXMLDocument(
+    $uri as xs:string,
+    $content as xs:string,
+    $collections as xs:string*,
+    $properties as element()*,
+    $permissions as element()*,
+    $quality as xs:integer?
+) as element()?
+{
+    let $body := try {
+            xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+        }
+        catch ($e) {
+            common:error(500, "Invalid XML", "xml"),
+            xdmp:log($e)
+        }
+    return (
+        xdmp:document-insert($uri, $body, $permissions, $collections, $quality),
+        if(exists($properties))
+        then xdmp:document-set-properties($uri, $properties)
+        else ()
+    )
+};
+
+declare function reststore:updateXMLDocumentContent(
+    $uri as xs:string,
+    $content as xs:string
+) as element()?
+{
+    let $body := try {
+            xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+        }
+        catch ($e) {
+            common:error(500, "Invalid XML", "xml"),
+            xdmp:log($e)
+        }
+    let $existing := doc($uri)/*
+    let $test :=
+        if(empty($existing))
+        then common:error(404, concat("There is no XML document to update at '", $uri, "'"), "xml")
+        else ()
+    where exists($existing)
+    return xdmp:node-replace($existing, $body)
+};
+
+declare function reststore:deleteXMLDocument(
+    $uri as xs:string
+) as element()?
+{
+    if(exists(doc($uri)/*))
+    then xdmp:document-delete($uri)
+    else common:error(404, concat("There is no XML document to delete at '", $uri, "'"), "xml")
+};
+
+
+(:
+    Functions to manage document metadata
+:)
 
 declare function reststore:setProperties(
     $uri as xs:string,
@@ -220,32 +460,64 @@ declare function reststore:setQuality(
 
 
 
-declare function reststore:getDocumentCollections(
-    $uri as xs:string
-) as element(json:item)
+declare private function reststore:getDocumentCollections(
+    $uri as xs:string,
+    $outputFormat as xs:string
+) as element()*
 {
-    json:array(
+    if($outputFormat = "json")
+    then json:array(xdmp:document-get-collections($uri))
+    else
         for $collection in xdmp:document-get-collections($uri)
-        return $collection
-    )
+        return <collection>{ $collection }</collection>
 };
 
-declare function reststore:getDocumentProperties(
-    $uri as xs:string
-) as element(json:item)
+declare private function reststore:getDocumentProperties(
+    $uri as xs:string,
+    $outputFormat as xs:string
+) as element()*
 {
-    json:object(
+    if($outputFormat = "json")
+    then
+        json:object(
+            for $property in xdmp:document-properties($uri)/prop:properties/*
+            where namespace-uri($property) = "http://marklogic.com/reststore"
+            return (local-name($property), string($property))
+        )
+    else
         for $property in xdmp:document-properties($uri)/prop:properties/*
         where namespace-uri($property) = "http://marklogic.com/reststore"
-        return (local-name($property), string($property))
-    )
+        return element { local-name($property) } { string($property) }
 };
 
-declare function reststore:getDocumentPermissions(
-    $uri as xs:string
-) as element(json:item)
+declare private function reststore:getDocumentPermissions(
+    $uri as xs:string,
+    $outputFormat as xs:string
+) as element()*
 {
-    json:object(
+    if($outputFormat = "json")
+    then
+        json:object(
+            let $permMap := map:map()
+            let $populate :=
+                for $permission in xdmp:document-get-permissions($uri)
+                let $role := string($permission/sec:role-id)
+                let $capabilities := (map:get($permMap, $role), string($permission/sec:capability))
+                return map:put($permMap, $role, $capabilities)
+            for $key in map:keys($permMap)
+            let $role := xdmp:eval("
+                    xquery version ""1.0-ml"";
+                    import module ""http://marklogic.com/xdmp/security"" at ""/MarkLogic/security.xqy"";
+                    declare variable $roleId as xs:unsignedLong external;
+                    sec:get-role-names($roleId)
+                ", (
+                    xs:QName("roleId"), xs:unsignedLong($key)
+                ), <options xmlns="xdmp:eval"><database>{ xdmp:security-database() }</database></options>)
+            return (
+                $role, json:array(map:get($permMap, $key))
+            )
+        )
+    else
         let $permMap := map:map()
         let $populate :=
             for $permission in xdmp:document-get-permissions($uri)
@@ -261,13 +533,10 @@ declare function reststore:getDocumentPermissions(
             ", (
                 xs:QName("roleId"), xs:unsignedLong($key)
             ), <options xmlns="xdmp:eval"><database>{ xdmp:security-database() }</database></options>)
-        return (
-            $role, json:array(map:get($permMap, $key))
-        )
-    )
+        return element { $role } { for $perm in map:get($permMap, $key) return <permission>{ $perm }</permission> }
 };
 
-declare function reststore:getDocumentQuality(
+declare private function reststore:getDocumentQuality(
     $uri as xs:string
 ) as xs:decimal
 {

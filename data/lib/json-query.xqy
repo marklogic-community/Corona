@@ -17,6 +17,7 @@ limitations under the License.
 module namespace jsonquery="http://marklogic.com/json-query";
 
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
+import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
@@ -83,7 +84,7 @@ declare function jsonquery:execute(
         then $total
         else $end
 
-    return common:outputMultipleDocs($results, $start, $end, $total, $include, $cts, $returnPath)
+    return reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $cts, $returnPath)
 };
 
 declare private function jsonquery:dispatch(

@@ -4,12 +4,14 @@ if(typeof mljson == "undefined" || !mljson) {
 
 mljson.documents = [
     {
+        "type": "json",
         "uri": "/doc-store-test-1.json",
         "content": {
             "foo": "bar"
         }
     },
     {
+        "type": "json",
         "uri": "/doc-store-test-2.json",
         "permissions": {
             "app-builder": ["read", "update"],
@@ -20,6 +22,7 @@ mljson.documents = [
         }
     },
     {
+        "type": "json",
         "uri": "/doc-store-test-3.json",
         "properties": {
             "state": "published",
@@ -30,6 +33,7 @@ mljson.documents = [
         }
     },
     {
+        "type": "json",
         "uri": "/doc-store-test-4.json",
         "collections": [
             "published",
@@ -40,12 +44,52 @@ mljson.documents = [
         }
     },
     {
+        "type": "json",
         "uri": "/doc-store-test-5.json",
         "quality": 5,
         "content": {
             "foo": "bar"
         }
     },
+
+    {
+        "type": "xml",
+        "uri": "/doc-store-test-1.xml",
+        "content": "<foo>bar</foo>"
+    },
+    {
+        "type": "xml",
+        "uri": "/doc-store-test-2.xml",
+        "permissions": {
+            "app-builder": ["read", "update"],
+            "app-user": ["read"]
+        },
+        "content": "<foo>bar</foo>"
+    },
+    {
+        "type": "xml",
+        "uri": "/doc-store-test-3.xml",
+        "properties": {
+            "state": "published",
+            "active": "yes"
+        },
+        "content": "<foo>bar</foo>"
+    },
+    {
+        "type": "xml",
+        "uri": "/doc-store-test-4.xml",
+        "collections": [
+            "published",
+            "active"
+        ],
+        "content": "<foo>bar</foo>"
+    },
+    {
+        "type": "xml",
+        "uri": "/doc-store-test-5.xml",
+        "quality": 5,
+        "content": "<foo>bar</foo>"
+    }
 ];
 
 mljson.constructURL = function(doc, prefix, withExtras) {
@@ -81,10 +125,15 @@ mljson.constructURL = function(doc, prefix, withExtras) {
         }
     }
 
-    return "/data/store" + prefix + doc.uri + "?" + extras;
+    if(doc.type === "json") {
+        return "/json/store" + prefix + doc.uri + "?" + extras;
+    }
+    else {
+        return "/xml/store" + prefix + doc.uri + "?" + extras;
+    }
 };
 
-mljson.compareDocuments = function(model, actual, withExtras) {
+mljson.compareJSONDocuments = function(model, actual, withExtras) {
     if(withExtras) {
         if(model.permissions !== undefined) {
             for(var role in model.permissions) {
@@ -113,6 +162,28 @@ mljson.compareDocuments = function(model, actual, withExtras) {
     deepEqual(model.content, actual.content, "Content matches");
 };
 
+mljson.compareXMLDocuments = function(model, xmlAsString, withExtras) {
+    var parser = new DOMParser();
+    var actual = parser.parseFromString(xmlAsString, "text/xml");
+
+    if(withExtras) {
+        if(model.permissions !== undefined) {
+            // deepEqual(model.permissions, actual.permissions, "Permissions match");
+        }
+        if(model.properties !== undefined) {
+            // deepEqual(model.properties, actual.properties, "Properties match");
+        }
+        if(model.collections !== undefined) {
+            // deepEqual(model.collections.sort(), actual.collections.sort(), "Collections match");
+        }
+        if(model.quality !== undefined) {
+            // equal(model.quality, actual.quality, "Quality matches");
+        }
+    }
+
+    // deepEqual(model.content, actual.content, "Content matches");
+};
+
 
 mljson.insertDocuments = function(prefix, withExtras) {
     var i = 0;
@@ -120,19 +191,29 @@ mljson.insertDocuments = function(prefix, withExtras) {
         var wrapper = function(index) {
             var doc = mljson.documents[index];
             asyncTest("Inserting document: " + prefix + doc.uri, function() {
+                var docContent = doc.content;
+                if(doc.type === "json") {
+                    docContent = JSON.stringify(docContent);
+                }
                 $.ajax({
                     url: mljson.constructURL(doc, prefix, withExtras),
                     type: 'PUT',
-                    data: JSON.stringify(doc.content),
+                    data: docContent,
                     context: doc,
                     success: function() {
                         ok(true, "Inserted document");
                         $.ajax({
-                            url: "/data/store" + prefix + this.uri + "?include=all",
+                            url: mljson.constructURL(doc, prefix, false) + "include=all",
                             type: 'GET',
                             context: this,
                             success: function(data) {
-                                mljson.compareDocuments(this, JSON.parse(data), withExtras);
+                                if(this.type === "json") {
+                                    mljson.compareJSONDocuments(this, JSON.parse(data), withExtras);
+                                }
+                                else {
+                                    mljson.compareXMLDocuments(this, data, true);
+                                }
+
                                 if(withExtras === false) {
                                     mljson.addExtras(prefix, this);
                                 }
@@ -166,11 +247,16 @@ mljson.addExtras = function(prefix, doc) {
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url: "/data/store" + prefix + this.uri + "?include=all",
+                    url:  mljson.constructURL(doc, prefix, false) + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {
-                        mljson.compareDocuments(this, JSON.parse(data), true);
+                        if(this.type === "json") {
+                            mljson.compareJSONDocuments(this, JSON.parse(data), true);
+                        }
+                        else {
+                            mljson.compareXMLDocuments(this, data, true);
+                        }
                         mljson.deleteDocument(prefix, doc);
                     },
                     error: function(j, t, error) {
@@ -197,7 +283,7 @@ mljson.deleteDocument = function(prefix, doc) {
             success: function() {
                 ok(true, "Deleted document");
                 $.ajax({
-                    url: "/data/store" + prefix + this.uri + "?include=all",
+                    url:  mljson.constructURL(doc, prefix, false) + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {

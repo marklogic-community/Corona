@@ -22,7 +22,7 @@ import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/c
 
 declare option xdmp:mapping "false";
 
-let $params := rest:process-request(endpoints:request("/data/store.xqy"))
+let $params := rest:process-request(endpoints:request("/data/jsonstore.xqy"))
 let $uri := map:get($params, "uri")
 let $requestMethod := xdmp:get-request-method()
 let $bodyContent := xdmp:get-request-body("text")/text()
@@ -30,18 +30,18 @@ let $bodyContent := xdmp:get-request-body("text")/text()
 where exists($uri)
 return
     if($requestMethod = "GET")
-    then reststore:getDocument($uri)
+    then reststore:getJSONDocument($uri)
     else if($requestMethod = "DELETE")
-    then reststore:deleteDocument($uri)
+    then reststore:deleteJSONDocument($uri)
     else if($requestMethod = "PUT")
-    then reststore:insertDocument($uri, $bodyContent)
+    then reststore:insertJSONDocument($uri, $bodyContent)
     else if($requestMethod = "POST")
     then
         if(empty(doc($uri)) and exists($bodyContent))
-        then reststore:insertDocument($uri, $bodyContent)
+        then reststore:insertJSONDocument($uri, $bodyContent)
         else (
             if(exists($bodyContent))
-            then reststore:updateDocumentContent($uri, $bodyContent)
+            then reststore:updateJSONDocumentContent($uri, $bodyContent)
             else (),
             reststore:setProperties($uri, reststore:propertiesFromRequest()),
             reststore:setPermissions($uri, reststore:permissionsFromRequest()),

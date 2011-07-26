@@ -40,14 +40,14 @@ return
     then
         if(exists($existing))
         then json:xmlToJSON($existing)
-        else common:error(404, "Range index not found")
+        else common:error(404, "Range index not found", "json")
 
     else if($requestMethod = "POST")
     then
         if(exists(manage:validateIndexName($name)))
-        then common:error(500, manage:validateIndexName($name))
+        then common:error(500, manage:validateIndexName($name), "json")
         else if(exists($existing))
-        then common:error(500, "Range index with this configuration already exists")
+        then common:error(500, "Range index with this configuration already exists", "json")
         else
             let $key := xdmp:get-request-field("key")[1]
             let $type := xdmp:get-request-field("type")[1]
@@ -58,6 +58,6 @@ return
     then
         if(exists($existing))
         then manage:deleteRange($name, $config)
-        else common:error(404, "Range index not found")
+        else common:error(404, "Range index not found", "json")
     else ()
 

@@ -11,7 +11,14 @@ declare option xdmp:mapping "false";
 declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 <options xmlns="http://marklogic.com/appservices/rest">
     <!-- Manage documents in the database -->
-    <request uri="^/data/store(/.+)$" endpoint="/data/store.xqy" user-params="allow">
+    <request uri="^/json/store(/.+)$" endpoint="/data/jsonstore.xqy" user-params="allow">
+        <uri-param name="uri" as="string">$1</uri-param>
+        <http method="GET"/>
+        <http method="POST"/>
+        <http method="PUT"/>
+        <http method="DELETE"/>
+    </request>
+    <request uri="^/xml/store(/.+)$" endpoint="/data/xmlstore.xqy" user-params="allow">
         <uri-param name="uri" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST"/>

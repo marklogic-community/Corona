@@ -18,32 +18,39 @@ xquery version "1.0-ml";
 
 module namespace common="http://marklogic.com/mljson/common";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
-import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
-import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
-import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
+
+declare namespace search="http://marklogic.com/appservices/search";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
 declare function common:error(
     $statusCode as xs:integer,
-    $message as xs:string
-) as xs:string
+    $message as xs:string,
+    $outputFormat as xs:string
+)
 {
     let $set := xdmp:set-response-code($statusCode, $message)
     let $add := xdmp:add-response-header("Date", string(current-dateTime()))
-    let $response :=
-        json:document(
-            json:object((
-                "error", json:object((
-                    "code", $statusCode,
-                    "message", $message
+    return
+        if($outputFormat = "xml")
+        then
+            (: XXX - Will need to output in a real XML format :)
+            <error>
+                <code>{ $statusCode }</code>
+                <message>{ $message }</message>
+            </error>
+        else
+            json:xmlToJSON(json:document(
+                json:object((
+                    "error", json:object((
+                        "code", $statusCode,
+                        "message", $message
+                    ))
                 ))
             ))
-        )
-    return json:xmlToJSON($response)
 };
 
 declare function common:valuesForFacet(
@@ -147,62 +154,7 @@ declare function common:indexNameToRangeQuery(
         else cts:element-range-query($QName, $operator, $values, $options, $weight)
 };
 
-declare function common:outputMultipleDocs(
-    $docs as element(json:json)*,
-    $start as xs:integer,
-    $end as xs:integer?,
-    $total as xs:integer,
-    $include as xs:string*,
-    $query as cts:query?,
-    $returnPath as xs:string?
-) as xs:string
-{
-    let $end :=
-        if(empty($end))
-        then $start
-        else $end
-
-    return json:xmlToJSON(
-        json:object((
-            "meta", json:object((
-                "start", $start,
-                "end", $end,
-                "total", $total
-            )),
-            "results", json:array(
-                for $doc in $docs
-                let $uri := base-uri($doc)
-                let $doc :=
-                    if(exists($returnPath))
-                    then path:select($doc, $returnPath)
-                    else $doc
-                return json:object((
-                    "uri", $uri,
-                    if($include = ("content", "all"))
-                    then ("content", $doc)
-                    else (),
-                    if($include = ("collections", "all"))
-                    then ("collections", reststore:getDocumentCollections($uri))
-                    else (),
-                    if($include = ("properties", "all"))
-                    then ("properties", reststore:getDocumentProperties($uri))
-                    else (),
-                    if($include = ("permissions", "all"))
-                    then ("permissions", reststore:getDocumentPermissions($uri))
-                    else (),
-                    if($include = ("quality", "all"))
-                    then ("quality", reststore:getDocumentQuality($uri))
-                    else (),
-                    if($include = ("snippet", "all"))
-                    then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*)))
-                    else ()
-                ))
-            )
-        ))
-    )
-};
-
-declare private function common:translateSnippet(
+declare function common:translateSnippet(
     $snippet as element(search:snippet)
 ) as element(json:item)
 {
