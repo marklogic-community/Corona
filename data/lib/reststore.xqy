@@ -73,51 +73,31 @@ declare function reststore:qualityFromRequest(
 
 declare function reststore:getJSONDocument(
     $uri as xs:string
-)
+) as xs:string
 {
-    let $includes := xdmp:get-request-field("include", "content")
-    let $content := $includes = ("content", "all")
-    let $collections := $includes = ("collections", "all")
-    let $properties := $includes = ("properties", "all")
-    let $permissions := $includes = ("permissions", "all")
-    let $quality := $includes = ("quality", "all")
-    return reststore:getJSONDocument($uri, $content, $collections, $properties, $permissions, $quality)
+    reststore:getJSONDocument($uri, xdmp:get-request-field("include", "content"))
 };
 
 declare function reststore:getJSONDocument(
     $uri as xs:string,
-    $includeContent as xs:boolean,
-    $includeCollections as xs:boolean,
-    $includeProperties as xs:boolean,
-    $includePermissions as xs:boolean,
-    $includeQuality as xs:boolean
+    $includes as xs:string*
 ) as xs:string
 {
     if(empty(doc($uri)/json:json))
     then common:error(404, "Document not found", "json")
     else
 
-    if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-    then json:xmlToJSON(doc($uri)/json:json)
-    else json:xmlToJSON(json:document(
-        json:object((
-            if($includeContent)
-            then ("content", doc($uri)/json:json)
-            else (),
-            if($includeCollections)
-            then ("collections", reststore:getDocumentCollections($uri, "json"))
-            else (),
-            if($includeProperties)
-            then ("properties", reststore:getDocumentProperties($uri, "json"))
-            else (),
-            if($includePermissions)
-            then ("permissions", reststore:getDocumentPermissions($uri, "json"))
-            else (),
-            if($includeQuality)
-            then ("quality", reststore:getDocumentQuality($uri))
-            else ()
+    let $includeContent := $includes = ("content", "all")
+    let $includeCollections := $includes = ("collections", "all")
+    let $includeProperties := $includes = ("properties", "all")
+    let $includePermissions := $includes = ("permissions", "all")
+    let $includeQuality := $includes = ("quality", "all")
+    return
+        if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
+        then json:xmlToJSON(doc($uri)/json:json)
+        else json:xmlToJSON(json:document(
+            json:object(reststore:outputJSONDocument($uri, doc($uri)/json:json, $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality))
         ))
-    ))
 };
 
 declare function reststore:outputMultipleJSONDocs(
@@ -145,27 +125,13 @@ declare function reststore:outputMultipleJSONDocs(
             "results", json:array(
                 for $doc in $docs
                 let $uri := base-uri($doc)
-                let $doc :=
+                let $content :=
                     if(exists($returnPath))
                     then path:select($doc, $returnPath)
                     else $doc
                 return json:object((
                     "uri", $uri,
-                    if($include = ("content", "all"))
-                    then ("content", $doc)
-                    else (),
-                    if($include = ("collections", "all"))
-                    then ("collections", reststore:getDocumentCollections($uri, "json"))
-                    else (),
-                    if($include = ("properties", "all"))
-                    then ("properties", reststore:getDocumentProperties($uri, "json"))
-                    else (),
-                    if($include = ("permissions", "all"))
-                    then ("permissions", reststore:getDocumentPermissions($uri, "json"))
-                    else (),
-                    if($include = ("quality", "all"))
-                    then ("quality", reststore:getDocumentQuality($uri))
-                    else (),
+                    reststore:outputJSONDocument($uri, $content, $include = ("content", "all"), $include = ("collections", "all"), $include = ("properties", "all"), $include = ("permissions", "all"), $include = ("quality", "all")),
                     if($include = ("snippet", "all"))
                     then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*)))
                     else ()
@@ -173,6 +139,33 @@ declare function reststore:outputMultipleJSONDocs(
             )
         ))
     )
+};
+
+declare private function reststore:outputJSONDocument(
+    $uri as xs:string,
+    $content as element()?,
+    $includeContent as xs:boolean,
+    $includeCollections as xs:boolean,
+    $includeProperties as xs:boolean,
+    $includePermissions as xs:boolean,
+    $includeQuality as xs:boolean
+)
+{
+    if($includeContent)
+    then ("content", doc($uri)/json:json)
+    else (),
+    if($includeCollections)
+    then ("collections", reststore:getDocumentCollections($uri, "json"))
+    else (),
+    if($includeProperties)
+    then ("properties", reststore:getDocumentProperties($uri, "json"))
+    else (),
+    if($includePermissions)
+    then ("permissions", reststore:getDocumentPermissions($uri, "json"))
+    else (),
+    if($includeQuality)
+    then ("quality", reststore:getDocumentQuality($uri))
+    else ()
 };
 
 declare function reststore:insertJSONDocument(
@@ -250,35 +243,31 @@ declare function reststore:getXMLDocument(
     $uri as xs:string
 ) as element()
 {
-    let $includes := xdmp:get-request-field("include", "content")
-    let $content := $includes = ("content", "all")
-    let $collections := $includes = ("collections", "all")
-    let $properties := $includes = ("properties", "all")
-    let $permissions := $includes = ("permissions", "all")
-    let $quality := $includes = ("quality", "all")
-    return reststore:getXMLDocument($uri, $content, $collections, $properties, $permissions, $quality)
+    reststore:getXMLDocument($uri, xdmp:get-request-field("include", "content"))
 };
 
 declare function reststore:getXMLDocument(
     $uri as xs:string,
-    $includeContent as xs:boolean,
-    $includeCollections as xs:boolean,
-    $includeProperties as xs:boolean,
-    $includePermissions as xs:boolean,
-    $includeQuality as xs:boolean
+    $includes as xs:string*
 ) as element()
 {
     if(empty(doc($uri)/*))
     then common:error(404, "Document not found", "xml")
     else
 
-    if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-    then doc($uri)/*
-    else 
-        (: XXX - Will need to output in a real XML format :)
-        <response>{
-            reststore:outputXMLDocument($uri, doc($uri)/*, $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality)
-        }</response>
+    let $includeContent := $includes = ("content", "all")
+    let $includeCollections := $includes = ("collections", "all")
+    let $includeProperties := $includes = ("properties", "all")
+    let $includePermissions := $includes = ("permissions", "all")
+    let $includeQuality := $includes = ("quality", "all")
+    return
+        if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
+        then doc($uri)/*
+        else 
+            (: XXX - Will need to output in a real XML format :)
+            <response>{
+                reststore:outputXMLDocument($uri, doc($uri)/*, $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality)
+            }</response>
 };
 
 declare function reststore:outputMultipleXMLDocs(
@@ -310,6 +299,7 @@ declare function reststore:outputMultipleXMLDocs(
                     then path:select($doc, $returnPath)
                     else $doc
                 return <result>{(
+                    <uri>{ $uri }</uri>,
                     reststore:outputXMLDocument($uri, $content, $include = ("content", "all"), $include = ("collections", "all"), $include = ("properties", "all"), $include = ("permissions", "all"), $include = ("quality", "all")),
                     if($include = ("snippet", "all"))
                     then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*)))
