@@ -239,6 +239,63 @@ declare function manage:getAllRanges(
 };
 
 
+declare function manage:setNamespaceURI(
+    $prefix as xs:string,
+    $uri as xs:string
+) as empty-sequence()
+{
+    let $config := admin:get-configuration()
+    let $group := xdmp:group()
+    let $existing := admin:group-get-namespaces($config, $group)[*:prefix = $prefix]
+    let $config :=
+        if(exists($existing))
+        then admin:group-delete-namespace($config, $group, $existing)
+        else $config
+
+    let $namespace := admin:group-namespace($prefix, $uri)
+    return admin:save-configuration(admin:group-add-namespace($config, $group, $namespace))
+};
+
+declare function manage:deleteNamespace(
+    $prefix as xs:string
+) as empty-sequence()
+{
+    let $config := admin:get-configuration()
+    let $group := xdmp:group()
+    let $namespace := admin:group-get-namespaces($config, $group)[*:prefix = $prefix]
+    where exists($namespace)
+    return admin:save-configuration(admin:group-delete-namespace($config, $group, $namespace))
+};
+
+declare function manage:getNamespaceURI(
+    $prefix as xs:string
+) as element(json:item)*
+{
+	try {
+		json:object((
+            "prefix", $prefix,
+            "uri", namespace-uri(element { concat($prefix, ":foo") } { () })
+        ))
+	}
+	catch($e) {
+		()
+	}
+};
+
+declare function manage:getAllNamespaces(
+) as element(json:item)*
+{
+    let $config := admin:get-configuration()
+    let $group := xdmp:group()
+    for $namespace in admin:group-get-namespaces($config, $group)
+    where not(starts-with(string($namespace/*:namespace-uri), "http://xqdev.com/prop/"))
+    return json:object((
+        "prefix", string($namespace/*:prefix),
+        "uri", string($namespace/*:namespace-uri)
+    ))
+};
+
+
 
 (: Private functions :)
 

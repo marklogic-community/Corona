@@ -95,6 +95,15 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         </http>
         <http method="DELETE"/>
     </request>
+
+    <request uri="^/xml/manage/namespace/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/namespace.xqy">
+        <uri-param name="prefix" as="string">$1</uri-param>
+        <http method="GET"/>
+        <http method="POST">
+            <param name="uri" required="true"/>
+        </http>
+        <http method="DELETE"/>
+    </request>
 </options>;
 
 declare function endpoints:options(

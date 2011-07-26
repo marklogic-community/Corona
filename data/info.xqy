@@ -57,7 +57,8 @@ json:document(
         )),
         "statistics", json:object((
             "documentCount", xdmp:estimate(collection())
-        ))
+        )),
+        "xmlNamespaces", json:array(manage:getAllNamespaces())
     ))
 )
 
