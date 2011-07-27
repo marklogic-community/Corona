@@ -124,13 +124,22 @@ declare function manage:getAllFields(
 };
 
 
-declare function manage:createMap(
+declare function manage:createJSONMap(
     $name as xs:string,
     $key as xs:string,
     $mode as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("map/", $name, "/", json:escapeNCName($key), "/", $mode))
+    prop:set(concat("index-", $name), concat("map/json/", $name, "/", json:escapeNCName($key), "/", $mode))
+};
+
+declare function manage:createXMLMap(
+    $name as xs:string,
+    $element as xs:string,
+    $mode as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("map/xml/", $name, "/", $element, "/", $mode))
 };
 
 declare function manage:deleteMap(
@@ -146,15 +155,26 @@ declare function manage:getMap(
 {
     let $property := prop:get(concat("index-", $name))
     let $bits := tokenize($property, "/")
-    let $name := $bits[2]
-    let $key := json:unescapeNCName($bits[3])
-    let $mode := $bits[4]
+    let $type := $bits[2]
+    let $name := $bits[3]
+    let $key := json:unescapeNCName($bits[4])
+    let $element := $bits[4]
+    let $mode := $bits[5]
     where $bits[1] = "map"
-    return json:object((
-        "name", $name,
-        "key", $key,
-        "mode", $mode
-    ))
+    return
+        if($type = "json")
+        then json:object((
+            "name", $name,
+            "type", $type,
+            "key", $key,
+            "mode", $mode
+        ))
+        else json:object((
+            "name", $name,
+            "type", $type,
+            "element", $element,
+            "mode", $mode
+        ))
 };
 
 declare function manage:getAllMaps(

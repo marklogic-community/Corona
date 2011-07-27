@@ -258,7 +258,7 @@ declare private function parser:constraintQuery(
         bits:
             field -> field, name
             range -> range, name, key, type, operator
-            map -> map, name, key, mode
+            map -> map, type, name, key, mode
     :)
     let $value := string($term/value)
     let $definition := prop:get(concat("index-", $term/field))
@@ -270,15 +270,20 @@ declare private function parser:constraintQuery(
 
         else if($bits[1] = "map")
         then 
-            if($bits[4] = "equals")
-            then
-                if($value = ("true", "false"))
-                then cts:or-query((
-                    cts:element-value-query(xs:QName(concat("json:", $bits[3])), $value),
-                    cts:element-attribute-value-query(xs:QName(concat("json:", $bits[3])), xs:QName("boolean"), $value)
-                ))
-                else cts:element-value-query(xs:QName(concat("json:", $bits[3])), $value)
-            else cts:element-word-query(xs:QName(concat("json:", $bits[3])), $value)
+            let $QName :=
+                if($bits[2] = "json")
+                then xs:QName(concat("json:", $bits[4]))
+                else xs:QName($bits[4])
+            return
+                if($bits[5] = "equals")
+                then
+                    if($value = ("true", "false"))
+                    then cts:or-query((
+                        cts:element-value-query($QName, $value),
+                        cts:element-attribute-value-query($QName, xs:QName("boolean"), $value)
+                    ))
+                    else cts:element-value-query($QName, $value)
+                else cts:element-word-query($QName, $value)
 
         else if($bits[1] = "range")
         then

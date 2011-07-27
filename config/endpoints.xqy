@@ -90,7 +90,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
-            <param name="key" required="true"/>
+            <param name="key" required="false"/>
+            <param name="element" required="false"/>
             <param name="mode" required="true" values="contains|equals"/>
         </http>
         <http method="DELETE"/>

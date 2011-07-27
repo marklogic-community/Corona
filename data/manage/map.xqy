@@ -30,6 +30,7 @@ declare option xdmp:mapping "false";
 (: let $params := rest:process-request(endpoints:request("/data/manage/map.xqy")) :)
 let $name := xdmp:get-request-field("name")[1]
 let $key := xdmp:get-request-field("key")[1]
+let $element := xdmp:get-request-field("element")[1]
 let $mode := xdmp:get-request-field("mode")[1]
 let $requestMethod := xdmp:get-request-method()
 
@@ -44,11 +45,17 @@ return
 
     else if($requestMethod = "POST")
     then 
-        if(not($mode = ("equals", "contains")))
+        if(empty($key) and empty($element))
+        then common:error(500, "Must supply either a key or element name", "json")
+        else if(not($mode = ("equals", "contains")))
         then common:error(500, "Map modes must be either 'equals' or 'contains'", "json")
         else if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name), "json")
-        else manage:createMap($name, $key, $mode)
+        else if(exists($key))
+        then manage:createJSONMap($name, $key, $mode)
+        else if(exists($element))
+        then manage:createXMLMap($name, $element, $mode)
+        else ()
 
     else if($requestMethod = "DELETE")
     then
