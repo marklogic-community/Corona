@@ -14,6 +14,9 @@ mljson.removeIndexes = function(info, callback) {
     for(i = 0; i < info.indexes.ranges.length; i += 1) {
         indexes.push({"type": "range", "name": info.indexes.ranges[i].name});
     }
+    for(i = 0; i < info.xmlNamespaces.length; i += 1) {
+        indexes.push({"type": "namespace", "name": info.xmlNamespaces[i].prefix});
+    }
     
     var processingPosition = 0;
 
@@ -29,7 +32,10 @@ mljson.removeIndexes = function(info, callback) {
                     url: '/data/info',
                     success: function(data) {
                         var info = JSON.parse(data);
-                        ok(info.indexes.fields.length === 0 && info.indexes.mappings.length === 0 && info.indexes.ranges.length === 0, "All indexes removed");
+                        ok(info.indexes.fields.length === 0, "All fields removed");
+                        ok(info.indexes.mappings.length === 0, "All mappings removed");
+                        ok(info.indexes.ranges.length === 0, "All ranges removed");
+                        ok(info.xmlNamespaces.length === 0, "All namespaces removed");
                         callback.call();
                     },
                     error: function() {
@@ -48,11 +54,11 @@ mljson.removeIndexes = function(info, callback) {
                 type: 'DELETE',
                 success: function() {
                     processingPosition++;
-                    ok(true, "Removed the " + index.name + " index");
+                    ok(true, "Removed the " + index.name + " " + index.type);
                     removeNextIndex();
                 },
                 error: function(j, t, error) {
-                    ok(false, "Could not delete index" + error);
+                    ok(false, "Could not delete " + index.type + ": " + error);
                 },
                 complete: function() {
                     start();
@@ -112,6 +118,14 @@ mljson.addIndexes = function(callback) {
             "shouldSucceed": true,
             "purpose": "General range creation on a string"
         },
+        {
+            "type": "namespace",
+            "pluralType": "xmlNamespaces",
+            "prefix": "testns",
+            "uri": "http://test.ns/uri",
+            "shouldSucceed": true,
+            "purpose": "Creation of XML namespace"
+        },
 
         {
             "type": "field",
@@ -140,6 +154,14 @@ mljson.addIndexes = function(callback) {
             "operator": "eq",
             "shouldSucceed": false,
             "purpose": "Making sure you can't have duplicate names when creating a range"
+        },
+        {
+            "type": "namespace",
+            "pluralType": "xmlNamespaces",
+            "prefix": "test:ns",
+            "uri": "http://test.ns/uri",
+            "shouldSucceed": false,
+            "purpose": "Should fail with invalid XML namespace prefix"
         }
     ];
 
@@ -154,10 +176,12 @@ mljson.addIndexes = function(callback) {
             equals(config.operator, server.operator, "Index operators match");
         }
         else if(config.type === "field") {
-            console.log(config.includes);
-            console.log(server.includedKeys);
             deepEqual(config.includes, server.includedKeys, "Index includes match");
             deepEqual(config.excludes, server.excludedKeys, "Index excludes match");
+        }
+        else if(config.type === "namespace") {
+            equal(config.prefix, server.prefix, "Namespace prefixes match");
+            equal(config.uri, server.uri, "Namespace uris match");
         }
     };
     
@@ -185,21 +209,32 @@ mljson.addIndexes = function(callback) {
                                 continue;
                             }
                             var foundIndex = false;
-                            for(j = 0; j < info.indexes[config.pluralType].length; j += 1) {
-                                var server = info.indexes[config.pluralType][j];
-                                if(server.name === config.name) {
-                                    foundIndex = true;
-                                    compareIndexes(config, server);
+                            if(config.type === "namespace") {
+                                for(j = 0; j < info.xmlNamespaces.length; j += 1) {
+                                    var server = info.xmlNamespaces[j];
+                                    if(server.prefix === config.prefix) {
+                                        foundIndex = true;
+                                        compareIndexes(config, server);
+                                    }
+                                }
+                            }
+                            else {
+                                for(j = 0; j < info.indexes[config.pluralType].length; j += 1) {
+                                    var server = info.indexes[config.pluralType][j];
+                                    if(server.name === config.name) {
+                                        foundIndex = true;
+                                        compareIndexes(config, server);
+                                    }
                                 }
                             }
                             if(!foundIndex) {
-                                ok(false, "Could not find newly added index");
+                                ok(false, "Could not find newly added index or namespace");
                             }
                         }
                         callback.call();
                     },
                     error: function() {
-                        ok(false, "Could not check for added index");
+                        ok(false, "Could not check for added index or namespace");
                     },
                     complete: function() { start(); }
                 });
@@ -210,7 +245,11 @@ mljson.addIndexes = function(callback) {
         asyncTest(index.purpose, function() {
             var url = "/manage/" + index.type + "/" + index.name;
             var data = {};
-            if(index.type === "map") {
+            if(index.type === "namespace") {
+                url = "/manage/" + index.type + "/" + index.prefix;
+                data.uri = index.uri;
+            }
+            else if(index.type === "map") {
                 data.key = index.key;
                 data.mode = index.mode;
             }
@@ -250,12 +289,12 @@ mljson.addIndexes = function(callback) {
                 type: 'POST',
                 context: index,
                 success: function() {
-                    ok(true, "Index was created");
+                    ok(true, "Index/namespace was created");
                     processingPosition++;
                     addNextIndex();
                 },
                 error: function(j, t, error) {
-                    ok(!this.shouldSucceed, "Could not add index: " + error);
+                    ok(!this.shouldSucceed, "Could not add index/namespace: " + error);
                     processingPosition++;
                     addNextIndex();
                 },
