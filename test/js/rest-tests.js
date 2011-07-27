@@ -42,7 +42,7 @@ mljson.removeIndexes = function(info, callback) {
         }
 
         asyncTest("Remove the " + index.name + " index", function() {
-            var url = "/data/manage/" + index.type + "/" + index.name;
+            var url = "/manage/" + index.type + "/" + index.name;
             $.ajax({
                 url: url,
                 type: 'DELETE',
@@ -208,7 +208,7 @@ mljson.addIndexes = function(callback) {
         }
 
         asyncTest(index.purpose, function() {
-            var url = "/data/manage/" + index.type + "/" + index.name;
+            var url = "/manage/" + index.type + "/" + index.name;
             var data = {};
             if(index.type === "map") {
                 data.key = index.key;

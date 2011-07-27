@@ -68,14 +68,14 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Index management -->
-    <request uri="^/data/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/data/manage/field.xqy" user-params="allow">
+    <request uri="^/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/data/manage/field.xqy" user-params="allow">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST"/>
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/data/manage/range/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/range.xqy">
+    <request uri="^/manage/range/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/range.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -86,7 +86,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/data/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/map.xqy">
+    <request uri="^/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/map.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -96,7 +96,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/xml/manage/namespace/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/namespace.xqy">
+    <request uri="^/manage/namespace/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/namespace.xqy">
         <uri-param name="prefix" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
