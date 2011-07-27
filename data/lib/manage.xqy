@@ -276,7 +276,6 @@ declare function manage:getRange(
 ) as element(json:item)?
 {
     let $index := config:get($name)
-    let $log := xdmp:log($index)
     where $index/@type = "range"
     return
         if($index/structure = "json")
