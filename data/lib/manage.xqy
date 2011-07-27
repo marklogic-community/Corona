@@ -218,6 +218,7 @@ declare function manage:createRange(
             return admin:save-configuration($config)
         else if($type = "boolean")
         then
+            (: XXX - don't think we can create range indexes of type boolean :)
             let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, "", "boolean", "", false())
             let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
             return admin:save-configuration($config)
@@ -314,15 +315,19 @@ declare function manage:getNamespaceURI(
     $prefix as xs:string
 ) as element(json:item)*
 {
-	try {
-		json:object((
+    let $uri :=
+        try {
+            namespace-uri(element { concat($prefix, ":foo") } { () })
+        }
+        catch($e) {
+            ()
+        }
+    where exists($uri) and not(starts-with($prefix, "index-"))
+    return
+        json:object((
             "prefix", $prefix,
-            "uri", namespace-uri(element { concat($prefix, ":foo") } { () })
+            "uri", $uri
         ))
-	}
-	catch($e) {
-		()
-	}
 };
 
 declare function manage:getAllNamespaces(
