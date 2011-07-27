@@ -43,22 +43,45 @@ declare function manage:validateIndexName(
 
 declare function manage:createField(
     $name as xs:string,
-    $includes as xs:string*,
-    $excludes as xs:string*,
+    $includeKeys as xs:string*,
+    $excludeKeys as xs:string*,
+    $includeElements as xs:string*,
+    $excludeElements as xs:string*,
     $config as element()
 ) as empty-sequence()
 {
     let $database := xdmp:database()
     let $config := admin:database-add-field($config, $database, admin:database-field($name, false()))
     let $add :=
-        for $include in $includes
+        for $include in $includeKeys[string-length(.) > 0]
         let $include := json:escapeNCName($include)
         let $el := admin:database-included-element("http://marklogic.com/json", $include, 1, (), "", "")
         return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
     let $add :=
-        for $exclude in $excludes
+        for $exclude in $excludeKeys[string-length(.) > 0]
         let $exclude := json:escapeNCName($exclude)
         let $el := admin:database-excluded-element("http://marklogic.com/json", $exclude)
+        return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
+
+    let $add :=
+        for $include in $includeElements[string-length(.) > 0]
+        let $namespace :=
+            if(contains($include, ":"))
+            then namespace-uri(element { $include } { () })
+            else ""
+        let $include := 
+            if(contains($include, ":"))
+            then tokenize($include, ":")[2]
+            else $include
+        let $el := admin:database-included-element($namespace, $include, 1, (), "", "")
+        return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
+    let $add :=
+        for $exclude in $excludeElements[string-length(.) > 0]
+        let $namespace :=
+            if(contains($exclude, ":"))
+            then namespace-uri(element { $exclude } { () })
+            else ""
+        let $el := admin:database-excluded-element($namespace, $exclude)
         return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
     return admin:save-configuration($config)
     ,
@@ -299,6 +322,17 @@ declare function manage:getAllNamespaces(
 
 (: Private functions :)
 
+declare private function manage:getPrefixForNamespaceURI(
+    $uri as xs:string
+) as xs:string?
+{
+    let $config := admin:get-configuration()
+    let $group := xdmp:group()
+    for $namespace in admin:group-get-namespaces($config, $group)
+    where string($namespace/*:namespace-uri) = $uri
+    return string($namespace/*:prefix)
+};
+
 declare private function manage:fieldDefinitionToJsonXml(
     $field as element(db:field)
 ) as element(json:item)
@@ -308,12 +342,30 @@ declare private function manage:fieldDefinitionToJsonXml(
         "includedKeys", json:array(
             for $include in $field/db:included-elements/db:included-element
             for $key in tokenize(string($include/db:localname), " ")
-            return json:unescapeNCName($key)
+            return
+                if($include/db:namespace-uri = "http://marklogic.com/json")
+                then json:object((
+                    "type", "key",
+                    "name", json:unescapeNCName($key)
+                ))
+                else json:object((
+                    "type", "element",
+                    "name", if(string-length($include/db:namespace-uri)) then concat(manage:getPrefixForNamespaceURI(string($include/db:namespace-uri)), ":", $key) else $key
+                ))
         ),
         "excludedKeys", json:array(
-            for $include in $field/db:excluded-elements/db:excluded-element
-            for $key in tokenize(string($include/db:localname), " ")
-            return json:unescapeNCName($key)
+            for $exclude in $field/db:excluded-elements/db:excluded-element
+            for $key in tokenize(string($exclude/db:localname), " ")
+            return
+                if($exclude/db:namespace-uri = "http://marklogic.com/json")
+                then json:object((
+                    "type", "key",
+                    "name", json:unescapeNCName($key)
+                ))
+                else json:object((
+                    "type", "element",
+                    "name", if(string-length($exclude/db:namespace-uri)) then concat(manage:getPrefixForNamespaceURI(string($exclude/db:namespace-uri)), ":", $key) else $key
+                ))
         )
     ))
 };

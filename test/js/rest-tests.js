@@ -71,8 +71,15 @@ mljson.addIndexes = function(callback) {
             "type": "field",
             "pluralType": "fields",
             "name": "field1",
-            "includes": ["included1", "included2"],
-            "excludes": ["excluded1"],
+            "includes": [
+                { "type": "key", "name": "included1"},
+                { "type": "key", "name": "included2"},
+                { "type": "element", "name": "nonselment"},
+            ],
+            "excludes": [
+                { "type": "key", "name": "excluded1"},
+                { "type": "element", "name": "excludenonsel"},
+            ],
             "shouldSucceed": true,
             "purpose": "General field creation",
         },
@@ -147,6 +154,8 @@ mljson.addIndexes = function(callback) {
             equals(config.operator, server.operator, "Index operators match");
         }
         else if(config.type === "field") {
+            console.log(config.includes);
+            console.log(server.includedKeys);
             deepEqual(config.includes, server.includedKeys, "Index includes match");
             deepEqual(config.excludes, server.excludedKeys, "Index excludes match");
         }
@@ -206,8 +215,28 @@ mljson.addIndexes = function(callback) {
                 data.mode = index.mode;
             }
             else if(index.type === "field") {
-                data.include = index.includes;
-                data.exclude = index.excludes;
+                data.includeKey = [];
+                data.excludeKey = [];
+                data.includeElement = [];
+                data.excludeElement = [];
+
+                var i = 0;
+                for(i = 0; i < index.includes.length; i += 1) {
+                    if(index.includes[i].type === "key") {
+                        data.includeKey.push(index.includes[i].name);
+                    }
+                    else {
+                        data.includeElement.push(index.includes[i].name);
+                    }
+                }
+                for(i = 0; i < index.excludes.length; i += 1) {
+                    if(index.excludes[i].type === "key") {
+                        data.excludeKey.push(index.excludes[i].name);
+                    }
+                    else {
+                        data.excludeElement.push(index.excludes[i].name);
+                    }
+                }
             }
             else if(index.type === "range") {
                 data.key = index.key;
@@ -289,7 +318,7 @@ mljson.insertDocuments = function() {
 
         asyncTest("Inserting document: " + doc.uri, function() {
             $.ajax({
-                url: "/data/store" + doc.uri,
+                url: "/json/store" + doc.uri,
                 type: 'PUT',
                 data: JSON.stringify(doc),
                 success: function() {

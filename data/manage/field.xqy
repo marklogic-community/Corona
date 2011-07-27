@@ -52,10 +52,12 @@ return
             then xdmp:set($config, admin:database-delete-field($config, $database, $name))
             else (),
 
-            (: Pretty hacky for the moment :)
-            let $includes := distinct-values((xdmp:get-request-field("include"), xdmp:get-request-field("include[]")))
-            let $excludes := distinct-values((xdmp:get-request-field("exclude"), xdmp:get-request-field("exclude[]")))
-            return manage:createField($name, $includes, $excludes, $config)
+            (: XXX - Pretty hacky for the moment :)
+            let $includeKeys := distinct-values((xdmp:get-request-field("includeKey"), xdmp:get-request-field("includeKey[]")))
+            let $excludes := distinct-values((xdmp:get-request-field("excludeKey"), xdmp:get-request-field("excludeKey[]")))
+            let $includeElements := distinct-values((xdmp:get-request-field("includeElement"), xdmp:get-request-field("includeElement[]")))
+            let $excludeElements := distinct-values((xdmp:get-request-field("excludeElement"), xdmp:get-request-field("excludeElement[]")))
+            return manage:createField($name, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
         )
 
     else if($requestMethod = "DELETE")
