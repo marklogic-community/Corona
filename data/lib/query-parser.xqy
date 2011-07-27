@@ -18,7 +18,7 @@ xquery version "1.0-ml";
 
 module namespace parser = "http://marklogic.com/mljson/query-parser";
 
-import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
+import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
@@ -254,28 +254,28 @@ declare private function parser:constraintQuery(
     $ignoreFacet as xs:string?
 ) as cts:query?
 {
-    (:
-        bits:
-            field -> field, name
-            range -> range, name, key, type, operator
-            map -> map, type, name, key, mode
-    :)
     let $value := string($term/value)
-    let $definition := prop:get(concat("index-", $term/field))
-    let $bits := tokenize($definition, "/")
+    let $index := config:get($term/field)
+    let $options :=
+        if($index/type = "string")
+        then "collation=http://marklogic.com/collation/"
+        else ()
+    let $operator := common:humanOperatorToMathmatical($index/operator)
     where $term/field != $ignoreFacet
     return
-        if($bits[1] = "field")
-        then cts:field-word-query($bits[2], $value)
+        if($index/@type = "field")
+        then cts:field-word-query($index/name, $value)
 
-        else if($bits[1] = "map")
+        else if($index/@type = "map")
         then 
             let $QName :=
-                if($bits[2] = "json")
-                then xs:QName(concat("json:", $bits[4]))
-                else xs:QName($bits[4])
+                if($index/structure = "json")
+                then xs:QName(concat("json:", $index/key))
+                else if($index/structure = "xmlelement")
+                then xs:QName($index/element)
+                else ()
             return
-                if($bits[5] = "equals")
+                if($index/mode = "equals")
                 then
                     if($value = ("true", "false"))
                     then cts:or-query((
@@ -285,31 +285,32 @@ declare private function parser:constraintQuery(
                     else cts:element-value-query($QName, $value)
                 else cts:element-word-query($QName, $value)
 
-        else if($bits[1] = "range")
+        else if($index/@type = "range")
         then
-            (: XXX - we can't make a range index on booleans :)
-            if($bits[4] = "boolean")
+            if($index/structure = "json")
             then
-                let $QName := xs:QName(concat("json:", $bits[3]))
-                let $value := common:castFromJSONType($value, $bits[4])
-                return cts:element-attribute-range-query($QName, xs:QName("boolean"), "=", $value)
+                (: XXX - we can't make a range index on booleans :)
+                if($index/type = "boolean")
+                then
+                    let $QName := xs:QName(concat("json:", $index/key))
+                    let $value := common:castFromJSONType($value, "boolean")
+                    return cts:element-attribute-range-query($QName, xs:QName("boolean"), "=", $value)
 
-            else if($bits[4] = "date")
-            then
-                let $QName := xs:QName(concat("json:", $bits[3]))
-                let $value := common:castFromJSONType($value, $bits[4])
-                let $operator := common:humanOperatorToMathmatical($bits[5])
-                return cts:element-attribute-range-query($QName, xs:QName("normalized-date"), $operator, $value)
+                else if($index/type = "date")
+                then
+                    let $QName := xs:QName(concat("json:", $index/key))
+                    let $value := common:castFromJSONType($value, "date")
+                    return cts:element-attribute-range-query($QName, xs:QName("normalized-date"), $operator, $value)
 
-            else
-                let $QName := xs:QName(concat("json:", $bits[3]))
-                let $value := common:castFromJSONType($value, $bits[4])
-                let $operator := common:humanOperatorToMathmatical($bits[5])
-                let $options :=
-                    if($bits[4] = "string")
-                    then "collation=http://marklogic.com/collation/"
-                    else ()
-                return cts:element-range-query($QName, $operator, $value, $options)
+                else
+                    let $QName := xs:QName(concat("json:", $index/key))
+                    let $value := common:castFromJSONType($value, $index/type)
+                    return cts:element-range-query($QName, $operator, $value, $options)
+            else if($index/structure = "xmlelement")
+            then cts:element-range-query(xs:QName($index/element), $operator, common:castAs($value, $index/type), $options)
+            else if($index/structure = "xmlattribute")
+            then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), $operator, common:castAs($value, $index/type))
+            else ()
         else parser:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)
 };
 

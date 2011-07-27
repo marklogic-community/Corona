@@ -19,7 +19,7 @@ xquery version "1.0-ml";
 module namespace common="http://marklogic.com/mljson/common";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
-import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
+import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
 
 declare namespace search="http://marklogic.com/appservices/search";
 
@@ -59,18 +59,23 @@ declare function common:valuesForFacet(
 ) as xs:string*
 {
     let $query := <foo>{ $query }</foo>/*
-    let $definition := prop:get(concat("index-", $facetName))
-    (: bits -> range, name, key, type, operator :)
-    let $bits := tokenize($definition, "/")
-    let $operator := if($bits[5]) then common:humanOperatorToMathmatical($bits[5]) else "="
-    where $bits[1] = "range"
+    let $index := config:get($facetName)
+    let $operator := if(exists($index/operator)) then common:humanOperatorToMathmatical($index/operator) else "="
+    where $index/@type = "range"
     return
-        if($bits[4] = "date")
-        then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName(concat("json:", $bits[3]))][cts:attribute = "normalized-date"][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
-        else if($bits[4] = "string")
-        then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $bits[3]))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
-        else if($bits[4] = "number")
-        then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $bits[3]))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:decimal")]/cts:value)
+        if($index/structure = "json")
+        then
+            if($index/type = "date")
+            then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName(concat("json:", $index/key))][cts:attribute = xs:QName("normalized-date")][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
+            else if($index/type = "string")
+            then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $index/key))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
+            else if($index/type = "number")
+            then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $index/key))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:decimal")]/cts:value)
+            else ()
+        else if($index/structure = "xmlelement")
+        then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName($index/element)][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
+        else if($index/structure = "xmlattribute")
+        then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName($index/element)][cts:attribute = xs:QName($index/attribute)][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
         else ()
 };
 
@@ -107,8 +112,46 @@ declare function common:castFromJSONType(
     else xs:string($value)
 };
 
+declare function common:castAs(
+    $value as xs:anySimpleType,
+    $type as xs:string
+)
+{
+    if($type = "string") then xs:string($value)
+    else if($type = "boolean") then xs:boolean($value)
+    else if($type = "decimal") then xs:decimal($value)
+    else if($type = "float") then xs:float($value)
+    else if($type = "double") then xs:double($value)
+    else if($type = "duration") then xs:duration($value)
+    else if($type = "dateTime") then xs:dateTime($value)
+    else if($type = "time") then xs:time($value)
+    else if($type = "date") then xs:date($value)
+    else if($type = "gYearMonth") then xs:gYearMonth($value)
+    else if($type = "gYear") then xs:gYear($value)
+    else if($type = "gMonthDay") then xs:gMonthDay($value)
+    else if($type = "gDay") then xs:gDay($value)
+    else if($type = "gMonth") then xs:gMonth($value)
+    else if($type = "hexBinary") then xs:hexBinary($value)
+    else if($type = "base64Binary") then xs:base64Binary($value)
+    else if($type = "QName") then xs:QName($value)
+    else if($type = "integer") then xs:integer($value)
+    else if($type = "nonPositiveInteger") then xs:nonPositiveInteger($value)
+    else if($type = "negativeInteger") then xs:negativeInteger($value)
+    else if($type = "long") then xs:long($value)
+    else if($type = "int") then xs:int($value)
+    else if($type = "short") then xs:short($value)
+    else if($type = "byte") then xs:byte($value)
+    else if($type = "nonNegativeInteger") then xs:nonNegativeInteger($value)
+    else if($type = "unsignedLong") then xs:unsignedLong($value)
+    else if($type = "unsignedInt") then xs:unsignedInt($value)
+    else if($type = "unsignedShort") then xs:unsignedShort($value)
+    else if($type = "unsignedByte") then xs:unsignedByte($value)
+    else if($type = "positiveInteger") then xs:positiveInteger($value)
+    else xs:string($value)
+};
+
 declare function common:humanOperatorToMathmatical(
-    $operator as xs:string
+    $operator as xs:string?
 ) as xs:string
 {
     if($operator = "eq")
@@ -134,24 +177,31 @@ declare function common:indexNameToRangeQuery(
     $weight as xs:double?
 ) as cts:element-range-query?
 {
-    let $prop := prop:get(concat("index-", $name))
-    let $bits := tokenize($prop, "/")
-    let $key := $bits[3]
-    let $type := $bits[4]
-    let $operator := common:humanOperatorToMathmatical(($operatorOverride, $bits[5])[1])
+    let $index := config:get($name)
+    let $operator := common:humanOperatorToMathmatical(($operatorOverride, $index/operator, "eq")[1])
     let $values := 
-        for $value in $values
-        return common:castFromJSONType($value)
-    let $QName := xs:QName(concat("json:", $key))
-    where exists($prop) and starts-with($prop, "range/")
+        if($index/structure = "json")
+        then
+            for $value in $values
+            return common:castFromJSONType($value)
+        else
+            for $value in $values
+            where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $index/type, $value)
+            return common:castAs($value, $index/type)
+    where $index/@type = "range"
     return 
-        if($values/@type = "boolean" or ($values/@type = "array" and count($values/json:item/@boolean) = count($values/json:item)))
-        then cts:element-attribute-range-query($QName, xs:QName("boolean"), "=", $values, $options, $weight)
-
-        else if($values/@type = "date" or ($values/@type = "array" and count($values/json:item/@normalized-date) = count($values/json:item)))
-        then cts:element-attribute-range-query($QName, xs:QName("normalized-date"), $operator, $values, $options, $weight)
-
-        else cts:element-range-query($QName, $operator, $values, $options, $weight)
+        if($index/structure = "json")
+        then
+            if($index/type = "boolean")
+            then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("boolean"), "=", $values, $options, $weight)
+            else if($index/type = "date")
+            then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), $operator, $values, $options, $weight)
+            else cts:element-range-query(xs:QName(concat("json:", $index/key)), $operator, $values, $options, $weight)
+        else if($index/structure = "xmlelement")
+        then cts:element-range-query(xs:QName($index/element), $operator, $values, $options, $weight)
+        else if($index/structure = "xmlattribute")
+        then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), $operator, $values, $options, $weight)
+        else ()
 };
 
 declare function common:translateSnippet(

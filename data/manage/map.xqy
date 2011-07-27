@@ -20,7 +20,6 @@ import module namespace manage="http://marklogic.com/mljson/manage" at "../lib/m
 import module namespace common="http://marklogic.com/mljson/common" at "../lib/common.xqy";
 import module namespace json="http://marklogic.com/json" at "../lib/json.xqy";
 
-import module namespace prop="http://xqdev.com/prop" at "../lib/properties.xqy";
 import module namespace rest="http://marklogic.com/appservices/rest" at "../lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
 
@@ -45,8 +44,8 @@ return
 
     else if($requestMethod = "POST")
     then 
-        if(empty($key) and empty($element))
-        then common:error(500, "Must supply either a key or element name", "json")
+        if((empty($key) and empty($element)) or (exists($key) and exists($element)))
+        then common:error(500, "Must supply either a JSON key or XML element name", "json")
         else if(not($mode = ("equals", "contains")))
         then common:error(500, "Map modes must be either 'equals' or 'contains'", "json")
         else if(exists(manage:validateIndexName($name)))

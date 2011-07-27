@@ -20,7 +20,6 @@ import module namespace manage="http://marklogic.com/mljson/manage" at "../lib/m
 import module namespace common="http://marklogic.com/mljson/common" at "../lib/common.xqy";
 import module namespace json="http://marklogic.com/json" at "../lib/json.xqy";
 
-import module namespace prop="http://xqdev.com/prop" at "../lib/properties.xqy";
 import module namespace rest="http://marklogic.com/appservices/rest" at "../lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";

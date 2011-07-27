@@ -20,7 +20,6 @@ import module namespace manage="http://marklogic.com/mljson/manage" at "../lib/m
 import module namespace common="http://marklogic.com/mljson/common" at "../lib/common.xqy";
 import module namespace json="http://marklogic.com/json" at "../lib/json.xqy";
 
-import module namespace prop="http://xqdev.com/prop" at "../lib/properties.xqy";
 import module namespace rest="http://marklogic.com/appservices/rest" at "../lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
@@ -44,15 +43,32 @@ return
 
     else if($requestMethod = "POST")
     then
-        if(exists(manage:validateIndexName($name)))
+        let $key := xdmp:get-request-field("key")[1]
+        let $element := xdmp:get-request-field("element")[1]
+        let $attribute := xdmp:get-request-field("element")[1]
+        let $type := xdmp:get-request-field("type")[1]
+        let $operator := xdmp:get-request-field("operator")[1]
+        return
+
+        if((empty($key) and empty($element)) or (exists($key) and exists($element)))
+        then common:error(500, "Must supply either a JSON key or XML element name", "json")
+        else if(exists($attribute) and empty($element))
+        then common:error(500, "Must supply an XML element along with an XML attribute", "json")
+        else if(exists($key) and not($type = ("string", "date", "number")))
+        then common:error(500, "Valid JSON types are: string, date and number", "json")
+        else if(exists($element) and not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
+        then common:error(500, "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI", "json")
+        else if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name), "json")
         else if(exists($existing))
         then common:error(500, "Range index with this configuration already exists", "json")
-        else
-            let $key := xdmp:get-request-field("key")[1]
-            let $type := xdmp:get-request-field("type")[1]
-            let $operator := xdmp:get-request-field("operator")[1]
-            return manage:createRange($name, $key, $type, $operator, $config)
+        else if(exists($key))
+        then manage:createJSONRange($name, $key, $type, $operator, $config)
+        else if(exists($element) and exists($attribute))
+        then manage:createXMLAttributeRange($name, $element, $attribute, $type, $operator, $config)
+        else if(exists($element) and empty($attribute))
+        then manage:createXMLElementRange($name, $element, $type, $operator, $config)
+        else ()
 
     else if($requestMethod = "DELETE")
     then
