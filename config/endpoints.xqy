@@ -27,7 +27,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Custom queries -->
-    <request uri="^/data/customquery(/)?$" endpoint="/data/customquery.xqy">
+    <request uri="^/(json|xml)/customquery(/)?$" endpoint="/data/customquery.xqy">
+        <uri-param name="content-type">$1</uri-param>
         <param name="q" required="true"/>
         <param name="start" required="false"/>
         <param name="end" required="false"/>
@@ -38,11 +39,11 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Query strings -->
-    <request uri="^/data/query(/|/(\d+)/?|/(\d+)/(\d+)/?)?$" endpoint="/data/query.xqy">
-        <uri-param name="__MLJSONURL__:index">$2</uri-param>
-        <uri-param name="__MLJSONURL__:start">$3</uri-param>
-        <uri-param name="__MLJSONURL__:end">$4</uri-param>
+    <request uri="^/(json|xml)/query(/)?$" endpoint="/data/query.xqy">
+        <uri-param name="content-type">$1</uri-param>
         <param name="q" required="true"/>
+        <param name="start" required="false"/>
+        <param name="end" required="false"/>
         <param name="include" repeatable="true" required="false"/>
         <param name="returnpath" required="false"/>
     </request>

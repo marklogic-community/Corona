@@ -32,7 +32,7 @@ declare function customquery:getCTS(
     return customquery:dispatch($tree, $ignoreFacet)
 };
 
-declare function customquery:execute(
+declare function customquery:searchJSON(
     $json as xs:string,
     $include as xs:string*,
     $start as xs:positiveInteger?,
@@ -68,6 +68,44 @@ declare function customquery:execute(
         else $end
 
     return reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $cts, $returnPath)
+};
+
+declare function customquery:searchXML(
+    $json as xs:string,
+    $include as xs:string*,
+    $start as xs:positiveInteger?,
+    $end as xs:positiveInteger?,
+    $returnPath as xs:string?
+) as element(response)
+{
+    let $start := if(empty($start)) then 1 else $start
+    let $tree := json:jsonToXML($json)
+    let $cts := customquery:dispatch($tree, ())
+    let $options := customquery:extractOptions($tree, "search")
+    let $weight := customquery:extractWeight($tree)
+    let $debug :=
+        if($tree/json:debug[@boolean = "true"])
+        then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
+        else ()
+
+    let $results :=
+        if(exists($start) and exists($end))
+        then cts:search(/*, $cts, $options, $weight)[$start to $end]
+        else if(exists($start))
+        then cts:search(/*, $cts, $options, $weight)[$start]
+        else cts:search(/*, $cts, $options, $weight)
+
+    let $total :=
+        if(exists($results[1]))
+        then cts:remainder($results[1]) + $start - 1
+        else 0
+
+    let $end :=
+        if($end > $total)
+        then $total
+        else $end
+
+    return reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $cts, $returnPath)
 };
 
 declare private function customquery:dispatch(
@@ -148,7 +186,11 @@ declare private function customquery:handleRange(
     else
         let $operator := string($step/json:operator[@type = "string"])
         let $name := $step/json:name[@type = "string"]
-        let $values := customquery:stringOrArrayToSet($step/json:value, false())
+        let $values := 
+            if($step/json:value/@type = "array")
+            then $step/json:value//json:item
+            else $step/json:value
+        
         let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
         where exists($name) and exists($values) and $name != $ignoreFacet
         return common:indexNameToRangeQuery(string($name), $values, $operator, customquery:extractOptions($step, "range"), $weight)
@@ -156,35 +198,53 @@ declare private function customquery:handleRange(
 
 declare private function customquery:handleEquals(
     $step as element(json:equals)
-) as cts:element-value-query?
+) as cts:query?
 {
-    let $key := $step/json:key[@type = "string"]
-    let $values := customquery:stringOrArrayToSet($step/json:value, true())
+    let $values := customquery:valueToStrings($step/json:value)
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    let $QName := xs:QName(concat("json:", json:escapeNCName($key)))
-    where exists($key) and exists($values)
-    return 
-        if($step/json:value/@type = "boolean" or ($step/json:value/@type = "array" and count($step/json:value/json:item/@boolean) = count($step/json:value/json:item)))
-        then cts:element-attribute-value-query($QName, xs:QName("boolean"), $values, customquery:extractOptions($step, "word"), $weight)
-        else cts:element-value-query($QName, $values, customquery:extractOptions($step, "word"), $weight)
+    where exists($values)
+    return
+        if(exists($step/json:key[@type = "string"]))
+        then
+            let $key := $step/json:key
+            let $castAs := json:castAs($key, true())
+            let $QName := xs:QName(concat("json:", json:escapeNCName($key)))
+            return 
+                if(exists($step/json:value/@boolean) or ($step/json:value/@type = "array" and count($step/json:value/json:item/@boolean) = count($step/json:value/json:item)))
+                then cts:element-attribute-value-query($QName, xs:QName("boolean"), $values, customquery:extractOptions($step, "word"), $weight)
+                else if($castAs = "date")
+                then cts:element-attribute-value-query($QName, xs:QName("normalized-date"), $values, customquery:extractOptions($step, "word"), $weight)
+                else cts:element-value-query($QName, $values, customquery:extractOptions($step, "word"), $weight)
+
+        else if(exists($step/json:element[@type = "string"]) and exists($step/json:attribute[@type = "string"]))
+        then cts:element-attribute-value-query(xs:QName($step/json:element), xs:QName($step/json:attribute), $values, customquery:extractOptions($step, "word"), $weight)
+        else if(exists($step/json:element[@type = "string"]))
+        then cts:element-value-query(xs:QName($step/json:element), $values, customquery:extractOptions($step, "word"), $weight)
+        else ()
 };
 
 declare private function customquery:handleContains(
     $step as element(json:contains)
-) as cts:element-word-query?
+) as cts:query?
 {
-    let $key := $step/json:key[@type = "string"]
-    let $strings := customquery:stringOrArrayToSet($step/json:string, true())
+    let $values := customquery:valueToStrings($step/json:string)
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    where exists($key) and exists($strings)
-    return cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($key))), $strings, customquery:extractOptions($step, "word"), $weight)
+    where exists($values)
+    return
+        if(exists($step/json:key[@type = "string"]))
+        then cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($step/json:key))), $values, customquery:extractOptions($step, "word"), $weight)
+        else if(exists($step/json:element[@type = "string"]) and exists($step/json:attribute[@type = "string"]))
+        then cts:element-attribute-word-query(xs:QName($step/json:element), xs:QName($step/json:attribute), $values, customquery:extractOptions($step, "word"), $weight)
+        else if(exists($step/json:element[@type = "string"]))
+        then cts:element-word-query(xs:QName($step/json:element), $values, customquery:extractOptions($step, "word"), $weight)
+        else ()
 };
 
 declare private function customquery:handleCollection(
     $step as element(json:collection)
 ) as cts:collection-query
 {
-    cts:collection-query(customquery:stringOrArrayToSet($step, true()))
+    cts:collection-query(customquery:valueToStrings($step))
 };
 
 declare private function customquery:handleGeo(
@@ -192,20 +252,40 @@ declare private function customquery:handleGeo(
     $ignoreFacet as xs:string?
 ) as cts:query?
 {
-    let $parent := $step/json:parent[@type = "string"]
-    let $key := $step/json:key[@type = "string"]
-    let $latKey := $step/json:latKey[@type = "string"]
-    let $longKey := $step/json:longKey[@type = "string"]
-
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    where exists($key) or (exists($latKey) and exists($longKey))
+    let $parent :=
+        if(exists($step/json:parentKey[@type = "string"]))
+        then xs:QName(concat("json:", json:escapeNCName($step/json:parentKey)))
+        else if(exists($step/json:parentElement[@type = "string"]))
+        then xs:QName($step/json:parentElement)
+        else ()
+    let $latLongPair :=
+        if(exists($step/json:key[@type = "string"]))
+        then xs:QName(concat("json:", json:escapeNCName($step/json:key)))
+        else if(exists($step/json:element[@type = "string"]))
+        then xs:QName($step/json:element)
+        else ()
+    let $latKey :=
+        if(exists($step/json:latKey[@type = "string"]))
+        then xs:QName(concat("json:", json:escapeNCName($step/json:latKey)))
+        else if(exists($step/json:latElement[@type = "string"]))
+        then xs:QName($step/json:latElement)
+        else ()
+    let $longKey :=
+        if(exists($step/json:longKey[@type = "string"]))
+        then xs:QName(concat("json:", json:escapeNCName($step/json:longKey)))
+        else if(exists($step/json:longElement[@type = "string"]))
+        then xs:QName($step/json:longElement)
+        else ()
+
+    where exists($latLongPair) or (exists($latKey) and exists($longKey))
     return
         if(exists($parent) and exists($latKey) and exists($longKey))
-        then cts:element-pair-geospatial-query(xs:QName(concat("json:", $parent)), xs:QName(concat("json:", json:escapeNCName($latKey))), xs:QName(concat("json:", json:escapeNCName($longKey))), customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
-        else if(exists($parent) and exists($key))
-        then cts:element-child-geospatial-query(xs:QName(concat("json:", $parent)), xs:QName(concat("json:", json:escapeNCName($key))), customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
-        else if(exists($key))
-        then cts:element-geospatial-query(xs:QName(concat("json:", json:escapeNCName($key))), customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-pair-geospatial-query($parent, $latKey, $longKey, customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
+        else if(exists($parent) and exists($latLongPair))
+        then cts:element-child-geospatial-query($parent, $latLongPair, customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
+        else if(exists($latLongPair))
+        then cts:element-geospatial-query($latLongPair, customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
         else ()
 };
 
@@ -246,24 +326,19 @@ declare private function customquery:handleGeoPolygon(
     )
 };
 
-declare private function customquery:stringOrArrayToSet(
-    $item as element(),
-    $forceAsString as xs:boolean
+declare private function customquery:valueToStrings(
+    $item as element()
 ) as xs:string*
 {
     if($item/@type = "array")
     then
-        for $i in $item/json:item[@type = ("string", "number", "boolean")]
-        return
-            if($forceAsString)
-            then string($i)
-            else common:castFromJSONType($i)
+        for $i in $item/json:item
+        return customquery:valueToStrings($i)
+    else if(exists($item/@boolean))
+    then string($item/@boolean)
     else if($item/@type = "object")
     then ()
-    else
-        if($forceAsString)
-        then string($item)
-        else common:castFromJSONType($item)
+    else string($item)
 };
 
 declare private function customquery:extractOptions(

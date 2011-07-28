@@ -22,36 +22,33 @@ import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 
 declare option xdmp:mapping "false";
 
-let $requestMethod := xdmp:get-request-method()
 let $query := xdmp:get-request-field("q", "")[1]
 let $include := xdmp:get-request-field("include", "content")
-let $returnPath := xdmp:get-request-field("returnpath")
+let $contentType := xdmp:get-request-field("content-type")[1]
+let $returnPath := xdmp:get-request-field("returnpath")[1]
 
-let $index := xdmp:get-request-field("__MLJSONURL__:index")
-let $index :=
-    if($index castable as xs:integer)
-    then xs:integer($index)
-    else 1
-
-let $start := xdmp:get-request-field("__MLJSONURL__:start")
-let $start :=
-    if($start castable as xs:integer)
-    then xs:integer($start)
-    else $index
-
-let $end := xdmp:get-request-field("__MLJSONURL__:end")
-let $end :=
-    if($end castable as xs:integer)
-    then xs:integer($end)
-    else $start
+let $start := xdmp:get-request-field("start")[1]
+let $end := xdmp:get-request-field("end")[1]
+let $start := if($start castable as xs:positiveInteger) then xs:positiveInteger($start) else 1
+let $end := if($end castable as xs:positiveInteger) then xs:positiveInteger($end) else ()
 
 let $query := parser:parse($query)
 
 let $results :=
-    if(exists($start) and exists($end) and $end > $start)
-    then cts:search(/json:json, $query)[$start to $end]
-    else if(exists($start))
-    then cts:search(/json:json, $query)[$start]
+    if($contentType = "json")
+    then
+        if(exists($start) and exists($end) and $end > $start)
+        then cts:search(/json:json, $query)[$start to $end]
+        else if(exists($start))
+        then cts:search(/json:json, $query)[$start]
+        else ()
+    else if($contentType = "xml")
+    then
+        if(exists($start) and exists($end) and $end > $start)
+        then cts:search(/*, $query)[$start to $end]
+        else if(exists($start))
+        then cts:search(/*, $query)[$start]
+        else ()
     else ()
 
 let $total :=
@@ -65,6 +62,8 @@ let $end :=
     else $end
 
 return
-    if($requestMethod = "GET")
+    if($contentType = "json")
     then reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $query, $returnPath)
+    else if($contentType = "xml")
+    then reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $query, $returnPath)
     else ()

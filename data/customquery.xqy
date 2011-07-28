@@ -23,9 +23,10 @@ declare option xdmp:mapping "false";
 
 let $requestMethod := xdmp:get-request-method()
 let $include := xdmp:get-request-field("include", "content")
+let $contentType := xdmp:get-request-field("content-type")[1]
 let $start := xdmp:get-request-field("start")[1]
 let $end := xdmp:get-request-field("end")[1]
-let $returnPath := xdmp:get-request-field("returnpath")
+let $returnPath := xdmp:get-request-field("returnpath")[1]
 let $query := string(xdmp:get-request-field("q", "{}")[1])
 let $query :=
     if(string-length(normalize-space($query)) = 0)
@@ -37,5 +38,10 @@ let $end := if($end castable as xs:positiveInteger) then xs:positiveInteger($end
 
 return
     if($requestMethod = ("GET", "POST"))
-    then customquery:execute($query, $include, $start, $end, $returnPath)
+    then
+        if($contentType = "json")
+        then customquery:searchJSON($query, $include, $start, $end, $returnPath)
+        else if($contentType = "xml")
+        then customquery:searchXML($query, $include, $start, $end, $returnPath)
+        else ()
     else ()

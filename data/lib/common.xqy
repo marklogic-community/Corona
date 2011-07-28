@@ -180,14 +180,9 @@ declare function common:indexNameToRangeQuery(
     let $index := config:get($name)
     let $operator := common:humanOperatorToMathmatical(($operatorOverride, $index/operator, "eq")[1])
     let $values := 
-        if($index/structure = "json")
-        then
-            for $value in $values
-            return common:castFromJSONType($value)
-        else
-            for $value in $values
-            where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $index/type, $value)
-            return common:castAs($value, $index/type)
+        for $value in $values
+        where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $index/type, $value)
+        return common:castAs($value, $index/type)
     where $index/@type = "range"
     return 
         if($index/structure = "json")
