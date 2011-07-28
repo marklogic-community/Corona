@@ -222,7 +222,7 @@ $(document).ready(function() {
             url: "/test/xq/object-construction.xqy",
             success: function(data) {
                 ok(true, "Object construction success");
-                deepEqual(JSON.parse(data), {"intvalue":1,"floatvalue":1.2,"boolvalue":true,"nullvalue":null,"arrayvalue":[1,2,3],"objectvalue":{"foo":"bar"},"datevalue::date":"July 8th, 2011","xmlvalue::xml":"","notrailingvalue":null}, "Constructed object comparison");
+                deepEqual(JSON.parse(data), {"intvalue":1,"floatvalue":1.2,"boolvalue":true,"nullvalue":null,"arrayvalue":[1,2,3],"objectvalue":{"foo":"bar"},"datevalue::date":"July 8th, 2011","xmlvalue::xml":"<foo><bar/></foo>","notrailingvalue":null}, "Constructed object comparison");
             },
             error: function() {
                 ok(false, "Object construction");

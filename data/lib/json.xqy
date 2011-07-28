@@ -622,6 +622,7 @@ declare private function json:escapeJSONString(
     let $string := replace($string, codepoints-to-string((13, 10)), "\\n")
     let $string := replace($string, codepoints-to-string(13), "\\n")
     let $string := replace($string, codepoints-to-string(10), "\\n")
+    let $string := replace($string, codepoints-to-string(9), "\\t")
     return $string
 };
 
