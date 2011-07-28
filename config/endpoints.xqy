@@ -99,7 +99,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/namespace/([A-Za-z_][A-Za-z0-9_\.]*)(/)?$" endpoint="/data/manage/namespace.xqy">
+    <request uri="^/manage/namespace/([^/]+)(/)?$" endpoint="/data/manage/namespace.xqy">
         <uri-param name="prefix" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">

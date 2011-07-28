@@ -37,7 +37,10 @@ return
         else common:error(404, "Namespace not found", "json")
 
     else if($requestMethod = "POST")
-    then manage:setNamespaceURI($prefix, $uri)
+    then
+        if(not(matches($prefix, "^[A-Za-z_][A-Za-z0-9_\.]*$")))
+        then common:error(500, "Invalid namespace prefix", "json")
+        else manage:setNamespaceURI($prefix, $uri)
 
     else if($requestMethod = "DELETE")
     then
