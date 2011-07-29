@@ -285,7 +285,8 @@ declare function json:null(
 (: Search functions :)
 
 declare function json:rangeIndexValues(
-    $rangeDefinition as element(json:item),
+    $key as xs:string,
+    $type as xs:string,
     $query as cts:query?,
     $options as xs:string*,
     $limit as xs:integer?
@@ -297,13 +298,13 @@ declare function json:rangeIndexValues(
         else (),
         $options
     )
-    let $key := xs:QName(concat("json:", json:escapeNCName($rangeDefinition/json:key)))
+    let $key := xs:QName(concat("json:", json:escapeNCName($key)))
     return
-        if($rangeDefinition/json:type = "date")
+        if($type = "date")
         then cts:element-attribute-values($key, xs:QName("normalized-date"), (), ("type=dateTime", $options), $query)
-        else if($rangeDefinition/json:type = "string")
+        else if($type = "string")
         then cts:element-values($key, (), ("type=string", $options), $query)
-        else if($rangeDefinition/json:type = "number")
+        else if($type = "number")
         then cts:element-values($key, (), ("type=decimal", $options), $query)
         else ()
 };

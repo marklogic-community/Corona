@@ -64,8 +64,9 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <request uri="^/data/info(/)?$" endpoint="/data/info.xqy" user-params="ignore"/>
 
     <!-- Facets -->
-    <request uri="^/data/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/data/facet.xqy">
-        <uri-param name="facets">$1</uri-param>
+    <request uri="^/(json|xml)/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/data/facet.xqy">
+        <uri-param name="content-type">$1</uri-param>
+        <uri-param name="facets">$2</uri-param>
         <param name="q" required="false"/>
         <param name="customquery" required="false"/>
         <param name="limit" as="integer" required="false"/>
