@@ -33,6 +33,7 @@ declare function path:select(
     else
         let $tokens := path:tokenize($path)
         let $parts :=
+            let $Log := xdmp:log(path:constructPath($tokens))
             for $part in $doc/xdmp:value(path:constructPath($tokens))
             return <json:item>{ $part/(@*, node()) }</json:item>
         return
@@ -56,6 +57,7 @@ declare private function path:tokenize(
         '(root\(\))',
         '(parent\(\))',
         'ancestor\("([^"]*)"\)',
+        'xpath\("([^"]*)"\)',
         "(\.)",
         "(\*)",
 
@@ -73,10 +75,11 @@ declare private function path:tokenize(
         else if($match/*:group/@nr = 4) then <root>{ string($match) }</root>
         else if($match/*:group/@nr = 5) then <parent>{ string($match) }</parent>
         else if($match/*:group/@nr = 6) then <ancestor>{ string($match/*:group) }</ancestor>
-        else if($match/*:group/@nr = 7) then <dot>{ string($match) }</dot>
-        else if($match/*:group/@nr = 8) then <wildstep>{ string($match) }</wildstep>
+        else if($match/*:group/@nr = 7) then <xpath>{ string($match/*:group) }</xpath>
+        else if($match/*:group/@nr = 8) then <dot>{ string($match) }</dot>
+        else if($match/*:group/@nr = 9) then <wildstep>{ string($match) }</wildstep>
 
-        else if($match/*:group/@nr = 9) then ()
+        else if($match/*:group/@nr = 10) then ()
 
         else xdmp:log(concat("Unknown group in path parsing: ", xdmp:quote($match)))
 };
@@ -93,6 +96,7 @@ declare private function path:constructPath(
             case element(root) return path:processRoot($tokens, $index)
             case element(parent) return path:processParent($tokens, $index)
             case element(ancestor) return path:processAncestor($tokens, $index)
+            case element(xpath) return path:processXPath($tokens, $index)
             case element(wildstep) return path:processWildstep($tokens, $index)
             case element(dot) return path:processDot($tokens, $index)
 
@@ -114,7 +118,7 @@ declare private function path:processStep(
     let $step := $tokens[$index]
     return
         if($step/@type = "index")
-        then concat("json::item[", string($step), "]")
+        then concat("json:item[", string($step), "]")
         else if($step/@type = "key")
         then concat("json:", json:unescapeNCName(string($step)))
         else ()
@@ -157,6 +161,24 @@ declare private function path:processAncestor(
         then ()
         else path:throwError($tokens, $index + 1, "expected either a dot, a quoted step or an array index")
     return concat("ancestor::json:", json:unescapeNCName(string($tokens[$index])))
+};
+
+declare private function path:processXPath(
+    $tokens as element()*,
+    $index as xs:integer
+) as xs:string
+{
+    let $nextToken := $tokens[$index + 1]
+    let $test :=
+        if(exists($nextToken))
+        then path:throwError($tokens, $index + 1, "expected not to see any more tokens after the XPath")
+        else ()
+    let $XPath  := string($tokens[$index])
+    let $XPath :=
+        if(starts-with($XPath, "/"))
+        then substring($XPath, 2)
+        else $XPath
+    return $XPath
 };
 
 declare private function path:processWildstep(
