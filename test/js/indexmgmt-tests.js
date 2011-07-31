@@ -162,6 +162,26 @@ mljson.addIndexes = function(callback) {
             "uri": "http://test.ns/uri",
             "shouldSucceed": false,
             "purpose": "Should fail with invalid XML namespace prefix"
+        },
+        {
+            "type": "range",
+            "pluralType": "ranges",
+            "name": "messageDate",
+            "key": "date::date",
+            "datatype": "date",
+            "operator": "eq",
+            "shouldSucceed": true,
+            "purpose": "Range index for MarkMail JSON message date"
+        },
+        {
+            "type": "range",
+            "pluralType": "ranges",
+            "name": "list",
+            "key": "list",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": true,
+            "purpose": "Range index for MarkMail JSON message list"
         }
     ];
 

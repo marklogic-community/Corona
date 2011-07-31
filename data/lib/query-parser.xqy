@@ -51,7 +51,7 @@ declare private function parser:tokenize(
 ) as element()*
 {
 	let $phraseMatch := '"[^"]+"'
-	let $wordMatch := "[\w,\*\?][\w\-,\*\?]*"
+	let $wordMatch := "[\w,\._\*\?][\w\._\-,\*\?]*"
 	let $constraintMatch := "[A-Za-z0-9_\-]+:"
 	let $tokens := (
 		"\(", "\)", $phraseMatch,
@@ -261,7 +261,7 @@ declare private function parser:constraintQuery(
         then "collation=http://marklogic.com/collation/"
         else ()
     let $operator := common:humanOperatorToMathmatical($index/operator)
-    where $term/field != $ignoreFacet
+    where if(exists($ignoreFacet)) then string($term/field) != $ignoreFacet else true()
     return
         if($index/@type = "field")
         then cts:field-word-query($index/name, $value)

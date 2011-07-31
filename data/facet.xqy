@@ -22,16 +22,21 @@ import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
 import module namespace parser="http://marklogic.com/mljson/query-parser" at "lib/query-parser.xqy";
 
+import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
+import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
+
 declare option xdmp:mapping "false";
 
-let $facets := tokenize(xdmp:get-request-field("facets")[1], ",")
-let $contentType := xdmp:get-request-field("content-type")[1]
-let $queryString := xdmp:get-request-field("q")[1]
-let $customQuery := xdmp:get-request-field("customquery")[1]
+let $params := rest:process-request(endpoints:request("/data/facet.xqy"))
+let $facets := tokenize(map:get($params, "facets"), ",")
+let $contentType := map:get($params, "content-type")
+let $queryString := map:get($params, "q")
+let $customQuery := map:get($params, "customquery")
 
-let $limit := xs:integer(xdmp:get-request-field("limit", "25"))
-let $order := xdmp:get-request-field("order")[1]
-let $frequency := xdmp:get-request-field("frequency")[1]
+let $limit := map:get($params, "limit")
+let $order := map:get($params, "order")
+let $frequency := map:get($params, "frequency")
+let $includeAllValues := map:get($params, "includeAllValues")
 
 let $query :=
     if(exists($queryString))
@@ -51,6 +56,17 @@ let $options := (
 
 let $values :=
     for $facet in $facets
+
+    (: Pulling out the facet values first becaues the next block will generate
+       a query without this facet if includeAllValues is "yes" :)
+    let $valuesInQuery := common:valuesForFacet($query, $facet)
+    let $query :=
+        if($includeAllValues = "yes" and exists($queryString))
+        then parser:parse($queryString, $facet)
+        else if($includeAllValues = "yes" and exists($customQuery))
+        then customquery:getCTS($customQuery, $facet)
+        else $query
+
     let $index := config:get($facet)
     let $values :=
         if($index/structure = "json")
@@ -69,6 +85,7 @@ let $values :=
                 for $item in $values
                 return json:object((
                     "value", $item,
+                    "inQuery", $item = $valuesInQuery,
                     "count", cts:frequency($item)
                 ))
             )
@@ -76,10 +93,11 @@ let $values :=
         else if($contentType = "xml")
         then <facet name="{ $facet }">{
             for $item in $values
-            return (
-                <value>{ $item }</value>,
+            return <result>
+                <value>{ $item }</value>
+                <inQuery>{ $item = $valuesInQuery }</inQuery>
                 <count>{ cts:frequency($item) }</count>
-            )
+            </result>
         }</facet>
         else ()
 return
