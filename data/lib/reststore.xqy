@@ -24,6 +24,7 @@ import module namespace path="http://marklogic.com/mljson/path-parser" at "path-
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
+import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 
 (:
     Functions to retrieve request information
@@ -47,8 +48,10 @@ declare function reststore:propertiesFromRequest(
     let $bits := tokenize($property, ":")
     let $name := $bits[1]
     let $value := string-join($bits[2 to last()], ":")
+    let $date := dateparser:parse($value)
+    let $dateAttribute := if(exists($date)) then attribute normalized-date { $date } else ()
     where exists($name)
-    return element { QName("http://marklogic.com/reststore", $name) } { $value }
+    return element { QName("http://marklogic.com/reststore", $name) } { ($dateAttribute, $value) }
 };
 
 declare function reststore:collectionsFromRequest(
@@ -408,7 +411,6 @@ declare function reststore:getRawXMLDoc(
 ) as element()?
 {
     let $doc := doc($uri)
-    let $log := xdmp:log($doc)
     where xdmp:document-get-collections($uri) = $const:XMLCollection
     return $doc/*
 };

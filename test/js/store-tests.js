@@ -26,7 +26,8 @@ mljson.documents = [
         "uri": "/doc-store-test-3.json",
         "properties": {
             "state": "published",
-            "active": "yes"
+            "active": "yes",
+            "publishedOn": "January 15th, 2011"
         },
         "content": {
             "foo": "bar"
