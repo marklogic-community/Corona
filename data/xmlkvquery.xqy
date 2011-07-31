@@ -17,6 +17,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "lib/date-parser.xqy";
 
@@ -57,9 +58,9 @@ let $query := cts:and-query(
 
 let $results :=
     if(exists($start) and exists($end) and $end > $start)
-    then cts:search(collection()/*, $query)[$start to $end]
+    then cts:search(collection($const:XMLCollection)/*, $query)[$start to $end]
     else if(exists($start))
-    then cts:search(collection()/*, $query)[$start]
+    then cts:search(collection($const:XMLCollection)/*, $query)[$start]
     else ()
 
 let $total :=

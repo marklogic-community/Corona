@@ -20,3 +20,6 @@ module namespace const="http://marklogic.com/mljson/constants";
 
 
 declare variable $const:version as xs:string := "1.0";
+
+declare variable $const:JSONCollection as xs:string := "mljson-json";
+declare variable $const:XMLCollection as xs:string := "mljson-xml";

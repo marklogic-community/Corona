@@ -22,6 +22,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
+import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 
 (:
@@ -197,7 +198,7 @@ declare function reststore:insertJSONDocument(
             xdmp:log($e)
         }
     return (
-        xdmp:document-insert($uri, $body, $permissions, $collections, $quality),
+        xdmp:document-insert($uri, $body, $permissions, ($const:JSONCollection, $collections), $quality),
         if(exists($properties))
         then xdmp:document-set-properties($uri, $properties)
         else ()
@@ -251,7 +252,7 @@ declare function reststore:getXMLDocument(
     $includes as xs:string*
 ) as element()
 {
-    if(empty(doc($uri)/*))
+    if(empty(reststore:getRawXMLDoc($uri)))
     then common:error(404, "Document not found", "xml")
     else
 
@@ -262,11 +263,11 @@ declare function reststore:getXMLDocument(
     let $includeQuality := $includes = ("quality", "all")
     return
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-        then doc($uri)/*
+        then reststore:getRawXMLDoc($uri)
         else 
             (: XXX - Will need to output in a real XML format :)
             <response>{
-                reststore:outputXMLDocument($uri, doc($uri)/*, $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality)
+                reststore:outputXMLDocument($uri, reststore:getRawXMLDoc($uri), $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality)
             }</response>
 };
 
@@ -365,7 +366,7 @@ declare function reststore:insertXMLDocument(
             xdmp:log($e)
         }
     return (
-        xdmp:document-insert($uri, $body, $permissions, $collections, $quality),
+        xdmp:document-insert($uri, $body, $permissions, ($const:XMLCollection, $collections), $quality),
         if(exists($properties))
         then xdmp:document-set-properties($uri, $properties)
         else ()
@@ -384,7 +385,7 @@ declare function reststore:updateXMLDocumentContent(
             common:error(500, "Invalid XML", "xml"),
             xdmp:log($e)
         }
-    let $existing := doc($uri)/*
+    let $existing := reststore:getRawXMLDoc($uri)
     let $test :=
         if(empty($existing))
         then common:error(404, concat("There is no XML document to update at '", $uri, "'"), "xml")
@@ -397,9 +398,19 @@ declare function reststore:deleteXMLDocument(
     $uri as xs:string
 ) as element()?
 {
-    if(exists(doc($uri)/*))
+    if(exists(reststore:getRawXMLDoc($uri)))
     then xdmp:document-delete($uri)
     else common:error(404, concat("There is no XML document to delete at '", $uri, "'"), "xml")
+};
+
+declare function reststore:getRawXMLDoc(
+    $uri as xs:string
+) as element()?
+{
+    let $doc := doc($uri)
+    let $log := xdmp:log($doc)
+    where xdmp:document-get-collections($uri) = $const:XMLCollection
+    return $doc/*
 };
 
 
@@ -432,9 +443,12 @@ declare function reststore:setCollections(
     $collections as xs:string*
 ) as empty-sequence()
 {
-    if(exists($collections))
-    then xdmp:document-set-collections($uri, $collections)
-    else ()
+    let $doc := doc($uri)
+    where exists($doc) and exists($collections)
+    return
+        if(exists($doc/json:json))
+        then xdmp:document-set-collections($uri, ($const:JSONCollection, $collections))
+        else xdmp:document-set-collections($uri, ($const:XMLCollection, $collections))
 };
 
 declare function reststore:setQuality(
@@ -456,9 +470,10 @@ declare private function reststore:getDocumentCollections(
 ) as element()*
 {
     if($outputFormat = "json")
-    then json:array(xdmp:document-get-collections($uri))
+    then json:array(xdmp:document-get-collections($uri)[not(. = ($const:JSONCollection, $const:XMLCollection))])
     else
         for $collection in xdmp:document-get-collections($uri)
+        where not($collection = ($const:JSONCollection, $const:XMLCollection))
         return <collection>{ $collection }</collection>
 };
 

@@ -16,6 +16,7 @@ limitations under the License.
 
 module namespace customquery="http://marklogic.com/mljson/custom-query";
 
+import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
@@ -52,10 +53,10 @@ declare function customquery:searchJSON(
 
     let $results :=
         if(exists($start) and exists($end))
-        then cts:search(/json:json, $cts, $options, $weight)[$start to $end]
+        then cts:search(collection($const:JSONCollection)/json:json, $cts, $options, $weight)[$start to $end]
         else if(exists($start))
-        then cts:search(/json:json, $cts, $options, $weight)[$start]
-        else cts:search(/json:json, $cts, $options, $weight)
+        then cts:search(collection($const:JSONCollection)/json:json, $cts, $options, $weight)[$start]
+        else cts:search(collection($const:JSONCollection)/json:json, $cts, $options, $weight)
 
     let $total :=
         if(exists($results[1]))
@@ -90,10 +91,10 @@ declare function customquery:searchXML(
 
     let $results :=
         if(exists($start) and exists($end))
-        then cts:search(/*, $cts, $options, $weight)[$start to $end]
+        then cts:search(collection($const:XMLCollection)/*, $cts, $options, $weight)[$start to $end]
         else if(exists($start))
-        then cts:search(/*, $cts, $options, $weight)[$start]
-        else cts:search(/*, $cts, $options, $weight)
+        then cts:search(collection($const:XMLCollection)/*, $cts, $options, $weight)[$start]
+        else cts:search(collection($const:XMLCollection)/*, $cts, $options, $weight)
 
     let $total :=
         if(exists($results[1]))
