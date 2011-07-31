@@ -18,6 +18,7 @@ xquery version "1.0-ml";
 
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace manage="http://marklogic.com/mljson/manage" at "lib/manage.xqy";
+import module namespace const="http://marklogic.com/mljson/constants" at "lib/constants.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 
 declare option xdmp:mapping "false";
@@ -27,7 +28,8 @@ let $database := xdmp:database()
 let $json :=
 json:document(
     json:object((
-        "version", xdmp:version(),
+        "libraryVersion", $const:version,
+        "serverVersion", xdmp:version(),
         "architecture", xdmp:architecture(),
         "platform", xdmp:platform(),
         "hosts", json:array((
