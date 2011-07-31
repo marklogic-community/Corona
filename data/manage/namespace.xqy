@@ -20,11 +20,15 @@ import module namespace manage="http://marklogic.com/mljson/manage" at "../lib/m
 import module namespace common="http://marklogic.com/mljson/common" at "../lib/common.xqy";
 import module namespace json="http://marklogic.com/json" at "../lib/json.xqy";
 
+import module namespace rest="http://marklogic.com/appservices/rest" at "../lib/rest/rest.xqy";
+import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
+
 declare option xdmp:mapping "false";
 
 
-let $prefix := xdmp:get-request-field("prefix")[1]
-let $uri := xdmp:get-request-field("uri")[1]
+let $params := rest:process-request(endpoints:request("/data/manage/namespace.xqy"))
+let $prefix := map:get($params, "prefix")
+let $uri := map:get($params, "uri")
 let $requestMethod := xdmp:get-request-method()
 
 let $existing := manage:getNamespaceURI($prefix)

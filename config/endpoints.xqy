@@ -75,10 +75,15 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Index management -->
-    <request uri="^/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/data/manage/field.xqy" user-params="allow">
+    <request uri="^/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/data/manage/field.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
-        <http method="POST"/>
+        <http method="POST">
+            <param name="includeKey" alias="includeKey[]" required="false" repeatable="true"/>
+            <param name="excludeKey" alias="excludeKey[]" required="false" repeatable="true"/>
+            <param name="includeElement" alias="includeElement[]" required="false" repeatable="true"/>
+            <param name="excludeElement" alias="excludeElement[]" required="false" repeatable="true"/>
+        </http>
         <http method="DELETE"/>
     </request>
 

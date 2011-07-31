@@ -27,8 +27,8 @@ import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic
 declare option xdmp:mapping "false";
 
 
-(: let $params := rest:process-request(endpoints:request("/data/manage/field.xqy")) :)
-let $name := xdmp:get-request-field("name")
+let $params := rest:process-request(endpoints:request("/data/manage/field.xqy"))
+let $name := map:get($params, "name")
 let $requestMethod := xdmp:get-request-method()
 
 let $database := xdmp:database()
@@ -51,11 +51,10 @@ return
             then xdmp:set($config, admin:database-delete-field($config, $database, $name))
             else (),
 
-            (: XXX - Pretty hacky for the moment :)
-            let $includeKeys := distinct-values((xdmp:get-request-field("includeKey"), xdmp:get-request-field("includeKey[]")))
-            let $excludes := distinct-values((xdmp:get-request-field("excludeKey"), xdmp:get-request-field("excludeKey[]")))
-            let $includeElements := distinct-values((xdmp:get-request-field("includeElement"), xdmp:get-request-field("includeElement[]")))
-            let $excludeElements := distinct-values((xdmp:get-request-field("excludeElement"), xdmp:get-request-field("excludeElement[]")))
+            let $includeKeys := distinct-values(map:get($params, "includeKey"))
+            let $excludes := distinct-values(map:get($params, "excludeKey"))
+            let $includeElements := distinct-values(map:get($params, "includeElement"))
+            let $excludeElements := distinct-values(map:get($params, "excludeElement"))
             return manage:createField($name, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
         )
 

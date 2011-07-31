@@ -9,9 +9,6 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare option xdmp:mapping "false";
 
-(: These are the QNames of errors that may be thrown by functions in this module; note that
-   the $rest:OPTIONSMETHOD is handled specially by rest:format-error()
- :)
 declare variable $rest:UNACCEPTABLETYPE  := xs:QName("rest:UNACCEPTABLETYPE");
 declare variable $rest:UNSUPPORTEDPARAM  := xs:QName("rest:UNSUPPORTEDPARAM");
 declare variable $rest:INVALIDTYPE       := xs:QName("rest:INVALIDTYPE");
@@ -26,12 +23,12 @@ declare variable $rest:FAILEDCONDITION   := xs:QName("rest:FAILEDCONDITION");
 (: ====================================================================== :)
 
 declare function rest:rewrite(
-  $options as element(rest:options))
-as xs:string?
+  $options as element(rest:options)
+) as xs:string?
 {
-  let $uri := xdmp:get-request-url()
+  let $reqenv := rest:request-environment()
   return
-    rest:rewrite($options, $uri)
+    rest-impl:rewrite($options/rest:request, rest:request-environment())
 };
 
 declare function rest:rewrite(
@@ -39,11 +36,10 @@ declare function rest:rewrite(
   $uri as xs:string)
 as xs:string?
 {
-  let $method := xdmp:get-request-method()
-  let $accept-headers := xdmp:get-request-header("Accept")
-  let $user-params := rest-impl:uri-parameters($uri)
+  let $reqenv := rest:request-environment()
+  let $_ := map:put($reqenv, "uri", $uri)
   return
-    rest:rewrite($options/rest:request, $uri, $method, $accept-headers, $user-params)
+    rest-impl:rewrite($options/rest:request, $reqenv)
 };
 
 declare function rest:rewrite(
@@ -54,19 +50,46 @@ declare function rest:rewrite(
   $user-params as map:map)
 as xs:string?
 {
-    rest-impl:rewrite($requests, $uri, $method, $accept-headers, $user-params)
+  let $reqenv := rest:request-environment()
+  let $_ := map:put($reqenv, "uri", $uri)
+  let $_ := map:put($reqenv, "method", $method)
+  let $_ := map:put($reqenv, "accept", $accept-headers)
+  let $_ := map:put($reqenv, "params", $user-params)
+  return
+   rest-impl:rewrite($requests, $reqenv)
 };
+
+declare function rest:request-environment()
+as map:map
+{
+  let $params := map:map()
+  let $_ := for $name in xdmp:get-request-field-names()
+            let $values
+              := for $value in xdmp:get-request-field($name)
+                 return
+                   xdmp:url-decode($value)
+            return
+              map:put($params, xdmp:url-decode($name), $values)
+
+  let $reqenv := map:map()
+  let $_       := map:put($reqenv, "uri", xdmp:get-request-url())
+  let $_       := map:put($reqenv, "method", xdmp:get-request-method())
+  let $_       := map:put($reqenv, "accept", xdmp:get-request-header("Accept"))
+  let $_       := map:put($reqenv, "user-agent", xdmp:get-request-header("User-Agent"))
+  let $_       := map:put($reqenv, "params", $params)
+  return
+    $reqenv
+};
+
+(: ====================================================================== :)
 
 declare function rest:matching-request(
   $options as element(rest:options))
 as element(rest:request)?
 {
-  let $uri     := xdmp:get-request-url()
-  let $method  := xdmp:get-request-method()
-  let $accept  := xdmp:get-request-header("Accept")
-  let $params  := rest:get-raw-query-params()
+  let $reqenv := rest:request-environment()
   return
-    rest:matching-request($options, $uri, $method, $accept, $params)
+    rest-impl:matching-request($options/rest:request, $reqenv)
 };
 
 declare function rest:matching-request(
@@ -77,14 +100,22 @@ declare function rest:matching-request(
   $user-params as map:map)
 as element(rest:request)?
 {
-  rest-impl:matching-request($options/rest:request, $uri, $method, $accept-headers, $user-params)
+  let $reqenv := rest:request-environment()
+  let $_ := map:put($reqenv, "uri", $uri)
+  let $_ := map:put($reqenv, "method", $method)
+  let $_ := map:put($reqenv, "accept", $accept-headers)
+  let $_ := map:put($reqenv, "params", $user-params)
+  return
+    rest-impl:matching-request($options/rest:request, $reqenv)
 };
 
 declare function rest:process-request(
   $request as element(rest:request))
 as map:map
 {
-  rest-impl:process-request($request)
+  let $reqenv := rest:request-environment()
+  return
+    rest-impl:process-request($request, $reqenv)
 };
 
 declare function rest:check-options(
@@ -115,9 +146,8 @@ declare function rest:test-conditions(
   $request as element(rest:request))
 as empty-sequence()
 {
-  let $uri := xdmp:get-request-url()
-  let $method := xdmp:get-request-method()
-  let $test := rest-impl:conditions-match($request, $uri, $method, true())
+  let $reqenv := rest:request-environment()
+  let $test := rest-impl:conditions-match($request, $reqenv, true())
   return
     ()
 };
@@ -132,9 +162,13 @@ as xs:string*
 declare function rest:get-raw-query-params()
 as map:map
 {
-  let $uri := xdmp:get-request-url()
+  let $params := map:map()
+  let $_ := for $name in xdmp:get-request-field-names()
+            let $values := xdmp:get-request-field($name)
+            return
+              map:put($params, $name, $values)
   return
-    rest-impl:uri-parameters($uri)
+    $params
 };
 
 declare function rest:report-error(
@@ -143,4 +177,5 @@ as element()
 {
   rest-impl:report-error($error)
 };
+
 

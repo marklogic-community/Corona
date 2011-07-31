@@ -27,8 +27,8 @@ import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic
 declare option xdmp:mapping "false";
 
 
-(: let $params := rest:process-request(endpoints:request("/data/manage/range.xqy")) :)
-let $name := xdmp:get-request-field("name")[1]
+let $params := rest:process-request(endpoints:request("/data/manage/range.xqy"))
+let $name := map:get($params, "name")
 let $requestMethod := xdmp:get-request-method()
 
 let $config := admin:get-configuration()
@@ -43,11 +43,11 @@ return
 
     else if($requestMethod = "POST")
     then
-        let $key := xdmp:get-request-field("key")[1]
-        let $element := xdmp:get-request-field("element")[1]
-        let $attribute := xdmp:get-request-field("element")[1]
-        let $type := xdmp:get-request-field("type")[1]
-        let $operator := xdmp:get-request-field("operator")[1]
+        let $key := map:get($params, "key")
+        let $element := map:get($params, "element")
+        let $attribute := map:get($params, "element")
+        let $type := map:get($params, "type")
+        let $operator := map:get($params, "operator")
         return
 
         if((empty($key) and empty($element)) or (exists($key) and exists($element)))

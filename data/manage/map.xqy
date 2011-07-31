@@ -26,11 +26,11 @@ import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/c
 declare option xdmp:mapping "false";
 
 
-(: let $params := rest:process-request(endpoints:request("/data/manage/map.xqy")) :)
-let $name := xdmp:get-request-field("name")[1]
-let $key := xdmp:get-request-field("key")[1]
-let $element := xdmp:get-request-field("element")[1]
-let $mode := xdmp:get-request-field("mode")[1]
+let $params := rest:process-request(endpoints:request("/data/manage/map.xqy"))
+let $name := map:get($params, "name")
+let $key := map:get($params, "key")
+let $element := map:get($params, "element")
+let $mode := map:get($params, "mode")
 let $requestMethod := xdmp:get-request-method()
 
 let $existing := manage:getMap($name)
