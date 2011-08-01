@@ -17,6 +17,7 @@ limitations under the License.
 module namespace customquery="http://marklogic.com/mljson/custom-query";
 
 import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
+import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
@@ -174,27 +175,28 @@ declare private function customquery:handleRange(
     $ignoreRange as xs:string?
 ) as cts:query?
 {
-    if(exists($step/json:from) and exists($step/json:to))
-    then
-        let $name := $step/json:name[@type = "string"]
-        let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-        let $options := customquery:extractOptions($step, "range")
-        where exists($name) and $name != $ignoreRange
-        return cts:and-query((
-            common:indexNameToRangeQuery(string($name), $step/json:to, "le", $options, $weight),
-            common:indexNameToRangeQuery(string($name), $step/json:from, "ge", $options, $weight)
+    let $indexName := $step/json:name[@type = "string"]
+    let $index := config:get($indexName)
+    let $options := customquery:extractOptions($step, "range")
+    let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
+    where $indexName != $ignoreRange and exists($index)
+    return
+        if($index/@type = "bucketedrange" and exists($step/json:bucketLabel))
+        then search:bucketLabelToQuery($index, string($step/json:bucketLabel), $options, $weight)
+
+        else if(exists($step/json:from) and exists($step/json:to))
+        then cts:and-query((
+            search:rangeValueToQuery($index, string($step/json:from), "ge", $options, $weight),
+            search:rangeValueToQuery($index, string($step/json:to), "le", $options, $weight)
         ))
-    else
-        let $operator := string($step/json:operator[@type = "string"])
-        let $name := $step/json:name[@type = "string"]
-        let $values := 
-            if($step/json:value/@type = "array")
-            then $step/json:value//json:item
-            else $step/json:value
-        
-        let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-        where exists($name) and exists($values) and $name != $ignoreRange
-        return common:indexNameToRangeQuery(string($name), $values, $operator, customquery:extractOptions($step, "range"), $weight)
+
+        else
+            let $operator := string($step/json:operator[@type = "string"])
+            let $values := 
+                if($step/json:value/@type = "array")
+                then $step/json:value//json:item
+                else $step/json:value
+            return search:rangeValueToQuery($index, $values, $operator, $options, $weight)
 };
 
 declare private function customquery:handleEquals(

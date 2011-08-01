@@ -29,6 +29,16 @@ declare function search:bucketLabelToQuery(
     $bucketLabel as xs:string
 ) as cts:query?
 {
+    search:bucketLabelToQuery($index, $bucketLabel, (), ())
+};
+
+declare function search:bucketLabelToQuery(
+    $index as element(index),
+    $bucketLabel as xs:string,
+    $options as xs:string*,
+    $weight as xs:double?
+) as cts:query?
+{
     let $bucketBits := $index/buckets/*
     let $positionOfBucketLabel :=
         for $bucket at $pos in $bucketBits
@@ -46,8 +56,8 @@ declare function search:bucketLabelToQuery(
 
     let $options :=
         if($index/type = "string")
-        then "collation=http://marklogic.com/collation/"
-        else ()
+        then ($options, "collation=http://marklogic.com/collation/")
+        else $options
 
     where exists($positionOfBucketLabel)
     return
@@ -56,36 +66,36 @@ declare function search:bucketLabelToQuery(
             if($index/type = "date")
             then cts:and-query((
                 if(exists($lowerBound))
-                then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), ">=", common:castFromJSONType($lowerBound, "date"), $options)
+                then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), ">=", common:castFromJSONType($lowerBound, "date"), $options, $weight)
                 else (),
                 if(exists($upperBound))
-                then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), "<", common:castFromJSONType($upperBound, "date"), $options)
+                then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), "<", common:castFromJSONType($upperBound, "date"), $options, $weight)
                 else ()
             ))
             else cts:and-query((
                 if(exists($lowerBound))
-                then cts:element-range-query(xs:QName(concat("json:", $index/key)), ">=", common:castFromJSONType($lowerBound, $index/type), $options)
+                then cts:element-range-query(xs:QName(concat("json:", $index/key)), ">=", common:castFromJSONType($lowerBound, $index/type), $options, $weight)
                 else (),
                 if(exists($upperBound))
-                then cts:element-range-query(xs:QName(concat("json:", $index/key)), "<", common:castFromJSONType($upperBound, $index/type), $options)
+                then cts:element-range-query(xs:QName(concat("json:", $index/key)), "<", common:castFromJSONType($upperBound, $index/type), $options, $weight)
                 else ()
             ))
         else if($index/structure = "xmlelement")
         then cts:and-query((
             if(exists($lowerBound))
-            then cts:element-range-query(xs:QName($index/element), ">=", common:castAs($lowerBound, $index/type), $options)
+            then cts:element-range-query(xs:QName($index/element), ">=", common:castAs($lowerBound, $index/type), $options, $weight)
             else (),
             if(exists($upperBound))
-            then cts:element-range-query(xs:QName($index/element), "<", common:castAs($upperBound, $index/type), $options)
+            then cts:element-range-query(xs:QName($index/element), "<", common:castAs($upperBound, $index/type), $options, $weight)
             else ()
         ))
         else if($index/structure = "xmlattribute")
         then cts:and-query((
             if(exists($lowerBound))
-            then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), ">=", common:castAs($lowerBound, $index/type), $options)
+            then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), ">=", common:castAs($lowerBound, $index/type), $options, $weight)
             else (),
             if(exists($upperBound))
-            then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), "<", common:castAs($upperBound, $index/type), $options)
+            then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), "<", common:castAs($upperBound, $index/type), $options, $weight)
             else ()
         ))
         else ()
@@ -93,29 +103,54 @@ declare function search:bucketLabelToQuery(
 
 declare function search:rangeValueToQuery(
     $index as element(index),
-    $value as xs:string
+    $values as xs:string*
 ) as cts:query?
 {
+    search:rangeValueToQuery($index, $values, (), (), ())
+};
+
+declare function search:rangeValueToQuery(
+    $index as element(index),
+    $values as xs:string*,
+    $operatorOverride as xs:string?,
+    $options as xs:string*,
+    $weight as xs:double?
+) as cts:query?
+{
+    let $values :=
+        for $value in $values
+        let $type :=
+            if($index/structure = "xml")
+            then string($index/type)
+            else if($index/type = "date")
+            then "dateTime"
+            else if($index/type = "number")
+            then "decimal"
+            else "string"
+
+        where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $type, $value)
+        return common:castAs($value, $type)
     let $options :=
         if($index/type = "string")
-        then "collation=http://marklogic.com/collation/"
-        else ()
+        then ($options, "collation=http://marklogic.com/collation/")
+        else $options
     let $JSONQName := xs:QName(concat("json:", $index/key))
+    where $index/@type = ("range", "bucketedrange")
     return
         if($index/structure = "json")
         then
             if($index/type = "boolean")
-            then cts:element-attribute-range-query($JSONQName, xs:QName("boolean"), "=", $value)
+            then cts:element-attribute-range-query($JSONQName, xs:QName("boolean"), "=", $values, $weight)
 
             else if($index/type = "date")
-            then cts:element-attribute-range-query($JSONQName, xs:QName("normalized-date"), common:humanOperatorToMathmatical($index/operator), common:castFromJSONType($value, "date"))
+            then cts:element-attribute-range-query($JSONQName, xs:QName("normalized-date"), common:humanOperatorToMathmatical($index/operator), $values, $weight)
 
-            else cts:element-range-query($JSONQName, common:humanOperatorToMathmatical($index/operator), common:castFromJSONType($value, "date"), $options)
+            else cts:element-range-query($JSONQName, common:humanOperatorToMathmatical($index/operator), $values, $options, $weight)
         else if($index/structure = "xmlelement")
-        then cts:element-range-query(xs:QName($index/element), common:humanOperatorToMathmatical($index/operator), common:castAs($value, $index/type), $options)
+        then cts:element-range-query(xs:QName($index/element), common:humanOperatorToMathmatical($index/operator), $values, $options, $weight)
 
         else if($index/structure = "xmlattribute")
-        then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), common:humanOperatorToMathmatical($index/operator), common:castAs($value, $index/type))
+        then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), common:humanOperatorToMathmatical($index/operator), $values, $weight)
         else ()
 };
 

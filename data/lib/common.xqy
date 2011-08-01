@@ -169,36 +169,6 @@ declare function common:humanOperatorToMathmatical(
     else "="
 };
 
-declare function common:indexNameToRangeQuery(
-    $name as xs:string,
-    $values as element()*,
-    $operatorOverride as xs:string?,
-    $options as xs:string*,
-    $weight as xs:double?
-) as cts:element-range-query?
-{
-    let $index := config:get($name)
-    let $operator := common:humanOperatorToMathmatical(($operatorOverride, $index/operator, "eq")[1])
-    let $values := 
-        for $value in $values
-        where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $index/type, $value)
-        return common:castAs($value, $index/type)
-    where $index/@type = ("range", "bucketedrange")
-    return 
-        if($index/structure = "json")
-        then
-            if($index/type = "boolean")
-            then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("boolean"), "=", $values, $options, $weight)
-            else if($index/type = "date")
-            then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), $operator, $values, $options, $weight)
-            else cts:element-range-query(xs:QName(concat("json:", $index/key)), $operator, $values, $options, $weight)
-        else if($index/structure = "xmlelement")
-        then cts:element-range-query(xs:QName($index/element), $operator, $values, $options, $weight)
-        else if($index/structure = "xmlattribute")
-        then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), $operator, $values, $options, $weight)
-        else ()
-};
-
 declare function common:translateSnippet(
     $snippet as element(search:snippet)
 ) as element(json:item)
