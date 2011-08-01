@@ -382,7 +382,6 @@ declare function manage:deleteBucketedRange(
     let $database := xdmp:database()
     let $index := config:get($name)
     let $existing := manage:getRangeDefinition($index, $config)
-    let $log := xdmp:log($index)
     where $index/@type = ("bucketedrange", "autobucketedrange")
     return (
         if(exists($existing))

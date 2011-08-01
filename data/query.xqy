@@ -21,17 +21,19 @@ import module namespace parser="http://marklogic.com/mljson/query-parser" at "li
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 
+import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
+import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
+
 declare option xdmp:mapping "false";
 
-let $query := xdmp:get-request-field("q", "")[1]
-let $include := xdmp:get-request-field("include", "content")
-let $contentType := xdmp:get-request-field("content-type")[1]
-let $returnPath := xdmp:get-request-field("returnpath")[1]
+let $params := rest:process-request(endpoints:request("/data/query.xqy"))
 
-let $start := xdmp:get-request-field("start")[1]
-let $end := xdmp:get-request-field("end")[1]
-let $start := if($start castable as xs:positiveInteger) then xs:positiveInteger($start) else 1
-let $end := if($end castable as xs:positiveInteger) then xs:positiveInteger($end) else ()
+let $query := map:get($params, "q")
+let $include := map:get($params, "include")
+let $contentType := map:get($params, "content-type")
+let $returnPath := map:get($params, "returnpath")
+let $start := map:get($params, "start")
+let $end := map:get($params, "end")
 
 let $query := parser:parse($query)
 

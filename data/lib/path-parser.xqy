@@ -33,7 +33,6 @@ declare function path:select(
     else
         let $tokens := path:tokenize($path)
         let $parts :=
-            let $Log := xdmp:log(path:constructPath($tokens))
             for $part in $doc/xdmp:value(path:constructPath($tokens))
             return <json:item>{ $part/(@*, node()) }</json:item>
         return

@@ -20,6 +20,7 @@ module namespace parser = "http://marklogic.com/mljson/query-parser";
 
 import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
+import module namespace search="http://marklogic.com/mljson/search" at "search.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
@@ -256,72 +257,20 @@ declare private function parser:constraintQuery(
 {
     let $value := string($term/value)
     let $index := config:get($term/field)
-    let $options :=
-        if($index/type = "string")
-        then "collation=http://marklogic.com/collation/"
-        else ()
-    let $operator := common:humanOperatorToMathmatical($index/operator)
     where if(exists($ignoreField)) then string($term/field) != $ignoreField else true()
     return
         if($index/@type = "field")
-        then cts:field-word-query($index/name, $value)
+        then search:fieldValueToQuery($index, $value)
 
         else if($index/@type = "map")
-        then 
-            let $QName :=
-                if($index/structure = "json")
-                then xs:QName(concat("json:", $index/key))
-                else if($index/structure = "xmlelement")
-                then xs:QName($index/element)
-                else ()
-            return
-                if($index/mode = "equals")
-                then
-                    if($value = ("true", "false"))
-                    then cts:or-query((
-                        cts:element-value-query($QName, $value),
-                        cts:element-attribute-value-query($QName, xs:QName("boolean"), $value)
-                    ))
-                    else cts:element-value-query($QName, $value)
-                else cts:element-word-query($QName, $value)
+        then search:mapValueToQuery($index, $value)
 
         else if($index/@type = "range")
-        then
-            if($index/structure = "json")
-            then
-                if($index/type = "boolean")
-                then
-                    let $QName := xs:QName(concat("json:", $index/key))
-                    return cts:element-attribute-range-query($QName, xs:QName("boolean"), "=", $value)
+        then search:rangeValueToQuery($index, $value)
 
-                else if($index/type = "date")
-                then
-                    let $QName := xs:QName(concat("json:", $index/key))
-                    let $value := common:castFromJSONType($value, "date")
-                    return cts:element-attribute-range-query($QName, xs:QName("normalized-date"), $operator, $value)
-
-                else
-                    let $QName := xs:QName(concat("json:", $index/key))
-                    let $value := common:castFromJSONType($value, $index/type)
-                    return cts:element-range-query($QName, $operator, $value, $options)
-            else if($index/structure = "xmlelement")
-            then cts:element-range-query(xs:QName($index/element), $operator, common:castAs($value, $index/type), $options)
-            else if($index/structure = "xmlattribute")
-            then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), $operator, common:castAs($value, $index/type))
-            else ()
         else if($index/@type = "bucketedrange")
-        then
-            (: XXX - bunch of work to do here :)
-            if($index/structure = "json")
-            then
-                if($index/type = "date")
-                then ()
-                else ()
-            else if($index/structure = "xmlelement")
-            then ()
-            else if($index/structure = "xmlattribute")
-            then ()
-            else ()
+        then search:bucketLabelToQuery($index, $value)
+
         else parser:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)
 };
 

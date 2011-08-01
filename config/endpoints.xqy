@@ -42,9 +42,9 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <request uri="^/(json|xml)/query(/)?$" endpoint="/data/query.xqy">
         <uri-param name="content-type">$1</uri-param>
         <param name="q" required="true"/>
-        <param name="start" required="false"/>
-        <param name="end" required="false"/>
-        <param name="include" repeatable="true" required="false"/>
+        <param name="start" required="false" as="positiveInteger" default="1"/>
+        <param name="end" required="false" as="positiveInteger"/>
+        <param name="include" repeatable="true" required="false" default="content"/>
         <param name="returnpath" required="false"/>
     </request>
 
