@@ -156,7 +156,7 @@ declare private function reststore:outputJSONDocument(
 )
 {
     if($includeContent)
-    then ("content", doc($uri)/json:json)
+    then ("content", $content)
     else (),
     if($includeCollections)
     then ("collections", reststore:getDocumentCollections($uri, "json"))
