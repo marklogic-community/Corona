@@ -26,11 +26,11 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare function customquery:getCTS(
     $json as xs:string,
-    $ignoreFacet as xs:string?
+    $ignoreRange as xs:string?
 ) as cts:query
 {
     let $tree := json:jsonToXML($json)
-    return customquery:dispatch($tree, $ignoreFacet)
+    return customquery:dispatch($tree, $ignoreRange)
 };
 
 declare function customquery:searchJSON(
@@ -111,7 +111,7 @@ declare function customquery:searchXML(
 
 declare private function customquery:dispatch(
     $step as element(),
-    $ignoreFacet as xs:string?
+    $ignoreRange as xs:string?
 )
 {
     let $precedent := (
@@ -130,27 +130,27 @@ declare private function customquery:dispatch(
         $step/json:box[@type = "object"],
         $step/json:polygon[@type = "array"]
     )[1]
-    return customquery:process($precedent, $ignoreFacet)
+    return customquery:process($precedent, $ignoreRange)
 };
 
 declare private function customquery:process(
     $step as element(),
-    $ignoreFacet as xs:string?
+    $ignoreRange as xs:string?
 )
 {
     typeswitch($step)
-    case element(json:item) return customquery:dispatch($step, $ignoreFacet)
-    case element(json:and) return cts:and-query(for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreFacet))
-    case element(json:or) return cts:or-query(for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreFacet))
-    case element(json:not) return cts:not-query(customquery:dispatch($step, $ignoreFacet))
-    case element(json:andNot) return customquery:handleAndNot($step, $ignoreFacet)
-    case element(json:property) return cts:properties-query(customquery:dispatch($step, $ignoreFacet))
-    case element(json:range) return customquery:handleRange($step, $ignoreFacet)
+    case element(json:item) return customquery:dispatch($step, $ignoreRange)
+    case element(json:and) return cts:and-query(for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreRange))
+    case element(json:or) return cts:or-query(for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreRange))
+    case element(json:not) return cts:not-query(customquery:dispatch($step, $ignoreRange))
+    case element(json:andNot) return customquery:handleAndNot($step, $ignoreRange)
+    case element(json:property) return cts:properties-query(customquery:dispatch($step, $ignoreRange))
+    case element(json:range) return customquery:handleRange($step, $ignoreRange)
     case element(json:equals) return customquery:handleEquals($step)
     case element(json:contains) return customquery:handleContains($step)
     case element(json:collection) return customquery:handleCollection($step)
-    case element(json:geo) return customquery:handleGeo($step, $ignoreFacet)
-    case element(json:region) return for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreFacet)
+    case element(json:geo) return customquery:handleGeo($step, $ignoreRange)
+    case element(json:region) return for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreRange)
     case element(json:point) return customquery:handleGeoPoint($step)
     case element(json:circle) return customquery:handleGeoCircle($step)
     case element(json:box) return customquery:handleGeoBox($step)
@@ -160,18 +160,18 @@ declare private function customquery:process(
 
 declare private function customquery:handleAndNot(
     $step as element(json:andNot),
-    $ignoreFacet as xs:string?
+    $ignoreRange as xs:string?
 ) as cts:and-not-query?
 {
     let $positive := $step/json:positive[@type = "object"]
     let $negative := $step/json:negative[@type = "object"]
     where exists($positive) and exists($negative)
-    return cts:and-not-query(customquery:dispatch($positive, $ignoreFacet), customquery:dispatch($negative, $ignoreFacet))
+    return cts:and-not-query(customquery:dispatch($positive, $ignoreRange), customquery:dispatch($negative, $ignoreRange))
 };
 
 declare private function customquery:handleRange(
     $step as element(json:range),
-    $ignoreFacet as xs:string?
+    $ignoreRange as xs:string?
 ) as cts:query?
 {
     if(exists($step/json:from) and exists($step/json:to))
@@ -179,7 +179,7 @@ declare private function customquery:handleRange(
         let $name := $step/json:name[@type = "string"]
         let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
         let $options := customquery:extractOptions($step, "range")
-        where exists($name) and $name != $ignoreFacet
+        where exists($name) and $name != $ignoreRange
         return cts:and-query((
             common:indexNameToRangeQuery(string($name), $step/json:to, "le", $options, $weight),
             common:indexNameToRangeQuery(string($name), $step/json:from, "ge", $options, $weight)
@@ -193,7 +193,7 @@ declare private function customquery:handleRange(
             else $step/json:value
         
         let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-        where exists($name) and exists($values) and $name != $ignoreFacet
+        where exists($name) and exists($values) and $name != $ignoreRange
         return common:indexNameToRangeQuery(string($name), $values, $operator, customquery:extractOptions($step, "range"), $weight)
 };
 
@@ -250,7 +250,7 @@ declare private function customquery:handleCollection(
 
 declare private function customquery:handleGeo(
     $step as element(json:geo),
-    $ignoreFacet as xs:string?
+    $ignoreRange as xs:string?
 ) as cts:query?
 {
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
@@ -282,11 +282,11 @@ declare private function customquery:handleGeo(
     where exists($latLongPair) or (exists($latKey) and exists($longKey))
     return
         if(exists($parent) and exists($latKey) and exists($longKey))
-        then cts:element-pair-geospatial-query($parent, $latKey, $longKey, customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-pair-geospatial-query($parent, $latKey, $longKey, customquery:process($step/json:region, $ignoreRange), customquery:extractOptions($step, "geo"), $weight)
         else if(exists($parent) and exists($latLongPair))
-        then cts:element-child-geospatial-query($parent, $latLongPair, customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-child-geospatial-query($parent, $latLongPair, customquery:process($step/json:region, $ignoreRange), customquery:extractOptions($step, "geo"), $weight)
         else if(exists($latLongPair))
-        then cts:element-geospatial-query($latLongPair, customquery:process($step/json:region, $ignoreFacet), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-geospatial-query($latLongPair, customquery:process($step/json:region, $ignoreRange), customquery:extractOptions($step, "geo"), $weight)
         else ()
 };
 

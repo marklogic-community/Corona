@@ -36,14 +36,14 @@ declare function parser:parse(
 
 declare function parser:parse(
 	$query as xs:string,
-    $ignoreFacet as xs:string?
+    $ignoreField as xs:string?
 ) as cts:query?
 {
 	let $init := xdmp:set($GROUPING-INDEX, 0)
 	let $tokens := parser:tokenize($query)
 	let $grouped := parser:groupTokens($tokens, 1)
 	let $folded := parser:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
-	return parser:dispatchQueryTree($folded, $ignoreFacet)
+	return parser:dispatchQueryTree($folded, $ignoreField)
 };
 
 declare private function parser:tokenize(
@@ -195,12 +195,12 @@ declare private function parser:extractSequence(
 
 declare private function parser:dispatchQueryTree(
 	$token as element(),
-    $ignoreFacet as xs:string?
+    $ignoreField as xs:string?
 ) as cts:query*
 {
 	let $queries :=
 		for $term in $token/*
-		return parser:termToQuery($term, $ignoreFacet)
+		return parser:termToQuery($term, $ignoreField)
 	return
 		if(count($queries) = 1 or local-name($token) = ("andQuery", "orQuery"))
 		then $queries
@@ -209,18 +209,18 @@ declare private function parser:dispatchQueryTree(
 
 declare private function parser:termToQuery(
 	$term as element(),
-    $ignoreFacet as xs:string?
+    $ignoreField as xs:string?
 ) as cts:query?
 {
 	typeswitch ($term)
-	case element(andQuery) return cts:and-query(parser:dispatchQueryTree($term, $ignoreFacet))
-	case element(orQuery) return cts:or-query(parser:dispatchQueryTree($term, $ignoreFacet))
-	case element(notQuery) return parser:notQuery($term, $ignoreFacet)
-	case element(nearQuery) return parser:nearQuery($term, $ignoreFacet)
-	case element(constraint) return parser:constraintQuery($term, $ignoreFacet)
+	case element(andQuery) return cts:and-query(parser:dispatchQueryTree($term, $ignoreField))
+	case element(orQuery) return cts:or-query(parser:dispatchQueryTree($term, $ignoreField))
+	case element(notQuery) return parser:notQuery($term, $ignoreField)
+	case element(nearQuery) return parser:nearQuery($term, $ignoreField)
+	case element(constraint) return parser:constraintQuery($term, $ignoreField)
 	case element(term) return parser:wordQuery($term)
 	case element(phrase) return parser:wordQuery($term)
-	case element(group) return parser:dispatchQueryTree($term, $ignoreFacet)
+	case element(group) return parser:dispatchQueryTree($term, $ignoreField)
 	case element(whitespace) return ()
 
 	default return xdmp:log(concat("Unhandled query token: ", xdmp:quote($term)))
@@ -235,23 +235,23 @@ declare private function parser:wordQuery(
 
 declare private function parser:notQuery(
 	$term as element(notQuery),
-    $ignoreFacet as xs:string?
+    $ignoreField as xs:string?
 ) as cts:not-query
 {
-	cts:not-query(parser:dispatchQueryTree($term, $ignoreFacet))
+	cts:not-query(parser:dispatchQueryTree($term, $ignoreField))
 };
 
 declare private function parser:nearQuery(
 	$term as element(notQuery),
-    $ignoreFacet as xs:string?
+    $ignoreField as xs:string?
 ) as cts:query
 {
-	cts:near-query(parser:dispatchQueryTree($term, $ignoreFacet), $term/@distance)
+	cts:near-query(parser:dispatchQueryTree($term, $ignoreField), $term/@distance)
 };
 
 declare private function parser:constraintQuery(
 	$term as element(constraint),
-    $ignoreFacet as xs:string?
+    $ignoreField as xs:string?
 ) as cts:query?
 {
     let $value := string($term/value)
@@ -261,7 +261,7 @@ declare private function parser:constraintQuery(
         then "collation=http://marklogic.com/collation/"
         else ()
     let $operator := common:humanOperatorToMathmatical($index/operator)
-    where if(exists($ignoreFacet)) then string($term/field) != $ignoreFacet else true()
+    where if(exists($ignoreField)) then string($term/field) != $ignoreField else true()
     return
         if($index/@type = "field")
         then cts:field-word-query($index/name, $value)
@@ -289,11 +289,9 @@ declare private function parser:constraintQuery(
         then
             if($index/structure = "json")
             then
-                (: XXX - we can't make a range index on booleans :)
                 if($index/type = "boolean")
                 then
                     let $QName := xs:QName(concat("json:", $index/key))
-                    let $value := common:castFromJSONType($value, "boolean")
                     return cts:element-attribute-range-query($QName, xs:QName("boolean"), "=", $value)
 
                 else if($index/type = "date")
@@ -310,6 +308,19 @@ declare private function parser:constraintQuery(
             then cts:element-range-query(xs:QName($index/element), $operator, common:castAs($value, $index/type), $options)
             else if($index/structure = "xmlattribute")
             then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), $operator, common:castAs($value, $index/type))
+            else ()
+        else if($index/@type = "bucketedrange")
+        then
+            (: XXX - bunch of work to do here :)
+            if($index/structure = "json")
+            then
+                if($index/type = "date")
+                then ()
+                else ()
+            else if($index/structure = "xmlelement")
+            then ()
+            else if($index/structure = "xmlattribute")
+            then ()
             else ()
         else parser:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)
 };

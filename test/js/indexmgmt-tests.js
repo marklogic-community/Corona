@@ -14,6 +14,9 @@ mljson.removeIndexes = function(info, callback) {
     for(i = 0; i < info.indexes.ranges.length; i += 1) {
         indexes.push({"type": "range", "name": info.indexes.ranges[i].name});
     }
+    for(i = 0; i < info.indexes.bucketedRanges.length; i += 1) {
+        indexes.push({"type": "bucketedrange", "name": info.indexes.bucketedRanges[i].name});
+    }
     for(i = 0; i < info.xmlNamespaces.length; i += 1) {
         indexes.push({"type": "namespace", "name": info.xmlNamespaces[i].prefix});
     }
@@ -119,6 +122,16 @@ mljson.addIndexes = function(callback) {
             "purpose": "General range creation on a string"
         },
         {
+            "type": "bucketedrange",
+            "pluralType": "bucketedRanges",
+            "name": "fromBucket",
+            "key": "fromPersonal",
+            "datatype": "string",
+            "buckets": "A-F|G|G-M|N|N-R|S|S-Z",
+            "shouldSucceed": true,
+            "purpose": "General bucketed range creation on a string"
+        },
+        {
             "type": "namespace",
             "pluralType": "xmlNamespaces",
             "prefix": "testns",
@@ -194,6 +207,11 @@ mljson.addIndexes = function(callback) {
             equals(config.key, server.key, "Index keys match");
             equals(config.datatype, server.type, "Index datatypes match");
             equals(config.operator, server.operator, "Index operators match");
+        }
+        else if(config.type === "bucketedrange") {
+            equals(config.key, server.key, "Index keys match");
+            equals(config.datatype, server.type, "Index datatypes match");
+            equals(config.buckets, server.buckets.join("|"), "Index buckets match");
         }
         else if(config.type === "field") {
             deepEqual(config.includes, server.includedKeys, "Index includes match");
@@ -301,6 +319,11 @@ mljson.addIndexes = function(callback) {
                 data.key = index.key;
                 data.type = index.datatype;
                 data.operator = index.operator;
+            }
+            else if(index.type === "bucketedrange") {
+                data.key = index.key;
+                data.type = index.datatype;
+                data.buckets = index.buckets;
             }
 
             $.ajax({

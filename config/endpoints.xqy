@@ -101,6 +101,21 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
+    <request uri="^/manage/bucketedrange/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/bucketedrange.xqy">
+        <uri-param name="name" as="string">$1</uri-param>
+        <http method="GET"/>
+        <http method="POST">
+            <param name="key" required="false"/>
+            <param name="element" required="false"/>
+            <param name="attribute" required="false"/>
+            <param name="type" required="true"/>
+            <param name="buckets" required="false"/>
+            <param name="autoBucket" required="false" values="decade|year|quarter|month|day|hour|minute"/>
+            <param name="startingAt" required="false"/>
+        </http>
+        <http method="DELETE"/>
+    </request>
+
     <request uri="^/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/map.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>

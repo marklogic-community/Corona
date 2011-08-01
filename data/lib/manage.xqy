@@ -184,33 +184,10 @@ declare function manage:createJSONRange(
         if($type = "boolean")
         then "eq"
         else $operator
-    where empty(manage:getJSONRangeDefinition($key, $type, $config))
-    return
-        if($type = "string")
-        then
-            let $index := admin:database-range-element-index("string", "http://marklogic.com/json", $key, "http://marklogic.com/collation/", false())
-            let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
-            return admin:save-configuration($config)
-        else if($type = "date")
-        then
-            let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, "", "normalized-date", "", false())
-            let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
-            return admin:save-configuration($config)
-        else if($type = "number")
-        then
-            let $index := admin:database-range-element-index("decimal", "http://marklogic.com/json", $key, "", false())
-            let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
-            return admin:save-configuration($config)
-        else if($type = "boolean")
-        then
-            (: XXX - don't think we can create range indexes of type boolean :)
-            let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, "", "boolean", "", false())
-            let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
-            return admin:save-configuration($config)
-        else
-            ()
-    ,
-    config:setJSONRange($name, json:escapeNCName($key), $type, $operator)
+    return (
+        manage:createJSONRangeIndex($name, $key, $type, $config),
+        config:setJSONRange($name, $key, $type, $operator)
+    )
 };
 
 declare function manage:createXMLElementRange(
@@ -221,11 +198,7 @@ declare function manage:createXMLElementRange(
     $config as element()
 ) as empty-sequence()
 {
-    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
-    let $nsLnBits := manage:getNSAndLN($element)
-    let $index := admin:database-range-element-index($type, $nsLnBits[1], $nsLnBits[2], $collation, false())
-    where empty(manage:getXMLElementRangeDefinition($element, $type, $config))
-    return admin:save-configuration(admin:database-add-range-element-index($config, xdmp:database(), $index))
+    manage:createXMLElementRangeIndex($name, $element, $type, $config)
     ,
     config:setXMLElementRange($name, $element, $type, $operator)
 };
@@ -239,16 +212,12 @@ declare function manage:createXMLAttributeRange(
     $config as element()
 ) as empty-sequence()
 {
-    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
-    let $elementNsLnBits := manage:getNSAndLN($element)
-    let $attributeNsLnBits := manage:getNSAndLN($attribute)
-    let $index := admin:database-range-element-attribute-index($type, $elementNsLnBits[1], $elementNsLnBits[2], $attributeNsLnBits[1], $attributeNsLnBits[2], $collation, false())
-    where empty(manage:getXMLAttributeRangeDefinition($element, $attribute, $type, $config))
-    return admin:save-configuration(admin:database-add-range-element-attribute-index($config, xdmp:database(), $index))
+    manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
     ,
     config:setXMLAttributeRange($name, $element, $attribute, $type, $operator)
 };
 
+(: XXX - should not delete the range index if other ranges are using it :)
 declare function manage:deleteRange(
     $name as xs:string,
     $config as element()
@@ -311,6 +280,115 @@ declare function manage:getAllRanges(
 {
     for $rangeName in config:rangeNames()
     return manage:getRange($rangeName)
+};
+
+
+declare function manage:createJSONBucketedRange(
+    $name as xs:string,
+    $key as xs:string,
+    $type as xs:string,
+    $buckets as element()+,
+    $config as element()
+) as empty-sequence()
+{
+    let $key := json:escapeNCName($key)
+    return (
+        manage:createJSONRangeIndex($name, $key, $type, $config),
+        config:setJSONBucketedRange($name, $key, $type, $buckets)
+    )
+};
+
+declare function manage:createXMLElementBucketedRange(
+    $name as xs:string,
+    $element as xs:string,
+    $type as xs:string,
+    $buckets as element()+,
+    $config as element()
+) as empty-sequence()
+{
+    manage:createXMLElementRangeIndex($name, $element, $type, $config)
+    ,
+    config:setXMLElementBucketedRange($name, $element, $type, $buckets)
+};
+
+declare function manage:createXMLAttributeBucketedRange(
+    $name as xs:string,
+    $element as xs:string,
+    $attribute as xs:string,
+    $type as xs:string,
+    $buckets as element()+,
+    $config as element()
+) as empty-sequence()
+{
+    manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
+    ,
+    config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets)
+};
+
+(: XXX - should not delete the range index if other ranges are using it :)
+declare function manage:deleteBucketedRange(
+    $name as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    let $database := xdmp:database()
+    let $index := config:get($name)
+    let $existing := manage:getRangeDefinition($index, $config)
+    let $log := xdmp:log($index)
+    where $index/@type = "bucketedrange"
+    return (
+        if(exists($existing))
+        then (
+            if(local-name($existing) = "range-element-index")
+            then admin:save-configuration(admin:database-delete-range-element-index($config, $database, $existing))
+            else admin:save-configuration(admin:database-delete-range-element-attribute-index($config, $database, $existing))
+        )
+        else ()
+        ,
+        config:delete($name)
+    )
+};
+
+declare function manage:getBucketedRange(
+    $name as xs:string
+) as element(json:item)?
+{
+    let $index := config:get($name)
+    where $index/@type = "bucketedrange"
+    return
+        if($index/structure = "json")
+        then
+            json:object((
+                "name", $name,
+                "key", json:unescapeNCName($index/key),
+                "type", string($index/type),
+                "buckets", json:array(for $bucket in $index/buckets/* return string($bucket))
+            ))
+        else if($index/structure = "xmlelement")
+        then
+            json:object((
+                "name", $name,
+                "element", string($index/element),
+                "type", string($index/type),
+                "buckets", json:array(for $bucket in $index/buckets/* return string($bucket))
+            ))
+        else if($index/structure = "xmlattribute")
+        then
+            json:object((
+                "name", $name,
+                "element", string($index/element),
+                "attribute", string($index/attribute),
+                "type", string($index/type),
+                "buckets", json:array(for $bucket in $index/buckets/* return string($bucket))
+            ))
+        else ()
+};
+
+declare function manage:getAllBucketedRanges(
+) as element(json:item)*
+{
+    for $name in config:bucketedRangeNames()
+    return manage:getBucketedRange($name)
 };
 
 
@@ -425,6 +503,70 @@ declare private function manage:fieldDefinitionToJsonXml(
         )
     ))
 };
+
+declare private function manage:createJSONRangeIndex(
+    $name as xs:string,
+    $key as xs:string,
+    $type as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    if(exists(manage:getJSONRangeDefinition($key, $type, $config)))
+    then ()
+    else if($type = "string")
+    then
+        let $index := admin:database-range-element-index("string", "http://marklogic.com/json", $key, "http://marklogic.com/collation/", false())
+        let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
+        return admin:save-configuration($config)
+    else if($type = "date")
+    then
+        let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, "", "normalized-date", "", false())
+        let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
+        return admin:save-configuration($config)
+    else if($type = "number")
+    then
+        let $index := admin:database-range-element-index("decimal", "http://marklogic.com/json", $key, "", false())
+        let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
+        return admin:save-configuration($config)
+    else if($type = "boolean")
+    then
+        (: XXX - don't think we can create range indexes of type boolean :)
+        let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, "", "boolean", "", false())
+        let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
+        return admin:save-configuration($config)
+    else ()
+};
+
+declare function manage:createXMLElementRangeIndex(
+    $name as xs:string,
+    $element as xs:string,
+    $type as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
+    let $nsLnBits := manage:getNSAndLN($element)
+    let $index := admin:database-range-element-index($type, $nsLnBits[1], $nsLnBits[2], $collation, false())
+    where empty(manage:getXMLElementRangeDefinition($element, $type, $config))
+    return admin:save-configuration(admin:database-add-range-element-index($config, xdmp:database(), $index))
+};
+
+declare function manage:createXMLAttributeRangeIndex(
+    $name as xs:string,
+    $element as xs:string,
+    $attribute as xs:string,
+    $type as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
+    let $elementNsLnBits := manage:getNSAndLN($element)
+    let $attributeNsLnBits := manage:getNSAndLN($attribute)
+    let $index := admin:database-range-element-attribute-index($type, $elementNsLnBits[1], $elementNsLnBits[2], $attributeNsLnBits[1], $attributeNsLnBits[2], $collation, false())
+    where empty(manage:getXMLAttributeRangeDefinition($element, $attribute, $type, $config))
+    return admin:save-configuration(admin:database-add-range-element-attribute-index($config, xdmp:database(), $index))
+};
+
 
 declare private function manage:getJSONRangeDefinition(
     $key as xs:string,

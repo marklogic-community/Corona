@@ -51,6 +51,7 @@ json:document(
             "keyValueTrailingWildcards", admin:database-get-fast-element-trailing-wildcard-searches($config, $database),
             "geo", json:array(),
             "ranges", json:array(manage:getAllRanges()),
+            "bucketedRanges", json:array(manage:getAllBucketedRanges()),
             "fields", json:array(manage:getAllFields($config)),
             "mappings", json:array(manage:getAllMaps())
         )),

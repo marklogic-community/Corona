@@ -19,6 +19,7 @@ xquery version "1.0-ml";
 module namespace config="http://marklogic.com/mljson/index-config";
 
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
+import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
@@ -86,6 +87,37 @@ declare function config:setXMLAttributeRange(
     prop:set(concat("index-", $name), concat("range/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $operator))
 };
 
+declare function config:setJSONBucketedRange(
+    $name as xs:string,
+    $key as xs:string,
+    $type as xs:string,
+    $buckets as element()+
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("bucketedrange/json/", $name, "/", $key, "/", $type, "/", config:bucketElementsToString($buckets, $type, "json")))
+};
+
+declare function config:setXMLElementBucketedRange(
+    $name as xs:string,
+    $element as xs:string,
+    $type as xs:string,
+    $buckets as element()+
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("bucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
+};
+
+declare function config:setXMLAttributeBucketedRange(
+    $name as xs:string,
+    $element as xs:string,
+    $attribute as xs:string,
+    $type as xs:string,
+    $buckets as element()+
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("bucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
+};
+
 declare function config:get(
     $name as xs:string
 ) as element(index)?
@@ -116,6 +148,32 @@ declare function config:get(
                     <attribute>{ $bits[4] }</attribute>,
                     <type>{ $bits[6] }</type>,
                     <operator>{ $bits[7] }</operator>
+                )
+                else ()
+            }
+        </index>
+        else if($bits[1] = "bucketedrange")
+        then <index type="bucketedrange" name="{ $bits[3] }">
+            <structure>{ $bits[2] }</structure>
+            {
+                if($bits[2] = "json")
+                then (
+                    <key>{ $bits[4] }</key>,
+                    <type>{ $bits[5] }</type>,
+                    <buckets>{ config:bucketStringToElements($bits[6]) }</buckets>
+                )
+                else if($bits[2] = "xmlelement")
+                then (
+                    <element>{ $bits[4] }</element>,
+                    <type>{ $bits[5] }</type>,
+                    <buckets>{ config:bucketStringToElements($bits[6]) }</buckets>
+                )
+                else if($bits[2] = "xmlattribute")
+                then (
+                    <element>{ $bits[4] }</element>,
+                    <attribute>{ $bits[4] }</attribute>,
+                    <type>{ $bits[6] }</type>,
+                    <buckets>{ config:bucketStringToElements($bits[7]) }</buckets>
                 )
                 else ()
             }
@@ -151,6 +209,15 @@ declare function config:rangeNames(
     return substring-after($key, "index-")
 };
 
+declare function config:bucketedRangeNames(
+) as xs:string*
+{
+    for $key in prop:all()
+    let $value := prop:get($key)
+    where starts-with($key, "index-") and starts-with($value, "bucketedrange/")
+    return substring-after($key, "index-")
+};
+
 declare function config:mapNames(
 ) as xs:string*
 {
@@ -158,4 +225,60 @@ declare function config:mapNames(
     let $value := prop:get($key)
     where starts-with($key, "index-") and starts-with($value, "map/")
     return substring-after($key, "index-")
+};
+
+
+
+declare private function config:bucketElementsToString(
+    $buckets as element()+,
+    $type as xs:string,
+    $format as xs:string
+) as xs:string
+{
+    string-join(
+        let $xsType :=
+            if($format = "json")
+            then
+                if($type = "number")
+                then "decimal"
+                else if($type = "date")
+                then "dateTime"
+                else "string"
+            else $type
+        let $check :=
+            if(local-name($buckets[1]) != "label" or local-name($buckets[last()]) != "label")
+            then error(xs:QName("config:INVALID-BUCKETS"), "The first and last bucket elements must be labels")
+            else ()
+        for $bucket at $pos in $buckets
+        let $check :=
+            if($pos mod 2 = 0 and local-name($bucket) != "boundary")
+            then error(xs:QName("config:INVALID-BUCKETS"), "Even bucket elements need to be boundary elements")
+            else if($pos mod 2 != 0 and local-name($bucket) != "label")
+            then error(xs:QName("config:INVALID-BUCKETS"), "Odd bucket elements ned to be label elements")
+            else ()
+        let $boundaryValue :=
+            if(local-name($bucket) = "boundary")
+            then
+                if($format = "json" and $type = "date")
+                then string(dateparser:parse(string($bucket)))
+                else string($bucket)
+            else ()
+        let $check :=
+            if(local-name($bucket) = "boundary" and not(xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundaryValue)))
+            then error(xs:QName("config:INVALID-BUCKETS"), concat("Bucket value '", $boundaryValue, "' is not of the correct datatype"))
+            else ()
+        return xdmp:url-encode(string($bucket))
+    , "|")
+};
+
+declare private function config:bucketStringToElements(
+    $string as xs:string
+) as element()+
+{
+    for $bit at $pos in tokenize($string, "\|")
+    let $bit := xdmp:url-decode($bit)
+    return
+        if($pos mod 2)
+        then <label>{ $bit }</label>
+        else <boundary>{ $bit }</boundary>
 };

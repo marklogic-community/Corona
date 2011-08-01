@@ -183,7 +183,7 @@ declare function common:indexNameToRangeQuery(
         for $value in $values
         where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $index/type, $value)
         return common:castAs($value, $index/type)
-    where $index/@type = "range"
+    where $index/@type = ("range", "bucketedrange")
     return 
         if($index/structure = "json")
         then
