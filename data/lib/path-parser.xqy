@@ -193,6 +193,8 @@ declare private function path:processWildstep(
     return
         if(count($tokens) = $index)
         then "/*"
+        else if($index = 1)
+        then "/"
         else ""
 };
 
