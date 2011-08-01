@@ -97,6 +97,18 @@ declare function config:setJSONBucketedRange(
     prop:set(concat("index-", $name), concat("bucketedrange/json/", $name, "/", $key, "/", $type, "/", config:bucketElementsToString($buckets, $type, "json")))
 };
 
+declare function config:setJSONAutoBucketedRange(
+    $name as xs:string,
+    $key as xs:string,
+    $type as xs:string,
+    $units as xs:string,
+    $startingAt as xs:anySimpleType,
+    $stoppingAt as xs:anySimpleType?
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("autobucketedrange/json/", $name, "/", $key, "/", $type, "/", $units, "/", $startingAt, "/", $stoppingAt))
+};
+
 declare function config:setXMLElementBucketedRange(
     $name as xs:string,
     $element as xs:string,
@@ -105,6 +117,18 @@ declare function config:setXMLElementBucketedRange(
 ) as empty-sequence()
 {
     prop:set(concat("index-", $name), concat("bucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
+};
+
+declare function config:setXMLElementAutoBucketedRange(
+    $name as xs:string,
+    $element as xs:string,
+    $type as xs:string,
+    $units as xs:string,
+    $startingAt as xs:anySimpleType,
+    $stoppingAt as xs:anySimpleType?
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("autobucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", $units, "/", $startingAt, "/", $stoppingAt))
 };
 
 declare function config:setXMLAttributeBucketedRange(
@@ -116,6 +140,19 @@ declare function config:setXMLAttributeBucketedRange(
 ) as empty-sequence()
 {
     prop:set(concat("index-", $name), concat("bucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
+};
+
+declare function config:setXMLAttributeAutoBucketedRange(
+    $name as xs:string,
+    $element as xs:string,
+    $attribute as xs:string,
+    $type as xs:string,
+    $units as xs:string,
+    $startingAt as xs:anySimpleType,
+    $stoppingAt as xs:anySimpleType?
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("autobucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $units, "/", $startingAt, "/", $stoppingAt))
 };
 
 declare function config:get(
@@ -178,6 +215,38 @@ declare function config:get(
                 else ()
             }
         </index>
+        else if($bits[1] = "autobucketedrange")
+        then <index type="autobucketedrange" name="{ $bits[3] }">
+            <structure>{ $bits[2] }</structure>
+            {
+                if($bits[2] = "json")
+                then (
+                    <key>{ $bits[4] }</key>,
+                    <type>{ $bits[5] }</type>,
+                    <units>{ $bits[6] }</units>,
+                    <startingAt>{ $bits[7] }</startingAt>,
+                    <stoppingAt>{ $bits[8] }</stoppingAt>
+                )
+                else if($bits[2] = "xmlelement")
+                then (
+                    <element>{ $bits[4] }</element>,
+                    <type>{ $bits[5] }</type>,
+                    <units>{ $bits[6] }</units>,
+                    <startingAt>{ $bits[7] }</startingAt>,
+                    <stoppingAt>{ $bits[8] }</stoppingAt>
+                )
+                else if($bits[2] = "xmlattribute")
+                then (
+                    <element>{ $bits[4] }</element>,
+                    <attribute>{ $bits[4] }</attribute>,
+                    <type>{ $bits[6] }</type>,
+                    <units>{ $bits[7] }</units>,
+                    <startingAt>{ $bits[8] }</startingAt>,
+                    <stoppingAt>{ $bits[9] }</stoppingAt>
+                )
+                else ()
+            }
+        </index>
         else if($bits[1] = "map")
         then <index type="map" name="{ $bits[3] }">
             <structure>{ $bits[2] }</structure>
@@ -214,7 +283,7 @@ declare function config:bucketedRangeNames(
 {
     for $key in prop:all()
     let $value := prop:get($key)
-    where starts-with($key, "index-") and starts-with($value, "bucketedrange/")
+    where starts-with($key, "index-") and (starts-with($value, "bucketedrange/") or starts-with($value, "autobucketedrange/"))
     return substring-after($key, "index-")
 };
 

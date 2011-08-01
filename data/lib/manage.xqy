@@ -298,6 +298,23 @@ declare function manage:createJSONBucketedRange(
     )
 };
 
+declare function manage:createJSONAutoBucketedRange(
+    $name as xs:string,
+    $key as xs:string,
+    $type as xs:string,
+    $units as xs:string,
+    $startingAt as xs:anySimpleType,
+    $stoppingAt as xs:anySimpleType?,
+    $config as element()
+) as empty-sequence()
+{
+    let $key := json:escapeNCName($key)
+    return (
+        manage:createJSONRangeIndex($name, $key, $type, $config),
+        config:setJSONAutoBucketedRange($name, $key, $type, $units, $startingAt, $stoppingAt)
+    )
+};
+
 declare function manage:createXMLElementBucketedRange(
     $name as xs:string,
     $element as xs:string,
@@ -309,6 +326,21 @@ declare function manage:createXMLElementBucketedRange(
     manage:createXMLElementRangeIndex($name, $element, $type, $config)
     ,
     config:setXMLElementBucketedRange($name, $element, $type, $buckets)
+};
+
+declare function manage:createXMLElementAutoBucketedRange(
+    $name as xs:string,
+    $element as xs:string,
+    $type as xs:string,
+    $units as xs:string,
+    $startingAt as xs:anySimpleType,
+    $stoppingAt as xs:anySimpleType?,
+    $config as element()
+) as empty-sequence()
+{
+    manage:createXMLElementRangeIndex($name, $element, $type, $config)
+    ,
+    config:setXMLElementAutoBucketedRange($name, $element, $type, $units, $startingAt, $stoppingAt)
 };
 
 declare function manage:createXMLAttributeBucketedRange(
@@ -325,6 +357,22 @@ declare function manage:createXMLAttributeBucketedRange(
     config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets)
 };
 
+declare function manage:createXMLAttributeAutoBucketedRange(
+    $name as xs:string,
+    $element as xs:string,
+    $attribute as xs:string,
+    $type as xs:string,
+    $units as xs:string,
+    $startingAt as xs:anySimpleType,
+    $stoppingAt as xs:anySimpleType?,
+    $config as element()
+) as empty-sequence()
+{
+    manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
+    ,
+    config:setXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $units, $startingAt, $stoppingAt)
+};
+
 (: XXX - should not delete the range index if other ranges are using it :)
 declare function manage:deleteBucketedRange(
     $name as xs:string,
@@ -335,7 +383,7 @@ declare function manage:deleteBucketedRange(
     let $index := config:get($name)
     let $existing := manage:getRangeDefinition($index, $config)
     let $log := xdmp:log($index)
-    where $index/@type = "bucketedrange"
+    where $index/@type = ("bucketedrange", "autobucketedrange")
     return (
         if(exists($existing))
         then (
@@ -354,7 +402,7 @@ declare function manage:getBucketedRange(
 ) as element(json:item)?
 {
     let $index := config:get($name)
-    where $index/@type = "bucketedrange"
+    where $index/@type = ("bucketedrange", "autobucketedrange")
     return
         if($index/structure = "json")
         then
@@ -362,7 +410,18 @@ declare function manage:getBucketedRange(
                 "name", $name,
                 "key", json:unescapeNCName($index/key),
                 "type", string($index/type),
-                "buckets", json:array(for $bucket in $index/buckets/* return string($bucket))
+                if(exists($index/buckets))
+                then ("buckets", json:array(for $bucket in $index/buckets/* return string($bucket)))
+                else (),
+                if(exists($index/units))
+                then ("units", string($index/units))
+                else (),
+                if(exists($index/startingAt))
+                then ("startingAt", string($index/startingAt))
+                else (),
+                if(exists($index/stoppingAt))
+                then ("stoppingAt", string($index/stoppingAt))
+                else ()
             ))
         else if($index/structure = "xmlelement")
         then
@@ -370,7 +429,18 @@ declare function manage:getBucketedRange(
                 "name", $name,
                 "element", string($index/element),
                 "type", string($index/type),
-                "buckets", json:array(for $bucket in $index/buckets/* return string($bucket))
+                if(exists($index/buckets))
+                then ("buckets", json:array(for $bucket in $index/buckets/* return string($bucket)))
+                else (),
+                if(exists($index/units))
+                then ("units", string($index/units))
+                else (),
+                if(exists($index/startingAt))
+                then ("startingAt", string($index/startingAt))
+                else (),
+                if(exists($index/stoppingAt))
+                then ("stoppingAt", string($index/stoppingAt))
+                else ()
             ))
         else if($index/structure = "xmlattribute")
         then
@@ -379,7 +449,18 @@ declare function manage:getBucketedRange(
                 "element", string($index/element),
                 "attribute", string($index/attribute),
                 "type", string($index/type),
-                "buckets", json:array(for $bucket in $index/buckets/* return string($bucket))
+                if(exists($index/buckets))
+                then ("buckets", json:array(for $bucket in $index/buckets/* return string($bucket)))
+                else (),
+                if(exists($index/units))
+                then ("units", string($index/units))
+                else (),
+                if(exists($index/startingAt))
+                then ("startingAt", string($index/startingAt))
+                else (),
+                if(exists($index/stoppingAt))
+                then ("stoppingAt", string($index/stoppingAt))
+                else ()
             ))
         else ()
 };

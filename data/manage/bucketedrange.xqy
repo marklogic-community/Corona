@@ -59,6 +59,10 @@ return
                 if($pos mod 2)
                 then <label>{ $bit }</label>
                 else <boundary>{ $bit }</boundary>
+
+        let $autoBucket := map:get($params, "autoBucket")
+        let $startingAt := map:get($params, "startingAt")
+        let $stoppingAt := map:get($params, "stoppingAt")
         return
 
         if((empty($key) and empty($element)) or (exists($key) and exists($element)))
@@ -73,12 +77,25 @@ return
         then common:error(500, manage:validateIndexName($name), "json")
         else if(exists($existing))
         then common:error(500, "A buckted range index with this configuration already exists", "json")
-        else if(exists($key))
-        then manage:createJSONBucketedRange($name, $key, $type, $buckets, $config)
-        else if(exists($element) and exists($attribute))
-        then manage:createXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets, $config)
-        else if(exists($element) and empty($attribute))
-        then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $config)
+        else if(exists($buckets))
+        then
+            if(exists($key))
+            then manage:createJSONBucketedRange($name, $key, $type, $buckets, $config)
+            else if(exists($element) and exists($attribute))
+            then manage:createXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets, $config)
+            else if(exists($element) and empty($attribute))
+            then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $config)
+            else ()
+        else if(exists($autoBucket) and exists($startingAt))
+        then
+            if(exists($key))
+            then manage:createJSONAutoBucketedRange($name, $key, $type, $autoBucket, $startingAt, $stoppingAt, $config)
+            else if(exists($element) and exists($attribute))
+            then manage:createXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $autoBucket, $startingAt, $stoppingAt, $config)
+            else if(exists($element) and empty($attribute))
+            then manage:createXMLElementAutoBucketedRange($name, $element, $type, $autoBucket, $startingAt, $stoppingAt, $config)
+            else ()
+        (: XXX - throw an error :)
         else ()
 
     else if($requestMethod = "DELETE")

@@ -112,6 +112,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="buckets" required="false"/>
             <param name="autoBucket" required="false" values="decade|year|quarter|month|day|hour|minute"/>
             <param name="startingAt" required="false"/>
+            <param name="stoppingAt" required="false"/>
         </http>
         <http method="DELETE"/>
     </request>
