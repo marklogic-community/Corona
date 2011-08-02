@@ -225,7 +225,7 @@ declare function config:get(
                     <type>{ $bits[5] }</type>,
                     <units>{ $bits[6] }</units>,
                     <startingAt>{ $bits[7] }</startingAt>,
-                    <stoppingAt>{ $bits[8] }</stoppingAt>
+                    if(string-length($bits[8])) then <stoppingAt>{ $bits[8] }</stoppingAt> else ()
                 )
                 else if($bits[2] = "xmlelement")
                 then (
@@ -233,7 +233,7 @@ declare function config:get(
                     <type>{ $bits[5] }</type>,
                     <units>{ $bits[6] }</units>,
                     <startingAt>{ $bits[7] }</startingAt>,
-                    <stoppingAt>{ $bits[8] }</stoppingAt>
+                    if(string-length($bits[8])) then <stoppingAt>{ $bits[8] }</stoppingAt> else ()
                 )
                 else if($bits[2] = "xmlattribute")
                 then (
@@ -242,7 +242,7 @@ declare function config:get(
                     <type>{ $bits[6] }</type>,
                     <units>{ $bits[7] }</units>,
                     <startingAt>{ $bits[8] }</startingAt>,
-                    <stoppingAt>{ $bits[9] }</stoppingAt>
+                    if(string-length($bits[9])) then <stoppingAt>{ $bits[9] }</stoppingAt> else ()
                 )
                 else ()
             }

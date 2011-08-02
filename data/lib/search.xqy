@@ -214,9 +214,9 @@ declare function search:rangeIndexValues(
         if($index/structure = "json")
         then
             if($index/type = "date")
-            then cts:element-attribute-values(xs:QName(concat("json:", json:escapeNCName($index/key))), xs:QName("normalized-date"), (), $options, $query)
+            then cts:element-attribute-values(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), (), $options, $query)
             else if($index/type = ("string", "number"))
-            then cts:element-values(xs:QName(concat("json:", json:escapeNCName($index/key))), (), $options, $query)
+            then cts:element-values(xs:QName(concat("json:", $index/key)), (), $options, $query)
             else ()
         else if($index/structure = "xmlelement")
         then cts:element-values(xs:QName($index/element), (), $options, $query)
@@ -257,16 +257,40 @@ declare function search:bucketIndexValues(
             where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundary)
             return common:castAs($boundary, $xsType)
         else if($index/@type = "autobucketedrange")
-        then ()
+        then 
+            let $duration :=
+                if($index/units = "decade")
+                then xs:yearMonthDuration("P10Y")
+                else if($index/units = "year")
+                then xs:yearMonthDuration("P1Y")
+                else if($index/units = "quarter")
+                then xs:yearMonthDuration("P3M")
+                else if($index/units = "month")
+                then xs:yearMonthDuration("P1M")
+                else if($index/units = "week")
+                then xs:dayTimeDuration("P7D")
+                else if($index/units = "day")
+                then xs:dayTimeDuration("P1D")
+                else if($index/units = "hour")
+                then xs:dayTimeDuration("PT1H")
+                else if($index/units = "minute")
+                then xs:dayTimeDuration("PT1M")
+                else ()
+            let $startDate := xs:dateTime($index/startingAt)
+            let $stopDate :=
+                if(exists($index/stoppingAt))
+                then xs:dateTime($index/stoppingAt)
+                else current-dateTime()
+            return search:generateDatesWithInterval($startDate, $duration, $stopDate)
         else ()
 
     let $values :=
         if($index/structure = "json")
         then
             if($index/type = "date")
-            then cts:element-attribute-value-ranges(xs:QName(concat("json:", json:escapeNCName($index/key))), xs:QName("normalized-date"), $buckets, $options, $query)
+            then cts:element-attribute-value-ranges(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), $buckets, $options, $query)
             else if($index/type = ("string", "number"))
-            then cts:element-value-ranges(xs:QName(concat("json:", json:escapeNCName($index/key))), $buckets, $options, $query)
+            then cts:element-value-ranges(xs:QName(concat("json:", $index/key)), $buckets, $options, $query)
             else ()
         else if($index/structure = "xmlelement")
         then cts:element-value-ranges(xs:QName($index/element), $buckets, $options, $query)
@@ -296,4 +320,22 @@ declare function search:bucketIndexValues(
             </result>
         }</facet>
         else ()
+};
+
+declare private function search:generateDatesWithInterval(
+    $startDate as xs:dateTime,
+    $interval as xs:duration,
+    $endDate as xs:dateTime
+) as xs:dateTime*
+{
+    let $latestDate := $startDate
+    for $i in (1 to 100)
+    where $latestDate le $endDate
+    return (
+        $latestDate,
+        xdmp:set($latestDate, $latestDate + $interval),
+        if($i = 100 and $latestDate < $endDate)
+        then search:generateDatesWithInterval($latestDate, $interval, $endDate)
+        else ()
+    )
 };

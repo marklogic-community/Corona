@@ -418,7 +418,7 @@ declare function manage:getBucketedRange(
                 if(exists($index/startingAt))
                 then ("startingAt", string($index/startingAt))
                 else (),
-                if(exists($index/stoppingAt))
+                if(string-length($index/stoppingAt))
                 then ("stoppingAt", string($index/stoppingAt))
                 else ()
             ))
@@ -437,7 +437,7 @@ declare function manage:getBucketedRange(
                 if(exists($index/startingAt))
                 then ("startingAt", string($index/startingAt))
                 else (),
-                if(exists($index/stoppingAt))
+                if(string-length($index/stoppingAt))
                 then ("stoppingAt", string($index/stoppingAt))
                 else ()
             ))

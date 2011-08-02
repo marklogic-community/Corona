@@ -177,14 +177,15 @@ mljson.addIndexes = function(callback) {
             "purpose": "Should fail with invalid XML namespace prefix"
         },
         {
-            "type": "range",
-            "pluralType": "ranges",
+            "type": "bucketedrange",
+            "pluralType": "bucketedRanges",
             "name": "messageDate",
             "key": "date::date",
             "datatype": "date",
-            "operator": "eq",
+            "startingAt": "1970-01-01T00:00:00-07:00",
+            "autoBucket": "month",
             "shouldSucceed": true,
-            "purpose": "Range index for MarkMail JSON message date"
+            "purpose": "Auto-bucketed range index for MarkMail JSON message date"
         },
         {
             "type": "range",
@@ -211,7 +212,18 @@ mljson.addIndexes = function(callback) {
         else if(config.type === "bucketedrange") {
             equals(config.key, server.key, "Index keys match");
             equals(config.datatype, server.type, "Index datatypes match");
-            equals(config.buckets, server.buckets.join("|"), "Index buckets match");
+            if(config.buckets !== undefined) {
+                equals(config.buckets, server.buckets.join("|"), "Index buckets match");
+            }
+            if(config.startingAt !== undefined) {
+                equals(config.startingAt, server.startingAt, "Index starting dates match");
+            }
+            if(config.stoppingAt !== undefined) {
+                equals(config.stoppingAt, server.stoppingAt, "Index stopping dates match");
+            }
+            if(config.autoBucket !== undefined) {
+                equals(config.units, server.units, "Index units match");
+            }
         }
         else if(config.type === "field") {
             deepEqual(config.includes, server.includedKeys, "Index includes match");
@@ -323,7 +335,18 @@ mljson.addIndexes = function(callback) {
             else if(index.type === "bucketedrange") {
                 data.key = index.key;
                 data.type = index.datatype;
-                data.buckets = index.buckets;
+                if(index.buckets !== undefined) {
+                    data.buckets = index.buckets;
+                }
+                if(index.startingAt !== undefined) {
+                    data.startingAt = index.startingAt;
+                }
+                if(index.stoppingAt !== undefined) {
+                    data.stoppingAt = index.stoppingAt;
+                }
+                if(index.autoBucket !== undefined) {
+                    data.autoBucket = index.autoBucket;
+                }
             }
 
             $.ajax({
