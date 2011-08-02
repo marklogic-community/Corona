@@ -288,7 +288,6 @@ declare function search:bucketIndexValues(
         else if($outputFormat = "xml")
         then <facet name="{ $index/@name }">{
             for $item at $pos in $values
-            let $log := xdmp:log($item)
             let $label := string($index/buckets/label[$pos])
             return <result>
                 <value>{ $label }</value>
