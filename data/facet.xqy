@@ -18,6 +18,7 @@ xquery version "1.0-ml";
 
 import module namespace config="http://marklogic.com/mljson/index-config" at "lib/index-config.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
+import module namespace search="http://marklogic.com/mljson/search" at "lib/search.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
 import module namespace parser="http://marklogic.com/mljson/query-parser" at "lib/query-parser.xqy";
@@ -69,17 +70,20 @@ let $values :=
 
     let $index := config:get($facet)
     let $values :=
-        if($index/structure = "json")
-        then json:rangeIndexValues(json:unescapeNCName($index/key), $index/type, $query, $options, $limit)
-        else if($index/structure = "xmlelement")
-        then cts:element-values(xs:QName($index/element), (), (concat("type=", $index/type), $options), $query)
-        else if($index/structure = "xmlattribute")
-        then cts:element-attribute-values(xs:QName($index/element), xs:QName($index/attribute), (), (concat("type=", $index/type), $options), $query)
+        if($index/@type = "range")
+        then search:rangeIndexValues($index, $query, $options, $limit)
+        else if($index/@type = ("bucketedrange", "autobucketedrange"))
+        then search:bucketIndexValues($index, $query, $options, $limit, $valuesInQuery, $contentType)
         else ()
+
+    let $options :=
+        if($includeAllValues = "yes" and $index/@type = ("bucketedrange", "autobucketedrange"))
+        then ("empties", $options)
+        else $options
 
     where exists($index)
     return
-        if($contentType = "json")
+        if($contentType = "json" and $index/@type = "range")
         then (
             $facet, json:array(
                 for $item in $values
@@ -90,7 +94,10 @@ let $values :=
                 ))
             )
         )
-        else if($contentType = "xml")
+        else if($contentType = "json" and $index/@type = ("bucketedrange", "autobucketedrange"))
+        then ($facet, $values)
+
+        else if($contentType = "xml" and $index/@type = "range")
         then <facet name="{ $facet }">{
             for $item in $values
             return <result>
@@ -99,6 +106,10 @@ let $values :=
                 <count>{ cts:frequency($item) }</count>
             </result>
         }</facet>
+
+        else if($contentType = "xml" and $index/@type = ("bucketedrange", "autobucketedrange"))
+        then $values 
+
         else ()
 return
     if($contentType = "json")

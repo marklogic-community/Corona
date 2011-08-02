@@ -185,3 +185,116 @@ declare function search:fieldValueToQuery(
 {
     cts:field-word-query($index/name, $value)
 };
+
+
+declare function search:rangeIndexValues(
+    $index as element(index),
+    $query as cts:query?,
+    $options as xs:string*,
+    $limit as xs:positiveInteger
+) as xs:string*
+{
+    let $xsType :=
+        if($index/structure = ("xmlelement", "xmlattribute"))
+        then string($index/type)
+        else if($index/type = "date")
+        then "dateTime"
+        else if($index/type = "number")
+        then "decimal"
+        else "string"
+    let $options := (
+        if(exists($limit))
+        then concat("limit=", $limit)
+        else (),
+        concat("type=", $xsType),
+        $options
+    )
+    where $index/@type = "range"
+    return
+        if($index/structure = "json")
+        then
+            if($index/type = "date")
+            then cts:element-attribute-values(xs:QName(concat("json:", json:escapeNCName($index/key))), xs:QName("normalized-date"), (), $options, $query)
+            else if($index/type = ("string", "number"))
+            then cts:element-values(xs:QName(concat("json:", json:escapeNCName($index/key))), (), $options, $query)
+            else ()
+        else if($index/structure = "xmlelement")
+        then cts:element-values(xs:QName($index/element), (), $options, $query)
+        else if($index/structure = "xmlattribute")
+        then cts:element-attribute-values(xs:QName($index/element), xs:QName($index/attribute), (), $options, $query)
+        else ()
+};
+
+declare function search:bucketIndexValues(
+    $index as element(index),
+    $query as cts:query?,
+    $options as xs:string*,
+    $limit as xs:positiveInteger,
+    $valuesInQuery as xs:string*,
+    $outputFormat as xs:string
+) as element()?
+{
+    let $xsType :=
+        if($index/structure = ("xmlelement", "xmlattribute"))
+        then string($index/type)
+        else if($index/type = "date")
+        then "dateTime"
+        else if($index/type = "number")
+        then "decimal"
+        else "string"
+    let $options := (
+        if(exists($limit))
+        then concat("limit=", $limit)
+        else (),
+        concat("type=", $xsType),
+        $options
+    )
+
+    let $buckets := 
+        if($index/@type = "bucketedrange")
+        then
+            for $boundary in $index/buckets/boundary
+            where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundary)
+            return common:castAs($boundary, $xsType)
+        else if($index/@type = "autobucketedrange")
+        then ()
+        else ()
+
+    let $values :=
+        if($index/structure = "json")
+        then
+            if($index/type = "date")
+            then cts:element-attribute-value-ranges(xs:QName(concat("json:", json:escapeNCName($index/key))), xs:QName("normalized-date"), $buckets, $options, $query)
+            else if($index/type = ("string", "number"))
+            then cts:element-value-ranges(xs:QName(concat("json:", json:escapeNCName($index/key))), $buckets, $options, $query)
+            else ()
+        else if($index/structure = "xmlelement")
+        then cts:element-value-ranges(xs:QName($index/element), $buckets, $options, $query)
+        else if($index/structure = "xmlattribute")
+        then cts:element-attribute-value-ranges(xs:QName($index/element), xs:QName($index/attribute), $buckets, $options, $query)
+        else ()
+
+    return
+        if($outputFormat = "json")
+        then json:array(
+            for $item at $pos in $values
+            let $label := string($index/buckets/label[$pos])
+            return json:object((
+                "value", $label,
+                "inQuery", $label = $valuesInQuery,
+                "count", cts:frequency($item)
+            ))
+        )
+        else if($outputFormat = "xml")
+        then <facet name="{ $index/@name }">{
+            for $item at $pos in $values
+            let $log := xdmp:log($item)
+            let $label := string($index/buckets/label[$pos])
+            return <result>
+                <value>{ $label }</value>
+                <inQuery>{ $label = $valuesInQuery }</inQuery>
+                <count>{ cts:frequency($item) }</count>
+            </result>
+        }</facet>
+        else ()
+};

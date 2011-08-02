@@ -54,7 +54,7 @@ declare function common:error(
 };
 
 declare function common:valuesForFacet(
-    $query as cts:query,
+    $query as cts:query?,
     $facetName as xs:string
 ) as xs:string*
 {

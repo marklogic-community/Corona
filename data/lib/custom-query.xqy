@@ -17,6 +17,7 @@ limitations under the License.
 module namespace customquery="http://marklogic.com/mljson/custom-query";
 
 import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
+import module namespace search="http://marklogic.com/mljson/search" at "search.xqy";
 import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
