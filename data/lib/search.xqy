@@ -312,6 +312,13 @@ declare function search:bucketIndexValues(
                     else if(exists($item/cts:lower-bound))
                     then xdmp:strftime($index/lastFormat, $item/cts:lower-bound)
                     else ()
+                    (:
+                        XXX - error prone!!!
+                        Should regular buckets take a format as well? If the do,
+                        that could really simplify things at index creation
+                        time.
+                        Need a function that takes a string and returns the lower and upper bounds.
+                    :)
                 else string($index/buckets/label[$pos])
             return json:object((
                 "value", $label,

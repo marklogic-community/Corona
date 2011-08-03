@@ -69,17 +69,17 @@ let $values :=
         else $query
 
     let $index := config:get($facet)
+    let $options :=
+        if($includeAllValues = "yes" and $index/@type = ("bucketedrange", "autobucketedrange"))
+        then ("empties", $options)
+        else $options
+
     let $values :=
         if($index/@type = "range")
         then search:rangeIndexValues($index, $query, $options, $limit)
         else if($index/@type = ("bucketedrange", "autobucketedrange"))
         then search:bucketIndexValues($index, $query, $options, $limit, $valuesInQuery, $contentType)
         else ()
-
-    let $options :=
-        if($includeAllValues = "yes" and $index/@type = ("bucketedrange", "autobucketedrange"))
-        then ("empties", $options)
-        else $options
 
     where exists($index)
     return

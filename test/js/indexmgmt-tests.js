@@ -183,9 +183,9 @@ mljson.addIndexes = function(callback) {
             "key": "date::date",
             "datatype": "date",
             "startingAt": "1970-01-01T00:00:00-07:00",
-            "firstFormat": "Before %d %b",
-            "format": "%d %b - @d @b",
-            "lastFormat": "After %d %b",
+            "firstFormat": "Before %b %d %Y",
+            "format": "%b %d %Y - @b @d @Y",
+            "lastFormat": "After %b %d %Y",
             "bucketInterval": "month",
             "shouldSucceed": true,
             "purpose": "Auto-bucketed range index for MarkMail JSON message date"
