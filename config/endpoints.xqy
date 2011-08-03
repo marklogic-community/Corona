@@ -110,9 +110,12 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="attribute" required="false"/>
             <param name="type" required="true"/>
             <param name="buckets" required="false"/>
-            <param name="autoBucket" required="false" values="decade|year|quarter|month|week|day|hour|minute"/>
+            <param name="bucketInterval" required="false" values="decade|year|quarter|month|week|day|hour|minute"/>
             <param name="startingAt" required="false"/>
             <param name="stoppingAt" required="false"/>
+            <param name="format" required="false"/>
+            <param name="firstFormat" required="false"/>
+            <param name="lastFormat" required="false"/>
         </http>
         <http method="DELETE"/>
     </request>

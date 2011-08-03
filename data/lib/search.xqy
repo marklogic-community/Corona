@@ -259,21 +259,21 @@ declare function search:bucketIndexValues(
         else if($index/@type = "autobucketedrange")
         then 
             let $duration :=
-                if($index/units = "decade")
+                if($index/bucketInterval = "decade")
                 then xs:yearMonthDuration("P10Y")
-                else if($index/units = "year")
+                else if($index/bucketInterval = "year")
                 then xs:yearMonthDuration("P1Y")
-                else if($index/units = "quarter")
+                else if($index/bucketInterval = "quarter")
                 then xs:yearMonthDuration("P3M")
-                else if($index/units = "month")
+                else if($index/bucketInterval = "month")
                 then xs:yearMonthDuration("P1M")
-                else if($index/units = "week")
+                else if($index/bucketInterval = "week")
                 then xs:dayTimeDuration("P7D")
-                else if($index/units = "day")
+                else if($index/bucketInterval = "day")
                 then xs:dayTimeDuration("P1D")
-                else if($index/units = "hour")
+                else if($index/bucketInterval = "hour")
                 then xs:dayTimeDuration("PT1H")
-                else if($index/units = "minute")
+                else if($index/bucketInterval = "minute")
                 then xs:dayTimeDuration("PT1M")
                 else ()
             let $startDate := xs:dateTime($index/startingAt)
@@ -302,7 +302,17 @@ declare function search:bucketIndexValues(
         if($outputFormat = "json")
         then json:array(
             for $item at $pos in $values
-            let $label := string($index/buckets/label[$pos])
+            let $label :=
+                if($index/@type = "autobucketedrange")
+                then
+                    if(exists($item/cts:lower-bound) and exists($item/cts:upper-bound))
+                    then common:dualStrftime($index/format, $item/cts:lower-bound, $item/cts:upper-bound)
+                    else if(exists($item/cts:upper-bound))
+                    then xdmp:strftime($index/firstFormat, $item/cts:upper-bound)
+                    else if(exists($item/cts:lower-bound))
+                    then xdmp:strftime($index/lastFormat, $item/cts:lower-bound)
+                    else ()
+                else string($index/buckets/label[$pos])
             return json:object((
                 "value", $label,
                 "inQuery", $label = $valuesInQuery,
@@ -312,7 +322,17 @@ declare function search:bucketIndexValues(
         else if($outputFormat = "xml")
         then <facet name="{ $index/@name }">{
             for $item at $pos in $values
-            let $label := string($index/buckets/label[$pos])
+            let $label :=
+                if($index/@type = "autobucketedrange")
+                then
+                    if(exists($item/cts:lower-bound) and exists($item/cts:upper-bound))
+                    then common:dualStrftime($index/format, $item/cts:lower-bound, $item/cts:upper-bound)
+                    else if(exists($item/cts:upper-bound))
+                    then xdmp:strftime($index/firstFormat, $item/cts:upper-bound)
+                    else if(exists($item/cts:lower-bound))
+                    then xdmp:strftime($index/lastFormat, $item/cts:lower-bound)
+                    else ()
+                else string($index/buckets/label[$pos])
             return <result>
                 <value>{ $label }</value>
                 <inQuery>{ $label = $valuesInQuery }</inQuery>

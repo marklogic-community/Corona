@@ -302,16 +302,19 @@ declare function manage:createJSONAutoBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
-    $units as xs:string,
+    $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string,
     $config as element()
 ) as empty-sequence()
 {
     let $key := json:escapeNCName($key)
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
-        config:setJSONAutoBucketedRange($name, $key, $type, $units, $startingAt, $stoppingAt)
+        config:setJSONAutoBucketedRange($name, $key, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
     )
 };
 
@@ -332,15 +335,18 @@ declare function manage:createXMLElementAutoBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
-    $units as xs:string,
+    $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string,
     $config as element()
 ) as empty-sequence()
 {
     manage:createXMLElementRangeIndex($name, $element, $type, $config)
     ,
-    config:setXMLElementAutoBucketedRange($name, $element, $type, $units, $startingAt, $stoppingAt)
+    config:setXMLElementAutoBucketedRange($name, $element, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
 };
 
 declare function manage:createXMLAttributeBucketedRange(
@@ -362,15 +368,18 @@ declare function manage:createXMLAttributeAutoBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
-    $units as xs:string,
+    $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string,
     $config as element()
 ) as empty-sequence()
 {
     manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
     ,
-    config:setXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $units, $startingAt, $stoppingAt)
+    config:setXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
 };
 
 (: XXX - should not delete the range index if other ranges are using it :)
@@ -401,6 +410,26 @@ declare function manage:getBucketedRange(
 ) as element(json:item)?
 {
     let $index := config:get($name)
+    let $common := (
+        if(exists($index/bucketInterval))
+        then ("bucketInterval", string($index/bucketInterval))
+        else (),
+        if(exists($index/startingAt))
+        then ("startingAt", string($index/startingAt))
+        else (),
+        if(string-length($index/stoppingAt))
+        then ("stoppingAt", string($index/stoppingAt))
+        else (),
+        if(exists($index/firstFormat))
+        then ("firstFormat", string($index/firstFormat))
+        else (),
+        if(exists($index/format))
+        then ("format", string($index/format))
+        else (),
+        if(exists($index/lastFormat))
+        then ("lastFormat", string($index/lastFormat))
+        else ()
+    )
     where $index/@type = ("bucketedrange", "autobucketedrange")
     return
         if($index/structure = "json")
@@ -412,15 +441,7 @@ declare function manage:getBucketedRange(
                 if(exists($index/buckets))
                 then ("buckets", json:array(for $bucket in $index/buckets/* return string($bucket)))
                 else (),
-                if(exists($index/units))
-                then ("units", string($index/units))
-                else (),
-                if(exists($index/startingAt))
-                then ("startingAt", string($index/startingAt))
-                else (),
-                if(string-length($index/stoppingAt))
-                then ("stoppingAt", string($index/stoppingAt))
-                else ()
+                $common
             ))
         else if($index/structure = "xmlelement")
         then
@@ -429,17 +450,16 @@ declare function manage:getBucketedRange(
                 "element", string($index/element),
                 "type", string($index/type),
                 if(exists($index/buckets))
-                then ("buckets", json:array(for $bucket in $index/buckets/* return string($bucket)))
+                then ("buckets", json:array(
+                        for $bucket in $index/buckets/*
+                        return
+                            if($bucket/@type = "number" and string($bucket) castable as xs:decimal)
+                            then xs:decimal(string($bucket))
+                            else string($bucket)
+                    )
+                )
                 else (),
-                if(exists($index/units))
-                then ("units", string($index/units))
-                else (),
-                if(exists($index/startingAt))
-                then ("startingAt", string($index/startingAt))
-                else (),
-                if(string-length($index/stoppingAt))
-                then ("stoppingAt", string($index/stoppingAt))
-                else ()
+                $common
             ))
         else if($index/structure = "xmlattribute")
         then
@@ -451,15 +471,7 @@ declare function manage:getBucketedRange(
                 if(exists($index/buckets))
                 then ("buckets", json:array(for $bucket in $index/buckets/* return string($bucket)))
                 else (),
-                if(exists($index/units))
-                then ("units", string($index/units))
-                else (),
-                if(exists($index/startingAt))
-                then ("startingAt", string($index/startingAt))
-                else (),
-                if(exists($index/stoppingAt))
-                then ("stoppingAt", string($index/stoppingAt))
-                else ()
+                $common
             ))
         else ()
 };

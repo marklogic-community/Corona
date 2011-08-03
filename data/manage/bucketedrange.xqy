@@ -60,9 +60,13 @@ return
                 then <label>{ $bit }</label>
                 else <boundary>{ $bit }</boundary>
 
-        let $autoBucket := map:get($params, "autoBucket")
+        let $bucketInterval := map:get($params, "bucketInterval")
         let $startingAt := map:get($params, "startingAt")
         let $stoppingAt := map:get($params, "stoppingAt")
+
+        let $format := map:get($params, "format")
+        let $firstFormat := map:get($params, "firstFormat")
+        let $lastFormat := map:get($params, "lastFormat")
         return
 
         if((empty($key) and empty($element)) or (exists($key) and exists($element)))
@@ -86,14 +90,14 @@ return
             else if(exists($element) and empty($attribute))
             then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $config)
             else ()
-        else if(exists($autoBucket) and exists($startingAt))
+        else if(exists($bucketInterval) and exists($startingAt))
         then
             if(exists($key))
-            then manage:createJSONAutoBucketedRange($name, $key, $type, $autoBucket, $startingAt, $stoppingAt, $config)
+            then manage:createJSONAutoBucketedRange($name, $key, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
             else if(exists($element) and exists($attribute))
-            then manage:createXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $autoBucket, $startingAt, $stoppingAt, $config)
+            then manage:createXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
             else if(exists($element) and empty($attribute))
-            then manage:createXMLElementAutoBucketedRange($name, $element, $type, $autoBucket, $startingAt, $stoppingAt, $config)
+            then manage:createXMLElementAutoBucketedRange($name, $element, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
             else ()
         (: XXX - throw an error :)
         else ()

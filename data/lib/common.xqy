@@ -184,3 +184,21 @@ declare function common:translateSnippet(
         , "")
     )
 };
+
+declare function common:dualStrftime(
+    $format as xs:string,
+    $date1 as xs:dateTime,
+    $date2 as xs:dateTime
+) as xs:string
+{
+	let $regex := "(%%)|(@@)|(%#.)|(%.)|(@#.)|(@.)"
+    let $bits :=
+        for $match in analyze-string($format, $regex)/*
+        return
+            if($match/self::*:non-match) then string($match)
+            else if($match/*:group/@nr = (1, 2)) then string($match)
+            else if($match/*:group/@nr = (3, 4)) then xdmp:strftime(string($match), $date1)
+            else if($match/*:group/@nr = (5, 6)) then xdmp:strftime(replace(string($match), "@", "%"), $date2)
+            else string($match)
+    return string-join($bits, "")
+};

@@ -101,12 +101,15 @@ declare function config:setJSONAutoBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
-    $units as xs:string,
+    $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
-    $stoppingAt as xs:anySimpleType?
+    $stoppingAt as xs:anySimpleType?,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("autobucketedrange/json/", $name, "/", $key, "/", $type, "/", $units, "/", $startingAt, "/", $stoppingAt))
+    prop:set(concat("index-", $name), concat("autobucketedrange/json/", $name, "/", $key, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
 };
 
 declare function config:setXMLElementBucketedRange(
@@ -123,12 +126,15 @@ declare function config:setXMLElementAutoBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
-    $units as xs:string,
+    $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
-    $stoppingAt as xs:anySimpleType?
+    $stoppingAt as xs:anySimpleType?,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("autobucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", $units, "/", $startingAt, "/", $stoppingAt))
+    prop:set(concat("index-", $name), concat("autobucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
 };
 
 declare function config:setXMLAttributeBucketedRange(
@@ -147,12 +153,15 @@ declare function config:setXMLAttributeAutoBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
-    $units as xs:string,
+    $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
-    $stoppingAt as xs:anySimpleType?
+    $stoppingAt as xs:anySimpleType?,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("autobucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $units, "/", $startingAt, "/", $stoppingAt))
+    prop:set(concat("index-", $name), concat("autobucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
 };
 
 declare function config:get(
@@ -223,26 +232,35 @@ declare function config:get(
                 then (
                     <key>{ $bits[4] }</key>,
                     <type>{ $bits[5] }</type>,
-                    <units>{ $bits[6] }</units>,
+                    <bucketInterval>{ $bits[6] }</bucketInterval>,
                     <startingAt>{ $bits[7] }</startingAt>,
-                    if(string-length($bits[8])) then <stoppingAt>{ $bits[8] }</stoppingAt> else ()
+                    if(string-length($bits[8])) then <stoppingAt>{ $bits[8] }</stoppingAt> else (),
+                    <firstFormat>{ xdmp:url-decode($bits[9]) }</firstFormat>,
+                    <format>{ xdmp:url-decode($bits[10]) }</format>,
+                    <lastFormat>{ xdmp:url-decode($bits[11]) }</lastFormat>
                 )
                 else if($bits[2] = "xmlelement")
                 then (
                     <element>{ $bits[4] }</element>,
                     <type>{ $bits[5] }</type>,
-                    <units>{ $bits[6] }</units>,
+                    <bucketInterval>{ $bits[6] }</bucketInterval>,
                     <startingAt>{ $bits[7] }</startingAt>,
-                    if(string-length($bits[8])) then <stoppingAt>{ $bits[8] }</stoppingAt> else ()
+                    if(string-length($bits[8])) then <stoppingAt>{ $bits[8] }</stoppingAt> else (),
+                    <firstFormat>{ xdmp:url-decode($bits[9]) }</firstFormat>,
+                    <format>{ xdmp:url-decode($bits[10]) }</format>,
+                    <lastFormat>{ xdmp:url-decode($bits[11]) }</lastFormat>
                 )
                 else if($bits[2] = "xmlattribute")
                 then (
                     <element>{ $bits[4] }</element>,
-                    <attribute>{ $bits[4] }</attribute>,
+                    <attribute>{ $bits[5] }</attribute>,
                     <type>{ $bits[6] }</type>,
-                    <units>{ $bits[7] }</units>,
+                    <bucketInterval>{ $bits[7] }</bucketInterval>,
                     <startingAt>{ $bits[8] }</startingAt>,
-                    if(string-length($bits[9])) then <stoppingAt>{ $bits[9] }</stoppingAt> else ()
+                    if(string-length($bits[9])) then <stoppingAt>{ $bits[9] }</stoppingAt> else (),
+                    <firstFormat>{ xdmp:url-decode($bits[10]) }</firstFormat>,
+                    <format>{ xdmp:url-decode($bits[11]) }</format>,
+                    <lastFormat>{ xdmp:url-decode($bits[12]) }</lastFormat>
                 )
                 else ()
             }

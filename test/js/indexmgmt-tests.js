@@ -183,7 +183,10 @@ mljson.addIndexes = function(callback) {
             "key": "date::date",
             "datatype": "date",
             "startingAt": "1970-01-01T00:00:00-07:00",
-            "autoBucket": "month",
+            "firstFormat": "Before %d %b",
+            "format": "%d %b - @d @b",
+            "lastFormat": "After %d %b",
+            "bucketInterval": "month",
             "shouldSucceed": true,
             "purpose": "Auto-bucketed range index for MarkMail JSON message date"
         },
@@ -221,8 +224,17 @@ mljson.addIndexes = function(callback) {
             if(config.stoppingAt !== undefined) {
                 equals(config.stoppingAt, server.stoppingAt, "Index stopping dates match");
             }
-            if(config.autoBucket !== undefined) {
-                equals(config.units, server.units, "Index units match");
+            if(config.bucketInterval !== undefined) {
+                equals(config.bucketInterval, server.bucketInterval, "Index bucketInterval match");
+            }
+            if(config.firstFormat !== undefined) {
+                equals(config.firstFormat, server.firstFormat, "Index firstFormat match");
+            }
+            if(config.format !== undefined) {
+                equals(config.format, server.format, "Index format match");
+            }
+            if(config.lastFormat !== undefined) {
+                equals(config.lastFormat, server.lastFormat, "Index lastFormat match");
             }
         }
         else if(config.type === "field") {
@@ -344,8 +356,17 @@ mljson.addIndexes = function(callback) {
                 if(index.stoppingAt !== undefined) {
                     data.stoppingAt = index.stoppingAt;
                 }
-                if(index.autoBucket !== undefined) {
-                    data.autoBucket = index.autoBucket;
+                if(index.bucketInterval !== undefined) {
+                    data.bucketInterval = index.bucketInterval;
+                }
+                if(index.firstFormat !== undefined) {
+                    data.firstFormat = index.firstFormat;
+                }
+                if(index.format !== undefined) {
+                    data.format = index.format;
+                }
+                if(index.lastFormat !== undefined) {
+                    data.lastFormat = index.lastFormat;
                 }
             }
 
