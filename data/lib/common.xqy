@@ -63,20 +63,26 @@ declare function common:valuesForFacet(
     let $operator := if(exists($index/operator)) then common:humanOperatorToMathmatical($index/operator) else "="
     where $index/@type = "range"
     return
-        if($index/structure = "json")
+        if($index/@type = "range")
         then
-            if($index/type = "date")
-            then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName(concat("json:", $index/key))][cts:attribute = xs:QName("normalized-date")][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
-            else if($index/type = "string")
-            then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $index/key))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
-            else if($index/type = "number")
-            then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $index/key))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:decimal")]/cts:value)
+            if($index/structure = "json")
+            then
+                if($index/type = "date")
+                then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName(concat("json:", $index/key))][cts:attribute = xs:QName("normalized-date")][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
+                else if($index/type = "string")
+                then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $index/key))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
+                else if($index/type = "number")
+                then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $index/key))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:decimal")]/cts:value)
+                else ()
+            else if($index/structure = "xmlelement")
+            then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName($index/element)][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
+            else if($index/structure = "xmlattribute")
+            then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName($index/element)][cts:attribute = xs:QName($index/attribute)][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
             else ()
-        else if($index/structure = "xmlelement")
-        then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName($index/element)][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
-        else if($index/structure = "xmlattribute")
-        then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName($index/element)][cts:attribute = xs:QName($index/attribute)][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
-        else ()
+        else if($index/@type = ("bucketedrange", "autobucketedrange"))
+            (: XXX - make this work :)
+            then ()
+            else ()
 };
 
 declare function common:castFromJSONType(
@@ -199,23 +205,6 @@ declare function common:dualStrftime(
             else if($match/*:group/@nr = (1, 2)) then string($match)
             else if($match/*:group/@nr = (3, 4)) then xdmp:strftime(string($match), $date1)
             else if($match/*:group/@nr = (5, 6)) then xdmp:strftime(replace(string($match), "@", "%"), $date2)
-            else string($match)
-    return string-join($bits, "")
-};
-
-declare function common:formatBucketLabel(
-    $format as xs:string,
-    $lowerBounds as xs:string?,
-    $upperBound as xs:string?
-) as xs:string
-{
-	let $regex := "(%)|(@)"
-    let $bits :=
-        for $match in analyze-string($format, $regex)/*
-        return
-            if($match/self::*:non-match) then string($match)
-            else if($match/*:group/@nr = 1) then $lowerBounds
-            else if($match/*:group/@nr = 2) then $upperBound
             else string($match)
     return string-join($bits, "")
 };

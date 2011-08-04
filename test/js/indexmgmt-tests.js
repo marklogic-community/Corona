@@ -127,10 +127,7 @@ mljson.addIndexes = function(callback) {
             "name": "fromBucket",
             "key": "fromPersonal",
             "datatype": "string",
-            "buckets": ["G", "N", "S"],
-            "firstFormat": "A - @",
-            "format": "% - @",
-            "lastFormat": "% - Z",
+            "buckets": "A-F|G|G-M|N|N-R|S|S-Z",
             "shouldSucceed": true,
             "purpose": "General bucketed range creation on a string"
         },
@@ -219,7 +216,7 @@ mljson.addIndexes = function(callback) {
             equals(config.key, server.key, "Index keys match");
             equals(config.datatype, server.type, "Index datatypes match");
             if(config.buckets !== undefined) {
-                deepEqual(config.buckets, server.buckets, "Index buckets match");
+                equals(config.buckets, server.buckets.join("|"), "Index buckets match");
             }
             if(config.startingAt !== undefined) {
                 equals(config.startingAt, server.startingAt, "Index starting dates match");
@@ -351,7 +348,7 @@ mljson.addIndexes = function(callback) {
                 data.key = index.key;
                 data.type = index.datatype;
                 if(index.buckets !== undefined) {
-                    data.bucket = index.buckets;
+                    data.buckets = index.buckets;
                 }
                 if(index.startingAt !== undefined) {
                     data.startingAt = index.startingAt;

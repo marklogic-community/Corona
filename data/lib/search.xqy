@@ -40,33 +40,39 @@ declare function search:bucketLabelToQuery(
 ) as cts:query?
 {
     let $bounds :=
-        let $buckets := search:getBucketsForIndex($index)
-        let $numBuckets := count($buckets)
-        for $pos in (0 to $numBuckets)
-        let $bucket := $buckets[$pos]
-        let $thisBucketLabel :=
-            if($index/@type = "bucketedrange")
-            then
-                if($pos = 0)
-                then common:formatBucketLabel($index/firstFormat, (), $buckets[1])
-                else if($pos = $numBuckets)
-                then common:formatBucketLabel($index/lastFormat, $bucket, ())
-                else common:formatBucketLabel($index/format, $bucket, $buckets[$pos + 1])
-            else if($index/@type = "autobucketedrange")
-            then 
+        if($index/@type = "bucketedrange")
+        then
+            let $bucketBits := $index/buckets/*
+            let $positionOfBucketLabel :=
+                for $bucket at $pos in $bucketBits
+                where local-name($bucket) = "label" and string($bucket) = $bucketLabel
+                return $pos
+            return (
+                if($positionOfBucketLabel > 1)
+                then <lower>{ $bucketBits[$positionOfBucketLabel - 1] }</lower>
+                else (),
+                if($positionOfBucketLabel < count($bucketBits))
+                then <upper>{ $bucketBits[$positionOfBucketLabel + 1] }</upper>
+                else ()
+            )
+        else
+            let $buckets := search:getBucketsForIndex($index)
+            let $numBuckets := count($buckets)
+            for $pos in (0 to $numBuckets)
+            let $bucket := $buckets[$pos]
+            let $thisBucketLabel :=
                 if($pos = 0)
                 then xdmp:strftime($index/firstFormat, $buckets[1])
                 else if($pos = $numBuckets)
                 then xdmp:strftime($index/lastFormat, $bucket)
                 else common:dualStrftime($index/format, $bucket, $buckets[$pos + 1])
-            else ()
-        where $thisBucketLabel = $bucketLabel
-        return
-            if($pos = 0)
-            then <upper>{ $buckets[1] }</upper>
-            else if($pos = $numBuckets)
-            then <lower>{ $bucket }</lower>
-            else (<lower>{ $bucket }</lower>, <upper>{ $buckets[$pos + 1] }</upper>)
+            where $thisBucketLabel = $bucketLabel
+            return
+                if($pos = 0)
+                then <upper>{ $buckets[1] }</upper>
+                else if($pos = $numBuckets)
+                then <lower>{ $bucket }</lower>
+                else (<lower>{ $bucket }</lower>, <upper>{ $buckets[$pos + 1] }</upper>)
 
     let $lowerBound := $bounds[local-name(.) = "lower"]
     let $upperBound := $bounds[local-name(.) = "upper"]
@@ -295,14 +301,7 @@ declare function search:bucketIndexValues(
                     else if(exists($item/cts:lower-bound))
                     then xdmp:strftime($index/lastFormat, $item/cts:lower-bound)
                     else ()
-                else 
-                    if(exists($item/cts:lower-bound) and exists($item/cts:upper-bound))
-                    then common:formatBucketLabel($index/format, string($item/cts:lower-bound), string($item/cts:upper-bound))
-                    else if(exists($item/cts:upper-bound))
-                    then common:formatBucketLabel($index/firstFormat, string($item/cts:lower-bound), string($item/cts:upper-bound))
-                    else if(exists($item/cts:lower-bound))
-                    then common:formatBucketLabel($index/lastFormat, string($item/cts:lower-bound), string($item/cts:upper-bound))
-                    else ()
+                else search:getLabelForBounds($index, $item/cts:lower-bound, $item/cts:upper-bound)
             return json:object((
                 "value", $label,
                 "inQuery", $label = $valuesInQuery,
@@ -322,14 +321,7 @@ declare function search:bucketIndexValues(
                     else if(exists($item/cts:lower-bound))
                     then xdmp:strftime($index/lastFormat, $item/cts:lower-bound)
                     else ()
-                else
-                    if(exists($item/cts:lower-bound) and exists($item/cts:upper-bound))
-                    then common:formatBucketLabel($index/format, string($item/cts:lower-bound), string($item/cts:upper-bound))
-                    else if(exists($item/cts:upper-bound))
-                    then common:formatBucketLabel($index/firstFormat, string($item/cts:lower-bound), string($item/cts:upper-bound))
-                    else if(exists($item/cts:lower-bound))
-                    then common:formatBucketLabel($index/lastFormat, string($item/cts:lower-bound), string($item/cts:upper-bound))
-                    else ()
+                else search:getLabelForBounds($index, $item/cts:lower-bound, $item/cts:upper-bound)
             return <result>
                 <value>{ $label }</value>
                 <inQuery>{ $label = $valuesInQuery }</inQuery>
@@ -353,7 +345,7 @@ declare function search:getBucketsForIndex(
             else if($index/type = "number")
             then "decimal"
             else "string"
-        for $boundary in $index/buckets/bucket
+        for $boundary in $index/buckets/boundary
         where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundary)
         return common:castAs($boundary, $xsType)
     else if($index/@type = "autobucketedrange")
@@ -401,4 +393,21 @@ declare private function search:generateDatesWithInterval(
         then search:generateDatesWithInterval($latestDate, $interval, $endDate)
         else ()
     )
+};
+
+declare private function search:getLabelForBounds(
+    $index as element(index),
+    $lowerBound as xs:anySimpleType?,
+    $upperBound as xs:anySimpleType?
+) as xs:string?
+{
+    if(empty($lowerBound) and string($upperBound) = ($index/buckets/boundary)[1])
+    then string(($index/buckets/label)[1])
+    else if(empty($upperBound) and string($lowerBound) = ($index/buckets/boundary)[last()])
+    then string(($index/buckets/label)[last()])
+    else
+        let $bits := $index/buckets/*
+        for $bucketBit at $pos in $bits
+        where local-name($bucketBit) = "boundary" and string($lowerBound) = $bucketBit and string($upperBound) = $bits[$pos + 2]
+        return $bits[$pos + 1]
 };

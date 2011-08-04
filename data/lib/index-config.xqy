@@ -91,13 +91,10 @@ declare function config:setJSONBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
-    $buckets as xs:anySimpleType+,
-    $firstFormat as xs:string,
-    $format as xs:string,
-    $lastFormat as xs:string
+    $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("bucketedrange/json/", $name, "/", $key, "/", $type, "/", config:bucketElementsToString($buckets), "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("index-", $name), concat("bucketedrange/json/", $name, "/", $key, "/", $type, "/", config:bucketElementsToString($buckets, $type, "json")))
 };
 
 declare function config:setJSONAutoBucketedRange(
@@ -119,13 +116,10 @@ declare function config:setXMLElementBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
-    $buckets as xs:anySimpleType+,
-    $firstFormat as xs:string,
-    $format as xs:string,
-    $lastFormat as xs:string
+    $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("bucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", config:bucketElementsToString($buckets), "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("index-", $name), concat("bucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
 };
 
 declare function config:setXMLElementAutoBucketedRange(
@@ -148,13 +142,10 @@ declare function config:setXMLAttributeBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
-    $buckets as xs:anySimpleType+,
-    $firstFormat as xs:string,
-    $format as xs:string,
-    $lastFormat as xs:string
+    $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("bucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", config:bucketElementsToString($buckets), "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("index-", $name), concat("bucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
 };
 
 declare function config:setXMLAttributeAutoBucketedRange(
@@ -215,29 +206,20 @@ declare function config:get(
                 then (
                     <key>{ $bits[4] }</key>,
                     <type>{ $bits[5] }</type>,
-                    <buckets>{ config:bucketStringToElements($bits[6]) }</buckets>,
-                    <firstFormat>{ xdmp:url-decode($bits[7]) }</firstFormat>,
-                    <format>{ xdmp:url-decode($bits[8]) }</format>,
-                    <lastFormat>{ xdmp:url-decode($bits[9]) }</lastFormat>
+                    <buckets>{ config:bucketStringToElements($bits[6]) }</buckets>
                 )
                 else if($bits[2] = "xmlelement")
                 then (
                     <element>{ $bits[4] }</element>,
                     <type>{ $bits[5] }</type>,
-                    <buckets>{ config:bucketStringToElements($bits[6]) }</buckets>,
-                    <firstFormat>{ xdmp:url-decode($bits[7]) }</firstFormat>,
-                    <format>{ xdmp:url-decode($bits[8]) }</format>,
-                    <lastFormat>{ xdmp:url-decode($bits[9]) }</lastFormat>
+                    <buckets>{ config:bucketStringToElements($bits[6]) }</buckets>
                 )
                 else if($bits[2] = "xmlattribute")
                 then (
                     <element>{ $bits[4] }</element>,
                     <attribute>{ $bits[4] }</attribute>,
                     <type>{ $bits[6] }</type>,
-                    <buckets>{ config:bucketStringToElements($bits[7]) }</buckets>,
-                    <firstFormat>{ xdmp:url-decode($bits[8]) }</firstFormat>,
-                    <format>{ xdmp:url-decode($bits[9]) }</format>,
-                    <lastFormat>{ xdmp:url-decode($bits[10]) }</lastFormat>
+                    <buckets>{ config:bucketStringToElements($bits[7]) }</buckets>
                 )
                 else ()
             }
@@ -335,22 +317,56 @@ declare function config:mapNames(
 
 
 declare private function config:bucketElementsToString(
-    $buckets as xs:anySimpleType+
+    $buckets as element()+,
+    $type as xs:string,
+    $format as xs:string
 ) as xs:string
 {
     string-join(
-        for $bucket in $buckets
-        let $bucket := replace($bucket, "\|", "\\|")
+
+        let $xsType :=
+            if($format = "json")
+            then
+                if($type = "number")
+                then "decimal"
+                else if($type = "date")
+                then "dateTime"
+                else "string"
+            else $type
+        let $check :=
+            if(local-name($buckets[1]) != "label" or local-name($buckets[last()]) != "label")
+            then error(xs:QName("config:INVALID-BUCKETS"), "The first and last bucket elements must be labels")
+            else ()
+        for $bucket at $pos in $buckets
+        let $check :=
+            if($pos mod 2 = 0 and local-name($bucket) != "boundary")
+            then error(xs:QName("config:INVALID-BUCKETS"), "Even bucket elements need to be boundary elements")
+            else if($pos mod 2 != 0 and local-name($bucket) != "label")
+            then error(xs:QName("config:INVALID-BUCKETS"), "Odd bucket elements ned to be label elements")
+            else ()
+        let $boundaryValue :=
+            if(local-name($bucket) = "boundary")
+            then
+                if($format = "json" and $type = "date")
+                then string(dateparser:parse(string($bucket)))
+                else string($bucket)
+            else ()
+        let $check :=
+            if(local-name($bucket) = "boundary" and not(xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundaryValue)))
+            then error(xs:QName("config:INVALID-BUCKETS"), concat("Bucket value '", $boundaryValue, "' is not of the correct datatype"))
+            else ()
         return xdmp:url-encode(string($bucket))
     , "|")
 };
 
 declare private function config:bucketStringToElements(
     $string as xs:string
-) as element(bucket)+
+) as element()+
 {
-    let $string := replace($string, "\\\|", "____________PIPE____________")
     for $bit at $pos in tokenize($string, "\|")
-    let $bit := replace($bit, "____________PIPE____________", "|")
-    return <bucket>{ xdmp:url-decode($bit) }</bucket>
+    let $bit := xdmp:url-decode($bit)
+    return
+        if($pos mod 2)
+        then <label>{ $bit }</label>
+        else <boundary>{ $bit }</boundary>
 };

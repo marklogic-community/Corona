@@ -47,6 +47,18 @@ return
         let $element := map:get($params, "element")
         let $attribute := map:get($params, "element")
         let $type := map:get($params, "type")
+        let $bucketString := map:get($params, "buckets")
+        let $buckets :=
+            (: doesn't look like the server supports negative lookbehind, hence this sad hack :)
+            let $bucketString := replace($bucketString, "\\\|", "____________PIPE____________")
+            let $bucketString := replace($bucketString, "\\\\", "\\")
+         
+            for $bit at $pos in tokenize($bucketString, "\|")
+            let $bit := replace($bit, "____________PIPE____________", "|")
+            return 
+               if($pos mod 2)
+               then <label>{ $bit }</label>
+               else <boundary>{ $bit }</boundary>
 
         let $mode :=
             if(exists($key))
@@ -54,15 +66,6 @@ return
             else if(exists($element) and exists($attribute))
             then "xmlelement"
             else "xmlattribute"
-
-        let $buckets :=
-            for $bucket in map:get($params, "bucket")
-            let $bucket :=
-                if($mode = "json")
-                then common:castFromJSONType($bucket, $type)
-                else common:castAs($bucket, $type)
-            order by $bucket ascending
-            return $bucket
 
         let $format := map:get($params, "format")
         let $firstFormat := map:get($params, "firstFormat")
@@ -97,11 +100,11 @@ return
         else if(exists($buckets))
         then
             if($mode = "json")
-            then manage:createJSONBucketedRange($name, $key, $type, $buckets, $firstFormat, $format, $lastFormat, $config)
+            then manage:createJSONBucketedRange($name, $key, $type, $buckets, $config)
             else if($mode = "xmlattribute")
-            then manage:createXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets, $firstFormat, $format, $lastFormat, $config)
+            then manage:createXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets, $config)
             else if($mode = "xmlelement")
-            then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $firstFormat, $format, $lastFormat, $config)
+            then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $config)
             else ()
         (: XXX - throw an error :)
         else ()

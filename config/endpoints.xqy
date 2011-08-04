@@ -109,7 +109,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="element" required="false"/>
             <param name="attribute" required="false"/>
             <param name="type" required="true"/>
-            <param name="bucket"  alias="bucket[]" repeatable="true" required="false"/>
+            <param name="buckets" required="false"/>
             <param name="bucketInterval" required="false" values="decade|year|quarter|month|week|day|hour|minute"/>
             <param name="startingAt" required="false"/>
             <param name="stoppingAt" required="false"/>

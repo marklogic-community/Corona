@@ -287,17 +287,14 @@ declare function manage:createJSONBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
-    $buckets as xs:anySimpleType+,
-    $firstFormat as xs:string,
-    $format as xs:string,
-    $lastFormat as xs:string,
+    $buckets as element()+,
     $config as element()
 ) as empty-sequence()
 {
     let $key := json:escapeNCName($key)
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
-        config:setJSONBucketedRange($name, $key, $type, $buckets, $firstFormat, $format, $lastFormat)
+        config:setJSONBucketedRange($name, $key, $type, $buckets)
     )
 };
 
@@ -325,16 +322,13 @@ declare function manage:createXMLElementBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
-    $buckets as xs:anySimpleType+,
-    $firstFormat as xs:string,
-    $format as xs:string,
-    $lastFormat as xs:string,
+    $buckets as element()+,
     $config as element()
 ) as empty-sequence()
 {
     manage:createXMLElementRangeIndex($name, $element, $type, $config)
     ,
-    config:setXMLElementBucketedRange($name, $element, $type, $buckets, $firstFormat, $format, $lastFormat)
+    config:setXMLElementBucketedRange($name, $element, $type, $buckets)
 };
 
 declare function manage:createXMLElementAutoBucketedRange(
@@ -360,16 +354,13 @@ declare function manage:createXMLAttributeBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
-    $buckets as xs:anySimpleType+,
-    $firstFormat as xs:string,
-    $format as xs:string,
-    $lastFormat as xs:string,
+    $buckets as element()+,
     $config as element()
 ) as empty-sequence()
 {
     manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
     ,
-    config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets, $firstFormat, $format, $lastFormat)
+    config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets)
 };
 
 declare function manage:createXMLAttributeAutoBucketedRange(
@@ -425,7 +416,7 @@ declare function manage:getBucketedRange(
         then ("buckets", json:array(
                 for $bucket in $index/buckets/*
                 return
-                    if($index/@type = "number" and string($bucket) castable as xs:decimal)
+                    if(local-name($bucket) = "boundary" and $index/@type = "number" and string($bucket) castable as xs:decimal)
                     then xs:decimal(string($bucket))
                     else string($bucket)
             )
