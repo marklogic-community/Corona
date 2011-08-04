@@ -39,27 +39,43 @@ declare function search:bucketLabelToQuery(
     $weight as xs:double?
 ) as cts:query?
 {
-    let $bucketBits := $index/buckets/*
-    let $positionOfBucketLabel :=
-        for $bucket at $pos in $bucketBits
-        where local-name($bucket) = "label" and string($bucket) = $bucketLabel
-        return $pos
+    let $bounds :=
+        let $buckets := search:getBucketsForIndex($index)
+        let $numBuckets := count($buckets)
+        for $pos in (0 to $numBuckets)
+        let $bucket := $buckets[$pos]
+        let $thisBucketLabel :=
+            if($index/@type = "bucketedrange")
+            then
+                if($pos = 0)
+                then common:formatBucketLabel($index/firstFormat, (), $buckets[1])
+                else if($pos = $numBuckets)
+                then common:formatBucketLabel($index/lastFormat, $bucket, ())
+                else common:formatBucketLabel($index/format, $bucket, $buckets[$pos + 1])
+            else if($index/@type = "autobucketedrange")
+            then 
+                if($pos = 0)
+                then xdmp:strftime($index/firstFormat, $buckets[1])
+                else if($pos = $numBuckets)
+                then xdmp:strftime($index/lastFormat, $bucket)
+                else common:dualStrftime($index/format, $bucket, $buckets[$pos + 1])
+            else ()
+        where $thisBucketLabel = $bucketLabel
+        return
+            if($pos = 0)
+            then <upper>{ $buckets[1] }</upper>
+            else if($pos = $numBuckets)
+            then <lower>{ $bucket }</lower>
+            else (<lower>{ $bucket }</lower>, <upper>{ $buckets[$pos + 1] }</upper>)
 
-    let $lowerBound :=
-        if($positionOfBucketLabel > 1)
-        then $bucketBits[$positionOfBucketLabel - 1]
-        else ()
-    let $upperBound :=
-        if($positionOfBucketLabel < count($bucketBits))
-        then $bucketBits[$positionOfBucketLabel + 1]
-        else ()
+    let $lowerBound := $bounds[local-name(.) = "lower"]
+    let $upperBound := $bounds[local-name(.) = "upper"]
 
     let $options :=
         if($index/type = "string")
         then ($options, "collation=http://marklogic.com/collation/")
         else $options
 
-    where exists($positionOfBucketLabel)
     return
         if($index/structure = "json")
         then
@@ -250,40 +266,7 @@ declare function search:bucketIndexValues(
         $options
     )
 
-    let $buckets := 
-        if($index/@type = "bucketedrange")
-        then
-            for $boundary in $index/buckets/boundary
-            where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundary)
-            return common:castAs($boundary, $xsType)
-        else if($index/@type = "autobucketedrange")
-        then 
-            let $duration :=
-                if($index/bucketInterval = "decade")
-                then xs:yearMonthDuration("P10Y")
-                else if($index/bucketInterval = "year")
-                then xs:yearMonthDuration("P1Y")
-                else if($index/bucketInterval = "quarter")
-                then xs:yearMonthDuration("P3M")
-                else if($index/bucketInterval = "month")
-                then xs:yearMonthDuration("P1M")
-                else if($index/bucketInterval = "week")
-                then xs:dayTimeDuration("P7D")
-                else if($index/bucketInterval = "day")
-                then xs:dayTimeDuration("P1D")
-                else if($index/bucketInterval = "hour")
-                then xs:dayTimeDuration("PT1H")
-                else if($index/bucketInterval = "minute")
-                then xs:dayTimeDuration("PT1M")
-                else ()
-            let $startDate := xs:dateTime($index/startingAt)
-            let $stopDate :=
-                if(exists($index/stoppingAt))
-                then xs:dateTime($index/stoppingAt)
-                else current-dateTime()
-            return search:generateDatesWithInterval($startDate, $duration, $stopDate)
-        else ()
-
+    let $buckets := search:getBucketsForIndex($index)
     let $values :=
         if($index/structure = "json")
         then
@@ -312,14 +295,14 @@ declare function search:bucketIndexValues(
                     else if(exists($item/cts:lower-bound))
                     then xdmp:strftime($index/lastFormat, $item/cts:lower-bound)
                     else ()
-                    (:
-                        XXX - error prone!!!
-                        Should regular buckets take a format as well? If the do,
-                        that could really simplify things at index creation
-                        time.
-                        Need a function that takes a string and returns the lower and upper bounds.
-                    :)
-                else string($index/buckets/label[$pos])
+                else 
+                    if(exists($item/cts:lower-bound) and exists($item/cts:upper-bound))
+                    then common:formatBucketLabel($index/format, string($item/cts:lower-bound), string($item/cts:upper-bound))
+                    else if(exists($item/cts:upper-bound))
+                    then common:formatBucketLabel($index/firstFormat, string($item/cts:lower-bound), string($item/cts:upper-bound))
+                    else if(exists($item/cts:lower-bound))
+                    then common:formatBucketLabel($index/lastFormat, string($item/cts:lower-bound), string($item/cts:upper-bound))
+                    else ()
             return json:object((
                 "value", $label,
                 "inQuery", $label = $valuesInQuery,
@@ -339,7 +322,14 @@ declare function search:bucketIndexValues(
                     else if(exists($item/cts:lower-bound))
                     then xdmp:strftime($index/lastFormat, $item/cts:lower-bound)
                     else ()
-                else string($index/buckets/label[$pos])
+                else
+                    if(exists($item/cts:lower-bound) and exists($item/cts:upper-bound))
+                    then common:formatBucketLabel($index/format, string($item/cts:lower-bound), string($item/cts:upper-bound))
+                    else if(exists($item/cts:upper-bound))
+                    then common:formatBucketLabel($index/firstFormat, string($item/cts:lower-bound), string($item/cts:upper-bound))
+                    else if(exists($item/cts:lower-bound))
+                    then common:formatBucketLabel($index/lastFormat, string($item/cts:lower-bound), string($item/cts:upper-bound))
+                    else ()
             return <result>
                 <value>{ $label }</value>
                 <inQuery>{ $label = $valuesInQuery }</inQuery>
@@ -347,6 +337,52 @@ declare function search:bucketIndexValues(
             </result>
         }</facet>
         else ()
+};
+
+declare function search:getBucketsForIndex(
+    $index as element(index)
+) as xs:anySimpleType*
+{
+    if($index/@type = "bucketedrange")
+    then
+        let $xsType :=
+            if($index/structure = ("xmlelement", "xmlattribute"))
+            then string($index/type)
+            else if($index/type = "date")
+            then "dateTime"
+            else if($index/type = "number")
+            then "decimal"
+            else "string"
+        for $boundary in $index/buckets/bucket
+        where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundary)
+        return common:castAs($boundary, $xsType)
+    else if($index/@type = "autobucketedrange")
+    then 
+        let $duration :=
+            if($index/bucketInterval = "decade")
+            then xs:yearMonthDuration("P10Y")
+            else if($index/bucketInterval = "year")
+            then xs:yearMonthDuration("P1Y")
+            else if($index/bucketInterval = "quarter")
+            then xs:yearMonthDuration("P3M")
+            else if($index/bucketInterval = "month")
+            then xs:yearMonthDuration("P1M")
+            else if($index/bucketInterval = "week")
+            then xs:dayTimeDuration("P7D")
+            else if($index/bucketInterval = "day")
+            then xs:dayTimeDuration("P1D")
+            else if($index/bucketInterval = "hour")
+            then xs:dayTimeDuration("PT1H")
+            else if($index/bucketInterval = "minute")
+            then xs:dayTimeDuration("PT1M")
+            else ()
+        let $startDate := xs:dateTime($index/startingAt)
+        let $stopDate :=
+            if(exists($index/stoppingAt))
+            then xs:dateTime($index/stoppingAt)
+            else current-dateTime()
+        return search:generateDatesWithInterval($startDate, $duration, $stopDate)
+    else ()
 };
 
 declare private function search:generateDatesWithInterval(

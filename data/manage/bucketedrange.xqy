@@ -47,26 +47,30 @@ return
         let $element := map:get($params, "element")
         let $attribute := map:get($params, "element")
         let $type := map:get($params, "type")
-        let $bucketString := map:get($params, "buckets")
+
+        let $mode :=
+            if(exists($key))
+            then "json"
+            else if(exists($element) and exists($attribute))
+            then "xmlelement"
+            else "xmlattribute"
+
         let $buckets :=
-            (: doesn't look like the server supports negative lookbehind, hence this sad hack :)
-            let $bucketString := replace($bucketString, "\\\|", "____________PIPE____________")
-            let $bucketString := replace($bucketString, "\\\\", "\\")
-
-            for $bit at $pos in tokenize($bucketString, "\|")
-            let $bit := replace($bit, "____________PIPE____________", "|")
-            return 
-                if($pos mod 2)
-                then <label>{ $bit }</label>
-                else <boundary>{ $bit }</boundary>
-
-        let $bucketInterval := map:get($params, "bucketInterval")
-        let $startingAt := map:get($params, "startingAt")
-        let $stoppingAt := map:get($params, "stoppingAt")
+            for $bucket in map:get($params, "bucket")
+            let $bucket :=
+                if($mode = "json")
+                then common:castFromJSONType($bucket, $type)
+                else common:castAs($bucket, $type)
+            order by $bucket ascending
+            return $bucket
 
         let $format := map:get($params, "format")
         let $firstFormat := map:get($params, "firstFormat")
         let $lastFormat := map:get($params, "lastFormat")
+
+        let $bucketInterval := map:get($params, "bucketInterval")
+        let $startingAt := map:get($params, "startingAt")
+        let $stoppingAt := map:get($params, "stoppingAt")
         return
 
         if((empty($key) and empty($element)) or (exists($key) and exists($element)))
@@ -81,23 +85,23 @@ return
         then common:error(500, manage:validateIndexName($name), "json")
         else if(exists($existing))
         then common:error(500, "A buckted range index with this configuration already exists", "json")
+        else if(exists($bucketInterval) and exists($startingAt) and $type = ("date", "dateTime"))
+        then
+            if($mode = "json")
+            then manage:createJSONAutoBucketedRange($name, $key, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
+            else if($mode = "xmlattribute")
+            then manage:createXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
+            else if($mode = "xmlelement")
+            then manage:createXMLElementAutoBucketedRange($name, $element, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
+            else ()
         else if(exists($buckets))
         then
-            if(exists($key))
-            then manage:createJSONBucketedRange($name, $key, $type, $buckets, $config)
-            else if(exists($element) and exists($attribute))
-            then manage:createXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets, $config)
-            else if(exists($element) and empty($attribute))
-            then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $config)
-            else ()
-        else if(exists($bucketInterval) and exists($startingAt))
-        then
-            if(exists($key))
-            then manage:createJSONAutoBucketedRange($name, $key, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
-            else if(exists($element) and exists($attribute))
-            then manage:createXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
-            else if(exists($element) and empty($attribute))
-            then manage:createXMLElementAutoBucketedRange($name, $element, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
+            if($mode = "json")
+            then manage:createJSONBucketedRange($name, $key, $type, $buckets, $firstFormat, $format, $lastFormat, $config)
+            else if($mode = "xmlattribute")
+            then manage:createXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets, $firstFormat, $format, $lastFormat, $config)
+            else if($mode = "xmlelement")
+            then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $firstFormat, $format, $lastFormat, $config)
             else ()
         (: XXX - throw an error :)
         else ()

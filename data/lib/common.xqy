@@ -202,3 +202,20 @@ declare function common:dualStrftime(
             else string($match)
     return string-join($bits, "")
 };
+
+declare function common:formatBucketLabel(
+    $format as xs:string,
+    $lowerBounds as xs:string?,
+    $upperBound as xs:string?
+) as xs:string
+{
+	let $regex := "(%)|(@)"
+    let $bits :=
+        for $match in analyze-string($format, $regex)/*
+        return
+            if($match/self::*:non-match) then string($match)
+            else if($match/*:group/@nr = 1) then $lowerBounds
+            else if($match/*:group/@nr = 2) then $upperBound
+            else string($match)
+    return string-join($bits, "")
+};

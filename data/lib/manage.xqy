@@ -287,14 +287,17 @@ declare function manage:createJSONBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
-    $buckets as element()+,
+    $buckets as xs:anySimpleType+,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string,
     $config as element()
 ) as empty-sequence()
 {
     let $key := json:escapeNCName($key)
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
-        config:setJSONBucketedRange($name, $key, $type, $buckets)
+        config:setJSONBucketedRange($name, $key, $type, $buckets, $firstFormat, $format, $lastFormat)
     )
 };
 
@@ -322,13 +325,16 @@ declare function manage:createXMLElementBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
-    $buckets as element()+,
+    $buckets as xs:anySimpleType+,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string,
     $config as element()
 ) as empty-sequence()
 {
     manage:createXMLElementRangeIndex($name, $element, $type, $config)
     ,
-    config:setXMLElementBucketedRange($name, $element, $type, $buckets)
+    config:setXMLElementBucketedRange($name, $element, $type, $buckets, $firstFormat, $format, $lastFormat)
 };
 
 declare function manage:createXMLElementAutoBucketedRange(
@@ -354,13 +360,16 @@ declare function manage:createXMLAttributeBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
-    $buckets as element()+,
+    $buckets as xs:anySimpleType+,
+    $firstFormat as xs:string,
+    $format as xs:string,
+    $lastFormat as xs:string,
     $config as element()
 ) as empty-sequence()
 {
     manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
     ,
-    config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets)
+    config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets, $firstFormat, $format, $lastFormat)
 };
 
 declare function manage:createXMLAttributeAutoBucketedRange(
@@ -411,6 +420,17 @@ declare function manage:getBucketedRange(
 {
     let $index := config:get($name)
     let $common := (
+        "type", string($index/type),
+        if(exists($index/buckets))
+        then ("buckets", json:array(
+                for $bucket in $index/buckets/*
+                return
+                    if($index/@type = "number" and string($bucket) castable as xs:decimal)
+                    then xs:decimal(string($bucket))
+                    else string($bucket)
+            )
+        )
+        else (),
         if(exists($index/bucketInterval))
         then ("bucketInterval", string($index/bucketInterval))
         else (),
@@ -437,10 +457,6 @@ declare function manage:getBucketedRange(
             json:object((
                 "name", $name,
                 "key", json:unescapeNCName($index/key),
-                "type", string($index/type),
-                if(exists($index/buckets))
-                then ("buckets", json:array(for $bucket in $index/buckets/* return string($bucket)))
-                else (),
                 $common
             ))
         else if($index/structure = "xmlelement")
@@ -448,17 +464,6 @@ declare function manage:getBucketedRange(
             json:object((
                 "name", $name,
                 "element", string($index/element),
-                "type", string($index/type),
-                if(exists($index/buckets))
-                then ("buckets", json:array(
-                        for $bucket in $index/buckets/*
-                        return
-                            if($bucket/@type = "number" and string($bucket) castable as xs:decimal)
-                            then xs:decimal(string($bucket))
-                            else string($bucket)
-                    )
-                )
-                else (),
                 $common
             ))
         else if($index/structure = "xmlattribute")
@@ -467,10 +472,6 @@ declare function manage:getBucketedRange(
                 "name", $name,
                 "element", string($index/element),
                 "attribute", string($index/attribute),
-                "type", string($index/type),
-                if(exists($index/buckets))
-                then ("buckets", json:array(for $bucket in $index/buckets/* return string($bucket)))
-                else (),
                 $common
             ))
         else ()

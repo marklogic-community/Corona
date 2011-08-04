@@ -80,7 +80,7 @@ declare private function parser:tokenize(
 				let $bits := tokenize($match, ":")
 				return (
 					<field>{ $bits[1] }</field>,
-					<value>{ string-join($bits[2 to last()], ":") }</value>
+					<value>{ replace(string-join($bits[2 to last()], ":"), '^"|"$', "") }</value>
 				)
 			}</constraint>
 		else if($match/*:group/@nr = 10) then <term>{ string($match) }</term>
