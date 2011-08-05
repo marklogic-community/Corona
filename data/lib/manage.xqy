@@ -217,7 +217,6 @@ declare function manage:createXMLAttributeRange(
     config:setXMLAttributeRange($name, $element, $attribute, $type, $operator)
 };
 
-(: XXX - should not delete the range index if other ranges are using it :)
 declare function manage:deleteRange(
     $name as xs:string,
     $config as element()
@@ -226,9 +225,10 @@ declare function manage:deleteRange(
     let $database := xdmp:database()
     let $index := config:get($name)
     let $existing := manage:getRangeDefinition($index, $config)
+    let $numUsing := if(exists($existing)) then manage:rangeDefinitionUsedBy($existing) else 0
     where $index/@type = "range"
     return (
-        if(exists($existing))
+        if($numUsing = 1)
         then (
             if(local-name($existing) = "range-element-index")
             then admin:save-configuration(admin:database-delete-range-element-index($config, $database, $existing))
@@ -382,7 +382,6 @@ declare function manage:createXMLAttributeAutoBucketedRange(
     config:setXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
 };
 
-(: XXX - should not delete the range index if other ranges are using it :)
 declare function manage:deleteBucketedRange(
     $name as xs:string,
     $config as element()
@@ -391,9 +390,10 @@ declare function manage:deleteBucketedRange(
     let $database := xdmp:database()
     let $index := config:get($name)
     let $existing := manage:getRangeDefinition($index, $config)
+    let $numUsing := if(exists($existing)) then manage:rangeDefinitionUsedBy($existing) else 0
     where $index/@type = ("bucketedrange", "autobucketedrange")
     return (
-        if(exists($existing))
+        if($numUsing = 1)
         then (
             if(local-name($existing) = "range-element-index")
             then admin:save-configuration(admin:database-delete-range-element-index($config, $database, $existing))
@@ -700,7 +700,7 @@ declare private function manage:getRangeDefinition(
     then (
         let $elementNsLnBits := manage:getNSAndLN($index/element)
         for $ri in admin:database-get-range-element-indexes($config, xdmp:database())
-        where $ri/*:scalar-type = string($ri/type) and $ri/*:namespace-uri = $elementNsLnBits[1] and $ri/*:localname = $elementNsLnBits[2]
+        where $ri/*:scalar-type = string($index/type) and $ri/*:namespace-uri = $elementNsLnBits[1] and $ri/*:localname = $elementNsLnBits[2]
         return $ri
     )[1]
     else if($index/structure = "xmlattribute")
@@ -717,6 +717,94 @@ declare private function manage:getRangeDefinition(
         return $ri
     )[1]
     else ()
+};
+
+declare private function manage:rangeDefinitionUsedBy(
+    $rangeDefinition as element()
+) as xs:integer
+{
+    count(
+        for $rangeName in (config:rangeNames(), config:bucketedRangeNames())
+        let $index := config:get($rangeName)
+        let $structure :=
+            if(exists($index/key))
+            then "json"
+            else if(exists($index/attribute))
+            then "xmlattribute"
+            else if(exists($index/element))
+            then "xmlelement"
+            else ()
+
+        let $rangeType :=
+            if($structure = "json")
+            then
+                if($index/type = ("date", "boolean"))
+                then "attribute"
+                else "element"
+            else if($structure = "xmlattribute")
+            then "attribute"
+            else "element"
+
+        let $xsType :=
+            if($structure = "json")
+            then manage:jsonTypeToSchemaType($index/type)
+            else string($index/type)
+
+        let $elementNsLnBits := if(exists($index/element)) then manage:getNSAndLN($index/element) else ()
+        let $attributeNsLnBits := if(exists($index/attribute)) then manage:getNSAndLN($index/attribute) else ()
+
+        let $localname :=
+            if($structure = "json")
+            then
+                if($index/type = "date")
+                then "normalized-date"
+                else if($index/type = "boolean")
+                then "boolean"
+                else string($index/key)
+            else if($structure = "xmlattribute")
+            then $attributeNsLnBits[2]
+            else if($structure = "xmlelement")
+            then $elementNsLnBits[2]
+            else ()
+        let $namespace :=
+            if($structure = "json")
+            then
+                if($index/type = ("date", "boolean"))
+                then ""
+                else "http://marklogic.com/json"
+            else if($structure = "xmlattribute")
+            then $attributeNsLnBits[1]
+            else if($structure = "xmlelement")
+            then $elementNsLnBits[1]
+            else ""
+
+        let $parentLocalname :=
+            if($structure = "json")
+            then string($index/key)
+            else if($structure = "xmlattribute")
+            then $elementNsLnBits[2]
+            else ()
+        let $parentNamespace :=
+            if($structure = "json")
+            then "http://marklogic.com/json"
+            else if($structure = "xmlattribute")
+            then $elementNsLnBits[1]
+            else ""
+
+        where
+            if($rangeType = "element")
+            then
+                $rangeDefinition/*:scalar-type = $xsType
+                and $rangeDefinition/*:namespace-uri = $namespace
+                and $rangeDefinition/*:localname = $localname
+            else
+                $rangeDefinition/*:scalar-type = $xsType
+                and $rangeDefinition/*:parent-namespace-uri = $parentNamespace
+                and $rangeDefinition/*:parent-localname = $parentLocalname
+                and $rangeDefinition/*:namespace-uri = $namespace
+                and $rangeDefinition/*:localname = $localname
+        return $index
+    )
 };
 
 declare private function manage:jsonTypeToSchemaType(
