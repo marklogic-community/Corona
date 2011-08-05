@@ -106,11 +106,11 @@ return
             else if($mode = "xmlelement")
             then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $config)
             else ()
-        else common:error(500, "Must supply either the bucket definitions or a bucket interval with a starting date")
+        else common:error(500, "Must supply either the bucket definitions or a bucket interval with a starting date", "json")
 
     else if($requestMethod = "DELETE")
     then
         if(exists($existing))
         then manage:deleteBucketedRange($name, $config)
         else common:error(404, "Bucketed range index not found", "json")
-    else common:error(500, concat("Unsupported method: ", $requestMethod))
+    else common:error(500, concat("Unsupported method: ", $requestMethod), "json")

@@ -65,4 +65,4 @@ return
         if(exists($existing))
         then manage:deleteField($name, $config)
         else common:error(404, "Field not found", "json")
-    else common:error(500, concat("Unsupported method: ", $requestMethod))
+    else common:error(500, concat("Unsupported method: ", $requestMethod), "json")
