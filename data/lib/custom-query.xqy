@@ -196,9 +196,6 @@ declare private function customquery:handleAndNot(
     return cts:and-not-query(customquery:dispatch($positive, $ignoreRange), customquery:dispatch($negative, $ignoreRange))
 };
 
-(:
-    XXX - what to do about range queries with bucket labels?
-:)
 declare private function customquery:handleRange(
     $step as element(json:range),
     $ignoreRange as xs:string?
@@ -208,7 +205,7 @@ declare private function customquery:handleRange(
     let $index := config:get($indexName)
     let $options := customquery:extractOptions($step, "range")
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    where $indexName != $ignoreRange and exists($index)
+    where if(exists($ignoreRange)) then $indexName != $ignoreRange else true() and exists($index)
     return
         if($index/@type = "bucketedrange" and exists($step/json:bucketLabel))
         then search:bucketLabelToQuery($index, string($step/json:bucketLabel), $options, $weight)

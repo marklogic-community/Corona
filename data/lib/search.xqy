@@ -131,7 +131,6 @@ declare function search:rangeValueToQuery(
     search:rangeValueToQuery($index, $values, (), (), ())
 };
 
-(: XXX - support auto-bucketed ranges :)
 declare function search:rangeValueToQuery(
     $index as element(index),
     $values as xs:string*,
@@ -158,7 +157,7 @@ declare function search:rangeValueToQuery(
         then ($options, "collation=http://marklogic.com/collation/")
         else $options
     let $JSONQName := xs:QName(concat("json:", $index/key))
-    where $index/@type = ("range", "bucketedrange")
+    where $index/@type = ("range", "bucketedrange", "autobucketedrange")
     return
         if($index/structure = "json")
         then
@@ -182,7 +181,6 @@ declare function search:mapValueToQuery(
     $value as xs:string
 ) as cts:query?
 {
-    (: XXX - would be nice to allow maps for xml attributes :)
     let $QName :=
         if($index/structure = "json")
         then xs:QName(concat("json:", $index/key))
