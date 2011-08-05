@@ -53,38 +53,6 @@ declare function common:error(
             ))
 };
 
-declare function common:valuesForFacet(
-    $query as cts:query?,
-    $facetName as xs:string
-) as xs:string*
-{
-    let $query := <foo>{ $query }</foo>/*
-    let $index := config:get($facetName)
-    let $operator := if(exists($index/operator)) then common:humanOperatorToMathmatical($index/operator) else "="
-    where $index/@type = "range"
-    return
-        if($index/@type = "range")
-        then
-            if($index/structure = "json")
-            then
-                if($index/type = "date")
-                then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName(concat("json:", $index/key))][cts:attribute = xs:QName("normalized-date")][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
-                else if($index/type = "string")
-                then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $index/key))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
-                else if($index/type = "number")
-                then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName(concat("json:", $index/key))][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:decimal")]/cts:value)
-                else ()
-            else if($index/structure = "xmlelement")
-            then string($query/descendant-or-self::cts:element-range-query[cts:element = xs:QName($index/element)][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:string")]/cts:value)
-            else if($index/structure = "xmlattribute")
-            then string($query/descendant-or-self::cts:element-attribute-range-query[cts:element = xs:QName($index/element)][cts:attribute = xs:QName($index/attribute)][@operator = $operator][cts:value/@xsi:type = xs:QName("xs:dateTime")]/cts:value)
-            else ()
-        else if($index/@type = ("bucketedrange", "autobucketedrange"))
-            (: XXX - make this work :)
-            then ()
-            else ()
-};
-
 declare function common:castFromJSONType(
     $value as xs:anySimpleType,
     $type as xs:string

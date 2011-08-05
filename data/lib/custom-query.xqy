@@ -35,6 +35,14 @@ declare function customquery:getCTS(
     return customquery:dispatch($tree, $ignoreRange)
 };
 
+declare function customquery:getCTSFromParseTree(
+    $parseTree as element(json:json),
+    $ignoreRange as xs:string?
+) as cts:query?
+{
+    customquery:dispatch($parseTree, $ignoreRange)
+};
+
 declare function customquery:searchJSON(
     $json as xs:string,
     $include as xs:string*,
@@ -111,6 +119,23 @@ declare function customquery:searchXML(
     return reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $cts, $returnPath)
 };
 
+declare function customquery:getParseTree(
+    $query as xs:string
+) as element(json:json)
+{
+    json:jsonToXML($query)
+};
+
+declare function customquery:valuesForFacet(
+    $parseTree as element(json:json),
+    $facetName as xs:string
+) as xs:string*
+{
+    for $range in $parseTree//json:range[@type = "object"][json:name = $facetName]
+    return string($range/json:value)
+};
+
+
 declare private function customquery:dispatch(
     $step as element(),
     $ignoreRange as xs:string?
@@ -171,6 +196,9 @@ declare private function customquery:handleAndNot(
     return cts:and-not-query(customquery:dispatch($positive, $ignoreRange), customquery:dispatch($negative, $ignoreRange))
 };
 
+(:
+    XXX - what to do about range queries with bucket labels?
+:)
 declare private function customquery:handleRange(
     $step as element(json:range),
     $ignoreRange as xs:string?

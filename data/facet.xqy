@@ -39,6 +39,7 @@ let $order := map:get($params, "order")
 let $frequency := map:get($params, "frequency")
 let $includeAllValues := map:get($params, "includeAllValues")
 
+    
 let $query :=
     if(exists($queryString))
     then parser:parse($queryString)
@@ -58,14 +59,30 @@ let $options := (
 let $values :=
     for $facet in $facets
 
-    (: Pulling out the facet values first becaues the next block will generate
-       a query without this facet if includeAllValues is "yes" :)
-    let $valuesInQuery := common:valuesForFacet($query, $facet)
+    let $rawQuery :=
+        if(exists($queryString))
+        then parser:getParseTree($queryString)
+        else if(exists($customQuery))
+        then customquery:getParseTree($customQuery)
+        else ()
+
+    let $valuesInQuery :=
+        if(exists($queryString))
+        then parser:valuesForFacet($rawQuery, $facet)
+        else if(exists($customQuery))
+        then customquery:valuesForFacet($rawQuery, $facet)
+        else ()
+
+    let $ignoreFacet :=
+        if($includeAllValues = "yes")
+        then $facet
+        else ()
+
     let $query :=
-        if($includeAllValues = "yes" and exists($queryString))
-        then parser:parse($queryString, $facet)
-        else if($includeAllValues = "yes" and exists($customQuery))
-        then customquery:getCTS($customQuery, $facet)
+        if(exists($queryString))
+        then parser:getCTSFromParseTree($rawQuery, $ignoreFacet)
+        else if(exists($customQuery))
+        then customquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
         else $query
 
     let $index := config:get($facet)

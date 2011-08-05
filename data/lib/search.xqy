@@ -131,6 +131,7 @@ declare function search:rangeValueToQuery(
     search:rangeValueToQuery($index, $values, (), (), ())
 };
 
+(: XXX - support auto-bucketed ranges :)
 declare function search:rangeValueToQuery(
     $index as element(index),
     $values as xs:string*,

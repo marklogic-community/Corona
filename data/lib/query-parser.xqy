@@ -47,6 +47,33 @@ declare function parser:parse(
 	return parser:dispatchQueryTree($folded, $ignoreField)
 };
 
+declare function parser:getParseTree(
+    $query as xs:string
+) as element(group)
+{
+	let $init := xdmp:set($GROUPING-INDEX, 0)
+	let $tokens := parser:tokenize($query)
+	let $grouped := parser:groupTokens($tokens, 1)
+	return parser:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
+};
+
+declare function parser:getCTSFromParseTree(
+    $parseTree as element(group),
+    $ignoreField as xs:string?
+) as cts:query?
+{
+	parser:dispatchQueryTree($parseTree, $ignoreField)
+};
+
+declare function parser:valuesForFacet(
+    $parseTree as element(group),
+    $facetName as xs:string
+) as xs:string*
+{
+    for $constraint in $parseTree//constraint[field = $facetName]
+    return string($constraint/value)
+};
+
 declare private function parser:tokenize(
 	$query as xs:string
 ) as element()*
