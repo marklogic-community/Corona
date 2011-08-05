@@ -51,4 +51,4 @@ return
         if(exists($existing))
         then manage:deleteNamespace($prefix)
         else common:error(404, "Namespace not found", "json")
-    else ()
+    else common:error(500, concat("Unsupported method: ", $requestMethod))

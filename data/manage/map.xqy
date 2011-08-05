@@ -61,4 +61,4 @@ return
         if(exists($existing))
         then manage:deleteMap($name)
         else common:error(404, "Mapping not found", "json")
-    else ()
+    else common:error(500, concat("Unsupported method: ", $requestMethod))

@@ -35,6 +35,11 @@ let $database := xdmp:database()
 let $config := admin:get-configuration()
 let $existing := manage:getField($name, $config)
 
+let $includeKeys := distinct-values(map:get($params, "includeKey"))
+let $excludes := distinct-values(map:get($params, "excludeKey"))
+let $includeElements := distinct-values(map:get($params, "includeElement"))
+let $excludeElements := distinct-values(map:get($params, "excludeElement"))
+
 return
     if($requestMethod = "GET")
     then
@@ -46,16 +51,13 @@ return
     then 
         if(exists(manage:validateIndexName($name)))
         then common:error(500, manage:validateIndexName($name), "json")
+        else if(empty($includeKeys) and empty($includeElements))
+        then common:error(500, "Must supply at least one JSON key or XML element to be included in the field", "json")
         else (
             if(exists($existing))
             then xdmp:set($config, admin:database-delete-field($config, $database, $name))
             else (),
-
-            let $includeKeys := distinct-values(map:get($params, "includeKey"))
-            let $excludes := distinct-values(map:get($params, "excludeKey"))
-            let $includeElements := distinct-values(map:get($params, "includeElement"))
-            let $excludeElements := distinct-values(map:get($params, "excludeElement"))
-            return manage:createField($name, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
+            manage:createField($name, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
         )
 
     else if($requestMethod = "DELETE")
@@ -63,4 +65,4 @@ return
         if(exists($existing))
         then manage:deleteField($name, $config)
         else common:error(404, "Field not found", "json")
-    else ()
+    else common:error(500, concat("Unsupported method: ", $requestMethod))
