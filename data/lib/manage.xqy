@@ -614,8 +614,7 @@ declare private function manage:createJSONRangeIndex(
         return admin:save-configuration($config)
     else if($type = "boolean")
     then
-        (: XXX - don't think we can create range indexes of type boolean :)
-        let $index := admin:database-range-element-attribute-index("boolean", "http://marklogic.com/json", $key, "", "boolean", "", false())
+        let $index := admin:database-range-element-attribute-index("string", "http://marklogic.com/json", $key, "", "boolean", "", false())
         let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
         return admin:save-configuration($config)
     else ()
