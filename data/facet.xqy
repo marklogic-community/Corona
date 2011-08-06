@@ -32,6 +32,7 @@ declare option xdmp:mapping "false";
 let $params := rest:process-request(endpoints:request("/data/facet.xqy"))
 let $facets := tokenize(map:get($params, "facets"), ",")
 let $contentType := map:get($params, "content-type")
+let $outputFormat := (map:get($params, "outputFormat"), $contentType)[1]
 let $queryString := map:get($params, "q")
 let $customQuery := map:get($params, "customquery")
 
@@ -101,44 +102,21 @@ let $values :=
 
     let $values :=
         if($index/@type = "range")
-        then search:rangeIndexValues($index, $query, $options, $limit)
+        then search:rangeIndexValues($index, $query, $options, $limit, $valuesInQuery, $outputFormat)
         else if($index/@type = ("bucketedrange", "autobucketedrange"))
-        then search:bucketIndexValues($index, $query, $options, $limit, $valuesInQuery, $contentType)
+        then search:bucketIndexValues($index, $query, $options, $limit, $valuesInQuery, $outputFormat)
         else ()
 
     where exists($index)
     return
-        if($contentType = "json" and $index/@type = "range")
-        then (
-            $facet, json:array(
-                for $item in $values
-                return json:object((
-                    "value", $item,
-                    "inQuery", $item = $valuesInQuery,
-                    "count", cts:frequency($item)
-                ))
-            )
-        )
-        else if($contentType = "json" and $index/@type = ("bucketedrange", "autobucketedrange"))
+        if($outputFormat = "json")
         then ($facet, $values)
-
-        else if($contentType = "xml" and $index/@type = "range")
-        then <facet name="{ $facet }">{
-            for $item in $values
-            return <result>
-                <value>{ $item }</value>
-                <inQuery>{ $item = $valuesInQuery }</inQuery>
-                <count>{ cts:frequency($item) }</count>
-            </result>
-        }</facet>
-
-        else if($contentType = "xml" and $index/@type = ("bucketedrange", "autobucketedrange"))
-        then $values 
-
+        else if($outputFormat = "xml")
+        then $values
         else ()
 return
-    if($contentType = "json")
+    if($outputFormat = "json")
     then json:xmlToJSON(json:object($values))
-    else if($contentType = "xml")
+    else if($outputFormat = "xml")
     then <results>{ $values }</results>
     else ()

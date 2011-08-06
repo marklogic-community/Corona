@@ -73,6 +73,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="order" required="false" default="frequency" values="descending|ascending|frequency"/>
         <param name="frequency" required="false" default="document" values="document|key"/>
         <param name="includeAllValues" required="false" default="no" values="no|yes"/>
+        <param name="outputFormat" required="false"  values="xml|json"/>
     </request>
 
     <!-- Index management -->

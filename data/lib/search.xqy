@@ -212,7 +212,9 @@ declare function search:rangeIndexValues(
     $index as element(index),
     $query as cts:query?,
     $options as xs:string*,
-    $limit as xs:positiveInteger
+    $limit as xs:positiveInteger,
+    $valuesInQuery as xs:string*,
+    $outputFormat as xs:string
 ) as xs:string*
 {
     let $xsType :=
@@ -230,8 +232,7 @@ declare function search:rangeIndexValues(
         concat("type=", $xsType),
         $options
     )
-    where $index/@type = "range"
-    return
+    let $values :=
         if($index/structure = "json")
         then
             if($index/type = "date")
@@ -243,6 +244,26 @@ declare function search:rangeIndexValues(
         then cts:element-values(xs:QName($index/element), (), $options, $query)
         else if($index/structure = "xmlattribute")
         then cts:element-attribute-values(xs:QName($index/element), xs:QName($index/attribute), (), $options, $query)
+        else ()
+    return
+        if($outputFormat = "json")
+        then json:array(
+            for $item in $values
+            return json:object((
+                "value", $item,
+                "inQuery", $item = $valuesInQuery,
+                "count", cts:frequency($item)
+            ))
+        )
+        else if($outputFormat = "xml")
+        then <facet name="{ $index/@name }">{
+            for $item in $values
+            return <result>
+                <value>{ $item }</value>
+                <inQuery>{ $item = $valuesInQuery }</inQuery>
+                <count>{ cts:frequency($item) }</count>
+            </result>
+        }</facet>
         else ()
 };
 
