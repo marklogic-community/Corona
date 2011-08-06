@@ -59,7 +59,8 @@ json:document(
             "directoryCreation", admin:database-get-directory-creation($config, $database)
         )),
         "statistics", json:object((
-            "documentCount", xdmp:estimate(collection())
+            "XMLDocumentCount", xdmp:estimate(collection($const:XMLCollection)),
+            "JSONDocumentCount", xdmp:estimate(collection($const:JSONCollection))
         )),
         "xmlNamespaces", json:array(manage:getAllNamespaces())
     ))
