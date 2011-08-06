@@ -16,6 +16,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace const="http://marklogic.com/mljson/constants" at "lib/constants.xqy";
 import module namespace config="http://marklogic.com/mljson/index-config" at "lib/index-config.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace search="http://marklogic.com/mljson/search" at "lib/search.xqy";
@@ -83,6 +84,13 @@ let $values :=
         then parser:getCTSFromParseTree($rawQuery, $ignoreFacet)
         else if(exists($customQuery))
         then customquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
+        else $query
+
+    let $query :=
+        if($contentType = "json")
+        then cts:and-query(($query, cts:collection-query($const:JSONCollection)))
+        else if($contentType = "xml")
+        then cts:and-query(($query, cts:collection-query($const:XMLCollection)))
         else $query
 
     let $index := config:get($facet)
