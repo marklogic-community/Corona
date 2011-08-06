@@ -37,7 +37,6 @@ declare function common:error(
     return
         if($outputFormat = "xml")
         then
-            (: XXX - Will need to output in a real XML format :)
             <error>
                 <code>{ $statusCode }</code>
                 <message>{ $message }</message>

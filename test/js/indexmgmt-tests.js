@@ -129,7 +129,18 @@ mljson.addIndexes = function(callback) {
             "datatype": "string",
             "buckets": "A-F|G|G-M|N|N-R|S|S-Z",
             "shouldSucceed": true,
-            "purpose": "General bucketed range creation on a string"
+            "purpose": "JSON key bucketed range creation on a string"
+        },
+        {
+            "type": "bucketedrange",
+            "pluralType": "bucketedRanges",
+            "name": "fromBucketXML",
+            "element": "from",
+            "attribute": "personal",
+            "datatype": "string",
+            "buckets": "A-F|G|G-M|N|N-R|S|S-Z",
+            "shouldSucceed": true,
+            "purpose": "Element/attribute bucketed range creation on a string"
         },
         {
             "type": "namespace",
@@ -204,46 +215,54 @@ mljson.addIndexes = function(callback) {
 
     var compareIndexes = function(config, server) {
         if(config.type === "map") {
-            equals(config.key, server.key, "Index keys match");
-            equals(config.mode, server.mode, "Index modes match");
+            equals(config.key, server.key, "Index key matches");
+            equals(config.mode, server.mode, "Index mode matches");
         }
         else if(config.type === "range") {
-            equals(config.key, server.key, "Index keys match");
-            equals(config.datatype, server.type, "Index datatypes match");
-            equals(config.operator, server.operator, "Index operators match");
+            equals(config.key, server.key, "Index key matches");
+            equals(config.datatype, server.type, "Index datatype matches");
+            equals(config.operator, server.operator, "Index operator matches");
         }
         else if(config.type === "bucketedrange") {
-            equals(config.key, server.key, "Index keys match");
-            equals(config.datatype, server.type, "Index datatypes match");
+            equals(config.datatype, server.type, "Index datatype matches");
+            if(config.key !== undefined) {
+                equals(config.key, server.key, "Index key matches");
+            }
+            if(config.element !== undefined) {
+                equals(config.element, server.element, "Index element matches");
+            }
+            if(config.attribute !== undefined) {
+                equals(config.attribute, server.attribute, "Index attribute matches");
+            }
             if(config.buckets !== undefined) {
-                equals(config.buckets, server.buckets.join("|"), "Index buckets match");
+                equals(config.buckets, server.buckets.join("|"), "Index buckets matches");
             }
             if(config.startingAt !== undefined) {
-                equals(config.startingAt, server.startingAt, "Index starting dates match");
+                equals(config.startingAt, server.startingAt, "Index starting date matches");
             }
             if(config.stoppingAt !== undefined) {
-                equals(config.stoppingAt, server.stoppingAt, "Index stopping dates match");
+                equals(config.stoppingAt, server.stoppingAt, "Index stopping date matches");
             }
             if(config.bucketInterval !== undefined) {
-                equals(config.bucketInterval, server.bucketInterval, "Index bucketInterval match");
+                equals(config.bucketInterval, server.bucketInterval, "Index bucketInterval matches");
             }
             if(config.firstFormat !== undefined) {
-                equals(config.firstFormat, server.firstFormat, "Index firstFormat match");
+                equals(config.firstFormat, server.firstFormat, "Index firstFormat matches");
             }
             if(config.format !== undefined) {
-                equals(config.format, server.format, "Index format match");
+                equals(config.format, server.format, "Index format matches");
             }
             if(config.lastFormat !== undefined) {
-                equals(config.lastFormat, server.lastFormat, "Index lastFormat match");
+                equals(config.lastFormat, server.lastFormat, "Index lastFormat matches");
             }
         }
         else if(config.type === "field") {
-            deepEqual(config.includes, server.includedKeys, "Index includes match");
-            deepEqual(config.excludes, server.excludedKeys, "Index excludes match");
+            deepEqual(config.includes, server.includedKeys, "Index includes matches");
+            deepEqual(config.excludes, server.excludedKeys, "Index excludes matches");
         }
         else if(config.type === "namespace") {
-            equal(config.prefix, server.prefix, "Namespace prefixes match");
-            equal(config.uri, server.uri, "Namespace uris match");
+            equal(config.prefix, server.prefix, "Namespace prefixes matches");
+            equal(config.uri, server.uri, "Namespace uris matches");
         }
     };
     
@@ -345,8 +364,16 @@ mljson.addIndexes = function(callback) {
                 data.operator = index.operator;
             }
             else if(index.type === "bucketedrange") {
-                data.key = index.key;
                 data.type = index.datatype;
+                if(index.key !== undefined) {
+                    data.key = index.key;
+                }
+                if(index.element !== undefined) {
+                    data.element = index.element;
+                }
+                if(index.attribute !== undefined) {
+                    data.attribute = index.attribute;
+                }
                 if(index.buckets !== undefined) {
                     data.buckets = index.buckets;
                 }

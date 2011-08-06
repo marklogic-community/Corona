@@ -268,7 +268,6 @@ declare function reststore:getXMLDocument(
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
         then reststore:getRawXMLDoc($uri)
         else 
-            (: XXX - Will need to output in a real XML format :)
             <response>{
                 reststore:outputXMLDocument($uri, reststore:getRawXMLDoc($uri), $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality)
             }</response>

@@ -45,7 +45,7 @@ return
     then
         let $key := map:get($params, "key")
         let $element := map:get($params, "element")
-        let $attribute := map:get($params, "element")
+        let $attribute := map:get($params, "attribute")
         let $type := map:get($params, "type")
         let $bucketString := map:get($params, "buckets")
         let $buckets :=
@@ -64,8 +64,8 @@ return
             if(exists($key))
             then "json"
             else if(exists($element) and exists($attribute))
-            then "xmlelement"
-            else "xmlattribute"
+            then "xmlattribute"
+            else "xmlelement"
 
         let $format := map:get($params, "format")
         let $firstFormat := map:get($params, "firstFormat")

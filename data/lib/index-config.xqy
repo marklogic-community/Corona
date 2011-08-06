@@ -191,7 +191,7 @@ declare function config:get(
                 else if($bits[2] = "xmlattribute")
                 then (
                     <element>{ $bits[4] }</element>,
-                    <attribute>{ $bits[4] }</attribute>,
+                    <attribute>{ $bits[5] }</attribute>,
                     <type>{ $bits[6] }</type>,
                     <operator>{ $bits[7] }</operator>
                 )
@@ -217,7 +217,7 @@ declare function config:get(
                 else if($bits[2] = "xmlattribute")
                 then (
                     <element>{ $bits[4] }</element>,
-                    <attribute>{ $bits[4] }</attribute>,
+                    <attribute>{ $bits[5] }</attribute>,
                     <type>{ $bits[6] }</type>,
                     <buckets>{ config:bucketStringToElements($bits[7]) }</buckets>
                 )
