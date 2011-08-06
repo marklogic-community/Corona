@@ -45,13 +45,13 @@ return
     then
         let $key := map:get($params, "key")
         let $element := map:get($params, "element")
-        let $attribute := map:get($params, "element")
+        let $attribute := map:get($params, "attribute")
         let $type := map:get($params, "type")
         let $operator := map:get($params, "operator")
         return
 
         if((empty($key) and empty($element)) or (exists($key) and exists($element)))
-        then common:error(500, "Must supply either a JSON key or XML element name", "json")
+        then common:error(500, "Must supply either a JSON key, an XML element name or XML element and attribute names", "json")
         else if(exists($attribute) and empty($element))
         then common:error(500, "Must supply an XML element along with an XML attribute", "json")
         else if(exists($key) and not($type = ("string", "date", "number")))
