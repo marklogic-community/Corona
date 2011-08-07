@@ -724,7 +724,7 @@ declare private function manage:getXMLAttributeRangeDefinition(
     $config as element()
 ) as element()?
 {
-    manage:getRangeDefinition(<index><structure>xmlelement</structure><element>{ $element }</element><attribute>{ $attribute }</attribute><type>{ $type }</type></index>, $config)
+    manage:getRangeDefinition(<index><structure>xmlattribute</structure><element>{ $element }</element><attribute>{ $attribute }</attribute><type>{ $type }</type></index>, $config)
 };
 
 declare private function manage:getRangeDefinition(
@@ -755,7 +755,7 @@ declare private function manage:getRangeDefinition(
     then (
         let $elementNsLnBits := manage:getNSAndLN($index/element)
         let $attributeNsLnBits := manage:getNSAndLN($index/attribute)
-        for $ri in admin:database-get-range-element-indexes($config, xdmp:database())
+        for $ri in admin:database-get-range-element-attribute-indexes($config, xdmp:database())
         where
             $ri/*:scalar-type = string($index/type)
             and $ri/*:parent-namespace-uri = $elementNsLnBits[1]
