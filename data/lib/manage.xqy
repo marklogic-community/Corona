@@ -41,6 +41,7 @@ declare function manage:validateIndexName(
 };
 
 
+(: Fields :)
 declare function manage:createField(
     $name as xs:string,
     $includeKeys as xs:string*,
@@ -50,6 +51,24 @@ declare function manage:createField(
     $config as element()
 ) as empty-sequence()
 {
+    let $test :=
+        for $element in ($includeElements, $excludeElements)
+        return try {
+            xs:QName($element)
+        }
+        catch ($e) {
+            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
+        }
+    let $existing := manage:validateIndexName($name)
+    let $test :=
+        if(exists($existing))
+        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
+        else ()
+    let $test :=
+        if(empty($includeKeys) and empty($includeElements))
+        then error(xs:QName("manage:MISSING-KEY-OR-ELEMENT"), "Must supply at least one JSON key or XML element to be included in the field")
+        else ()
+
     let $database := xdmp:database()
     let $config := admin:database-add-field($config, $database, admin:database-field($name, false()))
     let $add :=
@@ -114,13 +133,23 @@ declare function manage:getAllFields(
 };
 
 
+(: Maps :)
 declare function manage:createJSONMap(
     $name as xs:string,
     $key as xs:string,
     $mode as xs:string
 ) as empty-sequence()
 {
-    config:setJSONMap($name, json:escapeNCName($key), $mode)
+    let $test :=
+        if(not($mode = ("equals", "contains")))
+        then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals' or 'contains'")
+        else ()
+    let $existing := manage:validateIndexName($name)
+    let $test :=
+        if(exists($existing))
+        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
+        else ()
+    return config:setJSONMap($name, json:escapeNCName($key), $mode)
 };
 
 declare function manage:createXMLMap(
@@ -129,7 +158,23 @@ declare function manage:createXMLMap(
     $mode as xs:string
 ) as empty-sequence()
 {
-    config:setXMLMap($name, $element, $mode)
+    let $test :=
+        try {
+            xs:QName($element)
+        }
+        catch ($e) {
+            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
+        }
+    let $test :=
+        if(not($mode = ("equals", "contains")))
+        then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals' or 'contains'")
+        else ()
+    let $existing := manage:validateIndexName($name)
+    let $test :=
+        if(exists($existing))
+        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
+        else ()
+    return config:setXMLMap($name, $element, $mode)
 };
 
 declare function manage:deleteMap(
@@ -171,6 +216,7 @@ declare function manage:getAllMaps(
 };
 
 
+(: Ranges :)
 declare function manage:createJSONRange(
     $name as xs:string,
     $key as xs:string,
@@ -283,6 +329,7 @@ declare function manage:getAllRanges(
 };
 
 
+(: Bucketed ranges :)
 declare function manage:createJSONBucketedRange(
     $name as xs:string,
     $key as xs:string,
@@ -476,6 +523,7 @@ declare function manage:getAllBucketedRanges(
 };
 
 
+(: Namespaces :)
 declare function manage:setNamespaceURI(
     $prefix as xs:string,
     $uri as xs:string

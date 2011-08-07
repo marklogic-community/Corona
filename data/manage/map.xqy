@@ -46,15 +46,16 @@ return
     then 
         if((empty($key) and empty($element)) or (exists($key) and exists($element)))
         then common:error(500, "Must supply either a JSON key or XML element name", "json")
-        else if(not($mode = ("equals", "contains")))
-        then common:error(500, "Map modes must be either 'equals' or 'contains'", "json")
-        else if(exists(manage:validateIndexName($name)))
-        then common:error(500, manage:validateIndexName($name), "json")
-        else if(exists($key))
-        then manage:createJSONMap($name, $key, $mode)
-        else if(exists($element))
-        then manage:createXMLMap($name, $element, $mode)
-        else ()
+        else try {
+            if(exists($key))
+            then manage:createJSONMap($name, $key, $mode)
+            else if(exists($element))
+            then manage:createXMLMap($name, $element, $mode)
+            else ()
+        }
+        catch ($e) {
+            common:error($e, "json")
+        }
 
     else if($requestMethod = "DELETE")
     then

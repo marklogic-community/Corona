@@ -76,34 +76,147 @@ mljson.removeIndexes = function(info, callback) {
 mljson.addIndexes = function(callback) {
     // These are the index to try and create
     var indexes = [
+        // Namespaces
+        {
+            "type": "namespace",
+            "prefix": "test:ns",
+            "uri": "http://test.ns/uri",
+            "shouldSucceed": false,
+            "purpose": "Should fail with invalid XML namespace prefix"
+        },
+        {
+            "type": "namespace",
+            "prefix": "testns",
+            "uri": "http://test.ns/uri",
+            "shouldSucceed": true,
+            "purpose": "Creation of XML namespace"
+        },
+
+        // Fields
         {
             "type": "field",
-            "pluralType": "fields",
             "name": "field1",
             "includes": [
                 { "type": "key", "name": "included1"},
                 { "type": "key", "name": "included2"},
                 { "type": "element", "name": "nonselment"},
+                { "type": "element", "name": "testns:nselement"}
             ],
             "excludes": [
                 { "type": "key", "name": "excluded1"},
                 { "type": "element", "name": "excludenonsel"},
+                { "type": "element", "name": "testns:excludensel"}
             ],
             "shouldSucceed": true,
-            "purpose": "General field creation",
+            "purpose": "Field with includes and excludes of JSON keys and XML elements, with and without namespaces",
         },
         {
+            "type": "field",
+            "name": "field2",
+            "includes": [],
+            "excludes": [],
+            "shouldSucceed": false,
+            "purpose": "Checking for at least one included key or element"
+        },
+        {
+            "type": "field",
+            "name": "field2",
+            "includes": [
+                { "type": "element", "name": "invalidns:included1"}
+            ],
+            "excludes": [],
+            "shouldSucceed": false,
+            "purpose": "Checking for bogus XML element names"
+        },
+        {
+            "type": "field",
+            "name": "field1",
+            "includes": [
+                { "type": "key", "name": "included1"}
+            ],
+            "excludes": [],
+            "shouldSucceed": false,
+            "purpose": "Making sure you can't have duplicate names when creating a field"
+        },
+
+        // Maps
+        {
             "type": "map",
-            "pluralType": "mappings",
             "name": "map1",
             "key": "name1",
             "mode": "contains",
             "shouldSucceed": true,
-            "purpose": "General map creation"
+            "purpose": "JSON contains map"
+        },
+        {
+            "type": "map",
+            "name": "map2",
+            "element": "element1",
+            "mode": "contains",
+            "shouldSucceed": true,
+            "purpose": "XML contains map"
+        },
+        {
+            "type": "map",
+            "name": "map3",
+            "key": "name1",
+            "mode": "equals",
+            "shouldSucceed": true,
+            "purpose": "JSON contains map"
+        },
+        {
+            "type": "map",
+            "name": "map4",
+            "element": "element1",
+            "mode": "equals",
+            "shouldSucceed": true,
+            "purpose": "XML contains map"
+        },
+        {
+            "type": "map",
+            "name": "map5",
+            "element": "testns:element1",
+            "mode": "equals",
+            "shouldSucceed": true,
+            "purpose": "XML contains map with valid namespace"
+        },
+        {
+            "type": "map",
+            "name": "map6",
+            "element": "invalidns:element1",
+            "mode": "equals",
+            "shouldSucceed": false,
+            "purpose": "XML contains map with invalid namespace"
+        },
+        {
+            "type": "map",
+            "name": "map7",
+            "key": "name1",
+            "mode": "invalidmode",
+            "shouldSucceed": false,
+            "purpose": "Checking for invalid map modes"
+        },
+        {
+            "type": "map",
+            "name": "field1",
+            "key": "name1",
+            "mode": "equals",
+            "shouldSucceed": false,
+            "purpose": "Making sure you can't have duplicate names when creating a map"
+        },
+
+        // Ranges
+        {
+            "type": "range",
+            "name": "list",
+            "key": "list",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": true,
+            "purpose": "Range index for MarkMail JSON message list"
         },
         {
             "type": "range",
-            "pluralType": "ranges",
             "name": "range1",
             "key": "date1::date",
             "datatype": "date",
@@ -113,7 +226,6 @@ mljson.addIndexes = function(callback) {
         },
         {
             "type": "range",
-            "pluralType": "ranges",
             "name": "range2",
             "key": "included1",
             "datatype": "string",
@@ -122,8 +234,18 @@ mljson.addIndexes = function(callback) {
             "purpose": "General range creation on a string"
         },
         {
+            "type": "range",
+            "name": "field1",
+            "key": "name1",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": false,
+            "purpose": "Making sure you can't have duplicate names when creating a range"
+        },
+
+        // Bucketed ranges
+        {
             "type": "bucketedrange",
-            "pluralType": "bucketedRanges",
             "name": "fromBucket",
             "key": "fromPersonal",
             "datatype": "string",
@@ -133,7 +255,6 @@ mljson.addIndexes = function(callback) {
         },
         {
             "type": "bucketedrange",
-            "pluralType": "bucketedRanges",
             "name": "fromBucketXML",
             "element": "from",
             "attribute": "personal",
@@ -143,53 +264,7 @@ mljson.addIndexes = function(callback) {
             "purpose": "Element/attribute bucketed range creation on a string"
         },
         {
-            "type": "namespace",
-            "pluralType": "xmlNamespaces",
-            "prefix": "testns",
-            "uri": "http://test.ns/uri",
-            "shouldSucceed": true,
-            "purpose": "Creation of XML namespace"
-        },
-
-        {
-            "type": "field",
-            "pluralType": "fields",
-            "name": "field1",
-            "includes": [],
-            "excludes": [],
-            "shouldSucceed": false,
-            "purpose": "Making sure you can't have duplicate names when creating a field"
-        },
-        {
-            "type": "map",
-            "pluralType": "mappings",
-            "name": "field1",
-            "key": "name1",
-            "mode": "equals",
-            "shouldSucceed": false,
-            "purpose": "Making sure you can't have duplicate names when creating a map"
-        },
-        {
-            "type": "range",
-            "pluralType": "ranges",
-            "name": "field1",
-            "key": "name1",
-            "datatype": "string",
-            "operator": "eq",
-            "shouldSucceed": false,
-            "purpose": "Making sure you can't have duplicate names when creating a range"
-        },
-        {
-            "type": "namespace",
-            "pluralType": "xmlNamespaces",
-            "prefix": "test:ns",
-            "uri": "http://test.ns/uri",
-            "shouldSucceed": false,
-            "purpose": "Should fail with invalid XML namespace prefix"
-        },
-        {
             "type": "bucketedrange",
-            "pluralType": "bucketedRanges",
             "name": "messageDate",
             "key": "date::date",
             "datatype": "date",
@@ -200,22 +275,17 @@ mljson.addIndexes = function(callback) {
             "bucketInterval": "month",
             "shouldSucceed": true,
             "purpose": "Auto-bucketed range index for MarkMail JSON message date"
-        },
-        {
-            "type": "range",
-            "pluralType": "ranges",
-            "name": "list",
-            "key": "list",
-            "datatype": "string",
-            "operator": "eq",
-            "shouldSucceed": true,
-            "purpose": "Range index for MarkMail JSON message list"
         }
     ];
 
     var compareIndexes = function(config, server) {
         if(config.type === "map") {
-            equals(config.key, server.key, "Index key matches");
+            if(config.key !== undefined) {
+                equals(config.key, server.key, "Index key matches");
+            }
+            if(config.element !== undefined) {
+                equals(config.element, server.element, "Index element matches");
+            }
             equals(config.mode, server.mode, "Index mode matches");
         }
         else if(config.type === "range") {
@@ -300,8 +370,15 @@ mljson.addIndexes = function(callback) {
                                 }
                             }
                             else {
-                                for(j = 0; j < info.indexes[config.pluralType].length; j += 1) {
-                                    var server = info.indexes[config.pluralType][j];
+                                var pluralName = {
+                                    "range": "ranges",
+                                    "namespace": "xmlNamespaces",
+                                    "field": "fields",
+                                    "map": "mappings",
+                                    "bucketedrange": "bucketedRanges"
+                                }
+                                for(j = 0; j < info.indexes[pluralName[config.type]].length; j += 1) {
+                                    var server = info.indexes[pluralName[config.type]][j];
                                     if(server.name === config.name) {
                                         foundIndex = true;
                                         compareIndexes(config, server);
@@ -331,7 +408,12 @@ mljson.addIndexes = function(callback) {
                 data.uri = index.uri;
             }
             else if(index.type === "map") {
-                data.key = index.key;
+                if(index.key !== undefined) {
+                    data.key = index.key;
+                }
+                if(index.element !== undefined) {
+                    data.element = index.element;
+                }
                 data.mode = index.mode;
             }
             else if(index.type === "field") {
@@ -403,7 +485,12 @@ mljson.addIndexes = function(callback) {
                 type: 'POST',
                 context: index,
                 success: function() {
-                    ok(true, "Index/namespace was created");
+                    if(this.shouldSucceed) {
+                        ok(true, "Index/namespace was created");
+                    }
+                    else {
+                        ok(false, "Index/namespace was created when it should have errored");
+                    }
                     processingPosition++;
                     addNextIndex();
                 },

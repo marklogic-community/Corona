@@ -52,6 +52,14 @@ declare function common:error(
             ))
 };
 
+declare function common:error(
+    $exception as element(),
+    $outputFormat as xs:string
+)
+{
+    common:error(500, $exception/*:message, "json")
+};
+
 declare function common:castFromJSONType(
     $value as xs:anySimpleType,
     $type as xs:string

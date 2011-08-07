@@ -48,17 +48,17 @@ return
         else common:error(404, "Field not found", "json")
 
     else if($requestMethod = "POST")
-    then 
-        if(exists(manage:validateIndexName($name)))
-        then common:error(500, manage:validateIndexName($name), "json")
-        else if(empty($includeKeys) and empty($includeElements))
-        then common:error(500, "Must supply at least one JSON key or XML element to be included in the field", "json")
-        else (
-            if(exists($existing))
-            then xdmp:set($config, admin:database-delete-field($config, $database, $name))
-            else (),
+    then (
+        if(exists($existing))
+        then xdmp:set($config, admin:database-delete-field($config, $database, $name))
+        else (),
+        try {
             manage:createField($name, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
-        )
+        }
+        catch ($e) {
+            common:error($e, "json")
+        }
+    )
 
     else if($requestMethod = "DELETE")
     then
