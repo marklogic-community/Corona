@@ -120,7 +120,7 @@ mljson.addIndexes = function(callback) {
         },
         {
             "type": "field",
-            "name": "field2",
+            "name": "field3",
             "includes": [
                 { "type": "element", "name": "invalidns:included1"}
             ],
@@ -222,16 +222,82 @@ mljson.addIndexes = function(callback) {
             "datatype": "date",
             "operator": "gt",
             "shouldSucceed": true,
-            "purpose": "General range creation on a date"
+            "purpose": "JSON range creation on a date"
         },
         {
             "type": "range",
             "name": "range2",
-            "key": "included1",
+            "key": "rangeKey",
             "datatype": "string",
             "operator": "eq",
             "shouldSucceed": true,
-            "purpose": "General range creation on a string"
+            "purpose": "JSON range creation on a string"
+        },
+        {
+            "type": "range",
+            "name": "range3",
+            "key": "rangeKey",
+            "datatype": "number",
+            "operator": "eq",
+            "shouldSucceed": true,
+            "purpose": "JSON range creation on a number"
+        },
+        {
+            "type": "range",
+            "name": "range4",
+            "element": "rangeKey",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": true,
+            "purpose": "XML element range creation on a string"
+        },
+        {
+            "type": "range",
+            "name": "range5",
+            "element": "testns:rangeEl",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": true,
+            "purpose": "Namespaced XML element range creation on a string"
+        },
+        {
+            "type": "range",
+            "name": "range6",
+            "element": "testns:rangeEl",
+            "attribute": "rangeAttrib",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": true,
+            "purpose": "Namespaced XML element attribute range creation on a string"
+        },
+        {
+            "type": "range",
+            "name": "range7",
+            "element": "invalidns:rangeEl",
+            "attribute": "rangeAttrib",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": false,
+            "purpose": "Invalid XML element on a element attribute range index"
+        },
+        {
+            "type": "range",
+            "name": "range8",
+            "element": "rangeEl",
+            "attribute": "invalidns:rangeAttrib",
+            "datatype": "string",
+            "operator": "eq",
+            "shouldSucceed": false,
+            "purpose": "Invalid XML element on a element attribute range index"
+        },
+        {
+            "type": "range",
+            "name": "range8",
+            "element": "rangeEl",
+            "datatype": "string",
+            "operator": "bogusoperator",
+            "shouldSucceed": false,
+            "purpose": "Invalid operator on a range index"
         },
         {
             "type": "range",
@@ -289,7 +355,15 @@ mljson.addIndexes = function(callback) {
             equals(config.mode, server.mode, "Index mode matches");
         }
         else if(config.type === "range") {
-            equals(config.key, server.key, "Index key matches");
+            if(config.key !== undefined) {
+                equals(config.key, server.key, "Index key matches");
+            }
+            if(config.element !== undefined) {
+                equals(config.element, server.element, "Index element matches");
+            }
+            if(config.attribute !== undefined) {
+                equals(config.attribute, server.attribute, "Index attribute matches");
+            }
             equals(config.datatype, server.type, "Index datatype matches");
             equals(config.operator, server.operator, "Index operator matches");
         }
@@ -441,7 +515,15 @@ mljson.addIndexes = function(callback) {
                 }
             }
             else if(index.type === "range") {
-                data.key = index.key;
+                if(index.key !== undefined) {
+                    data.key = index.key;
+                }
+                if(index.element !== undefined) {
+                    data.element = index.element;
+                }
+                if(index.attribute !== undefined) {
+                    data.attribute = index.attribute;
+                }
                 data.type = index.datatype;
                 data.operator = index.operator;
             }

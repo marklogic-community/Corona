@@ -225,6 +225,20 @@ declare function manage:createJSONRange(
     $config as element()
 ) as empty-sequence()
 {
+    let $test :=
+        if(not($type = ("string", "date", "number")))
+        then error(xs:QName("manage:INVALID-DATATYPE"), "Valid JSON types are: string, date and number")
+        else ()
+    let $test :=
+        if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
+        then error(xs:QName("manage:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
+        else ()
+    let $existing := manage:validateIndexName($name)
+    let $test :=
+        if(exists($existing))
+        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
+        else ()
+
     let $key := json:escapeNCName($key)
     let $operator :=
         if($type = "boolean")
@@ -244,9 +258,31 @@ declare function manage:createXMLElementRange(
     $config as element()
 ) as empty-sequence()
 {
-    manage:createXMLElementRangeIndex($name, $element, $type, $config)
-    ,
-    config:setXMLElementRange($name, $element, $type, $operator)
+    let $test :=
+        try {
+            xs:QName($element)
+        }
+        catch ($e) {
+            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
+        }
+    let $test :=
+        if(not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
+        then error(xs:QName("manage:INVALID-DATATYPE"), "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI")
+        else ()
+    let $test :=
+        if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
+        then error(xs:QName("manage:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
+        else ()
+    let $existing := manage:validateIndexName($name)
+    let $test :=
+        if(exists($existing))
+        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
+        else ()
+
+    return (
+        manage:createXMLElementRangeIndex($name, $element, $type, $config),
+        config:setXMLElementRange($name, $element, $type, $operator)
+    )
 };
 
 declare function manage:createXMLAttributeRange(
@@ -258,9 +294,38 @@ declare function manage:createXMLAttributeRange(
     $config as element()
 ) as empty-sequence()
 {
-    manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
-    ,
-    config:setXMLAttributeRange($name, $element, $attribute, $type, $operator)
+    let $test :=
+        try {
+            xs:QName($element)
+        }
+        catch ($e) {
+            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
+        }
+    let $test :=
+        try {
+            xs:QName($attribute)
+        }
+        catch ($e) {
+            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML attribute name or undefined namespace prefix: '", $attribute, "'"))
+        }
+    let $test :=
+        if(not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
+        then error(xs:QName("manage:INVALID-DATATYPE"), "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI")
+        else ()
+    let $test :=
+        if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
+        then error(xs:QName("manage:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
+        else ()
+    let $existing := manage:validateIndexName($name)
+    let $test :=
+        if(exists($existing))
+        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
+        else ()
+
+    return (
+        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config),
+        config:setXMLAttributeRange($name, $element, $attribute, $type, $operator)
+    )
 };
 
 declare function manage:deleteRange(

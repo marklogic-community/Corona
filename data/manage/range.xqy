@@ -54,21 +54,19 @@ return
         then common:error(500, "Must supply either a JSON key, an XML element name or XML element and attribute names", "json")
         else if(exists($attribute) and empty($element))
         then common:error(500, "Must supply an XML element along with an XML attribute", "json")
-        else if(exists($key) and not($type = ("string", "date", "number")))
-        then common:error(500, "Valid JSON types are: string, date and number", "json")
-        else if(exists($element) and not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
-        then common:error(500, "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI", "json")
-        else if(exists(manage:validateIndexName($name)))
-        then common:error(500, manage:validateIndexName($name), "json")
-        else if(exists($existing))
-        then common:error(500, "Range index with this configuration already exists", "json")
-        else if(exists($key))
-        then manage:createJSONRange($name, $key, $type, $operator, $config)
-        else if(exists($element) and exists($attribute))
-        then manage:createXMLAttributeRange($name, $element, $attribute, $type, $operator, $config)
-        else if(exists($element) and empty($attribute))
-        then manage:createXMLElementRange($name, $element, $type, $operator, $config)
-        else ()
+        else
+            try {
+                if(exists($key))
+                then manage:createJSONRange($name, $key, $type, $operator, $config)
+                else if(exists($element) and exists($attribute))
+                then manage:createXMLAttributeRange($name, $element, $attribute, $type, $operator, $config)
+                else if(exists($element) and empty($attribute))
+                then manage:createXMLElementRange($name, $element, $type, $operator, $config)
+                else ()
+            }
+            catch ($e) {
+                common:error($e, "json")
+            }
 
     else if($requestMethod = "DELETE")
     then
