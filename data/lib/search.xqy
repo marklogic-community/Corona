@@ -293,6 +293,7 @@ declare function search:bucketIndexValues(
     )
 
     let $buckets := search:getBucketsForIndex($index)
+    let $log := xdmp:log($buckets)
     let $values :=
         if($index/structure = "json")
         then
@@ -407,7 +408,7 @@ declare private function search:generateDatesWithInterval(
     for $i in (1 to 100)
     where $latestDate le $endDate
     return (
-        $latestDate,
+        adjust-dateTime-to-timezone($latestDate, ()),
         xdmp:set($latestDate, $latestDate + $interval),
         if($i = 100 and $latestDate < $endDate)
         then search:generateDatesWithInterval($latestDate, $interval, $endDate)
