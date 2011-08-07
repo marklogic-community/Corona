@@ -27,20 +27,6 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
 
-declare function manage:validateIndexName(
-    $name as xs:string?
-) as xs:string?
-{
-    if(empty($name) or string-length($name) = 0)
-    then "Must provide a name for the index"
-    else if(not(matches($name, "^[0-9A-Za-z_-]+$")))
-    then "Index names can only contain alphanumeric, dash and underscore characters"
-    else if(exists(config:get($name)))
-    then concat("An index, field or alias with the name '", $name, "' already exists")
-    else ()
-};
-
-
 (: Fields :)
 declare function manage:createField(
     $name as xs:string,
@@ -51,19 +37,10 @@ declare function manage:createField(
     $config as element()
 ) as empty-sequence()
 {
+    let $test := manage:validateIndexName($name)
     let $test :=
         for $element in ($includeElements, $excludeElements)
-        return try {
-            xs:QName($element)
-        }
-        catch ($e) {
-            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
-        }
-    let $existing := manage:validateIndexName($name)
-    let $test :=
-        if(exists($existing))
-        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
-        else ()
+        return manage:validateElementName($element)
     let $test :=
         if(empty($includeKeys) and empty($includeElements))
         then error(xs:QName("manage:MISSING-KEY-OR-ELEMENT"), "Must supply at least one JSON key or XML element to be included in the field")
@@ -140,15 +117,8 @@ declare function manage:createJSONMap(
     $mode as xs:string
 ) as empty-sequence()
 {
-    let $test :=
-        if(not($mode = ("equals", "contains")))
-        then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals' or 'contains'")
-        else ()
-    let $existing := manage:validateIndexName($name)
-    let $test :=
-        if(exists($existing))
-        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
-        else ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateMode($mode)
     return config:setJSONMap($name, json:escapeNCName($key), $mode)
 };
 
@@ -158,22 +128,9 @@ declare function manage:createXMLMap(
     $mode as xs:string
 ) as empty-sequence()
 {
-    let $test :=
-        try {
-            xs:QName($element)
-        }
-        catch ($e) {
-            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
-        }
-    let $test :=
-        if(not($mode = ("equals", "contains")))
-        then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals' or 'contains'")
-        else ()
-    let $existing := manage:validateIndexName($name)
-    let $test :=
-        if(exists($existing))
-        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
-        else ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateElementName($element)
+    let $test := manage:validateMode($mode)
     return config:setXMLMap($name, $element, $mode)
 };
 
@@ -225,19 +182,9 @@ declare function manage:createJSONRange(
     $config as element()
 ) as empty-sequence()
 {
-    let $test :=
-        if(not($type = ("string", "date", "number")))
-        then error(xs:QName("manage:INVALID-DATATYPE"), "Valid JSON types are: string, date and number")
-        else ()
-    let $test :=
-        if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
-        then error(xs:QName("manage:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
-        else ()
-    let $existing := manage:validateIndexName($name)
-    let $test :=
-        if(exists($existing))
-        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
-        else ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateJSONType($type)
+    let $test := manage:validateOperator($operator)
 
     let $key := json:escapeNCName($key)
     let $operator :=
@@ -258,26 +205,10 @@ declare function manage:createXMLElementRange(
     $config as element()
 ) as empty-sequence()
 {
-    let $test :=
-        try {
-            xs:QName($element)
-        }
-        catch ($e) {
-            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
-        }
-    let $test :=
-        if(not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
-        then error(xs:QName("manage:INVALID-DATATYPE"), "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI")
-        else ()
-    let $test :=
-        if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
-        then error(xs:QName("manage:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
-        else ()
-    let $existing := manage:validateIndexName($name)
-    let $test :=
-        if(exists($existing))
-        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
-        else ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateElementName($element)
+    let $test := manage:validateXMLType($type)
+    let $test := manage:validateOperator($operator)
 
     return (
         manage:createXMLElementRangeIndex($name, $element, $type, $config),
@@ -294,33 +225,11 @@ declare function manage:createXMLAttributeRange(
     $config as element()
 ) as empty-sequence()
 {
-    let $test :=
-        try {
-            xs:QName($element)
-        }
-        catch ($e) {
-            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
-        }
-    let $test :=
-        try {
-            xs:QName($attribute)
-        }
-        catch ($e) {
-            error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML attribute name or undefined namespace prefix: '", $attribute, "'"))
-        }
-    let $test :=
-        if(not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
-        then error(xs:QName("manage:INVALID-DATATYPE"), "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI")
-        else ()
-    let $test :=
-        if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
-        then error(xs:QName("manage:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
-        else ()
-    let $existing := manage:validateIndexName($name)
-    let $test :=
-        if(exists($existing))
-        then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), $existing)
-        else ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateElementName($element)
+    let $test := manage:validateAttributeName($attribute)
+    let $test := manage:validateXMLType($type)
+    let $test := manage:validateOperator($operator)
 
     return (
         manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config),
@@ -403,6 +312,10 @@ declare function manage:createJSONBucketedRange(
     $config as element()
 ) as empty-sequence()
 {
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateJSONType($type)
+    let $test := manage:validateBuckets($buckets, manage:jsonTypeToSchemaType($type))
+
     let $key := json:escapeNCName($key)
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
@@ -423,6 +336,12 @@ declare function manage:createJSONAutoBucketedRange(
     $config as element()
 ) as empty-sequence()
 {
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateJSONType($type)
+    let $test := manage:validateBucketInterval($bucketInterval)
+    let $test := manage:validateStartAndStop($startingAt)
+    let $test := manage:validateStartAndStop($stoppingAt)
+
     let $key := json:escapeNCName($key)
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
@@ -438,9 +357,15 @@ declare function manage:createXMLElementBucketedRange(
     $config as element()
 ) as empty-sequence()
 {
-    manage:createXMLElementRangeIndex($name, $element, $type, $config)
-    ,
-    config:setXMLElementBucketedRange($name, $element, $type, $buckets)
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateElementName($element)
+    let $test := manage:validateXMLType($type)
+    let $test := manage:validateBuckets($buckets, $type)
+
+    return (
+        manage:createXMLElementRangeIndex($name, $element, $type, $config),
+        config:setXMLElementBucketedRange($name, $element, $type, $buckets)
+    )
 };
 
 declare function manage:createXMLElementAutoBucketedRange(
@@ -456,9 +381,17 @@ declare function manage:createXMLElementAutoBucketedRange(
     $config as element()
 ) as empty-sequence()
 {
-    manage:createXMLElementRangeIndex($name, $element, $type, $config)
-    ,
-    config:setXMLElementAutoBucketedRange($name, $element, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateElementName($element)
+    let $test := manage:validateXMLType($type)
+    let $test := manage:validateBucketInterval($bucketInterval)
+    let $test := manage:validateStartAndStop($startingAt)
+    let $test := manage:validateStartAndStop($stoppingAt)
+
+    return (
+        manage:createXMLElementRangeIndex($name, $element, $type, $config),
+        config:setXMLElementAutoBucketedRange($name, $element, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
+    )
 };
 
 declare function manage:createXMLAttributeBucketedRange(
@@ -470,9 +403,16 @@ declare function manage:createXMLAttributeBucketedRange(
     $config as element()
 ) as empty-sequence()
 {
-    manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
-    ,
-    config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets)
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateElementName($element)
+    let $test := manage:validateAttributeName($attribute)
+    let $test := manage:validateXMLType($type)
+    let $test := manage:validateBuckets($buckets, $type)
+
+    return (
+        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config),
+        config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets)
+    )
 };
 
 declare function manage:createXMLAttributeAutoBucketedRange(
@@ -489,9 +429,18 @@ declare function manage:createXMLAttributeAutoBucketedRange(
     $config as element()
 ) as empty-sequence()
 {
-    manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config)
-    ,
-    config:setXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateElementName($element)
+    let $test := manage:validateAttributeName($attribute)
+    let $test := manage:validateXMLType($type)
+    let $test := manage:validateBucketInterval($bucketInterval)
+    let $test := manage:validateStartAndStop($startingAt)
+    let $test := manage:validateStartAndStop($stoppingAt)
+
+    return (
+        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config),
+        config:setXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
+    )
 };
 
 declare function manage:deleteBucketedRange(
@@ -957,4 +906,109 @@ declare private function manage:getNSAndLN(
         let $el := element { $element } { () }
         return (namespace-uri($el), local-name($el))
     else ("", $element)
+};
+
+(: Validation functions :)
+
+declare private function manage:validateIndexName(
+    $name as xs:string
+) as empty-sequence()
+{
+    if(not(matches($name, "^[0-9A-Za-z_-]+$")))
+    then error(xs:QName("manage:INVALID-INDEX-NAME"), "Index names can only contain alphanumeric, dash and underscore characters")
+    else if(exists(config:get($name)))
+    then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), concat("An index, field or alias with the name '", $name, "' already exists"))
+    else ()
+};
+
+declare private function manage:validateJSONType(
+    $type as xs:string
+) as empty-sequence()
+{
+    if(not($type = ("string", "date", "number")))
+    then error(xs:QName("manage:INVALID-DATATYPE"), "Valid JSON types are: string, date and number")
+    else ()
+};
+
+declare private function manage:validateXMLType(
+    $type as xs:string
+) as empty-sequence()
+{
+    if(not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
+    then error(xs:QName("manage:INVALID-DATATYPE"), "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI")
+    else ()
+};
+
+declare private function manage:validateOperator(
+    $operator as xs:string
+) as empty-sequence()
+{
+    if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
+    then error(xs:QName("manage:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
+    else ()
+};
+
+declare private function manage:validateMode(
+    $mode as xs:string
+) as empty-sequence()
+{
+    if(not($mode = ("equals", "contains")))
+    then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals' or 'contains'")
+    else ()
+};
+
+declare private function manage:validateElementName(
+    $element as xs:string
+) as empty-sequence()
+{
+    try {
+        xs:QName($element)[2]
+    }
+    catch ($e) {
+        error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
+    }
+};
+
+declare private function manage:validateAttributeName(
+    $attribute as xs:string
+) as empty-sequence()
+{
+    try {
+        xs:QName($attribute)[2]
+    }
+    catch ($e) {
+        error(xs:QName("manage:INVALID-XML-ATTRIBUTE-NAME"), concat("Invalid XML attribute name or undefined namespace prefix: '", $attribute, "'"))
+    }
+};
+
+declare private function manage:validateBuckets(
+    $buckets as element()+,
+    $xsType as xs:string
+) as empty-sequence()
+{
+    for $bucket at $pos in $buckets
+    return
+        if($pos mod 2 = 0 and local-name($bucket) != "boundary" or $pos mod 2 != 0 and local-name($bucket) != "label")
+        then error(xs:QName("manage:INVALID-BOUNDS-SEQUENCE"), "Bucket bounds elements need to follow the <label>, <boundary>, <label>, <boundary>, …, <label>, <boundary>, <label> pattern")
+        else if(local-name($bucket) = "boundary" and not(xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, string($bucket))))
+        then error(xs:QName("manage:INVALID-BUCKET-BOUNDARY"), concat("The bucket boundary: '", string($bucket), "' is not of the right datatype"))
+        else ()
+};
+
+declare private function manage:validateBucketInterval(
+    $interval as xs:string
+) as empty-sequence()
+{
+    if(not($interval = ("decade", "year", "quarter", "month", "week", "day", "hour", "minute")))
+    then error(xs:QName("manage:INVALID-BUCKET-INTERVAL"), "Valid bucket intervals are: decade, year, quarter, month, week, day, hour and minute")
+    else ()
+};
+
+declare private function manage:validateStartAndStop(
+    $value as xs:anySimpleType?
+) as empty-sequence()
+{
+    if(exists($value) and not($value castable as xs:dateTime))
+    then error(xs:QName("manage:INVALID-BUCKET-BOUNDS"), "Bucket starting at and stopping at values must be dateTime values")
+    else ()
 };

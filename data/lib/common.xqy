@@ -57,6 +57,7 @@ declare function common:error(
     $outputFormat as xs:string
 )
 {
+    xdmp:log($exception),
     common:error(500, $exception/*:message, "json")
 };
 
