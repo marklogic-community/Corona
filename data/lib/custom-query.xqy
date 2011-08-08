@@ -17,6 +17,7 @@ limitations under the License.
 module namespace customquery="http://marklogic.com/mljson/custom-query";
 
 import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
+import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 import module namespace search="http://marklogic.com/mljson/search" at "search.xqy";
 import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
@@ -29,7 +30,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare function customquery:getCTS(
     $json as xs:string,
     $ignoreRange as xs:string?
-) as cts:query
+) as cts:query?
 {
     let $tree := json:jsonToXML($json)
     return customquery:dispatch($tree, $ignoreRange)
@@ -150,7 +151,7 @@ declare private function customquery:dispatch(
         $step/json:range[@type = "object"],
         $step/json:equals[@type = "object"],
         $step/json:contains[@type = "object"],
-        $step/json:collection[@type = "string"],
+        $step/json:collection[@type = ("string", "array")],
         $step/json:geo[@type = "object"],
         $step/json:point[@type = "object"],
         $step/json:circle[@type = "object"],
@@ -176,8 +177,8 @@ declare private function customquery:process(
     case element(json:equals) return customquery:handleEquals($step)
     case element(json:contains) return customquery:handleContains($step)
     case element(json:collection) return customquery:handleCollection($step)
-    case element(json:geo) return customquery:handleGeo($step, $ignoreRange)
-    case element(json:region) return for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreRange)
+    case element(json:geo) return customquery:handleGeo($step)
+    case element(json:region) return customquery:handleRegion($step)
     case element(json:point) return customquery:handleGeoPoint($step)
     case element(json:circle) return customquery:handleGeoCircle($step)
     case element(json:box) return customquery:handleGeoBox($step)
@@ -207,7 +208,7 @@ declare private function customquery:handleRange(
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
     where if(exists($ignoreRange)) then $indexName != $ignoreRange else true() and exists($index)
     return
-        if($index/@type = "bucketedrange" and exists($step/json:bucketLabel))
+        if($index/@type = ("bucketedrange", "autobucketedrange") and exists($step/json:bucketLabel))
         then search:bucketLabelToQuery($index, string($step/json:bucketLabel), $options, $weight)
 
         else if(exists($step/json:from) and exists($step/json:to))
@@ -237,6 +238,12 @@ declare private function customquery:handleEquals(
         then
             let $key := $step/json:key
             let $castAs := json:castAs($key, true())
+            let $values :=
+                if($castAs = "date")
+                then
+                    for $value in $values
+                    return string(dateparser:parse($value))
+                else $values
             let $QName := xs:QName(concat("json:", json:escapeNCName($key)))
             return 
                 if(exists($step/json:value/@boolean) or ($step/json:value/@type = "array" and count($step/json:value/json:item/@boolean) = count($step/json:value/json:item)))
@@ -277,8 +284,7 @@ declare private function customquery:handleCollection(
 };
 
 declare private function customquery:handleGeo(
-    $step as element(json:geo),
-    $ignoreRange as xs:string?
+    $step as element(json:geo)
 ) as cts:query?
 {
     let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
@@ -306,16 +312,34 @@ declare private function customquery:handleGeo(
         else if(exists($step/json:longElement[@type = "string"]))
         then xs:QName($step/json:longElement)
         else ()
+    let $latAttribute :=
+        if(exists($step/json:latAttribute[@type = "string"]))
+        then xs:QName($step/json:latAttribute)
+        else ()
+    let $longAttribute :=
+        if(exists($step/json:longAttribute[@type = "string"]))
+        then xs:QName($step/json:longAttribute)
+        else ()
 
-    where exists($latLongPair) or (exists($latKey) and exists($longKey))
     return
         if(exists($parent) and exists($latKey) and exists($longKey))
-        then cts:element-pair-geospatial-query($parent, $latKey, $longKey, customquery:process($step/json:region, $ignoreRange), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-pair-geospatial-query($parent, $latKey, $longKey, customquery:process($step/json:region, ()), customquery:extractOptions($step, "geo"), $weight)
         else if(exists($parent) and exists($latLongPair))
-        then cts:element-child-geospatial-query($parent, $latLongPair, customquery:process($step/json:region, $ignoreRange), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-child-geospatial-query($parent, $latLongPair, customquery:process($step/json:region, ()), customquery:extractOptions($step, "geo"), $weight)
+        else if(exists($parent) and exists($latAttribute) and exists($longAttribute))
+        then cts:element-attribute-pair-geospatial-query($parent, $latAttribute, $longAttribute, customquery:process($step/json:region, ()), customquery:extractOptions($step, "geo"), $weight)
         else if(exists($latLongPair))
-        then cts:element-geospatial-query($latLongPair, customquery:process($step/json:region, $ignoreRange), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-geospatial-query($latLongPair, customquery:process($step/json:region, ()), customquery:extractOptions($step, "geo"), $weight)
         else ()
+};
+
+declare private function customquery:handleRegion(
+    $step as element()
+)
+{
+    if($step[@type = "array"])
+    then for $item in $step/json:item[@type = "object"] return customquery:process($item, ())
+    else customquery:dispatch($step, ())
 };
 
 declare private function customquery:handleGeoPoint(

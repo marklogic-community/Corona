@@ -139,6 +139,11 @@ declare function search:rangeValueToQuery(
     $weight as xs:double?
 ) as cts:query?
 {
+    let $operatorOverride :=
+        if(string-length($operatorOverride))
+        then $operatorOverride
+        else ()
+    let $operator := common:humanOperatorToMathmatical(($operatorOverride, string($index/operator))[1])
     let $values :=
         for $value in $values
         let $type :=
@@ -152,7 +157,6 @@ declare function search:rangeValueToQuery(
 
         where $type = "dateTime" or xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $type, $value)
         return common:castAs($value, $type)
-    let $log := xdmp:log($values)
     let $options :=
         if($index/type = "string")
         then ($options, "collation=http://marklogic.com/collation/")
@@ -163,17 +167,17 @@ declare function search:rangeValueToQuery(
         if($index/structure = "json")
         then
             if($index/type = "boolean")
-            then cts:element-attribute-range-query($JSONQName, xs:QName("boolean"), "=", $values, $weight)
+            then cts:element-attribute-range-query($JSONQName, xs:QName("boolean"), "=", $values, $options, $weight)
 
             else if($index/type = "date")
-            then cts:element-attribute-range-query($JSONQName, xs:QName("normalized-date"), common:humanOperatorToMathmatical($index/operator), $values, $weight)
+            then cts:element-attribute-range-query($JSONQName, xs:QName("normalized-date"), $operator, $values, $options, $weight)
 
-            else cts:element-range-query($JSONQName, common:humanOperatorToMathmatical($index/operator), $values, $options, $weight)
+            else cts:element-range-query($JSONQName, $operator, $values, $options, $weight)
         else if($index/structure = "xmlelement")
-        then cts:element-range-query(xs:QName($index/element), common:humanOperatorToMathmatical($index/operator), $values, $options, $weight)
+        then cts:element-range-query(xs:QName($index/element), $operator, $values, $options, $weight)
 
         else if($index/structure = "xmlattribute")
-        then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), common:humanOperatorToMathmatical($index/operator), $values, $weight)
+        then cts:element-attribute-range-query(xs:QName($index/element), xs:QName($index/attribute), $operator, $values, $options, $weight)
         else ()
 };
 
@@ -294,7 +298,6 @@ declare function search:bucketIndexValues(
     )
 
     let $buckets := search:getBucketsForIndex($index)
-    let $log := xdmp:log($buckets)
     let $values :=
         if($index/structure = "json")
         then
