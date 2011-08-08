@@ -150,13 +150,14 @@ declare function search:rangeValueToQuery(
             then "decimal"
             else "string"
 
-        where xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $type, $value)
+        where $type = "dateTime" or xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $type, $value)
         return common:castAs($value, $type)
+    let $log := xdmp:log($values)
     let $options :=
         if($index/type = "string")
         then ($options, "collation=http://marklogic.com/collation/")
         else $options
-    let $JSONQName := xs:QName(concat("json:", $index/key))
+    let $JSONQName := if(exists($index/key)) then xs:QName(concat("json:", $index/key)) else ()
     where $index/@type = ("range", "bucketedrange", "autobucketedrange")
     return
         if($index/structure = "json")

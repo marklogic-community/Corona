@@ -270,9 +270,9 @@ declare private function parser:notQuery(
 };
 
 declare private function parser:nearQuery(
-	$term as element(notQuery),
+	$term as element(nearQuery),
     $ignoreField as xs:string?
-) as cts:query
+) as cts:near-query
 {
 	cts:near-query(parser:dispatchQueryTree($term, $ignoreField), $term/@distance)
 };
@@ -295,7 +295,7 @@ declare private function parser:constraintQuery(
         else if($index/@type = "range")
         then search:rangeValueToQuery($index, $value)
 
-        else if($index/@type = "bucketedrange")
+        else if($index/@type = ("bucketedrange", "autobucketedrange"))
         then search:bucketLabelToQuery($index, $value)
 
         else parser:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)

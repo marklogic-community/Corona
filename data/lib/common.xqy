@@ -105,7 +105,7 @@ declare function common:castAs(
     else if($type = "float") then xs:float($value)
     else if($type = "double") then xs:double($value)
     else if($type = "duration") then xs:duration($value)
-    else if($type = "dateTime") then xs:dateTime($value)
+    else if($type = "dateTime") then dateparser:parse($value)
     else if($type = "time") then xs:time($value)
     else if($type = "date") then xs:date($value)
     else if($type = "gYearMonth") then xs:gYearMonth($value)
