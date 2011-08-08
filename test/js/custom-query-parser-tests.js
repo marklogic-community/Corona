@@ -193,6 +193,24 @@ mljson.queries = [
         "purpose": "And not query"
     },
 
+    /* isNULL */
+    {
+        "query": { "isNULL": {
+            "key": "foo"
+        }},
+        "result": '<cts:element-attribute-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:attribute>type</cts:attribute> <cts:text xml:lang="en">null</cts:text></cts:element-attribute-value-query>',
+        "purpose": "isNULL query"
+    },
+
+    /* keyExists */
+    {
+        "query": { "keyExists": {
+            "key": "foo"
+        }},
+        "result": '<cts:element-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:and-query/></cts:element-query>',
+        "purpose": "keyExists query"
+    },
+
     /* Collection */
     {
         "query": { "collection": "foo" },
@@ -205,7 +223,7 @@ mljson.queries = [
         "purpose": "Collection query with an array of values"
     },
 
-    /* Collection */
+    /* Properties */
     {
         "query": { "property": { "equals": {
                 "key": "foo",

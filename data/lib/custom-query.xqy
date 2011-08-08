@@ -147,6 +147,8 @@ declare private function customquery:dispatch(
         $step/json:or[@type = "array"],
         $step/json:not[@type = "object"],
         $step/json:andNot[@type = "object"],
+        $step/json:isNULL[@type = "object"],
+        $step/json:keyExists[@type = "object"],
         $step/json:property[@type = "object"],
         $step/json:range[@type = "object"],
         $step/json:equals[@type = "object"],
@@ -172,6 +174,8 @@ declare private function customquery:process(
     case element(json:or) return cts:or-query(for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreRange))
     case element(json:not) return cts:not-query(customquery:dispatch($step, $ignoreRange))
     case element(json:andNot) return customquery:handleAndNot($step, $ignoreRange)
+    case element(json:isNULL) return customquery:handleIsNULL($step)
+    case element(json:keyExists) return customquery:handleKeyExists($step)
     case element(json:property) return cts:properties-query(customquery:dispatch($step, $ignoreRange))
     case element(json:range) return customquery:handleRange($step, $ignoreRange)
     case element(json:equals) return customquery:handleEquals($step)
@@ -195,6 +199,27 @@ declare private function customquery:handleAndNot(
     let $negative := $step/json:negative[@type = "object"]
     where exists($positive) and exists($negative)
     return cts:and-not-query(customquery:dispatch($positive, $ignoreRange), customquery:dispatch($negative, $ignoreRange))
+};
+
+declare private function customquery:handleIsNULL(
+    $step as element(json:isNULL)
+) as cts:element-attribute-value-query?
+{
+    if(exists($step/json:key))
+    then
+        let $QName := xs:QName(concat("json:", json:escapeNCName($step/json:key)))
+        let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
+        return cts:element-attribute-value-query($QName, xs:QName("type"), "null", (), $weight)
+    else ()
+};
+
+declare private function customquery:handleKeyExists(
+    $step as element(json:keyExists)
+) as cts:element-query?
+{
+    if(exists($step/json:key))
+    then cts:element-query(xs:QName(concat("json:", json:escapeNCName($step/json:key))), cts:and-query(()))
+    else ()
 };
 
 declare private function customquery:handleRange(
