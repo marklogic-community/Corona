@@ -49,6 +49,11 @@ mljson.queries = [
         "purpose": "Field constraint"
     },
     {
+        "query": 'field1:foo OR field1:bar',
+        "result": '<cts:or-query xmlns:cts="http://marklogic.com/cts"> <cts:field-word-query> <cts:field>field1</cts:field> <cts:text xml:lang="en">foo</cts:text> </cts:field-word-query> <cts:field-word-query> <cts:field>field1</cts:field> <cts:text xml:lang="en">bar</cts:text> </cts:field-word-query></cts:or-query>',
+        "purpose": "Field constraint"
+    },
+    {
         "query": 'map1:foo',
         "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:name1</cts:element> <cts:text xml:lang="en">foo</cts:text></cts:element-word-query>',
         "purpose": "Map constraint"
