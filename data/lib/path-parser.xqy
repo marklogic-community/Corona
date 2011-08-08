@@ -43,6 +43,14 @@ declare function path:select(
             else $parts
 };
 
+declare function path:parse(
+    $path as xs:string
+) as xs:string
+{
+    let $tokens := path:tokenize($path)
+    return path:constructPath($tokens)
+};
+
 declare private function path:tokenize(
     $path as xs:string
 ) as element()*
@@ -192,7 +200,7 @@ declare private function path:processWildstep(
         else path:throwError($tokens, $index + 1, "expected either a dot, a quoted step or an array index")
     return
         if(count($tokens) = $index)
-        then "/*"
+        then "*"
         else if($index = 1)
         then "/"
         else ""
