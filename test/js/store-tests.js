@@ -93,16 +93,31 @@ mljson.documents = [
     }
 ];
 
-mljson.constructURL = function(doc, prefix, withExtras) {
+mljson.constructURL = function(doc, prefix, processExtras) {
     var extras = "";
-    if(withExtras) {
+
+    var permissionArg = "permission";
+    var propertyArg = "property";
+    var collectionArg = "collection";
+    if(processExtras === "add") {
+        permissionArg = "addPermission";
+        propertyArg = "addProperty";
+        collectionArg = "addCollection";
+    }
+    if(processExtras === "remove") {
+        permissionArg = "removePermission";
+        propertyArg = "removeProperty";
+        collectionArg = "removeCollection";
+    }
+
+    if(processExtras !== "ignore") {
         if(doc.permissions !== undefined) {
             for(var role in doc.permissions) {
                 if(!(doc.permissions[role] instanceof Function)) {
                     var roles = doc.permissions[role];
                     var j = 0;
                     for(j = 0; j < roles.length; j += 1) {
-                        extras += "permission=" + role + ":" + roles[j] + "&";
+                        extras += permissionArg + "=" + role + ":" + roles[j] + "&";
                     }
                 }
             }
@@ -111,14 +126,19 @@ mljson.constructURL = function(doc, prefix, withExtras) {
             for(var property in doc.properties) {
                 if(!(doc.properties[property] instanceof Function)) {
                     var value = doc.properties[property];
-                    extras += "property=" + property + ":" + value + "&";
+                    if(propertyArg === "removeProperty") {
+                        extras += propertyArg + "=" + property + "&";
+                    }
+                    else {
+                        extras += propertyArg + "=" + property + ":" + value + "&";
+                    }
                 }
             }
         }
         if(doc.collections !== undefined) {
             var j = 0;
             for(j = 0; j < doc.collections.length; j += 1) {
-                extras += "collection=" + doc.collections[j] + "&";
+                extras += collectionArg + "=" + doc.collections[j] + "&";
             }
         }
         if(doc.quality !== undefined) {
@@ -159,6 +179,11 @@ mljson.compareJSONDocuments = function(model, actual, withExtras) {
             equal(model.quality, actual.quality, "Quality matches");
         }
     }
+    else {
+        deepEqual(actual.permissions, {}, "No permisssions");
+        deepEqual(actual.properties, {}, "No properties");
+        deepEqual(actual.collections, [], "No collections");
+    }
 
     deepEqual(model.content, actual.content, "Content matches");
 };
@@ -196,15 +221,19 @@ mljson.insertDocuments = function(prefix, withExtras) {
                 if(doc.type === "json") {
                     docContent = JSON.stringify(docContent);
                 }
+                var processExtras = "ignore";
+                if(withExtras) {
+                    processExtras = "set";
+                }
                 $.ajax({
-                    url: mljson.constructURL(doc, prefix, withExtras),
+                    url: mljson.constructURL(doc, prefix, processExtras),
                     type: 'PUT',
                     data: docContent,
                     context: doc,
                     success: function() {
                         ok(true, "Inserted document");
                         $.ajax({
-                            url: mljson.constructURL(doc, prefix, false) + "include=all",
+                            url: mljson.constructURL(doc, prefix, "ignore") + "include=all",
                             type: 'GET',
                             context: this,
                             success: function(data) {
@@ -216,7 +245,7 @@ mljson.insertDocuments = function(prefix, withExtras) {
                                 }
 
                                 if(withExtras === false) {
-                                    mljson.addExtras(prefix, this);
+                                    mljson.setExtras(prefix, this);
                                 }
                                 else {
                                     mljson.deleteDocument(prefix, this);
@@ -239,16 +268,88 @@ mljson.insertDocuments = function(prefix, withExtras) {
     }
 };
 
-mljson.addExtras = function(prefix, doc) {
+mljson.setExtras = function(prefix, doc) {
     asyncTest("Setting document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: mljson.constructURL(doc, prefix, true),
+            url: mljson.constructURL(doc, prefix, "set"),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  mljson.constructURL(doc, prefix, false) + "include=all",
+                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
+                    type: 'GET',
+                    context: this,
+                    success: function(data) {
+                        if(this.type === "json") {
+                            mljson.compareJSONDocuments(this, JSON.parse(data), true);
+                        }
+                        else {
+                            mljson.compareXMLDocuments(this, data, true);
+                        }
+                        mljson.removeExtras(prefix, doc);
+                    },
+                    error: function(j, t, error) {
+                        ok(false, "Could not fetch document");
+                    },
+                    complete: function() {
+                        start();
+                    }
+                });
+            },
+            error: function(j, t, error) {
+                ok(false, "Could not update document extras");
+            }
+        });
+    });
+};
+
+mljson.removeExtras = function(prefix, doc) {
+    asyncTest("Removing document extras: " + prefix + doc.uri, function() {
+        $.ajax({
+            url: mljson.constructURL(doc, prefix, "remove"),
+            type: 'POST',
+            context: doc,
+            success: function() {
+                ok(true, "Updated document extras");
+                $.ajax({
+                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
+                    type: 'GET',
+                    context: this,
+                    success: function(data) {
+                        if(this.type === "json") {
+                            mljson.compareJSONDocuments(this, JSON.parse(data), false);
+                        }
+                        else {
+                            mljson.compareXMLDocuments(this, data, false);
+                        }
+                        mljson.addExtras(prefix, doc);
+                    },
+                    error: function(j, t, error) {
+                        ok(false, "Could not fetch document");
+                    },
+                    complete: function() {
+                        start();
+                    }
+                });
+            },
+            error: function(j, t, error) {
+                ok(false, "Could not update document extras");
+            }
+        });
+    });
+};
+
+mljson.addExtras = function(prefix, doc) {
+    asyncTest("Adding document extras: " + prefix + doc.uri, function() {
+        $.ajax({
+            url: mljson.constructURL(doc, prefix, "add"),
+            type: 'POST',
+            context: doc,
+            success: function() {
+                ok(true, "Updated document extras");
+                $.ajax({
+                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -278,13 +379,13 @@ mljson.addExtras = function(prefix, doc) {
 mljson.deleteDocument = function(prefix, doc) {
     asyncTest("Deleting document: " + prefix + doc.uri, function() {
         $.ajax({
-            url: mljson.constructURL(doc, prefix, false),
+            url: mljson.constructURL(doc, prefix, "remove"),
             type: 'DELETE',
             context: doc,
             success: function() {
                 ok(true, "Deleted document");
                 $.ajax({
-                    url:  mljson.constructURL(doc, prefix, false) + "include=all",
+                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {

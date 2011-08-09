@@ -24,52 +24,6 @@ import module namespace path="http://marklogic.com/mljson/path-parser" at "path-
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
-import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
-
-(:
-    Functions to retrieve request information
-:)
-
-declare function reststore:permissionsFromRequest(
-) as element()*
-{
-    for $permission in xdmp:get-request-field("permission", ())
-    let $bits := tokenize($permission, ":")
-    let $user := string-join($bits[1 to last() - 1], ":")
-    let $access := $bits[last()]
-    where exists($user) and $access = ("update", "read", "execute")
-    return xdmp:permission($user, $access)
-};
-
-declare function reststore:propertiesFromRequest(
-) as element()*
-{
-    for $property in xdmp:get-request-field("property", ())
-    let $bits := tokenize($property, ":")
-    let $name := $bits[1]
-    let $value := string-join($bits[2 to last()], ":")
-    let $date := dateparser:parse($value)
-    let $dateAttribute := if(exists($date)) then attribute normalized-date { $date } else ()
-    where exists($name)
-    return element { QName("http://marklogic.com/reststore", $name) } { ($dateAttribute, $value) }
-};
-
-declare function reststore:collectionsFromRequest(
-) as xs:string*
-{
-    xdmp:get-request-field("collection", ())
-};
-
-declare function reststore:qualityFromRequest(
-) as xs:integer?
-{
-    let $quality := xdmp:get-request-field("quality", ())[1]
-    return
-        if($quality castable as xs:integer)
-        then xs:integer($quality)
-        else ()
-};
-
 
 (:
     JSON Document management
@@ -170,18 +124,6 @@ declare private function reststore:outputJSONDocument(
     if($includeQuality)
     then ("quality", reststore:getDocumentQuality($uri))
     else ()
-};
-
-declare function reststore:insertJSONDocument(
-    $uri as xs:string,
-    $content as xs:string
-) as xs:string?
-{
-    let $collections := reststore:collectionsFromRequest()
-    let $properties := reststore:propertiesFromRequest()
-    let $permissions := reststore:permissionsFromRequest()
-    let $quality := reststore:qualityFromRequest()
-    return reststore:insertJSONDocument($uri, $content, $collections, $properties, $permissions, $quality)
 };
 
 declare function reststore:insertJSONDocument(
@@ -341,18 +283,6 @@ declare private function reststore:outputXMLDocument(
 
 declare function reststore:insertXMLDocument(
     $uri as xs:string,
-    $content as xs:string
-) as element()?
-{
-    let $collections := reststore:collectionsFromRequest()
-    let $properties := reststore:propertiesFromRequest()
-    let $permissions := reststore:permissionsFromRequest()
-    let $quality := reststore:qualityFromRequest()
-    return reststore:insertXMLDocument($uri, $content, $collections, $properties, $permissions, $quality)
-};
-
-declare function reststore:insertXMLDocument(
-    $uri as xs:string,
     $content as xs:string,
     $collections as xs:string*,
     $properties as element()*,
@@ -429,6 +359,25 @@ declare function reststore:setProperties(
     else ()
 };
 
+declare function reststore:addProperties(
+    $uri as xs:string,
+    $properties as element()*
+) as empty-sequence()
+{
+    xdmp:document-add-properties($uri, $properties)
+};
+
+declare function reststore:removeProperties(
+    $uri as xs:string,
+    $properties as xs:string*
+) as empty-sequence()
+{
+    let $properties :=
+        for $prop in $properties
+        return QName("http://marklogic.com/reststore", $prop)
+    return xdmp:document-remove-properties($uri, $properties)
+};
+
 declare function reststore:setPermissions(
     $uri as xs:string,
     $permissions as element()*
@@ -437,6 +386,22 @@ declare function reststore:setPermissions(
     if(exists($permissions))
     then xdmp:document-set-permissions($uri, $permissions)
     else ()
+};
+
+declare function reststore:addPermissions(
+    $uri as xs:string,
+    $permissions as element()*
+) as empty-sequence()
+{
+    xdmp:document-add-permissions($uri, $permissions)
+};
+
+declare function reststore:removePermissions(
+    $uri as xs:string,
+    $permissions as element()*
+) as empty-sequence()
+{
+    xdmp:document-remove-permissions($uri, $permissions)
 };
 
 declare function reststore:setCollections(
@@ -450,6 +415,22 @@ declare function reststore:setCollections(
         if(exists($doc/json:json))
         then xdmp:document-set-collections($uri, ($const:JSONCollection, $collections))
         else xdmp:document-set-collections($uri, ($const:XMLCollection, $collections))
+};
+
+declare function reststore:addCollections(
+    $uri as xs:string,
+    $collections as xs:string*
+) as empty-sequence()
+{
+    xdmp:document-add-collections($uri, $collections)
+};
+
+declare function reststore:removeCollections(
+    $uri as xs:string,
+    $collections as xs:string*
+) as empty-sequence()
+{
+    xdmp:document-remove-collections($uri, $collections)
 };
 
 declare function reststore:setQuality(
