@@ -617,10 +617,30 @@ declare function manage:addContentItem(
     let $existing := config:getContentItems()
     let $new := (
         for $item in $existing
-        where not($item/@type = $type and $item = $QName)
+        where not($item/@type = $type and $item = $QName) or exists($item/@element)
         return $item
         ,
         <item type="{ $type }" weight="{ $weight }">{ $QName }</item>
+    )
+    return config:setContentItems($new)
+};
+
+declare function manage:addContentItem(
+    $type as xs:string,
+    $elementName as xs:string,
+    $attributeName as xs:string,
+    $weight as xs:decimal
+) as empty-sequence()
+{
+    let $test := manage:validateElementName($elementName)
+    let $test := manage:validateAttributeName($attributeName)
+    let $existing := config:getContentItems()
+    let $new := (
+        for $item in $existing
+        where not($item/@type = $type and $item/@element = $elementName and $item = $attributeName) or empty($item/@element)
+        return $item
+        ,
+        <item type="attribute" element="{ $elementName }" weight="{ $weight }">{ $attributeName }</item>
     )
     return config:setContentItems($new)
 };
@@ -641,6 +661,19 @@ declare function manage:deleteContentItem(
     return config:setContentItems($new)
 };
 
+declare function manage:deleteContentItem(
+    $type as xs:string,
+    $elementName as xs:string,
+    $attributeName as xs:string
+) as empty-sequence()
+{
+    config:setContentItems(
+        for $item in config:getContentItems()
+        where not($item/@type = $type and $item/@element = $elementName and $item = $attributeName)
+        return $item
+    )
+};
+
 declare function manage:getContentItem(
     $type as xs:string,
     $name as xs:string
@@ -651,9 +684,25 @@ declare function manage:getContentItem(
         then json:escapeNCName($name)
         else $name
     for $item in config:getContentItems()
+    let $Log := xdmp:log($item)
     where $item/@type = $type and $item = $QName
     return json:object((
         string($item/@type), $name,
+        "weight", xs:decimal($item/@weight)
+    ))
+};
+
+declare function manage:getContentItem(
+    $type as xs:string,
+    $elementName as xs:string,
+    $attributeName as xs:string
+) as element(json:item)?
+{
+    for $item in config:getContentItems()
+    where $item/@type = $type and $item/@element = $elementName and $item = $attributeName
+    return json:object((
+        "element", $elementName,
+        "attribute", $attributeName,
         "weight", xs:decimal($item/@weight)
     ))
 };
@@ -667,6 +716,9 @@ declare function manage:getAllContentItems(
         then json:unescapeNCName($item)
         else string($item)
     return json:object((
+        if($item/@type = "attribute")
+        then ("element", string($item/@element))
+        else (),
         string($item/@type), $name,
         "weight", xs:decimal($item/@weight)
     ))

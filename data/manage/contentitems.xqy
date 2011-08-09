@@ -30,20 +30,25 @@ let $params := rest:process-request(endpoints:request("/data/manage/contentitems
 let $requestMethod := xdmp:get-request-method()
 let $key := map:get($params, "key")
 let $element := map:get($params, "element")
+let $attribute := map:get($params, "attribute")
 let $field := map:get($params, "field")
 let $weight := map:get($params, "weight")
 
 let $existing :=
     if(exists($key))
     then manage:getContentItem("key", $key)
+    else if(exists($element) and exists($attribute))
+    then manage:getContentItem("attribute", $element, $attribute)
     else if(exists($element))
     then manage:getContentItem("element", $element)
+    else if(exists($field))
+    then manage:getContentItem("field", $field)
     else ()
 
 return
     if($requestMethod = "GET")
     then
-        if(empty(($key, $element, $field)))
+        if(empty(($key, $element, $attribute, $field)))
         then json:xmlToJSON(json:array(manage:getAllContentItems()))
         else if(exists($existing))
         then json:xmlToJSON($existing)
@@ -54,6 +59,8 @@ return
         try {
             if(exists($key))
             then manage:addContentItem("key", $key, $weight)
+            else if(exists($element) and exists($attribute))
+            then manage:addContentItem("attribute", $element, $attribute, $weight)
             else if(exists($element))
             then manage:addContentItem("element", $element, $weight)
             else if(exists($field))
@@ -70,6 +77,8 @@ return
         then
             if(exists($key))
             then manage:deleteContentItem("key", $key)
+            else if(exists($element) and exists($attribute))
+            then manage:deleteContentItem("attribute", $element, $attribute)
             else if(exists($element))
             then manage:deleteContentItem("element", $element)
             else if(exists($field))

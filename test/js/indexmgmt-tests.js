@@ -18,7 +18,8 @@ mljson.removeIndexes = function(info, callback) {
         indexes.push({"type": "bucketedrange", "name": info.indexes.bucketedRanges[i].name});
     }
     for(i = 0; i < info.contentItems.length; i += 1) {
-        indexes.push({"type": "contentItem", "name": "content item", "key": info.contentItems[i].key, "element": info.contentItems[i].element});
+        var item = info.contentItems[i];
+        indexes.push({"type": "contentItem", "name": "content item", "key": item.key, "element": item.element, "attribute": item.attribute, "field": item.field});
     }
     for(i = 0; i < info.xmlNamespaces.length; i += 1) {
         indexes.push({"type": "namespace", "name": info.xmlNamespaces[i].prefix});
@@ -60,8 +61,14 @@ mljson.removeIndexes = function(info, callback) {
                 if(index.key !== undefined) {
                     url += "key=" + escape(index.key)
                 }
-                else if(index.element !== undefined) {
+                if(index.element !== undefined) {
                     url += "element=" + escape(index.element)
+                }
+                if(index.attribute !== undefined) {
+                    url += "attribute=" + escape(index.attribute)
+                }
+                if(index.field !== undefined) {
+                    url += "field=" + escape(index.field)
                 }
             }
             $.ajax({
@@ -73,6 +80,7 @@ mljson.removeIndexes = function(info, callback) {
                     removeNextIndex();
                 },
                 error: function(j, t, error) {
+                console.log(index);
                     ok(false, "Could not delete " + index.type + ": " + error);
                 },
                 complete: function() {
@@ -117,7 +125,15 @@ mljson.addIndexes = function(callback) {
             "element": "testns:subject",
             "weight": 8,
             "shouldSucceed": true,
-            "purpose": "Adding a JSON key as a content item"
+            "purpose": "Adding a XML element as a content item"
+        },
+        {
+            "type": "contentItem",
+            "element": "testns:subject",
+            "attribute": "normalized",
+            "weight": 8,
+            "shouldSucceed": true,
+            "purpose": "Adding a XML attribute as a content item"
         },
         {
             "type": "contentItem",
@@ -502,12 +518,15 @@ mljson.addIndexes = function(callback) {
                                 var foundContentItem = false;
                                 for(j = 0; j < info.contentItems.length; j += 1) {
                                     var server = info.contentItems[j];
-                                    if(server.element === config.element && server.key === config.key && server.field === config.field && server.weight === config.weight) {
+                                    if(server.element === config.element && server.attribute === config.attribute && server.key === config.key && server.field === config.field && server.weight === config.weight) {
                                         foundContentItem = true;
                                     }
                                 }
                                 if(config.key) {
                                     ok(foundContentItem, "Found content item: " + config.key);
+                                }
+                                else if(config.element && config.attribute) {
+                                    ok(foundContentItem, "Found content item: " + config.attribute);
                                 }
                                 else if(config.element) {
                                     ok(foundContentItem, "Found content item: " + config.element);
@@ -558,6 +577,7 @@ mljson.addIndexes = function(callback) {
                 url = "/manage/contentItem";
                 data.key = index.key;
                 data.element = index.element;
+                data.attribute = index.attribute;
                 data.field = index.field;
                 data.weight = index.weight;
             }

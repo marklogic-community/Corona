@@ -173,6 +173,10 @@ declare function config:setContentItems(
         for $item in $items[@type = "element"]
         return concat(string($item), "=", $item/@weight)
     , "|")
+    let $attributes := string-join(
+        for $item in $items[@type = "attribute"]
+        return concat($item/@element, "@", string($item), "=", $item/@weight)
+    , "|")
     let $keys := string-join(
         for $item in $items[@type = "key"]
         return concat(string($item), "=", $item/@weight)
@@ -181,7 +185,7 @@ declare function config:setContentItems(
         for $item in $items[@type = "field"]
         return concat(string($item), "=", $item/@weight)
     , "|")
-    return prop:set("mljson-content-items", concat($elements, "/", $keys, "/", $fields))
+    return prop:set("mljson-content-items", concat($elements, "/", $attributes, "/", $keys, "/", $fields))
 };
 
 declare function config:getContentItems(
@@ -192,15 +196,20 @@ declare function config:getContentItems(
         for $item in tokenize($bits[1], "\|")
         let $elementBits := tokenize($item, "=")
         return <item type="element" weight="{ $elementBits[2] }">{ $elementBits[1] }</item>
-    let $keys :=
+    let $attributes :=
         for $item in tokenize($bits[2], "\|")
+        let $attributeBits := tokenize($item, "=")
+        let $nameBits := tokenize($attributeBits[1], "@")
+        return <item type="attribute" element="{ $nameBits[1] }" weight="{ $attributeBits[2] }">{ $nameBits[2] }</item>
+    let $keys :=
+        for $item in tokenize($bits[3], "\|")
         let $keyBits := tokenize($item, "=")
         return <item type="key" weight="{ $keyBits[2] }">{ $keyBits[1] }</item>
     let $fields :=
-        for $item in tokenize($bits[3], "\|")
+        for $item in tokenize($bits[4], "\|")
         let $fieldBits := tokenize($item, "=")
         return <item type="field" weight="{ $fieldBits[2] }">{ $fieldBits[1] }</item>
-    return ($elements, $keys, $fields)
+    return ($elements, $attributes, $keys, $fields)
 };
 
 declare function config:get(
