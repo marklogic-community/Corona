@@ -197,7 +197,7 @@ declare function reststore:insertJSONDocument(
             json:jsonToXML($content)
         }
         catch ($e) {
-            common:error(500, "Invalid JSON", "json"),
+            common:error(400, "Invalid JSON", "json"),
             xdmp:log($e)
         }
     return (
@@ -217,7 +217,7 @@ declare function reststore:updateJSONDocumentContent(
             json:jsonToXML($content)
         }
         catch ($e) {
-            common:error(500, "Invalid JSON", "json"),
+            common:error(400, "Invalid JSON", "json"),
             xdmp:log($e)
         }
     let $existing := doc($uri)/json:json
@@ -364,7 +364,7 @@ declare function reststore:insertXMLDocument(
             xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
         }
         catch ($e) {
-            common:error(500, "Invalid XML", "xml"),
+            common:error(400, "Invalid XML", "xml"),
             xdmp:log($e)
         }
     return (
@@ -384,7 +384,7 @@ declare function reststore:updateXMLDocumentContent(
             xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
         }
         catch ($e) {
-            common:error(500, "Invalid XML", "xml"),
+            common:error(400, "Invalid XML", "xml"),
             xdmp:log($e)
         }
     let $existing := reststore:getRawXMLDoc($uri)
