@@ -265,6 +265,8 @@ declare private function parser:wordQuery(
             then cts:element-word-query(xs:QName(concat("json:", $item)), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
             else if($item/@type = "element")
             then cts:element-word-query(xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+            else if($item/@type = "attribute")
+            then cts:element-attribute-word-query(xs:QName($item/@element), xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
             else if($item/@type = "field")
             then cts:field-word-query($item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
             else ()

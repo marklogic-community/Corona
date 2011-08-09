@@ -33,16 +33,17 @@ let $element := map:get($params, "element")
 let $attribute := map:get($params, "attribute")
 let $field := map:get($params, "field")
 let $weight := map:get($params, "weight")
+let $mode := map:get($params, "mode")
 
 let $existing :=
     if(exists($key))
-    then manage:getContentItem("key", $key)
+    then manage:getContentItem("key", $key, $mode)
     else if(exists($element) and exists($attribute))
-    then manage:getContentItem("attribute", $element, $attribute)
+    then manage:getContentItem("attribute", $element, $attribute, $mode)
     else if(exists($element))
-    then manage:getContentItem("element", $element)
+    then manage:getContentItem("element", $element, $mode)
     else if(exists($field))
-    then manage:getContentItem("field", $field)
+    then manage:getContentItem("field", $field, $mode)
     else ()
 
 return
@@ -58,13 +59,13 @@ return
     then
         try {
             if(exists($key))
-            then manage:addContentItem("key", $key, $weight)
+            then manage:addContentItem("key", $key, $mode, $weight)
             else if(exists($element) and exists($attribute))
-            then manage:addContentItem("attribute", $element, $attribute, $weight)
+            then manage:addContentItem("attribute", $element, $attribute, $mode, $weight)
             else if(exists($element))
-            then manage:addContentItem("element", $element, $weight)
+            then manage:addContentItem("element", $element, $mode, $weight)
             else if(exists($field))
-            then manage:addContentItem("field", $field, $weight)
+            then manage:addContentItem("field", $field, $mode, $weight)
             else ()
         }
         catch ($e) {
@@ -76,13 +77,13 @@ return
         if(exists($existing))
         then
             if(exists($key))
-            then manage:deleteContentItem("key", $key)
+            then manage:deleteContentItem("key", $key, $mode)
             else if(exists($element) and exists($attribute))
-            then manage:deleteContentItem("attribute", $element, $attribute)
+            then manage:deleteContentItem("attribute", $element, $attribute, $mode)
             else if(exists($element))
-            then manage:deleteContentItem("element", $element)
+            then manage:deleteContentItem("element", $element, $mode)
             else if(exists($field))
-            then manage:deleteContentItem("field", $field)
+            then manage:deleteContentItem("field", $field, $mode)
             else ()
         else common:error(404, "Content item not found", "json")
     else common:error(500, concat("Unsupported method: ", $requestMethod), "json")

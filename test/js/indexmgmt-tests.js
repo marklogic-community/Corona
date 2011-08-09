@@ -19,7 +19,7 @@ mljson.removeIndexes = function(info, callback) {
     }
     for(i = 0; i < info.contentItems.length; i += 1) {
         var item = info.contentItems[i];
-        indexes.push({"type": "contentItem", "name": "content item", "key": item.key, "element": item.element, "attribute": item.attribute, "field": item.field});
+        indexes.push({"type": "contentItem", "name": "content item", "key": item.key, "element": item.element, "attribute": item.attribute, "field": item.field, "mode": item.mode});
     }
     for(i = 0; i < info.xmlNamespaces.length; i += 1) {
         indexes.push({"type": "namespace", "name": info.xmlNamespaces[i].prefix});
@@ -59,16 +59,19 @@ mljson.removeIndexes = function(info, callback) {
             if(index.type === "contentItem") {
                 url = "/manage/contentItem?";
                 if(index.key !== undefined) {
-                    url += "key=" + escape(index.key)
+                    url += "key=" + escape(index.key) + "&";
                 }
                 if(index.element !== undefined) {
-                    url += "element=" + escape(index.element)
+                    url += "element=" + escape(index.element) + "&";
                 }
                 if(index.attribute !== undefined) {
-                    url += "attribute=" + escape(index.attribute)
+                    url += "attribute=" + escape(index.attribute) + "&";
                 }
                 if(index.field !== undefined) {
-                    url += "field=" + escape(index.field)
+                    url += "field=" + escape(index.field) + "&";
+                }
+                if(index.mode !== undefined) {
+                    url += "mode=" + escape(index.mode) + "&";
                 }
             }
             $.ajax({
@@ -148,6 +151,14 @@ mljson.addIndexes = function(callback) {
             "weight": 5,
             "shouldSucceed": true,
             "purpose": "Adding a field as a content item"
+        },
+        {
+            "type": "contentItem",
+            "field": "field1",
+            "mode": "equals",
+            "weight": 16,
+            "shouldSucceed": true,
+            "purpose": "Adding a field as a content item with a mode of equals"
         },
 
         // Fields
@@ -519,7 +530,12 @@ mljson.addIndexes = function(callback) {
                                 for(j = 0; j < info.contentItems.length; j += 1) {
                                     var server = info.contentItems[j];
                                     if(server.element === config.element && server.attribute === config.attribute && server.key === config.key && server.field === config.field && server.weight === config.weight) {
-                                        foundContentItem = true;
+                                        if(config.mode !== undefined && server.mode === config.mode) {
+                                            foundContentItem = true;
+                                        }
+                                        else {
+                                            foundContentItem = true;
+                                        }
                                     }
                                 }
                                 if(config.key) {
@@ -579,6 +595,7 @@ mljson.addIndexes = function(callback) {
                 data.element = index.element;
                 data.attribute = index.attribute;
                 data.field = index.field;
+                data.mode = index.mode;
                 data.weight = index.weight;
             }
             else if(index.type === "map") {
