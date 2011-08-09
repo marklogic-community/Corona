@@ -147,6 +147,7 @@ declare private function customquery:dispatch(
         $step/json:or[@type = "array"],
         $step/json:not[@type = "object"],
         $step/json:andNot[@type = "object"],
+        $step/json:near[@type = "object"],
         $step/json:isNULL[@type = "object"],
         $step/json:keyExists[@type = "object"],
         $step/json:property[@type = "object"],
@@ -174,6 +175,7 @@ declare private function customquery:process(
     case element(json:or) return cts:or-query(for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreRange))
     case element(json:not) return cts:not-query(customquery:dispatch($step, $ignoreRange))
     case element(json:andNot) return customquery:handleAndNot($step, $ignoreRange)
+    case element(json:near) return customquery:handleNear($step, $ignoreRange)
     case element(json:isNULL) return customquery:handleIsNULL($step)
     case element(json:keyExists) return customquery:handleKeyExists($step)
     case element(json:property) return cts:properties-query(customquery:dispatch($step, $ignoreRange))
@@ -199,6 +201,23 @@ declare private function customquery:handleAndNot(
     let $negative := $step/json:negative[@type = "object"]
     where exists($positive) and exists($negative)
     return cts:and-not-query(customquery:dispatch($positive, $ignoreRange), customquery:dispatch($negative, $ignoreRange))
+};
+
+declare private function customquery:handleNear(
+    $step as element(json:near),
+    $ignoreRange as xs:string?
+) as cts:near-query
+{
+    let $queries := for $item in $step/json:queries/json:item return customquery:dispatch($item, $ignoreRange)
+    let $distance := xs:double(($step/json:distance[@type = "number"], 10.0)[1]) 
+    let $options :=
+        if($step/json:ordered/@boolean = "true")
+        then "ordered"
+        else if($step/json:ordered/@boolean = "false")
+        then "unordered"
+        else ()
+    let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
+    return cts:near-query($queries, $distance, $options, $weight)
 };
 
 declare private function customquery:handleIsNULL(

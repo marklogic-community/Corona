@@ -193,6 +193,27 @@ mljson.queries = [
         "purpose": "And not query"
     },
 
+    /* Near */
+    {
+        "query": { "near": {
+            "queries": [
+                { "equals": {
+                    "key": "foo",
+                    "value": "bar"
+                }},
+                { "equals": {
+                    "key": "foo",
+                    "value": "baz"
+                }}
+            ],
+            "ordered": true,
+            "distance": 15,
+            "weight": 2
+        }},
+        "result": '<cts:near-query weight="2" distance="15" xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">baz</cts:text> </cts:element-value-query> <cts:option>ordered</cts:option></cts:near-query>',
+        "purpose": "Near query"
+    },
+
     /* isNULL */
     {
         "query": { "isNULL": {
