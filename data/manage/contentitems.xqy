@@ -30,6 +30,7 @@ let $params := rest:process-request(endpoints:request("/data/manage/contentitems
 let $requestMethod := xdmp:get-request-method()
 let $key := map:get($params, "key")
 let $element := map:get($params, "element")
+let $field := map:get($params, "field")
 let $weight := map:get($params, "weight")
 
 let $existing :=
@@ -42,7 +43,7 @@ let $existing :=
 return
     if($requestMethod = "GET")
     then
-        if(empty($key) and empty($element))
+        if(empty(($key, $element, $field)))
         then json:xmlToJSON(json:array(manage:getAllContentItems()))
         else if(exists($existing))
         then json:xmlToJSON($existing)
@@ -55,6 +56,8 @@ return
             then manage:addContentItem("key", $key, $weight)
             else if(exists($element))
             then manage:addContentItem("element", $element, $weight)
+            else if(exists($field))
+            then manage:addContentItem("field", $field, $weight)
             else ()
         }
         catch ($e) {
@@ -69,6 +72,8 @@ return
             then manage:deleteContentItem("key", $key)
             else if(exists($element))
             then manage:deleteContentItem("element", $element)
+            else if(exists($field))
+            then manage:deleteContentItem("field", $field)
             else ()
         else common:error(404, "Content item not found", "json")
     else common:error(500, concat("Unsupported method: ", $requestMethod), "json")

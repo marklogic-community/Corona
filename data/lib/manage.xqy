@@ -608,14 +608,13 @@ declare function manage:addContentItem(
     let $QName :=
         if($type = "key")
         then json:escapeNCName($name)
-        else (
+        else if($type = "element")
+        then (
             manage:validateElementName($name),
             $name
         )
+        else $name
     let $existing := config:getContentItems()
-    let $log := xdmp:log("Existing")
-    let $log := xdmp:log($existing)
-    let $log := xdmp:log("End Existing")
     let $new := (
         for $item in $existing
         where not($item/@type = $type and $item = $QName)
@@ -623,9 +622,6 @@ declare function manage:addContentItem(
         ,
         <item type="{ $type }" weight="{ $weight }">{ $QName }</item>
     )
-    let $log := xdmp:log("New")
-    let $log := xdmp:log($new)
-    let $log := xdmp:log("End New")
     return config:setContentItems($new)
 };
 
@@ -657,11 +653,7 @@ declare function manage:getContentItem(
     for $item in config:getContentItems()
     where $item/@type = $type and $item = $QName
     return json:object((
-        if($item/@type = "key")
-        then ("key", $name)
-        else if($item/@type = "element")
-        then ("element", $name)
-        else (),
+        string($item/@type), $name,
         "weight", xs:decimal($item/@weight)
     ))
 };
@@ -675,11 +667,7 @@ declare function manage:getAllContentItems(
         then json:unescapeNCName($item)
         else string($item)
     return json:object((
-        if($item/@type = "key")
-        then ("key", $name)
-        else if($item/@type = "element")
-        then ("element", $name)
-        else (),
+        string($item/@type), $name,
         "weight", xs:decimal($item/@weight)
     ))
 };

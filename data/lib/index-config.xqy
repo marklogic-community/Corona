@@ -177,7 +177,11 @@ declare function config:setContentItems(
         for $item in $items[@type = "key"]
         return concat(string($item), "=", $item/@weight)
     , "|")
-    return prop:set("mljson-content-items", concat($elements, "/", $keys))
+    let $fields := string-join(
+        for $item in $items[@type = "field"]
+        return concat(string($item), "=", $item/@weight)
+    , "|")
+    return prop:set("mljson-content-items", concat($elements, "/", $keys, "/", $fields))
 };
 
 declare function config:getContentItems(
@@ -192,7 +196,11 @@ declare function config:getContentItems(
         for $item in tokenize($bits[2], "\|")
         let $keyBits := tokenize($item, "=")
         return <item type="key" weight="{ $keyBits[2] }">{ $keyBits[1] }</item>
-    return ($elements, $keys)
+    let $fields :=
+        for $item in tokenize($bits[3], "\|")
+        let $fieldBits := tokenize($item, "=")
+        return <item type="field" weight="{ $fieldBits[2] }">{ $fieldBits[1] }</item>
+    return ($elements, $keys, $fields)
 };
 
 declare function config:get(

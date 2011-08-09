@@ -126,6 +126,13 @@ mljson.addIndexes = function(callback) {
             "shouldSucceed": true,
             "purpose": "Adding a JSON key with seperators as a content item"
         },
+        {
+            "type": "contentItem",
+            "field": "field1",
+            "weight": 5,
+            "shouldSucceed": true,
+            "purpose": "Adding a field as a content item"
+        },
 
         // Fields
         {
@@ -495,15 +502,18 @@ mljson.addIndexes = function(callback) {
                                 var foundContentItem = false;
                                 for(j = 0; j < info.contentItems.length; j += 1) {
                                     var server = info.contentItems[j];
-                                    if(server.element === config.element && server.key === config.key && server.weight === config.weight) {
+                                    if(server.element === config.element && server.key === config.key && server.field === config.field && server.weight === config.weight) {
                                         foundContentItem = true;
                                     }
                                 }
                                 if(config.key) {
                                     ok(foundContentItem, "Found content item: " + config.key);
                                 }
-                                else {
+                                else if(config.element) {
                                     ok(foundContentItem, "Found content item: " + config.element);
+                                }
+                                else {
+                                    ok(foundContentItem, "Found content item: " + config.field);
                                 }
                                 foundIndex = true;
                             }
@@ -548,6 +558,7 @@ mljson.addIndexes = function(callback) {
                 url = "/manage/contentItem";
                 data.key = index.key;
                 data.element = index.element;
+                data.field = index.field;
                 data.weight = index.weight;
             }
             else if(index.type === "map") {
