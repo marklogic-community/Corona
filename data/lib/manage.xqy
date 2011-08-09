@@ -598,6 +598,91 @@ declare function manage:getAllNamespaces(
     ))
 };
 
+(: Content items :)
+declare function manage:addContentItem(
+    $type as xs:string,
+    $name as xs:string,
+    $weight as xs:decimal
+) as empty-sequence()
+{
+    let $QName :=
+        if($type = "key")
+        then json:escapeNCName($name)
+        else (
+            manage:validateElementName($name),
+            $name
+        )
+    let $existing := config:getContentItems()
+    let $log := xdmp:log("Existing")
+    let $log := xdmp:log($existing)
+    let $log := xdmp:log("End Existing")
+    let $new := (
+        for $item in $existing
+        where not($item/@type = $type and $item = $QName)
+        return $item
+        ,
+        <item type="{ $type }" weight="{ $weight }">{ $QName }</item>
+    )
+    let $log := xdmp:log("New")
+    let $log := xdmp:log($new)
+    let $log := xdmp:log("End New")
+    return config:setContentItems($new)
+};
+
+declare function manage:deleteContentItem(
+    $type as xs:string,
+    $name as xs:string
+) as empty-sequence()
+{
+    let $QName :=
+        if($type = "key")
+        then json:escapeNCName($name)
+        else $name
+    let $new :=
+        for $item in config:getContentItems()
+        where not($item/@type = $type and $item = $QName)
+        return $item
+    return config:setContentItems($new)
+};
+
+declare function manage:getContentItem(
+    $type as xs:string,
+    $name as xs:string
+) as element(json:item)?
+{
+    let $QName :=
+        if($type = "key")
+        then json:escapeNCName($name)
+        else $name
+    for $item in config:getContentItems()
+    where $item/@type = $type and $item = $QName
+    return json:object((
+        if($item/@type = "key")
+        then ("key", $name)
+        else if($item/@type = "element")
+        then ("element", $name)
+        else (),
+        "weight", xs:decimal($item/@weight)
+    ))
+};
+
+declare function manage:getAllContentItems(
+) as element(json:item)*
+{
+    for $item in config:getContentItems()
+    let $name :=
+        if($item/@type = "key")
+        then json:unescapeNCName($item)
+        else string($item)
+    return json:object((
+        if($item/@type = "key")
+        then ("key", $name)
+        else if($item/@type = "element")
+        then ("element", $name)
+        else (),
+        "weight", xs:decimal($item/@weight)
+    ))
+};
 
 
 (: Private functions :)

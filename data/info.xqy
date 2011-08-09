@@ -55,6 +55,7 @@ json:document(
             "fields", json:array(manage:getAllFields($config)),
             "mappings", json:array(manage:getAllMaps())
         )),
+        "contentItems", json:array(manage:getAllContentItems()),
         "settings", json:object((
             "directoryCreation", admin:database-get-directory-creation($config, $database)
         )),

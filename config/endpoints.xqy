@@ -140,6 +140,19 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         </http>
         <http method="DELETE"/>
     </request>
+
+    <request uri="^/manage/(contentItem|contentItems)(/)?$" endpoint="/data/manage/contentitems.xqy">
+        <http method="GET"/>
+        <http method="POST">
+            <param name="key" required="false"/>
+            <param name="element" required="false"/>
+            <param name="weight" required="false" default="1.0" as="decimal"/>
+        </http>
+        <http method="DELETE">
+            <param name="key" required="false"/>
+            <param name="element" required="false"/>
+        </http>
+    </request>
 </options>;
 
 declare function endpoints:options(

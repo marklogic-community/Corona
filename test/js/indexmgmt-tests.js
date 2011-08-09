@@ -17,6 +17,9 @@ mljson.removeIndexes = function(info, callback) {
     for(i = 0; i < info.indexes.bucketedRanges.length; i += 1) {
         indexes.push({"type": "bucketedrange", "name": info.indexes.bucketedRanges[i].name});
     }
+    for(i = 0; i < info.contentItems.length; i += 1) {
+        indexes.push({"type": "contentItem", "name": "content item", "key": info.contentItems[i].key, "element": info.contentItems[i].element});
+    }
     for(i = 0; i < info.xmlNamespaces.length; i += 1) {
         indexes.push({"type": "namespace", "name": info.xmlNamespaces[i].prefix});
     }
@@ -52,6 +55,15 @@ mljson.removeIndexes = function(info, callback) {
 
         asyncTest("Remove the " + index.name + " index", function() {
             var url = "/manage/" + index.type + "/" + index.name;
+            if(index.type === "contentItem") {
+                url = "/manage/contentItem?";
+                if(index.key !== undefined) {
+                    url += "key=" + escape(index.key)
+                }
+                else if(index.element !== undefined) {
+                    url += "element=" + escape(index.element)
+                }
+            }
             $.ajax({
                 url: url,
                 type: 'DELETE',
@@ -90,6 +102,29 @@ mljson.addIndexes = function(callback) {
             "uri": "http://test.ns/uri",
             "shouldSucceed": true,
             "purpose": "Creation of XML namespace"
+        },
+
+        // Content items
+        {
+            "type": "contentItem",
+            "key": "subject",
+            "weight": 10,
+            "shouldSucceed": true,
+            "purpose": "Adding a JSON key as a content item"
+        },
+        {
+            "type": "contentItem",
+            "element": "testns:subject",
+            "weight": 8,
+            "shouldSucceed": true,
+            "purpose": "Adding a JSON key as a content item"
+        },
+        {
+            "type": "contentItem",
+            "key": "tri=ck|ey",
+            "weight": -10,
+            "shouldSucceed": true,
+            "purpose": "Adding a JSON key with seperators as a content item"
         },
 
         // Fields
@@ -456,10 +491,25 @@ mljson.addIndexes = function(callback) {
                                     }
                                 }
                             }
+                            else if(config.type === "contentItem") {
+                                var foundContentItem = false;
+                                for(j = 0; j < info.contentItems.length; j += 1) {
+                                    var server = info.contentItems[j];
+                                    if(server.element === config.element && server.key === config.key && server.weight === config.weight) {
+                                        foundContentItem = true;
+                                    }
+                                }
+                                if(config.key) {
+                                    ok(foundContentItem, "Found content item: " + config.key);
+                                }
+                                else {
+                                    ok(foundContentItem, "Found content item: " + config.element);
+                                }
+                                foundIndex = true;
+                            }
                             else {
                                 var pluralName = {
                                     "range": "ranges",
-                                    "namespace": "xmlNamespaces",
                                     "field": "fields",
                                     "map": "mappings",
                                     "bucketedrange": "bucketedRanges"
@@ -493,6 +543,12 @@ mljson.addIndexes = function(callback) {
             if(index.type === "namespace") {
                 url = "/manage/" + index.type + "/" + index.prefix;
                 data.uri = index.uri;
+            }
+            else if(index.type === "contentItem") {
+                url = "/manage/contentItem";
+                data.key = index.key;
+                data.element = index.element;
+                data.weight = index.weight;
             }
             else if(index.type === "map") {
                 if(index.key !== undefined) {

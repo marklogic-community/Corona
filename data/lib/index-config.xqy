@@ -164,6 +164,37 @@ declare function config:setXMLAttributeAutoBucketedRange(
     prop:set(concat("index-", $name), concat("autobucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
 };
 
+declare function config:setContentItems(
+    $items as element(item)*
+) as empty-sequence()
+{
+    prop:delete("mljson-content-items"),
+    let $elements := string-join(
+        for $item in $items[@type = "element"]
+        return concat(string($item), "=", $item/@weight)
+    , "|")
+    let $keys := string-join(
+        for $item in $items[@type = "key"]
+        return concat(string($item), "=", $item/@weight)
+    , "|")
+    return prop:set("mljson-content-items", concat($elements, "/", $keys))
+};
+
+declare function config:getContentItems(
+) as element(item)*
+{
+    let $bits := tokenize(prop:get("mljson-content-items"), "/")
+    let $elements :=
+        for $item in tokenize($bits[1], "\|")
+        let $elementBits := tokenize($item, "=")
+        return <item type="element" weight="{ $elementBits[2] }">{ $elementBits[1] }</item>
+    let $keys :=
+        for $item in tokenize($bits[2], "\|")
+        let $keyBits := tokenize($item, "=")
+        return <item type="key" weight="{ $keyBits[2] }">{ $keyBits[1] }</item>
+    return ($elements, $keys)
+};
+
 declare function config:get(
     $name as xs:string
 ) as element(index)?
