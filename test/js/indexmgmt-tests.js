@@ -157,7 +157,7 @@ mljson.addIndexes = function(callback) {
             "field": "field1",
             "mode": "equals",
             "weight": 16,
-            "shouldSucceed": true,
+            "shouldSucceed": false,
             "purpose": "Adding a field as a content item with a mode of equals"
         },
 

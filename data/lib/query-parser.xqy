@@ -281,8 +281,7 @@ declare private function parser:wordQuery(
                 else if($item/@type = "attribute")
                 then cts:element-attribute-value-query(xs:QName($item/@element), xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
                 else if($item/@type = "field")
-                (: XXX - put in a switch for field-value-query :) 
-                then cts:field-word-query($item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+                then xdmp:apply(xdmp:function("cts:field-value-query"), $item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
                 else ()
     return
         if(empty($query))

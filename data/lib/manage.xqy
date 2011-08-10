@@ -606,6 +606,16 @@ declare function manage:addContentItem(
     $weight as xs:decimal
 ) as empty-sequence()
 {
+    let $test :=
+        if($type = "field" and $mode = "equals")
+        then
+            try {
+                xdmp:function("cts:field-value-query")
+            }
+            catch ($e) {
+                error(xs:QName("manage:INVALID-MODE"), "This version of MarkLogic Server does not support field value queries.  Upgrade to 5.0 or greater.")
+            }
+        else ()
     let $QName :=
         if($type = "key")
         then json:escapeNCName($name)
