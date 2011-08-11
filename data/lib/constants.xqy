@@ -23,3 +23,5 @@ declare variable $const:version as xs:string := "1.0";
 
 declare variable $const:JSONCollection as xs:string := "mljson-json";
 declare variable $const:XMLCollection as xs:string := "mljson-xml";
+
+declare variable $const:TransformersCollection as xs:string := "mljson-transformers";

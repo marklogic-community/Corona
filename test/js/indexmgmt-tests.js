@@ -24,6 +24,9 @@ mljson.removeIndexes = function(info, callback) {
     for(i = 0; i < info.xmlNamespaces.length; i += 1) {
         indexes.push({"type": "namespace", "name": info.xmlNamespaces[i].prefix});
     }
+    for(i = 0; i < info.transformers.length; i += 1) {
+        indexes.push({"type": "transformer", "name": info.transformers[i]});
+    }
     
     var processingPosition = 0;
 
@@ -113,6 +116,15 @@ mljson.addIndexes = function(callback) {
             "uri": "http://test.ns/uri",
             "shouldSucceed": true,
             "purpose": "Creation of XML namespace"
+        },
+
+        // Transformers
+        {
+            "type": "transformer",
+            "name": "generic",
+            "xslt": '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><div>XSLT\'d!</div></xsl:template></xsl:stylesheet>',
+            "shouldSucceed": true,
+            "purpose": "Storing a XSLT transformer"
         },
 
         // Content items
@@ -552,6 +564,16 @@ mljson.addIndexes = function(callback) {
                                 }
                                 foundIndex = true;
                             }
+                            else if(config.type === "transformer") {
+                                var foundTransformer = false;
+                                for(j = 0; j < info.transformers.length; j += 1) {
+                                    if(info.transformers[j] === config.name) {
+                                        foundTransformer = true;
+                                    }
+                                }
+                                ok(foundTransformer, "Found transformer: " + config.name);
+                                foundIndex = true;
+                            }
                             else {
                                 var pluralName = {
                                     "range": "ranges",
@@ -588,6 +610,10 @@ mljson.addIndexes = function(callback) {
             if(index.type === "namespace") {
                 url = "/manage/" + index.type + "/" + index.prefix;
                 data.uri = index.uri;
+            }
+            if(index.type === "transformer") {
+                url = "/manage/" + index.type + "/" + index.name;
+                data = index.xslt;
             }
             else if(index.type === "contentItem") {
                 url = "/manage/contentItem";
@@ -678,10 +704,14 @@ mljson.addIndexes = function(callback) {
                 }
             }
 
+            var type = "POST";
+            if(index.type === "transformer") {
+                type = "PUT";
+            }
             $.ajax({
                 url: url,
                 data: data,
-                type: 'POST',
+                type: type,
                 context: index,
                 success: function() {
                     if(this.shouldSucceed) {

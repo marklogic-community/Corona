@@ -20,6 +20,7 @@ module namespace manage="http://marklogic.com/mljson/manage";
 
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
+import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 
 declare namespace db="http://marklogic.com/xdmp/database";
@@ -699,7 +700,6 @@ declare function manage:getContentItem(
         then json:escapeNCName($name)
         else $name
     for $item in config:getContentItems()
-    let $Log := xdmp:log($item)
     where $item/@type = $type and $item = $QName and $item/@mode = $mode
     return json:object((
         string($item/@type), $name,
@@ -854,6 +854,52 @@ declare function manage:createXMLAttributeRangeIndex(
     return admin:save-configuration(admin:database-add-range-element-attribute-index($config, xdmp:database(), $index))
 };
 
+
+(: Transformers :)
+declare function manage:setTransformer(
+    $name as xs:string,
+    $transformer as xs:string
+) as empty-sequence()
+{
+    let $doc :=
+        try {
+            xdmp:unquote($transformer, (), ("repair-none", "format-xml"))[1]/*
+        }
+        catch ($e) {
+            error(xs:QName("manage:INVALID-TRANSFORMER"), "Invalid transformer XSLT: parse error")
+        }
+    let $test :=
+        if(local-name($doc) = "stylesheet" and namespace-uri($doc) = "http://www.w3.org/1999/XSL/Transform")
+        then ()
+        else error(xs:QName("manage:INVALID-TRANSFORMER"), "Invalid transformer, must be an XSLT")
+    return xdmp:document-insert(concat("/transformers/", $name), $doc, xdmp:default-permissions(), $const:TransformersCollection)
+};
+
+declare function manage:deleteTransformer(
+    $name as xs:string
+) as empty-sequence()
+{
+    if(exists(concat("/transformers/", $name)))
+    then xdmp:document-delete(concat("/transformers/", $name))
+    else ()
+};
+
+declare function manage:getTransformer(
+    $name as xs:string
+) as element()?
+{
+    doc(concat("/transformers/", $name))/*
+};
+
+declare function manage:getAllTransformerNames(
+) as xs:string*
+{
+    for $transformer in collection($const:TransformersCollection)
+    return tokenize(base-uri($transformer), "/")[last()]
+};
+
+
+(: Private functions :)
 
 declare private function manage:getJSONRangeDefinition(
     $key as xs:string,

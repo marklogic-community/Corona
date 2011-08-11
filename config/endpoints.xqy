@@ -147,6 +147,13 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         </http>
         <http method="DELETE"/>
     </request>
+
+    <request uri="^/manage/transformer/([^/]+)(/)?$" endpoint="/data/manage/transformer.xqy">
+        <uri-param name="name" as="string">$1</uri-param>
+        <http method="GET"/>
+        <http method="PUT"/>
+        <http method="DELETE"/>
+    </request>
 </options>;
 
 declare function endpoints:options(

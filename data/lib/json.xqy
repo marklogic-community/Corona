@@ -123,7 +123,7 @@ declare function json:document(
     $value as item()
 ) as element(json:json)
 {
-    <json:json version="{ $const:version }">{
+    <json:json version="1.0">{
         json:untypedToJSONType($value)/(@*, node())
     }</json:json>
 };

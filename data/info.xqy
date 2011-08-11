@@ -56,6 +56,7 @@ json:document(
             "mappings", json:array(manage:getAllMaps())
         )),
         "contentItems", json:array(manage:getAllContentItems()),
+        "transformers", json:array(manage:getAllTransformerNames()),
         "settings", json:object((
             "directoryCreation", admin:database-get-directory-creation($config, $database)
         )),
