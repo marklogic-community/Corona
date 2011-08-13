@@ -264,6 +264,15 @@ mljson.addIndexes = function(callback) {
         {
             "type": "map",
             "name": "map6",
+            "element": "testns:element1",
+            "attribute": "mapattr",
+            "mode": "equals",
+            "shouldSucceed": true,
+            "purpose": "XML contains map with valid namespace and attribute"
+        },
+        {
+            "type": "map",
+            "name": "map7",
             "element": "invalidns:element1",
             "mode": "equals",
             "shouldSucceed": false,
@@ -271,7 +280,7 @@ mljson.addIndexes = function(callback) {
         },
         {
             "type": "map",
-            "name": "map7",
+            "name": "map8",
             "key": "name1",
             "mode": "invalidmode",
             "shouldSucceed": false,
@@ -445,6 +454,9 @@ mljson.addIndexes = function(callback) {
             }
             if(config.element !== undefined) {
                 equals(config.element, server.element, "Index element matches");
+            }
+            if(config.attribute !== undefined) {
+                equals(config.attribute, server.attribute, "Index attribute matches");
             }
             equals(config.mode, server.mode, "Index mode matches");
         }
@@ -630,6 +642,9 @@ mljson.addIndexes = function(callback) {
                 }
                 if(index.element !== undefined) {
                     data.element = index.element;
+                }
+                if(index.attribute !== undefined) {
+                    data.attribute = index.attribute;
                 }
                 data.mode = index.mode;
             }

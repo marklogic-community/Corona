@@ -135,6 +135,20 @@ declare function manage:createXMLMap(
     return config:setXMLMap($name, $element, $mode)
 };
 
+declare function manage:createXMLMap(
+    $name as xs:string,
+    $element as xs:string,
+    $attribute as xs:string,
+    $mode as xs:string
+) as empty-sequence()
+{
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateElementName($element)
+    let $test := manage:validateAttributeName($attribute)
+    let $test := manage:validateMode($mode)
+    return config:setXMLMap($name, $element, $attribute, $mode)
+};
+
 declare function manage:deleteMap(
     $name as xs:string
 ) as empty-sequence()
@@ -154,16 +168,23 @@ declare function manage:getMap(
         if($type = "json")
         then json:object((
             "name", $name,
-            "type", $type,
             "key", string($index/key),
             "mode", $mode
         ))
-        else json:object((
+        else if($type = "xmlelement")
+        then json:object((
             "name", $name,
-            "type", $type,
             "element", string($index/element),
             "mode", $mode
         ))
+        else if($type = "xmlattribute")
+        then json:object((
+            "name", $name,
+            "element", string($index/element),
+            "attribute", string($index/attribute),
+            "mode", $mode
+        ))
+        else ()
 };
 
 declare function manage:getAllMaps(

@@ -135,6 +135,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="POST">
             <param name="key" required="false"/>
             <param name="element" required="false"/>
+            <param name="attribute" required="false"/>
             <param name="mode" required="true"/>
         </http>
         <http method="DELETE"/>

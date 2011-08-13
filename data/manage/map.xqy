@@ -30,6 +30,7 @@ let $params := rest:process-request(endpoints:request("/data/manage/map.xqy"))
 let $name := map:get($params, "name")
 let $key := map:get($params, "key")
 let $element := map:get($params, "element")
+let $attribute := map:get($params, "attribute")
 let $mode := map:get($params, "mode")
 let $requestMethod := xdmp:get-request-method()
 
@@ -49,6 +50,8 @@ return
         else try {
             if(exists($key))
             then manage:createJSONMap($name, $key, $mode)
+            else if(exists($element) and exists($attribute))
+            then manage:createXMLMap($name, $element, $attribute, $mode)
             else if(exists($element))
             then manage:createXMLMap($name, $element, $mode)
             else ()

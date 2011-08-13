@@ -56,6 +56,16 @@ declare function config:setXMLMap(
     prop:set(concat("index-", $name), concat("map/xmlelement/", $name, "/", $element, "/", $mode))
 };
 
+declare function config:setXMLMap(
+    $name as xs:string,
+    $element as xs:string,
+    $attribute as xs:string,
+    $mode as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("index-", $name), concat("map/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $mode))
+};
+
 declare function config:setJSONRange(
     $name as xs:string,
     $key as xs:string,
@@ -330,6 +340,12 @@ declare function config:get(
                 then (
                     <element>{ $bits[4] }</element>,
                     <mode>{ $bits[5] }</mode>
+                )
+                else if($bits[2] = "xmlattribute")
+                then (
+                    <element>{ $bits[4] }</element>,
+                    <attribute>{ $bits[5] }</attribute>,
+                    <mode>{ $bits[6] }</mode>
                 )
                 else ()
             }
