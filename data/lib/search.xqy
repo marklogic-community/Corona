@@ -192,22 +192,30 @@ declare function search:mapValueToQuery(
         else if($index/structure = "xmlelement")
         then xs:QName($index/element)
         else ()
+    let $options :=
+        if($index/mode = "equals")
+        then "exact"
+        else (
+            "case-insensitive", 
+            "punctuation-insensitive",
+            "whitespace-insensitive"
+        )
     return
         if($index/structure = "xmlattribute")
         then
-            if($index/mode = "equals")
-            then cts:element-attribute-value-query($QName, xs:QName($index/attribute), $value)
-            else cts:element-attribute-word-query($QName, xs:QName($index/attribute), $value)
+            if($index/mode = ("equals", "textEquals"))
+            then cts:element-attribute-value-query($QName, xs:QName($index/attribute), $value, $options)
+            else cts:element-attribute-word-query($QName, xs:QName($index/attribute), $value, $options)
         else
             if($index/mode = "equals")
             then
                 if($value = ("true", "false"))
                 then cts:or-query((
-                    cts:element-value-query($QName, $value),
-                    cts:element-attribute-value-query($QName, xs:QName("boolean"), $value)
+                    cts:element-value-query($QName, $value, $options),
+                    cts:element-attribute-value-query($QName, xs:QName("boolean"), $value, $options)
                 ))
-                else cts:element-value-query($QName, $value)
-            else cts:element-word-query($QName, $value)
+                else cts:element-value-query($QName, $value, $options)
+            else cts:element-word-query($QName, $value, $options)
 };
 
 declare function search:fieldValueToQuery(

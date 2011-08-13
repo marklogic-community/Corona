@@ -1161,8 +1161,8 @@ declare private function manage:validateMode(
     $mode as xs:string
 ) as empty-sequence()
 {
-    if(not($mode = ("equals", "contains")))
-    then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals' or 'contains'")
+    if(not($mode = ("equals", "contains", "textEquals")))
+    then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals', 'contains' or 'textEquals'")
     else ()
 };
 

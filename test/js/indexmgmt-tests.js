@@ -273,6 +273,14 @@ mljson.addIndexes = function(callback) {
         {
             "type": "map",
             "name": "map7",
+            "element": "testns:element1",
+            "mode": "textEquals",
+            "shouldSucceed": true,
+            "purpose": "XML textEquals map"
+        },
+        {
+            "type": "map",
+            "name": "map8",
             "element": "invalidns:element1",
             "mode": "equals",
             "shouldSucceed": false,
@@ -280,7 +288,7 @@ mljson.addIndexes = function(callback) {
         },
         {
             "type": "map",
-            "name": "map8",
+            "name": "map9",
             "key": "name1",
             "mode": "invalidmode",
             "shouldSucceed": false,

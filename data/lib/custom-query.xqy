@@ -542,6 +542,10 @@ declare private function customquery:extractOptions(
             then "wildcarded"
             else "unwildcarded"
         else ()
+        ,
+        if($item/json:exact/@boolean = "true")
+        then "exact"
+        else ()
     )
     else ()
     ,
