@@ -156,6 +156,8 @@ declare private function customquery:dispatch(
         $step/json:range[@type = "object"],
         $step/json:equals[@type = "object"],
         $step/json:contains[@type = "object"],
+        $step/json:underElement[@type = "object"],
+        $step/json:underKey[@type = "object"],
         $step/json:collection[@type = ("string", "array")],
         $step/json:directory[@type = ("string", "array", "object")],
         $step/json:geo[@type = "object"],
@@ -185,6 +187,8 @@ declare private function customquery:process(
     case element(json:range) return customquery:handleRange($step, $ignoreRange)
     case element(json:equals) return customquery:handleEquals($step)
     case element(json:contains) return customquery:handleContains($step)
+    case element(json:underElement) return customquery:handleUnderElement($step, $ignoreRange)
+    case element(json:underKey) return customquery:handleUnderKey($step, $ignoreRange)
     case element(json:collection) return customquery:handleCollection($step)
     case element(json:directory) return customquery:handleDirectory($step)
     case element(json:geo) return customquery:handleGeo($step)
@@ -322,6 +326,32 @@ declare private function customquery:handleContains(
         else if(exists($step/json:element[@type = "string"]))
         then cts:element-word-query(xs:QName($step/json:element), $values, customquery:extractOptions($step, "word"), $weight)
         else ()
+};
+
+declare private function customquery:handleUnderKey(
+    $step as element(json:underKey),
+    $ignoreRange as xs:string?
+) as cts:element-query?
+{
+    let $query :=
+        if($step/json:query/@type = "string")
+        then string($step/json:query)
+        else customquery:dispatch($step/json:query, $ignoreRange)
+    where exists($step/json:key)
+    return cts:element-query(xs:QName(concat("json:", json:escapeNCName($step/json:key))), $query)
+};
+
+declare private function customquery:handleUnderElement(
+    $step as element(json:underElement),
+    $ignoreRange as xs:string?
+) as cts:element-query?
+{
+    let $query :=
+        if($step/json:query/@type = "string")
+        then string($step/json:query)
+        else customquery:dispatch($step/json:query, $ignoreRange)
+    where exists($step/json:element)
+    return cts:element-query(xs:QName($step/json:element), $query)
 };
 
 declare private function customquery:handleCollection(

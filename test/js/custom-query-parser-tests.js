@@ -267,6 +267,28 @@ mljson.queries = [
         "purpose": "Property query"
     },
 
+    /* UnderKey */
+    {
+        "query": { "underKey": { 
+                "key": "foo",
+                "query": "bar"
+            }
+        },
+        "result": '<cts:element-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:word-query> <cts:text xml:lang="en">bar</cts:text> </cts:word-query></cts:element-query>',
+        "purpose": "underKey query"
+    },
+
+    /* UnderElement */
+    {
+        "query": { "underElement": { 
+                "element": "foo",
+                "query": "bar"
+            }
+        },
+        "result": '<cts:element-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:word-query> <cts:text xml:lang="en">bar</cts:text> </cts:word-query></cts:element-query>',
+        "purpose": "underElement query"
+    },
+
     /* Range */
     {
         "query": { "range": {
