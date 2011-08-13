@@ -30,7 +30,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="q" required="true" default="{}"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
-        <param name="include" aliasas="include[]" repeatable="true" required="false" default="content"/>
+        <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>
         <http method="GET"/>
@@ -43,7 +43,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="q" required="true"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
-        <param name="include" aliasas="include[]" repeatable="true" required="false" default="content"/>
+        <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
@@ -60,7 +60,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="value" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
-        <param name="include" aliasas="include[]" repeatable="true" required="false" default="content"/>
+        <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
