@@ -338,7 +338,7 @@ declare private function customquery:handleDirectory(
     if($step/@type = "string" or $step/@type = "array")
     then cts:directory-query(customquery:valueToStrings($step))
     else if($step/@type = "object")
-    then cts:directory-query(customquery:valueToStrings($step/json:uri), if($step/json:immediateChildren = "true") then "1" else "infinity")
+    then cts:directory-query(customquery:valueToStrings($step/json:uri), if($step/json:descendants/@boolean = "true") then "infinity" else "1")
     else ()
 };
 

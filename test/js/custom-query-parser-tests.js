@@ -251,7 +251,7 @@ mljson.queries = [
         "purpose": "Directory query"
     },
     {
-        "query": { "directory": {"uri": "/foo", "immediateChildren": true}},
+        "query": { "directory": {"uri": "/foo", "descendants": true}},
         "result": '<cts:directory-query depth="infinity" xmlns:cts="http://marklogic.com/cts"> <cts:uri>/foo</cts:uri></cts:directory-query>',
         "purpose": "Directory query with a depth"
     },
