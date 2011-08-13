@@ -156,6 +156,7 @@ declare private function customquery:dispatch(
         $step/json:range[@type = "object"],
         $step/json:equals[@type = "object"],
         $step/json:contains[@type = "object"],
+        $step/json:wordAnywhere[@type = ("string", "array", "object")],
         $step/json:underElement[@type = "object"],
         $step/json:underKey[@type = "object"],
         $step/json:collection[@type = ("string", "array")],
@@ -187,6 +188,7 @@ declare private function customquery:process(
     case element(json:range) return customquery:handleRange($step, $ignoreRange)
     case element(json:equals) return customquery:handleEquals($step)
     case element(json:contains) return customquery:handleContains($step)
+    case element(json:wordAnywhere) return customquery:handleWordAnywhere($step)
     case element(json:underElement) return customquery:handleUnderElement($step, $ignoreRange)
     case element(json:underKey) return customquery:handleUnderKey($step, $ignoreRange)
     case element(json:collection) return customquery:handleCollection($step)
@@ -326,6 +328,15 @@ declare private function customquery:handleContains(
         else if(exists($step/json:element[@type = "string"]))
         then cts:element-word-query(xs:QName($step/json:element), $values, customquery:extractOptions($step, "word"), $weight)
         else ()
+};
+
+declare private function customquery:handleWordAnywhere(
+    $step as element(json:wordAnywhere)
+) as cts:word-query?
+{
+    if($step/@type = "object")
+    then cts:word-query(customquery:valueToStrings($step/json:string), customquery:extractOptions($step, "word"), xs:double(($step/json:weight[@type = "number"], 1.0)[1]))
+    else cts:word-query(customquery:valueToStrings($step))
 };
 
 declare private function customquery:handleUnderKey(

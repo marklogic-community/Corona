@@ -133,6 +133,27 @@ mljson.queries = [
         "purpose": "Simple XML attribute equals query"
     },
 
+    /* WordAnywhere */
+    {
+        "query": { "wordAnywhere": "foo" },
+        "result": '<cts:word-query xmlns:cts="http://marklogic.com/cts"> <cts:text xml:lang="en">foo</cts:text></cts:word-query>',
+        "purpose": "Simple wordAnywhere query"
+    },
+    {
+        "query": { "wordAnywhere": ["foo", "bar"] },
+        "result": '<cts:word-query xmlns:cts="http://marklogic.com/cts"> <cts:text xml:lang="en">foo</cts:text> <cts:text xml:lang="en">bar</cts:text></cts:word-query>',
+        "purpose": "wordAnywhere query with array"
+    },
+    {
+        "query": { "wordAnywhere": {
+                "string": "foo",
+                "weight": 2
+            }
+        },
+        "result": '<cts:word-query weight="2" xmlns:cts="http://marklogic.com/cts"> <cts:text xml:lang="en">foo</cts:text></cts:word-query>',
+        "purpose": "wordAnywhere query with weight"
+    },
+
     /* And */
     {
         "query": { "and": [
