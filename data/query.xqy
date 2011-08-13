@@ -38,20 +38,35 @@ let $end := map:get($params, "end")
 
 let $query := parser:parse($query)
 
+let $query := cts:and-query((
+    $query,
+    if($contentType = "json")
+    then cts:collection-query($const:JSONCollection)
+    else if($contentType = "xml")
+    then cts:collection-query($const:XMLCollection)
+    else (),
+    for $collection in map:get($params, "collection")
+    return cts:collection-query($collection),
+    for $directory in map:get($params, "underDirectory")
+    return cts:directory-query($directory, "infinity"),
+    for $directory in map:get($params, "inDirectory")
+    return cts:directory-query($directory)
+))
+
 let $results :=
     if($contentType = "json")
     then
         if(exists($start) and exists($end) and $end > $start)
-        then cts:search(collection($const:JSONCollection)/json:json, $query)[$start to $end]
+        then cts:search(/json:json, $query)[$start to $end]
         else if(exists($start))
-        then cts:search(collection($const:JSONCollection)/json:json, $query)[$start]
+        then cts:search(/json:json, $query)[$start]
         else ()
     else if($contentType = "xml")
     then
         if(exists($start) and exists($end) and $end > $start)
-        then cts:search(collection($const:XMLCollection)/*, $query)[$start to $end]
+        then cts:search(/*, $query)[$start to $end]
         else if(exists($start))
-        then cts:search(collection($const:XMLCollection)/*, $query)[$start]
+        then cts:search(/*, $query)[$start]
         else ()
     else ()
 

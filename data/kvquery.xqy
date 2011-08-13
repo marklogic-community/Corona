@@ -27,7 +27,9 @@ import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/c
 
 declare option xdmp:mapping "false";
 
-let $params := rest:process-request(endpoints:request("/data/jsonkvquery.xqy"))
+let $params := rest:process-request(endpoints:request("/data/kvquery.xqy"))
+
+let $contentType := map:get($params, "content-type")
 
 let $key := map:get($params, "key")
 let $element := map:get($params, "element")
@@ -38,6 +40,7 @@ let $start := map:get($params, "start")
 let $end := map:get($params, "end")
 let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
+let $applyTransform := map:get($params, "applyTransform")
 
 let $query :=
     if(exists($key))
@@ -63,11 +66,36 @@ let $query :=
     then cts:element-value-query(xs:QName($element), $value, "exact")
     else ()
 
+let $query := cts:and-query((
+    $query,
+    if($contentType = "json")
+    then cts:collection-query($const:JSONCollection)
+    else if($contentType = "xml")
+    then cts:collection-query($const:XMLCollection)
+    else (),
+    for $collection in map:get($params, "collection")
+    return cts:collection-query($collection),
+    for $directory in map:get($params, "underDirectory")
+    return cts:directory-query($directory, "infinity"),
+    for $directory in map:get($params, "inDirectory")
+    return cts:directory-query($directory)
+))
+
 let $results :=
-    if(exists($start) and exists($end) and $end > $start)
-    then cts:search(collection($const:JSONCollection)/json:json, $query)[$start to $end]
-    else if(exists($start))
-    then cts:search(collection($const:JSONCollection)/json:json, $query)[$start]
+    if($contentType = "json")
+    then
+        if(exists($start) and exists($end) and $end > $start)
+        then cts:search(/json:json, $query)[$start to $end]
+        else if(exists($start))
+        then cts:search(/json:json, $query)[$start]
+        else ()
+    else if($contentType = "xml")
+    then
+        if(exists($start) and exists($end) and $end > $start)
+        then cts:search(/*, $query)[$start to $end]
+        else if(exists($start))
+        then cts:search(/*, $query)[$start]
+        else ()
     else ()
 
 let $total :=
@@ -80,4 +108,9 @@ let $end :=
     then $total
     else $end
 
-return reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $query, $extractPath, ())
+return
+    if($contentType = "json")
+    then reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
+    else if($contentType = "xml")
+    then reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
+    else ()

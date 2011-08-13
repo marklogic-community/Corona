@@ -17,7 +17,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="GET">
             <param name="extractPath" required="false"/>
             <param name="applyTransform" required="false"/>
-            <param name="include" repeatable="true" required="false" default="content"/>
+            <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         </http>
         <http method="POST"/>
         <http method="PUT"/>
@@ -30,7 +30,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="q" required="true" default="{}"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
-        <param name="include" repeatable="true" required="false" default="content"/>
+        <param name="include" aliasas="include[]" repeatable="true" required="false" default="content"/>
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>
         <http method="GET"/>
@@ -43,32 +43,29 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="q" required="true"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
-        <param name="include" repeatable="true" required="false" default="content"/>
+        <param name="include" aliasas="include[]" repeatable="true" required="false" default="content"/>
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>
+        <param name="collection" alias="collection[]" required="false" repeatable="true"/>
+        <param name="underDirectory" required="false"/>
+        <param name="inDirectory" required="false"/>
     </request>
 
     <!-- Key value queryies -->
-    <request uri="^/json/kvquery$" endpoint="/data/jsonkvquery.xqy">
+    <request uri="^/(json|xml)/kvquery$" endpoint="/data/kvquery.xqy">
+        <uri-param name="content-type">$1</uri-param>
         <param name="key" required="false"/>
         <param name="element" required="false"/>
         <param name="attribute" required="false"/>
         <param name="value" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
-        <param name="include" repeatable="true" required="false" default="content"/>
+        <param name="include" aliasas="include[]" repeatable="true" required="false" default="content"/>
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>
-    </request>
-    <request uri="^/xml/kvquery$" endpoint="/data/xmlkvquery.xqy">
-        <param name="element" required="false"/>
-        <param name="attribute" required="false"/>
-        <param name="value" required="false"/>
-        <param name="start" required="false" as="positiveInteger" default="1"/>
-        <param name="end" required="false" as="positiveInteger"/>
-        <param name="include" repeatable="true" required="false" default="content"/>
-        <param name="extractPath" required="false"/>
-        <param name="applyTransform" required="false"/>
+        <param name="collection" alias="collection[]" required="false" repeatable="true"/>
+        <param name="underDirectory" required="false"/>
+        <param name="inDirectory" required="false"/>
     </request>
 
     <!-- Info request -->
