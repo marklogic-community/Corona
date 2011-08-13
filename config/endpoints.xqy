@@ -14,7 +14,11 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <request uri="^/(json|xml)/store(/.+)$" endpoint="/data/store.xqy" user-params="allow">
         <uri-param name="content-type">$1</uri-param>
         <uri-param name="uri" as="string">$2</uri-param>
-        <http method="GET"/>
+        <http method="GET">
+            <param name="extractPath" required="false"/>
+            <param name="applyTransform" required="false"/>
+            <param name="include" repeatable="true" required="false" default="content"/>
+        </http>
         <http method="POST"/>
         <http method="PUT"/>
         <http method="DELETE"/>
@@ -23,11 +27,12 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <!-- Custom queries -->
     <request uri="^/(json|xml)/customquery(/)?$" endpoint="/data/customquery.xqy">
         <uri-param name="content-type">$1</uri-param>
-        <param name="q" required="true"/>
-        <param name="start" required="false"/>
-        <param name="end" required="false"/>
-        <param name="include" repeatable="true" required="false"/>
-        <param name="returnpath" required="false"/>
+        <param name="q" required="true" default="{}"/>
+        <param name="start" required="false" as="positiveInteger" default="1"/>
+        <param name="end" required="false" as="positiveInteger"/>
+        <param name="include" repeatable="true" required="false" default="content"/>
+        <param name="extractPath" required="false"/>
+        <param name="applyTransform" required="false"/>
         <http method="GET"/>
         <http method="POST"/>
     </request>
@@ -39,19 +44,31 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
         <param name="include" repeatable="true" required="false" default="content"/>
-        <param name="returnpath" required="false"/>
+        <param name="extractPath" required="false"/>
+        <param name="applyTransform" required="false"/>
     </request>
 
     <!-- Key value queryies -->
-    <request uri="^/json/kvquery(/|/(\d+)/?|/(\d+)/(\d+)/?)?$" endpoint="/data/jsonkvquery.xqy" user-params="allow">
-        <uri-param name="__MLJSONURL__:index">$2</uri-param>
-        <uri-param name="__MLJSONURL__:start">$3</uri-param>
-        <uri-param name="__MLJSONURL__:end">$4</uri-param>
+    <request uri="^/json/kvquery$" endpoint="/data/jsonkvquery.xqy">
+        <param name="key" required="false"/>
+        <param name="element" required="false"/>
+        <param name="attribute" required="false"/>
+        <param name="value" required="false"/>
+        <param name="start" required="false" as="positiveInteger" default="1"/>
+        <param name="end" required="false" as="positiveInteger"/>
+        <param name="include" repeatable="true" required="false" default="content"/>
+        <param name="extractPath" required="false"/>
+        <param name="applyTransform" required="false"/>
     </request>
-    <request uri="^/xml/kvquery(/|/(\d+)/?|/(\d+)/(\d+)/?)?$" endpoint="/data/xmlkvquery.xqy" user-params="allow">
-        <uri-param name="__MLJSONURL__:index">$2</uri-param>
-        <uri-param name="__MLJSONURL__:start">$3</uri-param>
-        <uri-param name="__MLJSONURL__:end">$4</uri-param>
+    <request uri="^/xml/kvquery$" endpoint="/data/xmlkvquery.xqy">
+        <param name="element" required="false"/>
+        <param name="attribute" required="false"/>
+        <param name="value" required="false"/>
+        <param name="start" required="false" as="positiveInteger" default="1"/>
+        <param name="end" required="false" as="positiveInteger"/>
+        <param name="include" repeatable="true" required="false" default="content"/>
+        <param name="extractPath" required="false"/>
+        <param name="applyTransform" required="false"/>
     </request>
 
     <!-- Info request -->

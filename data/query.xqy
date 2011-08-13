@@ -31,7 +31,8 @@ let $params := rest:process-request(endpoints:request("/data/query.xqy"))
 let $query := map:get($params, "q")
 let $include := map:get($params, "include")
 let $contentType := map:get($params, "content-type")
-let $returnPath := map:get($params, "returnpath")
+let $extractPath := map:get($params, "extractPath")
+let $applyTransform := map:get($params, "applyTransform")
 let $start := map:get($params, "start")
 let $end := map:get($params, "end")
 
@@ -66,7 +67,7 @@ let $end :=
 
 return
     if($contentType = "json")
-    then reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $query, $returnPath)
+    then reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
     else if($contentType = "xml")
-    then reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $query, $returnPath)
+    then reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
     else ()

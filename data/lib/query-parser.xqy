@@ -261,7 +261,7 @@ declare private function parser:wordQuery(
     let $query :=
         for $item in config:getContentItems()
         return
-            if($type/@mode = "contains")
+            if($item/@mode = "contains")
             then
                 if($item/@type = "key")
                 then cts:element-word-query(xs:QName(concat("json:", $item)), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
@@ -272,7 +272,7 @@ declare private function parser:wordQuery(
                 else if($item/@type = "field")
                 then cts:field-word-query($item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
                 else ()
-            else if($type/@mode = "equals")
+            else if($item/@mode = "equals")
             then
                 if($item/@type = "key")
                 then cts:element-value-query(xs:QName(concat("json:", $item)), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
@@ -283,6 +283,7 @@ declare private function parser:wordQuery(
                 else if($item/@type = "field")
                 then xdmp:apply(xdmp:function("cts:field-value-query"), $item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
                 else ()
+            else ()
     return
         if(empty($query))
         then cts:word-query(string($term))

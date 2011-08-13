@@ -335,6 +335,9 @@ declare private function json:untypedToJSONType(
             else if($value instance of xs:string)
             then (attribute type { "string" }, string($value))
 
+            else if($value instance of document-node() and exists($value/json:json))
+            then $value/json:json/(@*, node())
+
             else (attribute type { "string" }, xdmp:quote($value))
         else attribute type { "null" }
     }</json:item>

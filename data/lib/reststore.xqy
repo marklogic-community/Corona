@@ -23,6 +23,8 @@ import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
 import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
 import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
+import module namespace manage="http://marklogic.com/mljson/manage" at "manage.xqy";
+
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 
 (:
@@ -30,15 +32,10 @@ import module namespace search="http://marklogic.com/appservices/search" at "/Ma
 :)
 
 declare function reststore:getJSONDocument(
-    $uri as xs:string
-) as xs:string
-{
-    reststore:getJSONDocument($uri, xdmp:get-request-field("include", "content"))
-};
-
-declare function reststore:getJSONDocument(
     $uri as xs:string,
-    $includes as xs:string*
+    $includes as xs:string*,
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?
 ) as xs:string
 {
     if(empty(doc($uri)/json:json))
@@ -50,11 +47,19 @@ declare function reststore:getJSONDocument(
     let $includeProperties := $includes = ("properties", "all")
     let $includePermissions := $includes = ("permissions", "all")
     let $includeQuality := $includes = ("quality", "all")
+    let $content :=
+        if(exists($extractPath))
+        then path:select(root(doc($uri)/json:json), $extractPath)
+        else root(doc($uri)/json:json)
+    let $content :=
+        if(exists($applyTransform))
+        then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+        else $content
     return
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-        then json:xmlToJSON(doc($uri)/json:json)
+        then json:xmlToJSON($content)
         else json:xmlToJSON(json:document(
-            json:object(reststore:outputJSONDocument($uri, doc($uri)/json:json, $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality))
+            json:object(reststore:outputJSONDocument($uri, $content, $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality))
         ))
 };
 
@@ -65,7 +70,8 @@ declare function reststore:outputMultipleJSONDocs(
     $total as xs:integer,
     $include as xs:string*,
     $query as cts:query?,
-    $returnPath as xs:string?
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?
 ) as xs:string
 {
     let $end :=
@@ -84,9 +90,13 @@ declare function reststore:outputMultipleJSONDocs(
                 for $doc in $docs
                 let $uri := base-uri($doc)
                 let $content :=
-                    if(exists($returnPath))
-                    then path:select($doc, $returnPath)
+                    if(exists($extractPath))
+                    then path:select($doc, $extractPath)
                     else $doc
+                let $content :=
+                    if(exists($applyTransform))
+                    then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+                    else $content
                 return json:object((
                     "uri", $uri,
                     reststore:outputJSONDocument($uri, $content, $include = ("content", "all"), $include = ("collections", "all"), $include = ("properties", "all"), $include = ("permissions", "all"), $include = ("quality", "all")),
@@ -101,7 +111,7 @@ declare function reststore:outputMultipleJSONDocs(
 
 declare private function reststore:outputJSONDocument(
     $uri as xs:string,
-    $content as element()?,
+    $content as node()?,
     $includeContent as xs:boolean,
     $includeCollections as xs:boolean,
     $includeProperties as xs:boolean,
@@ -186,16 +196,11 @@ declare function reststore:deleteJSONDocument(
 :)
 
 declare function reststore:getXMLDocument(
-    $uri as xs:string
-) as element()
-{
-    reststore:getXMLDocument($uri, xdmp:get-request-field("include", "content"))
-};
-
-declare function reststore:getXMLDocument(
     $uri as xs:string,
-    $includes as xs:string*
-) as element()
+    $includes as xs:string*,
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?
+) as item()
 {
     if(empty(reststore:getRawXMLDoc($uri)))
     then common:error(404, "Document not found", "xml")
@@ -206,12 +211,20 @@ declare function reststore:getXMLDocument(
     let $includeProperties := $includes = ("properties", "all")
     let $includePermissions := $includes = ("permissions", "all")
     let $includeQuality := $includes = ("quality", "all")
+    let $content :=
+        if(exists($extractPath))
+        then reststore:getRawXMLDoc($uri)/xdmp:value($extractPath)
+        else reststore:getRawXMLDoc($uri)
+    let $content :=
+        if(exists($applyTransform))
+        then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+        else $content
     return
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-        then reststore:getRawXMLDoc($uri)
+        then $content
         else 
             <response>{
-                reststore:outputXMLDocument($uri, reststore:getRawXMLDoc($uri), $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality)
+                reststore:outputXMLDocument($uri, $content, $includeContent, $includeCollections, $includeProperties, $includePermissions, $includeQuality)
             }</response>
 };
 
@@ -222,7 +235,8 @@ declare function reststore:outputMultipleXMLDocs(
     $total as xs:integer,
     $include as xs:string*,
     $query as cts:query?,
-    $returnPath as xs:string?
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?
 ) as element()
 {
     let $end :=
@@ -240,9 +254,13 @@ declare function reststore:outputMultipleXMLDocs(
                 for $doc in $docs
                 let $uri := base-uri($doc)
                 let $content :=
-                    if(exists($returnPath))
-                    then path:select($doc, $returnPath)
+                    if(exists($extractPath))
+                    then root($doc)/xdmp:value($extractPath)
                     else $doc
+                let $content :=
+                    if(exists($applyTransform))
+                    then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+                    else $content
                 return <result>{(
                     <uri>{ $uri }</uri>,
                     reststore:outputXMLDocument($uri, $content, $include = ("content", "all"), $include = ("collections", "all"), $include = ("properties", "all"), $include = ("permissions", "all"), $include = ("quality", "all")),
@@ -256,7 +274,7 @@ declare function reststore:outputMultipleXMLDocs(
 
 declare private function reststore:outputXMLDocument(
     $uri as xs:string,
-    $content as element()?,
+    $content as item()?,
     $includeContent as xs:boolean,
     $includeCollections as xs:boolean,
     $includeProperties as xs:boolean,
@@ -337,11 +355,11 @@ declare function reststore:deleteXMLDocument(
 
 declare function reststore:getRawXMLDoc(
     $uri as xs:string
-) as element()?
+) as node()?
 {
     let $doc := doc($uri)
     where xdmp:document-get-collections($uri) = $const:XMLCollection
-    return $doc/*
+    return $doc
 };
 
 

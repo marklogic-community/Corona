@@ -18,6 +18,7 @@ xquery version "1.0-ml";
 
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
+
 import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "lib/date-parser.xqy";
 
@@ -111,11 +112,14 @@ declare function local:syncMetadata(
     )
 };
 
+let $requestMethod := xdmp:get-request-method()
+let $bodyContent := xdmp:get-request-body("text")/text()
 let $params := rest:process-request(endpoints:request("/data/store.xqy"))
 let $contentType := map:get($params, "content-type")
 let $uri := map:get($params, "uri")
-let $requestMethod := xdmp:get-request-method()
-let $bodyContent := xdmp:get-request-body("text")/text()
+let $include := map:get($params, "include")
+let $extractPath := map:get($params, "extractPath")
+let $transformer := map:get($params, "applyTransformer")
 
 let $collections := local:collectionsFromRequest($params, "collection")
 let $properties := local:propertiesFromRequest($params, "property")
@@ -127,7 +131,7 @@ return
     if($contentType = "json")
     then
         if($requestMethod = "GET")
-        then reststore:getJSONDocument($uri)
+        then reststore:getJSONDocument($uri, $include, $extractPath, $transformer)
         else if($requestMethod = "DELETE")
         then reststore:deleteJSONDocument($uri)
         else if($requestMethod = "PUT")
@@ -146,7 +150,7 @@ return
     else if($contentType = "xml")
     then
         if($requestMethod = "GET")
-        then reststore:getXMLDocument($uri)
+        then reststore:getXMLDocument($uri, $include, $extractPath, $transformer)
         else if($requestMethod = "DELETE")
         then reststore:deleteXMLDocument($uri)
         else if($requestMethod = "PUT")

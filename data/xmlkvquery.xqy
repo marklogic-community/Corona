@@ -21,40 +21,29 @@ import module namespace const="http://marklogic.com/mljson/constants" at "lib/co
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "lib/date-parser.xqy";
 
+import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
+import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
+
 declare option xdmp:mapping "false";
 
-let $index := xdmp:get-request-field("__MLJSONURL__:index")
-let $index :=
-    if($index castable as xs:integer)
-    then xs:integer($index)
-    else 1
+let $params := rest:process-request(endpoints:request("/data/jsonkvquery.xqy"))
 
-let $start := xdmp:get-request-field("__MLJSONURL__:start")
-let $start :=
-    if($start castable as xs:integer)
-    then xs:integer($start)
-    else $index
+let $element := map:get($params, "element")
+let $attribute := map:get($params, "attribute")
+let $value := map:get($params, "value")
 
-let $end := xdmp:get-request-field("__MLJSONURL__:end")
-let $end :=
-    if($end castable as xs:integer)
-    then xs:integer($end)
-    else $start
+let $start := map:get($params, "start")
+let $end := map:get($params, "end")
+let $include := map:get($params, "include")
+let $extractPath := map:get($params, "extractPath")
+let $applyTransform := map:get($params, "applyTransform")
 
-let $query := cts:and-query(
-    for $key in xdmp:get-request-field-names()
-    let $value := xdmp:get-request-field($key)
-
-    let $bits := tokenize($key, "/@")
-    let $element := $bits[1]
-    let $attribute := $bits[2]
-
-    where not(starts-with($key, "__MLJSONURL__:"))
-    return
-        if(exists($attribute))
-        then cts:element-attribute-value-query(xs:QName($element), xs:QName($attribute), $value)
-        else cts:element-value-query(xs:QName($element), $value)
-)
+let $query :=
+    if(exists($element) and exists($attribute))
+    then cts:element-attribute-value-query(xs:QName($element), xs:QName($attribute), $value, "exact")
+    else if(exists($element))
+    then cts:element-value-query(xs:QName($element), $value, "exact")
+    else ()
 
 let $results :=
     if(exists($start) and exists($end) and $end > $start)
@@ -73,4 +62,4 @@ let $end :=
     then $total
     else $end
 
-return reststore:outputMultipleXMLDocs($results, $start, $end, $total, ("content"), $query, ())
+return reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)

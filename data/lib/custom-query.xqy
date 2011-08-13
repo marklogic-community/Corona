@@ -49,7 +49,8 @@ declare function customquery:searchJSON(
     $include as xs:string*,
     $start as xs:positiveInteger?,
     $end as xs:positiveInteger?,
-    $returnPath as xs:string?
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?
 ) as xs:string
 {
     let $start := if(empty($start)) then 1 else $start
@@ -79,7 +80,7 @@ declare function customquery:searchJSON(
         then $total
         else $end
 
-    return reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $cts, $returnPath)
+    return reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $cts, $extractPath, $applyTransform)
 };
 
 declare function customquery:searchXML(
@@ -87,7 +88,8 @@ declare function customquery:searchXML(
     $include as xs:string*,
     $start as xs:positiveInteger?,
     $end as xs:positiveInteger?,
-    $returnPath as xs:string?
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?
 ) as element(response)
 {
     let $start := if(empty($start)) then 1 else $start
@@ -117,7 +119,7 @@ declare function customquery:searchXML(
         then $total
         else $end
 
-    return reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $cts, $returnPath)
+    return reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $cts, $extractPath, $applyTransform)
 };
 
 declare function customquery:getParseTree(
