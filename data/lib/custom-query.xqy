@@ -157,6 +157,7 @@ declare private function customquery:dispatch(
         $step/json:equals[@type = "object"],
         $step/json:contains[@type = "object"],
         $step/json:collection[@type = ("string", "array")],
+        $step/json:directory[@type = ("string", "array", "object")],
         $step/json:geo[@type = "object"],
         $step/json:point[@type = "object"],
         $step/json:circle[@type = "object"],
@@ -185,6 +186,7 @@ declare private function customquery:process(
     case element(json:equals) return customquery:handleEquals($step)
     case element(json:contains) return customquery:handleContains($step)
     case element(json:collection) return customquery:handleCollection($step)
+    case element(json:directory) return customquery:handleDirectory($step)
     case element(json:geo) return customquery:handleGeo($step)
     case element(json:region) return customquery:handleRegion($step)
     case element(json:point) return customquery:handleGeoPoint($step)
@@ -327,6 +329,17 @@ declare private function customquery:handleCollection(
 ) as cts:collection-query
 {
     cts:collection-query(customquery:valueToStrings($step))
+};
+
+declare private function customquery:handleDirectory(
+    $step as element(json:directory)
+) as cts:directory-query?
+{
+    if($step/@type = "string" or $step/@type = "array")
+    then cts:directory-query(customquery:valueToStrings($step))
+    else if($step/@type = "object")
+    then cts:directory-query(customquery:valueToStrings($step/json:uri), if($step/json:immediateChildren = "true") then "1" else "infinity")
+    else ()
 };
 
 declare private function customquery:handleGeo(

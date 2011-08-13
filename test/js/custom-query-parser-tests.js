@@ -244,6 +244,18 @@ mljson.queries = [
         "purpose": "Collection query with an array of values"
     },
 
+    /* Directory */
+    {
+        "query": { "directory": "/foo" },
+        "result": '<cts:directory-query xmlns:cts="http://marklogic.com/cts"> <cts:uri>/foo</cts:uri></cts:directory-query>',
+        "purpose": "Directory query"
+    },
+    {
+        "query": { "directory": {"uri": "/foo", "immediateChildren": true}},
+        "result": '<cts:directory-query depth="infinity" xmlns:cts="http://marklogic.com/cts"> <cts:uri>/foo</cts:uri></cts:directory-query>',
+        "purpose": "Directory query with a depth"
+    },
+
     /* Properties */
     {
         "query": { "property": { "equals": {
