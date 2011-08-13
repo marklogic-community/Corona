@@ -193,15 +193,21 @@ declare function search:mapValueToQuery(
         then xs:QName($index/element)
         else ()
     return
-        if($index/mode = "equals")
+        if($index/structure = "xmlattribute")
         then
-            if($value = ("true", "false"))
-            then cts:or-query((
-                cts:element-value-query($QName, $value),
-                cts:element-attribute-value-query($QName, xs:QName("boolean"), $value)
-            ))
-            else cts:element-value-query($QName, $value)
-        else cts:element-word-query($QName, $value)
+            if($index/mode = "equals")
+            then cts:element-attribute-value-query($QName, xs:QName($index/attribute), $value)
+            else cts:element-attribute-word-query($QName, xs:QName($index/attribute), $value)
+        else
+            if($index/mode = "equals")
+            then
+                if($value = ("true", "false"))
+                then cts:or-query((
+                    cts:element-value-query($QName, $value),
+                    cts:element-attribute-value-query($QName, xs:QName("boolean"), $value)
+                ))
+                else cts:element-value-query($QName, $value)
+            else cts:element-word-query($QName, $value)
 };
 
 declare function search:fieldValueToQuery(

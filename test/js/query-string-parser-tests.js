@@ -59,6 +59,16 @@ mljson.queries = [
         "purpose": "Map constraint"
     },
     {
+        "query": 'map2:foo',
+        "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element>element1</cts:element> <cts:text xml:lang="en">foo</cts:text></cts:element-word-query>',
+        "purpose": "XML map constraint"
+    },
+    {
+        "query": 'map6:foo',
+        "result": '<cts:element-attribute-value-query xmlns:cts="http://marklogic.com/cts"> <cts:attribute>mapattr</cts:attribute> <cts:text xml:lang="en">foo</cts:text></cts:element-attribute-value-query>',
+        "purpose": "XML attribute map constraint"
+    },
+    {
         "query": 'range1:2007-01-25',
         "result": '<cts:element-attribute-range-query operator="&gt;" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">2007-01-25T00:00:00-07:00</cts:value></cts:element-attribute-range-query>',
         "purpose": "Date range constraint"
