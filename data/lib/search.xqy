@@ -223,7 +223,13 @@ declare function search:fieldValueToQuery(
     $value as xs:string
 ) as cts:query?
 {
-    cts:field-word-query($index/@name, $value)
+    if($index/mode = "contains")
+    then cts:field-word-query($index/@name, $value)
+    else if($index/mode = "textEquals")
+    then xdmp:apply(xdmp:function("cts:field-value-query"), $index/@name, $value, ("punctuation-insensitive", "whitespace-insensitive"))
+    else if($index/mode = "equals")
+    then xdmp:apply(xdmp:function("cts:field-value-query"), $index/@name, $value, "exact")
+    else ()
 };
 
 
