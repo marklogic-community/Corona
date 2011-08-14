@@ -16,6 +16,8 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace parser="http://marklogic.com/mljson/query-parser" at "lib/query-parser.xqy";
+import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 
@@ -126,12 +128,14 @@ let $properties := local:propertiesFromRequest($params, "property")
 let $permissions := local:permissionsFromRequest($params, "permission")
 let $quality := local:qualityFromRequest($params)
 
+let $query := (parser:parse(map:get($params, "q")), customquery:getCTS(map:get($params, "customquery")))[1]
+
 where exists($uri)
 return
     if($contentType = "json")
     then
         if($requestMethod = "GET")
-        then reststore:getJSONDocument($uri, $include, $extractPath, $transformer)
+        then reststore:getJSONDocument($uri, $include, $extractPath, $transformer, $query)
         else if($requestMethod = "DELETE")
         then reststore:deleteJSONDocument($uri)
         else if($requestMethod = "PUT")
@@ -150,7 +154,7 @@ return
     else if($contentType = "xml")
     then
         if($requestMethod = "GET")
-        then reststore:getXMLDocument($uri, $include, $extractPath, $transformer)
+        then reststore:getXMLDocument($uri, $include, $extractPath, $transformer, $query)
         else if($requestMethod = "DELETE")
         then reststore:deleteXMLDocument($uri)
         else if($requestMethod = "PUT")

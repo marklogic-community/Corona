@@ -26,14 +26,21 @@ import module namespace json="http://marklogic.com/json" at "json.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare function customquery:getCTS(
+    $json as xs:string?
+) as cts:query?
+{
+    customquery:getCTS($json, ())
+};
 
 declare function customquery:getCTS(
-    $json as xs:string,
+    $json as xs:string?,
     $ignoreRange as xs:string?
 ) as cts:query?
 {
-    let $tree := json:jsonToXML($json)
-    return customquery:dispatch($tree, $ignoreRange)
+    if(exists($json))
+    then customquery:dispatch(json:jsonToXML($json), $ignoreRange)
+    else ()
 };
 
 declare function customquery:getCTSFromParseTree(

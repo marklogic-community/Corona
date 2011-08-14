@@ -29,14 +29,14 @@ declare private variable $GROUPING-INDEX as xs:integer := 0;
 
 
 declare function parser:parse(
-	$query as xs:string
+	$query as xs:string?
 ) as cts:query?
 {
     parser:parse($query, ())
 };
 
 declare function parser:parse(
-	$query as xs:string,
+	$query as xs:string?,
     $ignoreField as xs:string?
 ) as cts:query?
 {
@@ -44,6 +44,7 @@ declare function parser:parse(
 	let $tokens := parser:tokenize($query)
 	let $grouped := parser:groupTokens($tokens, 1)
 	let $folded := parser:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
+    where string-length($query)
 	return parser:dispatchQueryTree($folded, $ignoreField)
 };
 
