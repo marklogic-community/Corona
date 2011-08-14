@@ -87,10 +87,12 @@ declare function json:jsonToXML(
         json:xmlToJSON(json:array((1, 2, 3, 4))) -> "[1, 2, 3, 4]"
 :)
 declare function json:xmlToJSON(
-    $element as element()
+    $element as node()
 ) as xs:string
 {
-    string-join(json:processElement($element), "")
+    if($element instance of document-node())
+    then string-join(json:processElement($element/json:json), "")
+    else string-join(json:processElement($element), "")
 };
 
 (:
