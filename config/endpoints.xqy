@@ -93,6 +93,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="excludeKey" alias="excludeKey[]" required="false" repeatable="true"/>
             <param name="includeElement" alias="includeElement[]" required="false" repeatable="true"/>
             <param name="excludeElement" alias="excludeElement[]" required="false" repeatable="true"/>
+            <param name="mode" required="false" default="contains"/>
         </http>
         <http method="DELETE"/>
     </request>

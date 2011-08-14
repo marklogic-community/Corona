@@ -32,10 +32,11 @@ declare function config:delete(
 };
 
 declare function config:setField(
-    $name as xs:string
+    $name as xs:string,
+    $mode as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("field/", $name))
+    prop:set(concat("index-", $name), concat("field/", $name, "/", $mode))
 };
 
 declare function config:setJSONMap(
@@ -351,7 +352,9 @@ declare function config:get(
             }
         </index>
         else if($bits[1] = "field")
-        then <index type="field" name="{ $bits[2] }"><name>{ $bits[2] }</name></index>
+        then <index type="field" name="{ $bits[2] }">
+            <mode>{ $bits[3] }</mode>
+        </index>
         else ()
 };
 

@@ -223,7 +223,7 @@ declare function search:fieldValueToQuery(
     $value as xs:string
 ) as cts:query?
 {
-    cts:field-word-query($index/name, $value)
+    cts:field-word-query($index/@name, $value)
 };
 
 

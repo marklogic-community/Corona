@@ -31,6 +31,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 (: Fields :)
 declare function manage:createField(
     $name as xs:string,
+    $mode as xs:string,
     $includeKeys as xs:string*,
     $excludeKeys as xs:string*,
     $includeElements as xs:string*,
@@ -39,6 +40,8 @@ declare function manage:createField(
 ) as empty-sequence()
 {
     let $test := manage:validateIndexName($name)
+    let $test := manage:validateMode($mode)
+    let $test := if($mode = "equals") then manage:checkForFieldValueCapability() else ()
     let $test :=
         for $element in ($includeElements, $excludeElements)
         return manage:validateElementName($element)
@@ -72,7 +75,7 @@ declare function manage:createField(
         return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
     return admin:save-configuration($config)
     ,
-    config:setField($name)
+    config:setField($name, $mode)
 };
 
 declare function manage:deleteField(
@@ -96,7 +99,7 @@ declare function manage:getField(
         }
         catch ($e) {()}
     where exists($def)
-    return manage:fieldDefinitionToJsonXml($def)
+    return manage:fieldDefinitionToJsonXml($def, config:get($name))
 };
 
 declare function manage:getAllFields(
@@ -107,7 +110,7 @@ declare function manage:getAllFields(
     let $config := admin:get-configuration()
     for $field in admin:database-get-fields($config, $database)
     where string-length($field/*:field-name) > 0
-    return manage:fieldDefinitionToJsonXml($field)
+    return manage:fieldDefinitionToJsonXml($field, config:get($field/*:field-name))
 };
 
 
@@ -630,13 +633,7 @@ declare function manage:addContentItem(
 {
     let $test :=
         if($type = "field" and $mode = "equals")
-        then
-            try {
-                xdmp:function("cts:field-value-query")
-            }
-            catch ($e) {
-                error(xs:QName("manage:INVALID-MODE"), "This version of MarkLogic Server does not support field value queries.  Upgrade to 5.0 or greater.")
-            }
+        then manage:checkForFieldValueCapability()
         else ()
     let $QName :=
         if($type = "key")
@@ -777,11 +774,13 @@ declare private function manage:getPrefixForNamespaceURI(
 };
 
 declare private function manage:fieldDefinitionToJsonXml(
-    $field as element(db:field)
+    $field as element(db:field),
+    $index as element(index)
 ) as element(json:item)
 {
     json:object((
         "name", string($field/db:field-name),
+        "mode", string($index/mode),
         "includedKeys", json:array(
             for $include in $field/db:included-elements/db:included-element
             for $key in tokenize(string($include/db:localname), " ")
@@ -1164,6 +1163,17 @@ declare private function manage:validateMode(
     if(not($mode = ("equals", "contains", "textEquals")))
     then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals', 'contains' or 'textEquals'")
     else ()
+};
+
+declare private function manage:checkForFieldValueCapability(
+) as empty-sequence()
+{
+    try {
+        xdmp:function("cts:field-value-query")
+    }
+    catch ($e) {
+        error(xs:QName("manage:INVALID-MODE"), "This version of MarkLogic Server does not support field value queries.  Upgrade to 5.0 or greater.")
+    }
 };
 
 declare private function manage:validateElementName(

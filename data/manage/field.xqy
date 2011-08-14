@@ -39,6 +39,7 @@ let $includeKeys := distinct-values(map:get($params, "includeKey"))
 let $excludes := distinct-values(map:get($params, "excludeKey"))
 let $includeElements := distinct-values(map:get($params, "includeElement"))
 let $excludeElements := distinct-values(map:get($params, "excludeElement"))
+let $mode := map:get($params, "mode")
 
 return
     if($requestMethod = "GET")
@@ -53,7 +54,7 @@ return
         then xdmp:set($config, admin:database-delete-field($config, $database, $name))
         else (),
         try {
-            manage:createField($name, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
+            manage:createField($name, $mode, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
         }
         catch ($e) {
             common:error($e, "json")

@@ -194,6 +194,17 @@ mljson.addIndexes = function(callback) {
         {
             "type": "field",
             "name": "field2",
+            "mode": "equals",
+            "includes": [
+                { "type": "key", "name": "included1"}
+            ],
+            "excludes": [],
+            "shouldSucceed": false,
+            "purpose": "Field with includes and a mode of equals",
+        },
+        {
+            "type": "field",
+            "name": "field3",
             "includes": [],
             "excludes": [],
             "shouldSucceed": false,
@@ -201,7 +212,7 @@ mljson.addIndexes = function(callback) {
         },
         {
             "type": "field",
-            "name": "field3",
+            "name": "field4",
             "includes": [
                 { "type": "element", "name": "invalidns:included1"}
             ],
@@ -517,6 +528,9 @@ mljson.addIndexes = function(callback) {
         else if(config.type === "field") {
             deepEqual(config.includes, server.includedKeys, "Index includes matches");
             deepEqual(config.excludes, server.excludedKeys, "Index excludes matches");
+            if(config.mode !== undefined) {
+                equals(config.mode, server.mode, "Index mode matches");
+            }
         }
         else if(config.type === "namespace") {
             equal(config.prefix, server.prefix, "Namespace prefixes matches");
@@ -657,6 +671,7 @@ mljson.addIndexes = function(callback) {
                 data.mode = index.mode;
             }
             else if(index.type === "field") {
+                data.mode = index.mode;
                 data.includeKey = [];
                 data.excludeKey = [];
                 data.includeElement = [];
