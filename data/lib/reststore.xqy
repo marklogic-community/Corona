@@ -188,11 +188,33 @@ declare function reststore:updateJSONDocumentContent(
 
 declare function reststore:deleteJSONDocument(
     $uri as xs:string
-) as xs:string?
+) as xs:string
 {
     if(exists(doc($uri)/json:json))
-    then xdmp:document-delete($uri)
+    then (json:xmlToJSON(json:array($uri)), xdmp:document-delete($uri))
     else common:error(404, concat("There is no JSON document to delete at '", $uri, "'"), "json")
+};
+
+declare function reststore:deleteJSONDocumentsWithQuery(
+    $query as cts:query,
+    $bulkDelete as xs:boolean
+) as xs:string
+{
+    let $docs := cts:search(collection($const:JSONCollection), $query)
+    let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
+    return
+        if($bulkDelete)
+        then
+            json:xmlToJSON(json:array(
+                for $doc in $docs
+                let $delete := xdmp:document-delete(base-uri($doc))
+                return base-uri($doc)
+            ))
+        else if($count = 1)
+        then json:xmlToJSON(json:array(base-uri($docs)))
+        else if($count = 0)
+        then common:error(404, "DELETE query doesn't match any documents", "json")
+        else common:error(400, "DELETE query matches more than one document without enabling bulk deletes", "json")
 };
 
 
@@ -356,11 +378,33 @@ declare function reststore:updateXMLDocumentContent(
 
 declare function reststore:deleteXMLDocument(
     $uri as xs:string
-) as element()?
+) as element()
 {
     if(exists(reststore:getRawXMLDoc($uri)))
-    then xdmp:document-delete($uri)
+    then (<results><uri>{ $uri }</uri></results>, xdmp:document-delete($uri))
     else common:error(404, concat("There is no XML document to delete at '", $uri, "'"), "xml")
+};
+
+declare function reststore:deleteXMLDocumentsWithQuery(
+    $query as cts:query,
+    $bulkDelete as xs:boolean
+) as element()
+{
+    let $docs := cts:search(collection($const:XMLCollection), $query)
+    let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
+    return
+        if($bulkDelete)
+        then
+            <results>{
+                for $doc in $docs
+                let $delete := xdmp:document-delete(base-uri($doc))
+                return <uri>{ base-uri($doc) }</uri>
+            }</results>
+        else if($count = 1)
+        then <results><uri>{ base-uri($docs) }</uri></results>
+        else if($count = 0)
+        then common:error(404, "DELETE query doesn't match any documents", "xml")
+        else common:error(400, "DELETE query matches more than one document without enabling bulk deletes", "xml")
 };
 
 declare function reststore:getRawXMLDoc(

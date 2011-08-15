@@ -246,9 +246,7 @@ mljson.queries = [
 
     /* keyExists */
     {
-        "query": { "keyExists": {
-            "key": "foo"
-        }},
+        "query": { "keyExists": "foo" },
         "result": '<cts:element-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:and-query/></cts:element-query>',
         "purpose": "keyExists query"
     },

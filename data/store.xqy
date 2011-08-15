@@ -16,6 +16,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace parser="http://marklogic.com/mljson/query-parser" at "lib/query-parser.xqy";
 import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
@@ -130,17 +131,22 @@ let $quality := local:qualityFromRequest($params)
 
 let $query := (parser:parse(map:get($params, "q")), customquery:getCTS(map:get($params, "customquery")))[1]
 
-where exists($uri)
+where string-length($uri) or ($requestMethod = "DELETE" and exists($query))
 return
     if($contentType = "json")
     then
-        if($requestMethod = "GET")
+        if($requestMethod = "GET" and string-length($uri))
         then reststore:getJSONDocument($uri, $include, $extractPath, $transformer, $query)
         else if($requestMethod = "DELETE")
-        then reststore:deleteJSONDocument($uri)
-        else if($requestMethod = "PUT")
+        then
+            if(string-length($uri))
+            then reststore:deleteJSONDocument($uri)
+            else if(exists($query))
+            then reststore:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"))
+            else common:error(400, "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", "json")
+        else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
-        else if($requestMethod = "POST")
+        else if($requestMethod = "POST" and string-length($uri))
         then
             if(empty(doc($uri)) and exists($bodyContent))
             then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
@@ -150,16 +156,21 @@ return
                 else (),
                 local:syncMetadata($uri, $params)
             )
-        else ()
+        else common:error(400, "Unknown request")
     else if($contentType = "xml")
     then
-        if($requestMethod = "GET")
+        if($requestMethod = "GET" and string-length($uri))
         then reststore:getXMLDocument($uri, $include, $extractPath, $transformer, $query)
         else if($requestMethod = "DELETE")
-        then reststore:deleteXMLDocument($uri)
-        else if($requestMethod = "PUT")
+        then
+            if(string-length($uri))
+            then reststore:deleteXMLDocument($uri)
+            else if(exists($query))
+            then reststore:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"))
+            else common:error(400, "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", "xml")
+        else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
-        else if($requestMethod = "POST")
+        else if($requestMethod = "POST" and string-length($uri))
         then
             if(empty(doc($uri)) and exists($bodyContent))
             then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
@@ -169,5 +180,5 @@ return
                 else (),
                 local:syncMetadata($uri, $params)
             )
-        else ()
+        else common:error(400, "Unknown request")
     else ()

@@ -158,7 +158,7 @@ declare private function customquery:dispatch(
         $step/json:andNot[@type = "object"],
         $step/json:near[@type = "object"],
         $step/json:isNULL[@type = "object"],
-        $step/json:keyExists[@type = "object"],
+        $step/json:keyExists[@type = ("string", "array")],
         $step/json:property[@type = "object"],
         $step/json:range[@type = "object"],
         $step/json:equals[@type = "object"],
@@ -253,9 +253,10 @@ declare private function customquery:handleKeyExists(
     $step as element(json:keyExists)
 ) as cts:element-query?
 {
-    if(exists($step/json:key))
-    then cts:element-query(xs:QName(concat("json:", json:escapeNCName($step/json:key))), cts:and-query(()))
-    else ()
+    let $QNames :=
+        for $i in customquery:valueToStrings($step)
+        return xs:QName(concat("json:", json:escapeNCName($i)))
+    return cts:element-query($QNames, cts:and-query(()))
 };
 
 declare private function customquery:handleRange(

@@ -11,17 +11,23 @@ declare option xdmp:mapping "false";
 declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 <options xmlns="http://marklogic.com/appservices/rest">
     <!-- Manage documents in the database -->
-    <request uri="^/(json|xml)/store(/.+)$" endpoint="/data/store.xqy" user-params="allow">
+    <request uri="^/(json|xml)/store(/.+)?$" endpoint="/data/store.xqy" user-params="allow">
         <uri-param name="content-type">$1</uri-param>
         <uri-param name="uri" as="string">$2</uri-param>
         <http method="GET">
+            <param name="q" required="false"/>
+            <param name="customquery" required="false"/>
             <param name="extractPath" required="false"/>
             <param name="applyTransform" required="false"/>
             <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         </http>
         <http method="POST"/>
         <http method="PUT"/>
-        <http method="DELETE"/>
+        <http method="DELETE">
+            <param name="q" required="false"/>
+            <param name="customquery" required="false"/>
+            <param name="bulkDelete" required="false" as="boolean" default="false"/>
+        </http>
     </request>
 
     <!-- Custom queries -->
