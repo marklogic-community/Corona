@@ -33,7 +33,6 @@ xquery version "1.0-ml";
 module namespace json="http://marklogic.com/json";
 
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
-import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 

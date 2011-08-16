@@ -26,21 +26,17 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare function path:select(
     $doc as element(),
     $path as xs:string
-) as element()
+) as element()*
 {
     if(string-length($path) = 0)
     then $doc
     else
         let $tokens := path:tokenize($path)
-        let $parts :=
-            for $part in $doc/xdmp:value(path:constructPath($tokens))
-            return <json:item>{ $part/(@*, node()) }</json:item>
+        for $part in $doc/xdmp:value(path:constructPath($tokens))
         return
-            if(count($parts) = 0)
-            then json:null()
-            else if(count($parts) > 1)
-            then json:array($parts)
-            else $parts
+            if(namespace-uri($part) = "http://marklogic.com/json")
+            then <json:item>{ $part/(@*, node()) }</json:item>
+            else $part
 };
 
 declare function path:parse(
@@ -127,7 +123,7 @@ declare private function path:processStep(
         if($step/@type = "index")
         then concat("json:item[", string($step), "]")
         else if($step/@type = "key")
-        then concat("json:", json:unescapeNCName(string($step)))
+        then concat("json:", json:escapeNCName(string($step)))
         else ()
 };
 

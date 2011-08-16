@@ -53,6 +53,12 @@ declare function reststore:getJSONDocument(
         then path:select(root(doc($uri)/json:json), $extractPath)
         else root(doc($uri)/json:json)
     let $content :=
+        if(empty($content))
+        then json:null()
+        else if(count($content, 1) = 1)
+        then $content
+        else json:array($content)
+    let $content :=
         if($include = ("highlighting") and exists($highlightQuery))
         then reststore:highlightJSONContent($content, $highlightQuery)
         else $content
@@ -99,6 +105,12 @@ declare function reststore:outputMultipleJSONDocs(
                     then path:select($doc, $extractPath)
                     else $doc
                 let $content :=
+                    if(empty($content))
+                    then json:null()
+                    else if(count($content, 1) = 1)
+                    then $content
+                    else json:array($content)
+                let $content :=
                     if($include = ("highlighting") and exists($query))
                     then reststore:highlightJSONContent($content, $query)
                     else $content
@@ -120,10 +132,17 @@ declare function reststore:outputMultipleJSONDocs(
 
 declare private function reststore:outputJSONDocument(
     $uri as xs:string,
-    $content as node()?,
+    $content as node()*,
     $include as xs:string*
 )
 {
+    let $content :=
+        if(empty($content))
+        then json:null()
+        else if(count($content, 1) = 1)
+        then $content
+        else json:array($content)
+    return
     if($include = ("content", "all"))
     then ("content", $content)
     else (),
@@ -245,19 +264,20 @@ declare function reststore:getXMLDocument(
         else reststore:getRawXMLDoc($uri)
     let $content :=
         if($include = ("highlighting") and exists($highlightQuery))
-        then reststore:highlightXMLContent($content, $highlightQuery)
+        then reststore:highlightXMLContent(if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content, $highlightQuery)
         else $content
     let $content :=
         if(exists($applyTransform))
-        then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+        then xdmp:xslt-eval(manage:getTransformer($applyTransform), if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content)
+        else $content
+    let $content :=
+        if(namespace-uri($content) = "http://marklogic.com/reststore")
+        then $content/*
         else $content
     return
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
         then $content
-        else 
-            <response>{
-                reststore:outputXMLDocument($uri, $content, $include)
-            }</response>
+        else <response>{ reststore:outputXMLDocument($uri, $content, $include) }</response>
 };
 
 declare function reststore:outputMultipleXMLDocs(
@@ -291,11 +311,15 @@ declare function reststore:outputMultipleXMLDocs(
                     else $doc
                 let $content :=
                     if($include = ("highlighting") and exists($query))
-                    then reststore:highlightXMLContent($content, $query)
+                    then reststore:highlightXMLContent(if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content, $query)
                     else $content
                 let $content :=
                     if(exists($applyTransform))
-                    then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+                    then xdmp:xslt-eval(manage:getTransformer($applyTransform), if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content)
+                    else $content
+                let $content :=
+                    if(namespace-uri($content) = "http://marklogic.com/reststore")
+                    then $content/*
                     else $content
                 return <result>{(
                     <uri>{ $uri }</uri>,
@@ -310,7 +334,7 @@ declare function reststore:outputMultipleXMLDocs(
 
 declare private function reststore:outputXMLDocument(
     $uri as xs:string,
-    $content as node()?,
+    $content as node()*,
     $include as xs:string*
 ) as element()*
 {
