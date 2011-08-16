@@ -76,8 +76,16 @@ let $query := cts:and-query((
     for $collection in map:get($params, "collection")
     return cts:collection-query($collection),
     for $directory in map:get($params, "underDirectory")
+    let $directory :=
+        if(ends-with($directory, "/"))
+        then $directory
+        else concat($directory, "/")
     return cts:directory-query($directory, "infinity"),
     for $directory in map:get($params, "inDirectory")
+    let $directory :=
+        if(ends-with($directory, "/"))
+        then $directory
+        else concat($directory, "/")
     return cts:directory-query($directory)
 ))
 
