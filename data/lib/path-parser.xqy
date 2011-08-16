@@ -121,7 +121,7 @@ declare private function path:processStep(
     let $step := $tokens[$index]
     return
         if($step/@type = "index")
-        then concat("json:item[", string($step), "]")
+        then concat("json:item[", xs:integer($step) + 1, "]")
         else if($step/@type = "key")
         then concat("json:", json:escapeNCName(string($step)))
         else ()
