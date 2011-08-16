@@ -68,4 +68,4 @@ json:document(
     ))
 )
 
-return json:xmlToJSON($json)
+return json:serialize($json)

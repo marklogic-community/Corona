@@ -37,7 +37,7 @@ return
     if($requestMethod = "GET")
     then
         if(exists($existing))
-        then json:xmlToJSON($existing)
+        then json:serialize($existing)
         else common:error(404, "Namespace not found", "json")
 
     else if($requestMethod = "POST")

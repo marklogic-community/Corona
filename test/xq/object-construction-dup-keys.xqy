@@ -26,4 +26,4 @@ let $doc := json:document(
     ))
 )
 
-return json:xmlToJSON($doc)
+return json:serialize($doc)

@@ -20,7 +20,7 @@ import module namespace json = "http://marklogic.com/json" at "/data/lib/json.xq
 
 
 try {
-    json:xmlToJSON(json:jsonToXML(xdmp:get-request-field("json")))
+    json:serialize(json:parse(xdmp:get-request-field("json")))
 }
 catch ($e) {
     xdmp:set-response-code(500, string($e//*:message))

@@ -42,7 +42,7 @@ declare function common:error(
                 <message>{ $message }</message>
             </error>
         else
-            json:xmlToJSON(json:document(
+            json:serialize(json:document(
                 json:object((
                     "error", json:object((
                         "code", $statusCode,

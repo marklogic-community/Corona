@@ -50,9 +50,9 @@ return
     if($requestMethod = "GET")
     then
         if(empty(($key, $element, $attribute, $field)))
-        then json:xmlToJSON(json:array(manage:getAllContentItems()))
+        then json:serialize(json:array(manage:getAllContentItems()))
         else if(exists($existing))
-        then json:xmlToJSON($existing)
+        then json:serialize($existing)
         else common:error(404, "Content item not found", "json")
 
     else if($requestMethod = "POST")

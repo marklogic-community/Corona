@@ -39,7 +39,7 @@ declare function customquery:getCTS(
 ) as cts:query?
 {
     if(exists($json))
-    then customquery:dispatch(json:jsonToXML($json), $ignoreRange)
+    then customquery:dispatch(json:parse($json), $ignoreRange)
     else ()
 };
 
@@ -61,7 +61,7 @@ declare function customquery:searchJSON(
 ) as xs:string
 {
     let $start := if(empty($start)) then 1 else $start
-    let $tree := json:jsonToXML($json)
+    let $tree := json:parse($json)
     let $cts := customquery:dispatch($tree, ())
     let $options := customquery:extractOptions($tree, "search")
     let $weight := customquery:extractWeight($tree)
@@ -100,7 +100,7 @@ declare function customquery:searchXML(
 ) as element(response)
 {
     let $start := if(empty($start)) then 1 else $start
-    let $tree := json:jsonToXML($json)
+    let $tree := json:parse($json)
     let $cts := customquery:dispatch($tree, ())
     let $options := customquery:extractOptions($tree, "search")
     let $weight := customquery:extractWeight($tree)
@@ -133,7 +133,7 @@ declare function customquery:getParseTree(
     $query as xs:string
 ) as element(json:json)
 {
-    json:jsonToXML($query)
+    json:parse($query)
 };
 
 declare function customquery:valuesForFacet(

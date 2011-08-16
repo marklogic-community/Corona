@@ -68,8 +68,8 @@ declare function reststore:getJSONDocument(
         else $content
     return
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-        then json:xmlToJSON($content)
-        else json:xmlToJSON(json:document(
+        then json:serialize($content)
+        else json:serialize(json:document(
             json:object(reststore:outputJSONDocument($uri, $content, $include))
         ))
 };
@@ -90,7 +90,7 @@ declare function reststore:outputMultipleJSONDocs(
         then $start
         else $end
 
-    return json:xmlToJSON(
+    return json:serialize(
         json:object((
             "meta", json:object((
                 "start", $start,
@@ -170,7 +170,7 @@ declare function reststore:insertJSONDocument(
 ) as xs:string?
 {
     let $body := try {
-            json:jsonToXML($content)
+            json:parse($content)
         }
         catch ($e) {
             common:error(400, "Invalid JSON", "json"),
@@ -190,7 +190,7 @@ declare function reststore:updateJSONDocumentContent(
 ) as xs:string?
 {
     let $body := try {
-            json:jsonToXML($content)
+            json:parse($content)
         }
         catch ($e) {
             common:error(400, "Invalid JSON", "json"),
@@ -210,7 +210,7 @@ declare function reststore:deleteJSONDocument(
 ) as xs:string
 {
     if(exists(doc($uri)/json:json))
-    then (json:xmlToJSON(json:array($uri)), xdmp:document-delete($uri))
+    then (json:serialize(json:array($uri)), xdmp:document-delete($uri))
     else common:error(404, concat("There is no JSON document to delete at '", $uri, "'"), "json")
 };
 
@@ -224,13 +224,13 @@ declare function reststore:deleteJSONDocumentsWithQuery(
     return
         if($bulkDelete)
         then
-            json:xmlToJSON(json:array(
+            json:serialize(json:array(
                 for $doc in $docs
                 let $delete := xdmp:document-delete(base-uri($doc))
                 return base-uri($doc)
             ))
         else if($count = 1)
-        then json:xmlToJSON(json:array(base-uri($docs)))
+        then json:serialize(json:array(base-uri($docs)))
         else if($count = 0)
         then common:error(404, "DELETE query doesn't match any documents", "json")
         else common:error(400, "DELETE query matches more than one document without enabling bulk deletes", "json")

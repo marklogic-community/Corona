@@ -116,7 +116,7 @@ let $values :=
         else ()
 return
     if($outputFormat = "json")
-    then json:xmlToJSON(json:object($values))
+    then json:serialize(json:object($values))
     else if($outputFormat = "xml")
     then <results>{ $values }</results>
     else ()
