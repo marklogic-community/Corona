@@ -85,6 +85,10 @@ declare function reststore:outputMultipleJSONDocs(
     $applyTransform as xs:string?
 ) as xs:string
 {
+    let $start :=
+        if($total = 0)
+        then 0
+        else $start
     let $end :=
         if(empty($end))
         then $start
@@ -291,6 +295,10 @@ declare function reststore:outputMultipleXMLDocs(
     $applyTransform as xs:string?
 ) as element()
 {
+    let $start :=
+        if($total = 0)
+        then 0
+        else $start
     let $end :=
         if(empty($end))
         then $start
