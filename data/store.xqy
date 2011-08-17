@@ -129,8 +129,17 @@ let $properties := local:propertiesFromRequest($params, "property")
 let $permissions := local:permissionsFromRequest($params, "permission")
 let $quality := local:qualityFromRequest($params)
 
-(: XXX - check for parse errors :)
-let $query := (parser:parse(map:get($params, "q")), customquery:getCTS(customquery:getParseTree(map:get($params, "customquery"))))[1]
+let $test := (
+)
+let $customQuery :=
+    try {
+        customquery:getParseTree(map:get($params, "customquery"))
+    }
+    catch ($e) {
+        xdmp:set($test, common:error(400, concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
+    }
+
+let $query := (parser:parse(map:get($params, "q")), customquery:getCTS($customQuery))[1]
 
 where string-length($uri) or ($requestMethod = "DELETE" and exists($query))
 return
