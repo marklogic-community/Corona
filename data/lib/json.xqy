@@ -244,10 +244,8 @@ declare function json:date(
 ) as element(json:item)
 {
     let $value :=
-        if($value instance of xs:dateTime or $value instance of xs:date)
+        if($value instance of xs:dateTime or $value instance of xs:date or $value instance of xs:string)
         then string($value)
-        else if($value instance of xs:string)
-        then $value
         else error(xs:QName("json:INVALID-DATE"), concat("Invalid date: ", xdmp:quote($value)))
     let $date := dateparser:parse($value)
     return
