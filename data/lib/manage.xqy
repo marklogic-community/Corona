@@ -16,11 +16,11 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-module namespace manage="http://marklogic.com/mljson/manage";
+module namespace manage="http://marklogic.com/corona/manage";
 
 import module namespace json="http://marklogic.com/json" at "json.xqy";
-import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
-import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
+import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
+import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 
 declare namespace db="http://marklogic.com/xdmp/database";

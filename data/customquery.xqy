@@ -16,11 +16,11 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
-import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
+import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
+import module namespace customquery="http://marklogic.com/corona/custom-query" at "lib/custom-query.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
-import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
+import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
 
 declare option xdmp:mapping "false";
 

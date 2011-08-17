@@ -1,4 +1,4 @@
-import module namespace parser="http://marklogic.com/mljson/query-parser" at "/data/lib/query-parser.xqy";
+import module namespace parser="http://marklogic.com/corona/query-parser" at "/data/lib/query-parser.xqy";
 
 declare option xdmp:mapping "false";
 

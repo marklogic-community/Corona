@@ -16,10 +16,10 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-module namespace common="http://marklogic.com/mljson/common";
+module namespace common="http://marklogic.com/corona/common";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
-import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
+import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
 
 declare namespace search="http://marklogic.com/appservices/search";
 

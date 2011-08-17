@@ -16,7 +16,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-module namespace config="http://marklogic.com/mljson/index-config";
+module namespace config="http://marklogic.com/corona/index-config";
 
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
@@ -179,7 +179,7 @@ declare function config:setContentItems(
     $items as element(item)*
 ) as empty-sequence()
 {
-    prop:delete("mljson-content-items"),
+    prop:delete("corona-content-items"),
     let $elements := string-join(
         for $item in $items[@type = "element"]
         return concat(string($item), "=", $item/@mode, "@", $item/@weight)
@@ -196,13 +196,13 @@ declare function config:setContentItems(
         for $item in $items[@type = "field"]
         return concat(string($item), "=", $item/@mode, "@", $item/@weight)
     , "|")
-    return prop:set("mljson-content-items", concat($elements, "/", $attributes, "/", $keys, "/", $fields))
+    return prop:set("corona-content-items", concat($elements, "/", $attributes, "/", $keys, "/", $fields))
 };
 
 declare function config:getContentItems(
 ) as element(item)*
 {
-    let $bits := tokenize(prop:get("mljson-content-items"), "/")
+    let $bits := tokenize(prop:get("corona-content-items"), "/")
     let $elements :=
         for $item in tokenize($bits[1], "\|")
         let $elementBits := tokenize($item, "=")

@@ -1,8 +1,8 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
-mljson.queries = [
+corona.queries = [
     /* Contains */
     {
         "query": { "contains": {
@@ -558,13 +558,13 @@ mljson.queries = [
 
 $(document).ready(function() {
     module("Custom Queries");
-    for (var i = 0; i < mljson.queries.length; i += 1) {
-        mljson.queryFromServerTest(mljson.queries[i]);
+    for (var i = 0; i < corona.queries.length; i += 1) {
+        corona.queryFromServerTest(corona.queries[i]);
     }
 });
 
 
-mljson.queryFromServer = function(test, success, error) {
+corona.queryFromServer = function(test, success, error) {
     asyncTest(test.purpose, function() {
         var data = {"q": JSON.stringify(test.query)}
         if(test.ignoreRange !== undefined) {
@@ -580,8 +580,8 @@ mljson.queryFromServer = function(test, success, error) {
     });
 };
 
-mljson.queryFromServerTest = function(test) {
-    mljson.queryFromServer(test,
+corona.queryFromServerTest = function(test) {
+    corona.queryFromServer(test,
         function(data, t, j) {
             if(test.error !== undefined) {
                 equals(data, test.error, test.purpose);

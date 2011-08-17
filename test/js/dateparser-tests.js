@@ -1,8 +1,8 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
-mljson.dates = [
+corona.dates = [
     {
         "string": "2011-07-07T11:05:42-07:00",
         "value": "2011-07-07T11:05:42-07:00"
@@ -79,13 +79,13 @@ mljson.dates = [
 
 $(document).ready(function() {
     module("Dates");
-    for (var i = 0; i < mljson.dates.length; i += 1) {
-        mljson.jsonFromServerTest(mljson.dates[i]);
+    for (var i = 0; i < corona.dates.length; i += 1) {
+        corona.jsonFromServerTest(corona.dates[i]);
     }
 });
 
 
-mljson.jsonFromServer = function(test, success, error) {
+corona.jsonFromServer = function(test, success, error) {
     asyncTest("Parsing: " + test.string, function() {
         $.ajax({
             url: '/test/xq/parsedate.xqy',
@@ -98,8 +98,8 @@ mljson.jsonFromServer = function(test, success, error) {
     });
 };
 
-mljson.jsonFromServerTest = function(test) {
-    mljson.jsonFromServer(test,
+corona.jsonFromServerTest = function(test) {
+    corona.jsonFromServer(test,
         function(data, t, j) {
             equals(data, test.value, "Parsed date doesn't match");
         },

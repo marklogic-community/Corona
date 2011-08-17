@@ -1,8 +1,8 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
-mljson.documents = [
+corona.documents = [
     {
         "type": "json",
         "uri": "/doc-store-test-1.json",
@@ -93,7 +93,7 @@ mljson.documents = [
     }
 ];
 
-mljson.constructURL = function(doc, prefix, processExtras) {
+corona.constructURL = function(doc, prefix, processExtras) {
     var extras = "";
 
     var permissionArg = "permission";
@@ -154,7 +154,7 @@ mljson.constructURL = function(doc, prefix, processExtras) {
     }
 };
 
-mljson.compareJSONDocuments = function(model, actual, withExtras) {
+corona.compareJSONDocuments = function(model, actual, withExtras) {
     if(withExtras) {
         if(model.permissions !== undefined) {
             for(var role in model.permissions) {
@@ -188,7 +188,7 @@ mljson.compareJSONDocuments = function(model, actual, withExtras) {
     deepEqual(model.content, actual.content, "Content matches");
 };
 
-mljson.compareXMLDocuments = function(model, xmlAsString, withExtras) {
+corona.compareXMLDocuments = function(model, xmlAsString, withExtras) {
     var parser = new DOMParser();
     var actual = parser.parseFromString(xmlAsString, "text/xml");
 
@@ -211,11 +211,11 @@ mljson.compareXMLDocuments = function(model, xmlAsString, withExtras) {
 };
 
 
-mljson.insertDocuments = function(prefix, withExtras) {
+corona.insertDocuments = function(prefix, withExtras) {
     var i = 0;
-    for(i = 0; i < mljson.documents.length; i += 1) {
+    for(i = 0; i < corona.documents.length; i += 1) {
         var wrapper = function(index) {
-            var doc = mljson.documents[index];
+            var doc = corona.documents[index];
             asyncTest("Inserting document: " + prefix + doc.uri, function() {
                 var docContent = doc.content;
                 if(doc.type === "json") {
@@ -226,29 +226,29 @@ mljson.insertDocuments = function(prefix, withExtras) {
                     processExtras = "set";
                 }
                 $.ajax({
-                    url: mljson.constructURL(doc, prefix, processExtras),
+                    url: corona.constructURL(doc, prefix, processExtras),
                     type: 'PUT',
                     data: docContent,
                     context: doc,
                     success: function() {
                         ok(true, "Inserted document");
                         $.ajax({
-                            url: mljson.constructURL(doc, prefix, "ignore") + "include=all",
+                            url: corona.constructURL(doc, prefix, "ignore") + "include=all",
                             type: 'GET',
                             context: this,
                             success: function(data) {
                                 if(this.type === "json") {
-                                    mljson.compareJSONDocuments(this, JSON.parse(data), withExtras);
+                                    corona.compareJSONDocuments(this, JSON.parse(data), withExtras);
                                 }
                                 else {
-                                    mljson.compareXMLDocuments(this, data, true);
+                                    corona.compareXMLDocuments(this, data, true);
                                 }
 
                                 if(withExtras === false) {
-                                    mljson.setExtras(prefix, this);
+                                    corona.setExtras(prefix, this);
                                 }
                                 else {
-                                    mljson.deleteDocument(prefix, this);
+                                    corona.deleteDocument(prefix, this);
                                 }
                             },
                             error: function(j, t, error) {
@@ -268,26 +268,26 @@ mljson.insertDocuments = function(prefix, withExtras) {
     }
 };
 
-mljson.setExtras = function(prefix, doc) {
+corona.setExtras = function(prefix, doc) {
     asyncTest("Setting document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: mljson.constructURL(doc, prefix, "set"),
+            url: corona.constructURL(doc, prefix, "set"),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {
                         if(this.type === "json") {
-                            mljson.compareJSONDocuments(this, JSON.parse(data), true);
+                            corona.compareJSONDocuments(this, JSON.parse(data), true);
                         }
                         else {
-                            mljson.compareXMLDocuments(this, data, true);
+                            corona.compareXMLDocuments(this, data, true);
                         }
-                        mljson.removeExtras(prefix, doc);
+                        corona.removeExtras(prefix, doc);
                     },
                     error: function(j, t, error) {
                         ok(false, "Could not fetch document");
@@ -304,26 +304,26 @@ mljson.setExtras = function(prefix, doc) {
     });
 };
 
-mljson.removeExtras = function(prefix, doc) {
+corona.removeExtras = function(prefix, doc) {
     asyncTest("Removing document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: mljson.constructURL(doc, prefix, "remove"),
+            url: corona.constructURL(doc, prefix, "remove"),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {
                         if(this.type === "json") {
-                            mljson.compareJSONDocuments(this, JSON.parse(data), false);
+                            corona.compareJSONDocuments(this, JSON.parse(data), false);
                         }
                         else {
-                            mljson.compareXMLDocuments(this, data, false);
+                            corona.compareXMLDocuments(this, data, false);
                         }
-                        mljson.addExtras(prefix, doc);
+                        corona.addExtras(prefix, doc);
                     },
                     error: function(j, t, error) {
                         ok(false, "Could not fetch document");
@@ -340,26 +340,26 @@ mljson.removeExtras = function(prefix, doc) {
     });
 };
 
-mljson.addExtras = function(prefix, doc) {
+corona.addExtras = function(prefix, doc) {
     asyncTest("Adding document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: mljson.constructURL(doc, prefix, "add"),
+            url: corona.constructURL(doc, prefix, "add"),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {
                         if(this.type === "json") {
-                            mljson.compareJSONDocuments(this, JSON.parse(data), true);
+                            corona.compareJSONDocuments(this, JSON.parse(data), true);
                         }
                         else {
-                            mljson.compareXMLDocuments(this, data, true);
+                            corona.compareXMLDocuments(this, data, true);
                         }
-                        mljson.deleteDocument(prefix, doc);
+                        corona.deleteDocument(prefix, doc);
                     },
                     error: function(j, t, error) {
                         ok(false, "Could not fetch document");
@@ -376,16 +376,16 @@ mljson.addExtras = function(prefix, doc) {
     });
 };
 
-mljson.deleteDocument = function(prefix, doc) {
+corona.deleteDocument = function(prefix, doc) {
     asyncTest("Deleting document: " + prefix + doc.uri, function() {
         $.ajax({
-            url: mljson.constructURL(doc, prefix, "remove"),
+            url: corona.constructURL(doc, prefix, "remove"),
             type: 'DELETE',
             context: doc,
             success: function() {
                 ok(true, "Deleted document");
                 $.ajax({
-                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -408,6 +408,6 @@ mljson.deleteDocument = function(prefix, doc) {
 
 $(document).ready(function() {
     module("Store");
-    mljson.insertDocuments("/no-extras", false);
-    mljson.insertDocuments("/extras", true);
+    corona.insertDocuments("/no-extras", false);
+    corona.insertDocuments("/extras", true);
 });

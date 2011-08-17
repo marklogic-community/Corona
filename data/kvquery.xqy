@@ -17,14 +17,14 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
-import module namespace const="http://marklogic.com/mljson/constants" at "lib/constants.xqy";
+import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
+import module namespace const="http://marklogic.com/corona/constants" at "lib/constants.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "lib/date-parser.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
-import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
+import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
 
 declare option xdmp:mapping "false";
 

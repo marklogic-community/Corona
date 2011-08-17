@@ -21,9 +21,9 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
-import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
-import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
-import module namespace manage="http://marklogic.com/mljson/manage" at "manage.xqy";
+import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
+import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
+import module namespace manage="http://marklogic.com/corona/manage" at "manage.xqy";
 
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 

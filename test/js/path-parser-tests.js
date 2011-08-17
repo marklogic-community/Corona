@@ -1,15 +1,15 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
-mljson.paths = [
+corona.paths = [
     {
-        "path": 'foo.bar.baz[1]',
+        "path": 'foo.bar.baz[0]',
         "result": "json:foo/json:bar/json:baz/json:item[1]",
         "purpose": "Simple steps with array access at end"
     },
     {
-        "path": '["foo"]["bar"]["baz"][1]',
+        "path": '["foo"]["bar"]["baz"][0]',
         "result": "json:foo/json:bar/json:baz/json:item[1]",
         "purpose": "Quoted steps with array access at end"
     },
@@ -77,13 +77,13 @@ mljson.paths = [
 
 $(document).ready(function() {
     module("Paths");
-    for (var i = 0; i < mljson.paths.length; i += 1) {
-        mljson.pathFromServerTest(mljson.paths[i]);
+    for (var i = 0; i < corona.paths.length; i += 1) {
+        corona.pathFromServerTest(corona.paths[i]);
     }
 });
 
 
-mljson.pathFromServer = function(test, success, error) {
+corona.pathFromServer = function(test, success, error) {
     asyncTest(test.purpose, function() {
         $.ajax({
             url: '/test/xq/parsepath.xqy',
@@ -95,8 +95,8 @@ mljson.pathFromServer = function(test, success, error) {
     });
 };
 
-mljson.pathFromServerTest = function(test) {
-    mljson.pathFromServer(test,
+corona.pathFromServerTest = function(test) {
+    corona.pathFromServer(test,
         function(data, t, j) {
             if(test.error !== undefined) {
                 equals(data, test.error, test.purpose);

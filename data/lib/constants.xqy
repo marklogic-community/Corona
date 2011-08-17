@@ -16,12 +16,12 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-module namespace const="http://marklogic.com/mljson/constants";
+module namespace const="http://marklogic.com/corona/constants";
 
 
 declare variable $const:version as xs:string := "1.0";
 
-declare variable $const:JSONCollection as xs:string := "mljson-json";
-declare variable $const:XMLCollection as xs:string := "mljson-xml";
+declare variable $const:JSONCollection as xs:string := "corona-json";
+declare variable $const:XMLCollection as xs:string := "corona-xml";
 
-declare variable $const:TransformersCollection as xs:string := "mljson-transformers";
+declare variable $const:TransformersCollection as xs:string := "corona-transformers";

@@ -15,7 +15,7 @@ print "finished\n";
 opendir(my $extractDH, $extractInto);
 
 my $ua = LWP::UserAgent->new;
-$ua->agent("mljson test loader");
+$ua->agent("corona test loader");
 
 my $i = 1;
 while(my $file = readdir $extractDH) {

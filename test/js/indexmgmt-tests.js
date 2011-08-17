@@ -1,8 +1,8 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
-mljson.removeIndexes = function(info, callback) {
+corona.removeIndexes = function(info, callback) {
     var i = 0;
     var indexes = [];
     for(i = 0; i < info.indexes.fields.length; i += 1) {
@@ -99,7 +99,7 @@ mljson.removeIndexes = function(info, callback) {
     removeNextIndex();
 };
 
-mljson.addIndexes = function(callback) {
+corona.addIndexes = function(callback) {
     // These are the index to try and create
     var indexes = [
         // Namespaces
@@ -776,7 +776,7 @@ mljson.addIndexes = function(callback) {
     addNextIndex();
 };
 
-mljson.insertDocuments = function() {
+corona.insertDocuments = function() {
     var documents = [
         {
             "name1": "Musical Animals",
@@ -855,9 +855,9 @@ $(document).ready(function() {
             url: '/data/info',
             success: function(data) {
                 var info = JSON.parse(data);
-                mljson.removeIndexes(info, function() {
-                    mljson.addIndexes(function() {
-                        mljson.insertDocuments();
+                corona.removeIndexes(info, function() {
+                    corona.addIndexes(function() {
+                        corona.insertDocuments();
                     });
                 });
             },

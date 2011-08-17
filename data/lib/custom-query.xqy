@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 :)
 
-module namespace customquery="http://marklogic.com/mljson/custom-query";
+module namespace customquery="http://marklogic.com/corona/custom-query";
 
-import module namespace const="http://marklogic.com/mljson/constants" at "constants.xqy";
+import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
-import module namespace search="http://marklogic.com/mljson/search" at "search.xqy";
-import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
-import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
+import module namespace search="http://marklogic.com/corona/search" at "search.xqy";
+import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
+import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 

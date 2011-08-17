@@ -1,8 +1,8 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
-mljson.queries = [
+corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
@@ -249,7 +249,7 @@ mljson.queries = [
     },
 ];
 
-mljson.constructURL = function(query, purpose) {
+corona.constructURL = function(query, purpose) {
     if(purpose === "prereq" || purpose === "delete") {
         var base;
         if(query.type === "json") {
@@ -281,9 +281,9 @@ mljson.constructURL = function(query, purpose) {
     }
 }
 
-mljson.runQueries = function() {
+corona.runQueries = function() {
     var i = 0;
-    for(i = 0; i < mljson.queries.length; i += 1) {
+    for(i = 0; i < corona.queries.length; i += 1) {
         var wrapper = function(query) {
             asyncTest(query.purpose, function() {
                 var docContent = query.prereqDoc.content;
@@ -291,12 +291,12 @@ mljson.runQueries = function() {
                     docContent = JSON.stringify(docContent);
                 }
                 $.ajax({
-                    url: mljson.constructURL(query, "prereq"),
+                    url: corona.constructURL(query, "prereq"),
                     type: 'PUT',
                     data: docContent,
                     success: function() {
                         $.ajax({
-                            url:  mljson.constructURL(query, "query"),
+                            url:  corona.constructURL(query, "query"),
                             type: 'GET',
                             data: query.query,
                             success: function(data) {
@@ -310,7 +310,7 @@ mljson.runQueries = function() {
                                     }
                                 }
                                 $.ajax({
-                                    url: mljson.constructURL(query, "delete"),
+                                    url: corona.constructURL(query, "delete"),
                                     type: 'DELETE',
                                     data: docContent,
                                     error: function() {
@@ -322,7 +322,7 @@ mljson.runQueries = function() {
                                 ok(!query.shouldSucceed, "Query failed");
                                 if(query.shouldSucceed === false) {
                                     $.ajax({
-                                        url: mljson.constructURL(query, "delete"),
+                                        url: corona.constructURL(query, "delete"),
                                         type: 'DELETE',
                                         data: docContent,
                                         error: function() {
@@ -342,11 +342,11 @@ mljson.runQueries = function() {
                 });
             });
             
-        }.call(this, mljson.queries[i]);
+        }.call(this, corona.queries[i]);
     }
 };
 
 $(document).ready(function() {
     module("Key/Value Queries");
-    mljson.runQueries();
+    corona.runQueries();
 });

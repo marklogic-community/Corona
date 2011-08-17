@@ -1,8 +1,8 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
-mljson.documents = [
+corona.documents = [
     {
         "type": "json",
         "uri": "/doc-store-test-1.json",
@@ -56,7 +56,7 @@ mljson.documents = [
     }
 ];
 
-mljson.constructURL = function(doc, prefix, processExtras) {
+corona.constructURL = function(doc, prefix, processExtras) {
     var extras = "";
     if(doc.type === "json") {
         return "/json/store" + prefix + doc.uri + "?" + extras;
@@ -66,11 +66,11 @@ mljson.constructURL = function(doc, prefix, processExtras) {
     }
 };
 
-mljson.insertDocuments = function(prefix, callback) {
+corona.insertDocuments = function(prefix, callback) {
     var i = 0;
-    for(i = 0; i < mljson.documents.length; i += 1) {
+    for(i = 0; i < corona.documents.length; i += 1) {
         var wrapper = function(index) {
-            var doc = mljson.documents[index];
+            var doc = corona.documents[index];
             asyncTest("Inserting document: " + prefix + doc.uri, function() {
                 var docContent = doc.content;
                 if(doc.type === "json") {
@@ -78,14 +78,14 @@ mljson.insertDocuments = function(prefix, callback) {
                 }
 
                 $.ajax({
-                    url: mljson.constructURL(doc, prefix),
+                    url: corona.constructURL(doc, prefix),
                     type: 'PUT',
                     data: docContent,
                     context: doc,
                     success: function() {
                         ok(true, "Inserted document");
-                        if(index === mljson.documents.length - 1) {
-                            mljson.deleteDocuments();
+                        if(index === corona.documents.length - 1) {
+                            corona.deleteDocuments();
                         }
                     },
                     error: function(j, t, error) {
@@ -100,7 +100,7 @@ mljson.insertDocuments = function(prefix, callback) {
     }
 };
 
-mljson.deleteDocuments = function() {
+corona.deleteDocuments = function() {
     asyncTest("Bulk delete check", function() {
         $.ajax({
             url: '/json/store?customquery={"keyExists": "foo"}',
@@ -165,16 +165,16 @@ mljson.deleteDocuments = function() {
     });
 };
 
-mljson.deleteDocument = function(prefix, doc) {
+corona.deleteDocument = function(prefix, doc) {
     asyncTest("Deleting document: " + prefix + doc.uri, function() {
         $.ajax({
-            url: mljson.constructURL(doc, prefix, "remove"),
+            url: corona.constructURL(doc, prefix, "remove"),
             type: 'DELETE',
             context: doc,
             success: function() {
                 ok(true, "Deleted document");
                 $.ajax({
-                    url:  mljson.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -197,6 +197,6 @@ mljson.deleteDocument = function(prefix, doc) {
 
 $(document).ready(function() {
     module("Bulk Store");
-    mljson.insertDocuments("/bulk", function() {
+    corona.insertDocuments("/bulk", function() {
     });
 });

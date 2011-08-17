@@ -16,11 +16,11 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-module namespace parser = "http://marklogic.com/mljson/query-parser";
+module namespace parser = "http://marklogic.com/corona/query-parser";
 
-import module namespace config="http://marklogic.com/mljson/index-config" at "index-config.xqy";
-import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
-import module namespace search="http://marklogic.com/mljson/search" at "search.xqy";
+import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
+import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
+import module namespace search="http://marklogic.com/corona/search" at "search.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";

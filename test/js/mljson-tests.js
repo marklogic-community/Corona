@@ -1,9 +1,9 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
 
-mljson.badJSON = [
+corona.badJSON = [
     {
         "jsonString": "[1 2]",
         "error": "Unexpected token number: '[1 2]'. Expected either a comma or closing array",
@@ -26,7 +26,7 @@ mljson.badJSON = [
     }
 ];
 
-mljson.validJSON = [
+corona.validJSON = [
     {
         "json": true,
         "purpose": "Primitive true"
@@ -194,13 +194,13 @@ mljson.validJSON = [
 
 $(document).ready(function() {
     module("Bad JSON");
-    for (var i = 0; i < mljson.badJSON.length; i += 1) {
-        mljson.badFromServerTest(mljson.badJSON[i]);
+    for (var i = 0; i < corona.badJSON.length; i += 1) {
+        corona.badFromServerTest(corona.badJSON[i]);
     }
 
     module("Good JSON");
-    for (var i = 0; i < mljson.validJSON.length; i += 1) {
-        mljson.jsonFromServerTest(mljson.validJSON[i]);
+    for (var i = 0; i < corona.validJSON.length; i += 1) {
+        corona.jsonFromServerTest(corona.validJSON[i]);
     }
 
     module("JSON Construction");
@@ -245,7 +245,7 @@ $(document).ready(function() {
 });
 
 
-mljson.jsonFromServer = function(test, success, error) {
+corona.jsonFromServer = function(test, success, error) {
     var jsonString = test.jsonString;
     if(jsonString === undefined) {
         jsonString = JSON.stringify(test.json)
@@ -262,8 +262,8 @@ mljson.jsonFromServer = function(test, success, error) {
     });
 };
 
-mljson.badFromServerTest = function(test) {
-    mljson.jsonFromServer(test,
+corona.badFromServerTest = function(test) {
+    corona.jsonFromServer(test,
         function(data, t, j) {
             equals(data, test.error, test.purpose);
         },
@@ -273,8 +273,8 @@ mljson.badFromServerTest = function(test) {
     );
 };
 
-mljson.jsonFromServerTest = function(test) {
-    mljson.jsonFromServer(test,
+corona.jsonFromServerTest = function(test) {
+    corona.jsonFromServer(test,
         function(data, t, j) {
             deepEqual(JSON.parse(data), test.json, test.purpose);
         },

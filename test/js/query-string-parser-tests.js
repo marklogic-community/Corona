@@ -1,8 +1,8 @@
-if(typeof mljson == "undefined" || !mljson) {
-    mljson = {};
+if(typeof corona == "undefined" || !corona) {
+    corona = {};
 }
 
-mljson.queries = [
+corona.queries = [
     {
         "query": 'foo',
         "result": '<cts:or-query xmlns:cts="http://marklogic.com/cts"> <cts:element-word-query weight="8"> <cts:element xmlns:testns="http://test.ns/uri">testns:subject</cts:element> <cts:text xml:lang="en">foo</cts:text> <cts:option>punctuation-insensitive</cts:option> <cts:option>whitespace-insensitive</cts:option> </cts:element-word-query> <cts:element-attribute-word-query weight="8"> <cts:element xmlns:testns="http://test.ns/uri">testns:subject</cts:element> <cts:attribute>normalized</cts:attribute> <cts:text xml:lang="en">foo</cts:text> <cts:option>punctuation-insensitive</cts:option> <cts:option>whitespace-insensitive</cts:option> </cts:element-attribute-word-query> <cts:element-word-query weight="10"> <cts:element xmlns:json="http://marklogic.com/json">json:subject</cts:element> <cts:text xml:lang="en">foo</cts:text> <cts:option>punctuation-insensitive</cts:option> <cts:option>whitespace-insensitive</cts:option> </cts:element-word-query> <cts:element-word-query weight="-10"> <cts:element xmlns:json="http://marklogic.com/json">json:tri_003Dck_007Cey</cts:element> <cts:text xml:lang="en">foo</cts:text> <cts:option>punctuation-insensitive</cts:option> <cts:option>whitespace-insensitive</cts:option> </cts:element-word-query> <cts:field-word-query weight="5"> <cts:field>field1</cts:field> <cts:text xml:lang="en">foo</cts:text> <cts:option>punctuation-insensitive</cts:option> <cts:option>whitespace-insensitive</cts:option> </cts:field-word-query></cts:or-query>',
@@ -117,13 +117,13 @@ mljson.queries = [
 
 $(document).ready(function() {
     module("Queries");
-    for (var i = 0; i < mljson.queries.length; i += 1) {
-        mljson.queryFromServerTest(mljson.queries[i]);
+    for (var i = 0; i < corona.queries.length; i += 1) {
+        corona.queryFromServerTest(corona.queries[i]);
     }
 });
 
 
-mljson.queryFromServer = function(test, success, error) {
+corona.queryFromServer = function(test, success, error) {
     asyncTest(test.purpose, function() {
         $.ajax({
             url: '/test/xq/parsequerystring.xqy',
@@ -135,8 +135,8 @@ mljson.queryFromServer = function(test, success, error) {
     });
 };
 
-mljson.queryFromServerTest = function(test) {
-    mljson.queryFromServer(test,
+corona.queryFromServerTest = function(test) {
+    corona.queryFromServer(test,
         function(data, t, j) {
             if(test.error !== undefined) {
                 equals(data, test.error, test.purpose);

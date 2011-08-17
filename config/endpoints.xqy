@@ -1,6 +1,6 @@
 xquery version "1.0-ml";
 
-module namespace endpoints="http://marklogic.com/mljson/endpoints";
+module namespace endpoints="http://marklogic.com/corona/endpoints";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "/data/lib/rest/rest.xqy";
 

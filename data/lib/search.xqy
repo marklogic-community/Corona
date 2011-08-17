@@ -16,9 +16,9 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-module namespace search="http://marklogic.com/mljson/search";
+module namespace search="http://marklogic.com/corona/search";
 
-import module namespace common="http://marklogic.com/mljson/common" at "common.xqy";
+import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";

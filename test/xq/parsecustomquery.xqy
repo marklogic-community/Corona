@@ -1,4 +1,4 @@
-import module namespace customquery="http://marklogic.com/mljson/custom-query" at "/data/lib/custom-query.xqy";
+import module namespace customquery="http://marklogic.com/corona/custom-query" at "/data/lib/custom-query.xqy";
 
 declare option xdmp:mapping "false";
 
