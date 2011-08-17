@@ -16,6 +16,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 
@@ -34,17 +35,33 @@ let $end := map:get($params, "end")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 let $query := string(map:get($params, "q"))
+
+let $test := (
+    if(empty($query) or string-length($query) = 0)
+    then common:error(400, "Must supply a query string", $contentType)
+    else if(exists($end) and exists($start) and $start > $end)
+    then common:error(400, "The end must be greater than the start", $contentType)
+    else ()
+)
+
 let $query :=
     if(string-length(normalize-space($query)) = 0)
     then "{}"
     else $query
 
+let $json := try {
+        json:parse($query)
+    }
+    catch ($e) {
+        xdmp:set($test, common:error(400, concat("The query JSON isn't valid: ", $e/*:message), $contentType))
+    }
+
+where $requestMethod = ("GET", "POST")
 return
-    if($requestMethod = ("GET", "POST"))
-    then
-        if($contentType = "json")
-        then customquery:searchJSON($query, $include, $start, $end, $extractPath, $applyTransform)
-        else if($contentType = "xml")
-        then customquery:searchXML($query, $include, $start, $end, $extractPath, $applyTransform)
-        else ()
+    if(exists($test))
+    then $test
+    else if($contentType = "json")
+    then customquery:searchJSON($json, $include, $start, $end, $extractPath, $applyTransform)
+    else if($contentType = "xml")
+    then customquery:searchXML($json, $include, $start, $end, $extractPath, $applyTransform)
     else ()

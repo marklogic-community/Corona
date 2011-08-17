@@ -52,7 +52,7 @@ declare function customquery:getCTSFromParseTree(
 };
 
 declare function customquery:searchJSON(
-    $json as xs:string,
+    $json as element(),
     $include as xs:string*,
     $start as xs:positiveInteger?,
     $end as xs:positiveInteger?,
@@ -61,12 +61,11 @@ declare function customquery:searchJSON(
 ) as xs:string
 {
     let $start := if(empty($start)) then 1 else $start
-    let $tree := json:parse($json)
-    let $cts := customquery:dispatch($tree, ())
-    let $options := customquery:extractOptions($tree, "search")
-    let $weight := customquery:extractWeight($tree)
+    let $cts := customquery:dispatch($json, ())
+    let $options := customquery:extractOptions($json, "search")
+    let $weight := customquery:extractWeight($json)
     let $debug :=
-        if($tree/json:debug[@boolean = "true"])
+        if($json/json:debug[@boolean = "true"])
         then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
         else ()
 
@@ -91,7 +90,7 @@ declare function customquery:searchJSON(
 };
 
 declare function customquery:searchXML(
-    $json as xs:string,
+    $json as element(),
     $include as xs:string*,
     $start as xs:positiveInteger?,
     $end as xs:positiveInteger?,
@@ -100,12 +99,11 @@ declare function customquery:searchXML(
 ) as element(response)
 {
     let $start := if(empty($start)) then 1 else $start
-    let $tree := json:parse($json)
-    let $cts := customquery:dispatch($tree, ())
-    let $options := customquery:extractOptions($tree, "search")
-    let $weight := customquery:extractWeight($tree)
+    let $cts := customquery:dispatch($json, ())
+    let $options := customquery:extractOptions($json, "search")
+    let $weight := customquery:extractWeight($json)
     let $debug :=
-        if($tree/json:debug[@boolean = "true"])
+        if($json/json:debug[@boolean = "true"])
         then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
         else ()
 

@@ -16,6 +16,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace const="http://marklogic.com/mljson/constants" at "lib/constants.xqy";
 import module namespace parser="http://marklogic.com/mljson/query-parser" at "lib/query-parser.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
@@ -35,6 +36,14 @@ let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 let $start := map:get($params, "start")
 let $end := map:get($params, "end")
+
+let $test := (
+    if(empty($query))
+    then common:error(400, "Must supply a query string", $contentType)
+    else if(exists($end) and exists($start) and $start > $end)
+    then common:error(400, "The end must be greater than the start", $contentType)
+    else ()
+)
 
 let $query := parser:parse($query)
 
@@ -89,7 +98,9 @@ let $end :=
     else $end
 
 return
-    if($contentType = "json")
+    if(exists($test))
+    then $test
+    else if($contentType = "json")
     then reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
     else if($contentType = "xml")
     then reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)

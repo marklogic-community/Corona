@@ -33,7 +33,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <!-- Custom queries -->
     <request uri="^/(json|xml)/customquery(/)?$" endpoint="/data/customquery.xqy">
         <uri-param name="content-type">$1</uri-param>
-        <param name="q" required="true" default="{}"/>
+        <param name="q" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
@@ -46,7 +46,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <!-- Query strings -->
     <request uri="^/(json|xml)/query(/)?$" endpoint="/data/query.xqy">
         <uri-param name="content-type">$1</uri-param>
-        <param name="q" required="true"/>
+        <param name="q" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
