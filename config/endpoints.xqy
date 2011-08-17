@@ -63,6 +63,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="key" required="false"/>
         <param name="element" required="false"/>
         <param name="attribute" required="false"/>
+        <param name="property" required="false"/>
         <param name="value" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>

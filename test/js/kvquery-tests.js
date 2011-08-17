@@ -8,18 +8,18 @@ mljson.queries = [
         "prereqDoc": {
             "uri": "/kvq/doc1.json",
             "content": {
-                "foo": "bar 123.45-7"
+                "foo": "bar 123.45-6"
             }
         },
         "query": {
             "key": "foo",
-            "value": "bar 123.45-7"
+            "value": "bar 123.45-6"
         },
         "shouldSucceed": true,
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
             equals(data.results[0].uri, "/kvq/doc1.json", "Correct document URI was found");
-            equals(data.results[0].content.foo, "bar 123.45-7", "Correct document content was found");
+            equals(data.results[0].content.foo, "bar 123.45-6", "Correct document content was found");
         },
         "purpose": "Simple JSON key/value query"
     },
@@ -153,6 +153,61 @@ mljson.queries = [
         "purpose": "Using bogus collection"
     },
     {
+        "type": "json",
+        "prereqDoc": {
+            "uri": "/kvq/doc7.json",
+            "content": {},
+            "property": "foo:bar"
+        },
+        "query": {
+            "property": "foo",
+            "value": "bar"
+        },
+        "shouldSucceed": true,
+        "assert": function(data) {
+            equals(data.results.length, 1, "Got one document");
+            equals(data.results[0].uri, "/kvq/doc7.json", "Correct document URI was found");
+        },
+        "purpose": "Property query"
+    },
+    {
+        "type": "json",
+        "prereqDoc": {
+            "uri": "/kvq/doc8.json",
+            "content": {}
+        },
+        "query": {
+            "property": "foo"
+        },
+        "shouldSucceed": false,
+        "purpose": "Mising value"
+    },
+    {
+        "type": "json",
+        "prereqDoc": {
+            "uri": "/kvq/doc8.json",
+            "content": {}
+        },
+        "query": {
+            "value": "foo"
+        },
+        "shouldSucceed": false,
+        "purpose": "Mising key"
+    },
+    {
+        "type": "json",
+        "prereqDoc": {
+            "uri": "/kvq/doc8.json",
+            "content": {}
+        },
+        "query": {
+            "start": 10,
+            "end": 1
+        },
+        "shouldSucceed": false,
+        "purpose": "Messed up start and end"
+    },
+    {
         "type": "xml",
         "prereqDoc": {
             "uri": "/kvq/doc1.xml",
@@ -208,6 +263,9 @@ mljson.constructURL = function(query, purpose) {
             if(query.prereqDoc.collection !== undefined) {
                 base += "collection=" + query.prereqDoc.collection + "&";
             }
+            if(query.prereqDoc.property !== undefined) {
+                base += "property=" + query.prereqDoc.property + "&";
+            }
         }
         return base;
     }
@@ -262,6 +320,16 @@ mljson.runQueries = function() {
                             },
                             error: function(j, t, error) {
                                 ok(!query.shouldSucceed, "Query failed");
+                                if(query.shouldSucceed === false) {
+                                    $.ajax({
+                                        url: mljson.constructURL(query, "delete"),
+                                        type: 'DELETE',
+                                        data: docContent,
+                                        error: function() {
+                                            ok(false, "Could not delete prereq document");
+                                        }
+                                    });
+                                }
                             },
                             complete: function() {
                                 start();
