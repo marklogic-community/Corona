@@ -129,7 +129,8 @@ let $properties := local:propertiesFromRequest($params, "property")
 let $permissions := local:permissionsFromRequest($params, "permission")
 let $quality := local:qualityFromRequest($params)
 
-let $query := (parser:parse(map:get($params, "q")), customquery:getCTS(map:get($params, "customquery")))[1]
+(: XXX - check for parse errors :)
+let $query := (parser:parse(map:get($params, "q")), customquery:getCTS(customquery:getParseTree(map:get($params, "customquery"))))[1]
 
 where string-length($uri) or ($requestMethod = "DELETE" and exists($query))
 return

@@ -41,13 +41,24 @@ let $order := map:get($params, "order")
 let $frequency := map:get($params, "frequency")
 let $includeAllValues := map:get($params, "includeAllValues")
 
-    
+let $test := (
+    if(empty($queryString) and empty($customQuery))
+    then common:error(400, "Must supply either a query string or a custom query", $contentType)
+    else ()
+)
+
 let $query :=
     if(exists($queryString))
     then parser:parse($queryString)
     else if(exists($customQuery))
-    then customquery:getCTS($customQuery, ())
+    then try {
+        customquery:getCTS(customquery:getParseTree($customQuery), ())
+    }
+    catch ($e) {
+        xdmp:set($test, common:error(400, concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
+    }
     else ()
+
 
 let $options := (
     if($order = "frequency")
@@ -59,6 +70,10 @@ let $options := (
 )
 
 let $values :=
+    if(exists($test))
+    then ()
+    else 
+
     for $facet in $facets
 
     let $rawQuery :=
@@ -115,7 +130,9 @@ let $values :=
         then $values
         else ()
 return
-    if($outputFormat = "json")
+    if(exists($test))
+    then $test
+    else if($outputFormat = "json")
     then json:serialize(json:object($values))
     else if($outputFormat = "xml")
     then <results>{ $values }</results>

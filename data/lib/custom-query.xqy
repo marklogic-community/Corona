@@ -27,19 +27,19 @@ import module namespace json="http://marklogic.com/json" at "json.xqy";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare function customquery:getCTS(
-    $json as xs:string?
+    $json as element(json:json)?
 ) as cts:query?
 {
     customquery:getCTS($json, ())
 };
 
 declare function customquery:getCTS(
-    $json as xs:string?,
+    $json as element(json:json)?,
     $ignoreRange as xs:string?
 ) as cts:query?
 {
     if(exists($json))
-    then customquery:dispatch(json:parse($json), $ignoreRange)
+    then customquery:dispatch($json, $ignoreRange)
     else ()
 };
 
@@ -52,7 +52,7 @@ declare function customquery:getCTSFromParseTree(
 };
 
 declare function customquery:searchJSON(
-    $json as element(),
+    $json as element(json:json),
     $include as xs:string*,
     $start as xs:positiveInteger?,
     $end as xs:positiveInteger?,
@@ -90,7 +90,7 @@ declare function customquery:searchJSON(
 };
 
 declare function customquery:searchXML(
-    $json as element(),
+    $json as element(json:json),
     $include as xs:string*,
     $start as xs:positiveInteger?,
     $end as xs:positiveInteger?,
@@ -128,10 +128,12 @@ declare function customquery:searchXML(
 };
 
 declare function customquery:getParseTree(
-    $query as xs:string
-) as element(json:json)
+    $query as xs:string?
+) as element(json:json)?
 {
-    json:parse($query)
+    if(empty($query))
+    then ()
+    else json:parse($query)
 };
 
 declare function customquery:valuesForFacet(

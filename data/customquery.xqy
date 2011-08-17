@@ -18,7 +18,6 @@ xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/mljson/common" at "lib/common.xqy";
 import module namespace customquery="http://marklogic.com/mljson/custom-query" at "lib/custom-query.xqy";
-import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/mljson/endpoints" at "/config/endpoints.xqy";
@@ -50,7 +49,7 @@ let $query :=
     else $query
 
 let $json := try {
-        json:parse($query)
+        customquery:getParseTree($query)
     }
     catch ($e) {
         xdmp:set($test, common:error(400, concat("The query JSON isn't valid: ", $e/*:message), $contentType))
