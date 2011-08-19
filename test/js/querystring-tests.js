@@ -6,47 +6,35 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/customquery/doc1.json",
-            "content": {
-                "foo": "bar 123.45-6"
-            }
+            "uri": "/querystring/doc1.json",
+            "content": {"subject": "bar00001"}
         },
         "query": {
-            "q": JSON.stringify({
-                "equals": {
-                    "key": "foo",
-                    "value": "bar 123.45-6"
-                }
-            }),
+            "q": "bar00001"
          },
         "shouldSucceed": true,
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].uri, "/customquery/doc1.json", "Correct document URI was found");
-            equals(data.results[0].content.foo, "bar 123.45-6", "Correct document content was found");
+            equals(data.results[0].uri, "/querystring/doc1.json", "Correct document URI was found");
+            equals(data.results[0].content.subject, "bar00001", "Correct document content was found");
         },
         "purpose": "Simple JSON custom query"
     },
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/customquery/doc3.json",
-            "content": {"foo": "bar 123.45-7"},
+            "uri": "/querystring/doc3.json",
+            "content": {"subject": "bar00002"},
             "collection": ["testcol"]
         },
         "query": {
-            "q": JSON.stringify({
-                "equals": {
-                    "key": "foo",
-                    "value": "bar 123.45-7"
-                }
-            }),
+            "q": "bar00002",
             "include": ["collections"]
          },
         "shouldSucceed": true,
         "assert": function(data, config) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].uri, "/customquery/doc3.json", "Correct document URI was found");
+            equals(data.results[0].uri, "/querystring/doc3.json", "Correct document URI was found");
             deepEqual(data.results[0].collections, config.prereqDoc.collection, "Correct document URI was found");
         },
         "purpose": "Extracting collection"
@@ -54,9 +42,9 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/customquery/doc2.json",
+            "uri": "/querystring/doc2.json",
             "content": {
-                "foo": "bar 123.45-9",
+                "subject": "bar00003",
                 "foo2": {
                     "bar": [
                         "baz"
@@ -65,18 +53,13 @@ corona.queries = [
             }
         },
         "query": {
-            "q": JSON.stringify({
-                "equals": {
-                    "key": "foo",
-                    "value": "bar 123.45-9"
-                }
-            }),
+            "q": "bar00003",
             "extractPath": "foo2.bar[0]"
          },
         "shouldSucceed": true,
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].uri, "/customquery/doc2.json", "Correct document URI was found");
+            equals(data.results[0].uri, "/querystring/doc2.json", "Correct document URI was found");
             equals(data.results[0].content, "baz", "Correct document content was found");
         },
         "purpose": "Using extractPath"
@@ -84,16 +67,11 @@ corona.queries = [
     {
         "type": "xml",
         "prereqDoc": {
-            "uri": "/customquery/doc1.xml",
-            "content": "<foo>bar 123.45-1</foo>"
+            "uri": "/querystring/doc1.xml",
+            "content": "<testns:subject xmlns:testns='http://test.ns/uri'>bar00004</testns:subject>"
         },
         "query": {
-            "q": JSON.stringify({
-                "equals": {
-                    "element": "foo",
-                    "value": "bar 123.45-1"
-                }
-            }),
+            "q": "bar00004",
             "applyTransform": "generic",
             "extractPath": "root()"
         },
@@ -101,7 +79,7 @@ corona.queries = [
         "assert": function(data) {
             equals(data.getElementsByTagName("results")[0].childNodes.length, 1, "Got one document");
             var result = data.getElementsByTagName("results")[0].childNodes[0];
-            equals(result.getElementsByTagName("uri")[0].childNodes[0].nodeValue, "/customquery/doc1.xml", "Correct document URI was found");
+            equals(result.getElementsByTagName("uri")[0].childNodes[0].nodeValue, "/querystring/doc1.xml", "Correct document URI was found");
             equals(result.getElementsByTagName("content")[0].childNodes[0].childNodes[0].nodeValue, "XSLT'd!", "Correct document content was found");
         },
         "purpose": "Applying transform"
@@ -109,11 +87,10 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/customquery/doc8.json",
+            "uri": "/querystring/doc8.json",
             "content": {}
         },
-        "query": {
-        },
+        "query": {},
         "shouldSucceed": false,
         "purpose": "Mising query"
     },
@@ -142,10 +119,10 @@ corona.constructURL = function(query, purpose) {
     if(purpose === "query") {
         var base;
         if(query.type === "json") {
-            base = "/json/customquery";
+            base = "/json/query";
         }
         else {
-            base = "/xml/customquery";
+            base = "/xml/query";
         }
         return base;
     }
