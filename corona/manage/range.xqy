@@ -27,43 +27,50 @@ import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/manage/field.xqy"))
+let $params := rest:process-request(endpoints:request("/corona/manage/range.xqy"))
 let $name := map:get($params, "name")
 let $requestMethod := xdmp:get-request-method()
 
-let $database := xdmp:database()
 let $config := admin:get-configuration()
-let $existing := manage:getField($name, $config)
-
-let $includeKeys := distinct-values(map:get($params, "includeKey"))
-let $excludes := distinct-values(map:get($params, "excludeKey"))
-let $includeElements := distinct-values(map:get($params, "includeElement"))
-let $excludeElements := distinct-values(map:get($params, "excludeElement"))
-let $mode := map:get($params, "mode")
+let $existing := manage:getRange($name)
 
 return
     if($requestMethod = "GET")
     then
         if(exists($existing))
         then json:serialize($existing)
-        else common:error(404, "Field not found", "json")
+        else common:error(404, "Range index not found", "json")
 
     else if($requestMethod = "POST")
-    then (
-        if(exists($existing))
-        then xdmp:set($config, admin:database-delete-field($config, $database, $name))
-        else (),
-        try {
-            manage:createField($name, $mode, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
-        }
-        catch ($e) {
-            common:error($e, "json")
-        }
-    )
+    then
+        let $key := map:get($params, "key")
+        let $element := map:get($params, "element")
+        let $attribute := map:get($params, "attribute")
+        let $type := map:get($params, "type")
+        let $operator := map:get($params, "operator")
+        return
+
+        if((empty($key) and empty($element)) or (exists($key) and exists($element)))
+        then common:error(500, "Must supply either a JSON key, an XML element name or XML element and attribute names", "json")
+        else if(exists($attribute) and empty($element))
+        then common:error(500, "Must supply an XML element along with an XML attribute", "json")
+        else
+            try {
+                if(exists($key))
+                then manage:createJSONRange($name, $key, $type, $operator, $config)
+                else if(exists($element) and exists($attribute))
+                then manage:createXMLAttributeRange($name, $element, $attribute, $type, $operator, $config)
+                else if(exists($element) and empty($attribute))
+                then manage:createXMLElementRange($name, $element, $type, $operator, $config)
+                else ()
+            }
+            catch ($e) {
+                common:error($e, "json")
+            }
 
     else if($requestMethod = "DELETE")
     then
         if(exists($existing))
-        then manage:deleteField($name, $config)
-        else common:error(404, "Field not found", "json")
+        then manage:deleteRange($name, $config)
+        else common:error(404, "Range index not found", "json")
     else common:error(500, concat("Unsupported method: ", $requestMethod), "json")

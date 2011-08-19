@@ -27,7 +27,7 @@ import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/manage/bucketedrange.xqy"))
+let $params := rest:process-request(endpoints:request("/corona/manage/bucketedrange.xqy"))
 let $name := map:get($params, "name")
 let $requestMethod := xdmp:get-request-method()
 

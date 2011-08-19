@@ -1,6 +1,6 @@
 xquery version "1.0-ml";
 
-import module namespace rest="http://marklogic.com/appservices/rest" at "/data/lib/rest/rest.xqy";
+import module namespace rest="http://marklogic.com/appservices/rest" at "rest/rest.xqy";
 
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
 

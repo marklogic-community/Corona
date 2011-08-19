@@ -117,7 +117,7 @@ declare function local:syncMetadata(
 
 let $requestMethod := xdmp:get-request-method()
 let $bodyContent := xdmp:get-request-body("text")/text()
-let $params := rest:process-request(endpoints:request("/data/store.xqy"))
+let $params := rest:process-request(endpoints:request("/corona/store.xqy"))
 let $contentType := map:get($params, "content-type")
 let $uri := map:get($params, "uri")
 let $include := map:get($params, "include")

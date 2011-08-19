@@ -26,34 +26,46 @@ import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/c
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/manage/map.xqy"))
-let $name := map:get($params, "name")
+let $params := rest:process-request(endpoints:request("/corona/manage/contentitems.xqy"))
+let $requestMethod := xdmp:get-request-method()
 let $key := map:get($params, "key")
 let $element := map:get($params, "element")
 let $attribute := map:get($params, "attribute")
+let $field := map:get($params, "field")
+let $weight := map:get($params, "weight")
 let $mode := map:get($params, "mode")
-let $requestMethod := xdmp:get-request-method()
 
-let $existing := manage:getMap($name)
+let $existing :=
+    if(exists($key))
+    then manage:getContentItem("key", $key, $mode)
+    else if(exists($element) and exists($attribute))
+    then manage:getContentItem("attribute", $element, $attribute, $mode)
+    else if(exists($element))
+    then manage:getContentItem("element", $element, $mode)
+    else if(exists($field))
+    then manage:getContentItem("field", $field, $mode)
+    else ()
 
 return
     if($requestMethod = "GET")
     then
-        if(exists($existing))
+        if(empty(($key, $element, $attribute, $field)))
+        then json:serialize(json:array(manage:getAllContentItems()))
+        else if(exists($existing))
         then json:serialize($existing)
-        else common:error(404, "Mapping not found", "json")
+        else common:error(404, "Content item not found", "json")
 
     else if($requestMethod = "POST")
-    then 
-        if((empty($key) and empty($element)) or (exists($key) and exists($element)))
-        then common:error(500, "Must supply either a JSON key or XML element name", "json")
-        else try {
+    then
+        try {
             if(exists($key))
-            then manage:createJSONMap($name, $key, $mode)
+            then manage:addContentItem("key", $key, $mode, $weight)
             else if(exists($element) and exists($attribute))
-            then manage:createXMLMap($name, $element, $attribute, $mode)
+            then manage:addContentItem("attribute", $element, $attribute, $mode, $weight)
             else if(exists($element))
-            then manage:createXMLMap($name, $element, $mode)
+            then manage:addContentItem("element", $element, $mode, $weight)
+            else if(exists($field))
+            then manage:addContentItem("field", $field, $mode, $weight)
             else ()
         }
         catch ($e) {
@@ -63,6 +75,15 @@ return
     else if($requestMethod = "DELETE")
     then
         if(exists($existing))
-        then manage:deleteMap($name)
-        else common:error(404, "Mapping not found", "json")
+        then
+            if(exists($key))
+            then manage:deleteContentItem("key", $key, $mode)
+            else if(exists($element) and exists($attribute))
+            then manage:deleteContentItem("attribute", $element, $attribute, $mode)
+            else if(exists($element))
+            then manage:deleteContentItem("element", $element, $mode)
+            else if(exists($field))
+            then manage:deleteContentItem("field", $field, $mode)
+            else ()
+        else common:error(404, "Content item not found", "json")
     else common:error(500, concat("Unsupported method: ", $requestMethod), "json")

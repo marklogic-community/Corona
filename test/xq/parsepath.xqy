@@ -1,4 +1,4 @@
-import module namespace path="http://marklogic.com/mljson/path-parser" at "/data/lib/path-parser.xqy";
+import module namespace path="http://marklogic.com/mljson/path-parser" at "/corona/lib/path-parser.xqy";
 
 declare option xdmp:mapping "false";
 

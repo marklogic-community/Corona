@@ -25,7 +25,7 @@ import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/c
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/manage/transformer.xqy"))
+let $params := rest:process-request(endpoints:request("/corona/manage/transformer.xqy"))
 let $requestMethod := xdmp:get-request-method()
 let $name := map:get($params, "name")
 let $bodyContent := xdmp:get-request-body("text")/text()

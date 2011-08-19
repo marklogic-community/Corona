@@ -29,7 +29,7 @@ import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/c
 
 declare option xdmp:mapping "false";
 
-let $params := rest:process-request(endpoints:request("/data/facet.xqy"))
+let $params := rest:process-request(endpoints:request("/corona/facet.xqy"))
 let $facets := tokenize(map:get($params, "facets"), ",")
 let $contentType := map:get($params, "content-type")
 let $outputFormat := (map:get($params, "outputFormat"), $contentType)[1]

@@ -39,7 +39,7 @@ corona.removeIndexes = function(info, callback) {
         if(index === undefined) {
             asyncTest("Check for no indexes", function() {
                 $.ajax({
-                    url: '/data/info',
+                    url: '/manage',
                     success: function(data) {
                         var info = JSON.parse(data);
                         ok(info.indexes.fields.length === 0, "All fields removed");
@@ -550,7 +550,7 @@ corona.addIndexes = function(callback) {
         if(index === undefined) {
             asyncTest("Checking created indexes", function() {
                 $.ajax({
-                    url: '/data/info',
+                    url: '/manage',
                     context: this,
                     success: function(data) {
                         var info = JSON.parse(data);
@@ -852,7 +852,7 @@ $(document).ready(function() {
     module("Database setup");
     asyncTest("Database index setup", function() {
         $.ajax({
-            url: '/data/info',
+            url: '/manage',
             success: function(data) {
                 var info = JSON.parse(data);
                 corona.removeIndexes(info, function() {

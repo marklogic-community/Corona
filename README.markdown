@@ -7,11 +7,11 @@ The Corona project is a set REST endpoints to enable usage of the [MarkLogic Ser
 Installing Corona is fairly simple:
 
 1. If you don't have a HTTP server configured in MarkLogic, create one
-2. Set the URL rewriter for the HTTP server to: /data/lib/rewriter.xqy
+2. Set the URL rewriter for the HTTP server to: /corona/lib/rewriter.xqy
 3. Download the Corona source and unzip it underneath the document directory that you configured in the MarkLogic HTTP server
 
 Feel free to remove the README file along with the test directory.
-But keep the config and data directories structured as they are. You can
+But keep the `config` and `corona` directories structured as they are. You can
 augment the functionality of Corona by writing your own XQuery and having it
 live alongside the Corona files.
 

@@ -2,7 +2,7 @@ xquery version "1.0-ml";
 
 module namespace endpoints="http://marklogic.com/corona/endpoints";
 
-import module namespace rest="http://marklogic.com/appservices/rest" at "/data/lib/rest/rest.xqy";
+import module namespace rest="http://marklogic.com/appservices/rest" at "/corona/lib/rest/rest.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
@@ -11,7 +11,7 @@ declare option xdmp:mapping "false";
 declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 <options xmlns="http://marklogic.com/appservices/rest">
     <!-- Manage documents in the database -->
-    <request uri="^/(json|xml)/store(/.+)?$" endpoint="/data/store.xqy" user-params="allow">
+    <request uri="^/(json|xml)/store(/.+)?$" endpoint="/corona/store.xqy" user-params="allow">
         <uri-param name="content-type">$1</uri-param>
         <uri-param name="uri" as="string">$2</uri-param>
         <http method="GET">
@@ -31,7 +31,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Custom queries -->
-    <request uri="^/(json|xml)/customquery(/)?$" endpoint="/data/customquery.xqy">
+    <request uri="^/(json|xml)/customquery(/)?$" endpoint="/corona/customquery.xqy">
         <uri-param name="content-type">$1</uri-param>
         <param name="q" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
@@ -44,7 +44,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Query strings -->
-    <request uri="^/(json|xml)/query(/)?$" endpoint="/data/query.xqy">
+    <request uri="^/(json|xml)/query(/)?$" endpoint="/corona/query.xqy">
         <uri-param name="content-type">$1</uri-param>
         <param name="q" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
@@ -58,7 +58,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Key value queryies -->
-    <request uri="^/(json|xml)/kvquery$" endpoint="/data/kvquery.xqy">
+    <request uri="^/(json|xml)/kvquery$" endpoint="/corona/kvquery.xqy">
         <uri-param name="content-type">$1</uri-param>
         <param name="key" required="false"/>
         <param name="element" required="false"/>
@@ -75,11 +75,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="inDirectory" required="false"/>
     </request>
 
-    <!-- Info request -->
-    <request uri="^/data/info(/)?$" endpoint="/data/info.xqy" user-params="ignore"/>
-
     <!-- Facets -->
-    <request uri="^/(json|xml)/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/data/facet.xqy">
+    <request uri="^/(json|xml)/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/corona/facet.xqy">
         <uri-param name="content-type">$1</uri-param>
         <uri-param name="facets">$2</uri-param>
         <param name="q" required="false"/>
@@ -92,7 +89,10 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Index management -->
-    <request uri="^/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/data/manage/field.xqy">
+
+    <request uri="^/manage(/)?$" endpoint="/corona/info.xqy" user-params="ignore"/>
+
+    <request uri="^/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/corona/manage/field.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -105,7 +105,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/range/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/range.xqy">
+    <request uri="^/manage/range/([A-Za-z0-9_-]+)(/)?$" endpoint="/corona/manage/range.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -118,7 +118,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/bucketedrange/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/bucketedrange.xqy">
+    <request uri="^/manage/bucketedrange/([A-Za-z0-9_-]+)(/)?$" endpoint="/corona/manage/bucketedrange.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -137,7 +137,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/data/manage/map.xqy">
+    <request uri="^/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/corona/manage/map.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -149,7 +149,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/namespace/([^/]+)(/)?$" endpoint="/data/manage/namespace.xqy">
+    <request uri="^/manage/namespace/([^/]+)(/)?$" endpoint="/corona/manage/namespace.xqy">
         <uri-param name="prefix" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -158,7 +158,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/(contentItem|contentItems)(/)?$" endpoint="/data/manage/contentitems.xqy">
+    <request uri="^/manage/(contentItem|contentItems)(/)?$" endpoint="/corona/manage/contentitems.xqy">
         <param name="key" required="false"/>
         <param name="element" required="false"/>
         <param name="attribute" required="false"/>
@@ -171,7 +171,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/transformer/([^/]+)(/)?$" endpoint="/data/manage/transformer.xqy">
+    <request uri="^/manage/transformer/([^/]+)(/)?$" endpoint="/corona/manage/transformer.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
         <http method="PUT"/>

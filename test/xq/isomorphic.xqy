@@ -16,7 +16,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-import module namespace json = "http://marklogic.com/json" at "/data/lib/json.xqy";
+import module namespace json = "http://marklogic.com/json" at "/corona/lib/json.xqy";
 
 
 try {

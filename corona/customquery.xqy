@@ -24,7 +24,7 @@ import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/c
 
 declare option xdmp:mapping "false";
 
-let $params := rest:process-request(endpoints:request("/data/query.xqy"))
+let $params := rest:process-request(endpoints:request("/corona/query.xqy"))
 
 let $requestMethod := xdmp:get-request-method()
 let $include := map:get($params, "include")

@@ -22,33 +22,48 @@ import module namespace json="http://marklogic.com/json" at "../lib/json.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "../lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
+import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 
 declare option xdmp:mapping "false";
 
 
-let $params := rest:process-request(endpoints:request("/data/manage/namespace.xqy"))
-let $prefix := map:get($params, "prefix")
-let $uri := map:get($params, "uri")
+let $params := rest:process-request(endpoints:request("/corona/manage/field.xqy"))
+let $name := map:get($params, "name")
 let $requestMethod := xdmp:get-request-method()
 
-let $existing := manage:getNamespaceURI($prefix)
+let $database := xdmp:database()
+let $config := admin:get-configuration()
+let $existing := manage:getField($name, $config)
+
+let $includeKeys := distinct-values(map:get($params, "includeKey"))
+let $excludes := distinct-values(map:get($params, "excludeKey"))
+let $includeElements := distinct-values(map:get($params, "includeElement"))
+let $excludeElements := distinct-values(map:get($params, "excludeElement"))
+let $mode := map:get($params, "mode")
 
 return
     if($requestMethod = "GET")
     then
         if(exists($existing))
         then json:serialize($existing)
-        else common:error(404, "Namespace not found", "json")
+        else common:error(404, "Field not found", "json")
 
     else if($requestMethod = "POST")
-    then
-        if(not(matches($prefix, "^[A-Za-z_][A-Za-z0-9_\.]*$")))
-        then common:error(500, "Invalid namespace prefix", "json")
-        else manage:setNamespaceURI($prefix, $uri)
+    then (
+        if(exists($existing))
+        then xdmp:set($config, admin:database-delete-field($config, $database, $name))
+        else (),
+        try {
+            manage:createField($name, $mode, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
+        }
+        catch ($e) {
+            common:error($e, "json")
+        }
+    )
 
     else if($requestMethod = "DELETE")
     then
         if(exists($existing))
-        then manage:deleteNamespace($prefix)
-        else common:error(404, "Namespace not found", "json")
+        then manage:deleteField($name, $config)
+        else common:error(404, "Field not found", "json")
     else common:error(500, concat("Unsupported method: ", $requestMethod), "json")
