@@ -57,7 +57,7 @@ return
             else ()
         }
         catch ($e) {
-            common:error($e, "json")
+            common:errorFromException(400, $e, "json")
         }
 
     else if($requestMethod = "DELETE")

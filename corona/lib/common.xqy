@@ -52,13 +52,14 @@ declare function common:error(
             ))
 };
 
-declare function common:error(
+declare function common:errorFromException(
+    $statusCode as xs:integer,
     $exception as element(),
     $outputFormat as xs:string
 )
 {
     xdmp:log($exception),
-    common:error(500, $exception/*:message, "json")
+    common:error($statusCode, $exception/*:message, $outputFormat)
 };
 
 declare function common:castFromJSONType(

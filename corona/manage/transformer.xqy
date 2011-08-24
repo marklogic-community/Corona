@@ -45,7 +45,7 @@ return
             manage:setTransformer($name, $bodyContent)
         }
         catch ($e) {
-            common:error($e, "xml")
+            common:errorFromException(400, $e, "xml")
         }
 
     else if($requestMethod = "DELETE")

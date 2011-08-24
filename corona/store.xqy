@@ -146,14 +146,19 @@ return
     if($contentType = "json")
     then
         if($requestMethod = "GET" and string-length($uri))
-        then reststore:getJSONDocument($uri, $include, $extractPath, $transformer, $query)
+        then try {
+            reststore:getJSONDocument($uri, $include, $extractPath, $transformer, $query)
+        }
+        catch ($e) {
+            common:errorFromException(400, $e, $contentType)
+        }
         else if($requestMethod = "DELETE")
         then
             if(string-length($uri))
             then reststore:deleteJSONDocument($uri)
             else if(exists($query))
             then reststore:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"))
-            else common:error(400, "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", "json")
+            else common:error(400, "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
@@ -166,18 +171,23 @@ return
                 else (),
                 local:syncMetadata($uri, $params)
             )
-        else common:error(400, "Unknown request")
+        else common:error(400, "Unknown request", $contentType)
     else if($contentType = "xml")
     then
         if($requestMethod = "GET" and string-length($uri))
-        then reststore:getXMLDocument($uri, $include, $extractPath, $transformer, $query)
+        then try {
+            reststore:getXMLDocument($uri, $include, $extractPath, $transformer, $query)
+        }
+        catch ($e) {
+            common:errorFromException(400, $e, $contentType)
+        }
         else if($requestMethod = "DELETE")
         then
             if(string-length($uri))
             then reststore:deleteXMLDocument($uri)
             else if(exists($query))
             then reststore:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"))
-            else common:error(400, "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", "xml")
+            else common:error(400, "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
@@ -190,5 +200,5 @@ return
                 else (),
                 local:syncMetadata($uri, $params)
             )
-        else common:error(400, "Unknown request")
+        else common:error(400, "Unknown request", $contentType)
     else ()

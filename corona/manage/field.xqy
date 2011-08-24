@@ -57,7 +57,7 @@ return
             manage:createField($name, $mode, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
         }
         catch ($e) {
-            common:error($e, "json")
+            common:errorFromException(400, $e, "json")
         }
     )
 
