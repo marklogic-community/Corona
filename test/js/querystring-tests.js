@@ -73,7 +73,7 @@ corona.queries = [
         "query": {
             "q": "bar00004",
             "applyTransform": "generic",
-            "extractPath": "root()"
+            "extractPath": ""
         },
         "shouldSucceed": true,
         "assert": function(data) {

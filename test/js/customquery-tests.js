@@ -95,7 +95,7 @@ corona.queries = [
                 }
             }),
             "applyTransform": "generic",
-            "extractPath": "root()"
+            "extractPath": ""
         },
         "shouldSucceed": true,
         "assert": function(data) {

@@ -24,10 +24,10 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
 declare function path:select(
-    $doc as element(),
+    $doc as node(),
     $path as xs:string,
     $type as xs:string
-) as element()*
+) as node()*
 {
     if(string-length($path) = 0)
     then $doc

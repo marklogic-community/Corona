@@ -264,7 +264,7 @@ declare function reststore:getXMLDocument(
     let $includeQuality := $include = ("quality", "all")
     let $content :=
         if(exists($extractPath))
-        then reststore:getRawXMLDoc($uri)/xdmp:value($extractPath)
+        then path:select(reststore:getRawXMLDoc($uri), $extractPath, "xml")
         else reststore:getRawXMLDoc($uri)
     let $content :=
         if($include = ("highlighting") and exists($highlightQuery))
@@ -315,7 +315,7 @@ declare function reststore:outputMultipleXMLDocs(
                 let $uri := base-uri($doc)
                 let $content :=
                     if(exists($extractPath))
-                    then root($doc)/xdmp:value($extractPath)
+                    then path:select(root($doc), $extractPath, "xml")
                     else $doc
                 let $content :=
                     if($include = ("highlighting") and exists($query))

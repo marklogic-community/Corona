@@ -217,7 +217,7 @@ corona.queries = [
             "element": "foo",
             "value": "bar 123.45-1",
             "applyTransform": "generic",
-            "extractPath": "root()"
+            "extractPath": ""
         },
         "shouldSucceed": true,
         "assert": function(data) {
