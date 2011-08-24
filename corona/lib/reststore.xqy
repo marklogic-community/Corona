@@ -50,7 +50,7 @@ declare function reststore:getJSONDocument(
     let $includeQuality := $include = ("quality", "all")
     let $content :=
         if(exists($extractPath))
-        then path:select(doc($uri)/json:json, $extractPath)
+        then path:select(doc($uri)/json:json, $extractPath, "json")
         else root(doc($uri)/json:json)
     let $content :=
         if(empty($content))
@@ -106,7 +106,7 @@ declare function reststore:outputMultipleJSONDocs(
                 let $uri := base-uri($doc)
                 let $content :=
                     if(exists($extractPath))
-                    then path:select($doc, $extractPath)
+                    then path:select($doc, $extractPath, "json")
                     else $doc
                 let $content :=
                     if(empty($content))
