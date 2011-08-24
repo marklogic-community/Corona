@@ -19,7 +19,7 @@ The URL rewritter is configured in the config/endpoints.xqy file. You can
 change the URL structure or add in more rules if need be there.
 
 ## API Documentation
-[Check the wiki for documentation on how to store, index and query the documents.](Corona/wiki)
+[Check the wiki for documentation on how to store, index and query the documents.](./wiki)
 
   [MarkLogic Server]: http://developer.marklogic.com
   [CRUD]: http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
