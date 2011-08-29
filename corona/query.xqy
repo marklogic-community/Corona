@@ -39,9 +39,9 @@ let $end := map:get($params, "end")
 
 let $test := (
     if(empty($query))
-    then common:error(400, "Must supply a query string", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a query string", $contentType)
     else if(exists($end) and exists($start) and $start > $end)
-    then common:error(400, "The end must be greater than the start", $contentType)
+    then common:error(400, "corona:INVALID-PARAMETER", "The end must be greater than the start", $contentType)
     else ()
 )
 

@@ -37,9 +37,9 @@ let $query := string(map:get($params, "q"))
 
 let $test := (
     if(empty($query) or string-length($query) = 0)
-    then common:error(400, "Must supply a query string", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a query string", $contentType)
     else if(exists($end) and exists($start) and $start > $end)
-    then common:error(400, "The end must be greater than the start", $contentType)
+    then common:error(400, "corona:INVALID-PARAMETER", "The end must be greater than the start", $contentType)
     else ()
 )
 
@@ -52,7 +52,7 @@ let $json := try {
         customquery:getParseTree($query)
     }
     catch ($e) {
-        xdmp:set($test, common:error(400, concat("The query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The query JSON isn't valid: ", $e/*:message), $contentType))
     }
 
 where $requestMethod = ("GET", "POST")

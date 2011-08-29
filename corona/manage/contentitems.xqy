@@ -53,7 +53,7 @@ return
         then json:serialize(json:array(manage:getAllContentItems()))
         else if(exists($existing))
         then json:serialize($existing)
-        else common:error(404, "Content item not found", "json")
+        else common:error(404, "corona:CONTENT-ITEM-NOT-FOUND", "Content item not found", "json")
 
     else if($requestMethod = "POST")
     then
@@ -85,5 +85,5 @@ return
             else if(exists($field))
             then manage:deleteContentItem("field", $field, $mode)
             else ()
-        else common:error(404, "Content item not found", "json")
-    else common:error(500, concat("Unsupported method: ", $requestMethod), "json")
+        else common:error(404, "corona:CONTENT-ITEM-NOT-FOUND", "Content item not found", "json")
+    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

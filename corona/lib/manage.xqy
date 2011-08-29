@@ -23,6 +23,7 @@ import module namespace config="http://marklogic.com/corona/index-config" at "in
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 
+declare namespace corona="http://marklogic.com/corona";
 declare namespace db="http://marklogic.com/xdmp/database";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
@@ -47,7 +48,7 @@ declare function manage:createField(
         return manage:validateElementName($element)
     let $test :=
         if(empty($includeKeys) and empty($includeElements))
-        then error(xs:QName("manage:MISSING-KEY-OR-ELEMENT"), "Must supply at least one JSON key or XML element to be included in the field")
+        then error(xs:QName("corona:MISSING-KEY-OR-ELEMENT"), "Must supply at least one JSON key or XML element to be included in the field")
         else ()
 
     let $database := xdmp:database()
@@ -886,12 +887,12 @@ declare function manage:setTransformer(
             xdmp:unquote($transformer, (), ("repair-none", "format-xml"))[1]/*
         }
         catch ($e) {
-            error(xs:QName("manage:INVALID-TRANSFORMER"), "Invalid transformer XSLT: parse error")
+            error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer XSLT: parse error")
         }
     let $test :=
         if(local-name($doc) = "stylesheet" and namespace-uri($doc) = "http://www.w3.org/1999/XSL/Transform")
         then ()
-        else error(xs:QName("manage:INVALID-TRANSFORMER"), "Invalid transformer, must be an XSLT")
+        else error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer, must be an XSLT")
     return xdmp:document-insert(concat("/transformers/", $name), $doc, xdmp:default-permissions(), $const:TransformersCollection)
 };
 
@@ -1123,9 +1124,9 @@ declare private function manage:validateIndexName(
 ) as empty-sequence()
 {
     if(not(matches($name, "^[0-9A-Za-z_-]+$")))
-    then error(xs:QName("manage:INVALID-INDEX-NAME"), "Index names can only contain alphanumeric, dash and underscore characters")
+    then error(xs:QName("corona:INVALID-INDEX-NAME"), "Index names can only contain alphanumeric, dash and underscore characters")
     else if(exists(config:get($name)))
-    then error(xs:QName("manage:DUPLICATE-INDEX-NAME"), concat("An index, field or alias with the name '", $name, "' already exists"))
+    then error(xs:QName("corona:DUPLICATE-INDEX-NAME"), concat("An index, field or alias with the name '", $name, "' already exists"))
     else ()
 };
 
@@ -1134,7 +1135,7 @@ declare private function manage:validateJSONType(
 ) as empty-sequence()
 {
     if(not($type = ("string", "date", "number")))
-    then error(xs:QName("manage:INVALID-DATATYPE"), "Valid JSON types are: string, date and number")
+    then error(xs:QName("corona:INVALID-DATATYPE"), "Valid JSON types are: string, date and number")
     else ()
 };
 
@@ -1143,7 +1144,7 @@ declare private function manage:validateXMLType(
 ) as empty-sequence()
 {
     if(not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
-    then error(xs:QName("manage:INVALID-DATATYPE"), "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI")
+    then error(xs:QName("corona:INVALID-DATATYPE"), "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI")
     else ()
 };
 
@@ -1152,7 +1153,7 @@ declare private function manage:validateOperator(
 ) as empty-sequence()
 {
     if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
-    then error(xs:QName("manage:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
+    then error(xs:QName("corona:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
     else ()
 };
 
@@ -1161,7 +1162,7 @@ declare private function manage:validateMode(
 ) as empty-sequence()
 {
     if(not($mode = ("equals", "contains", "textEquals")))
-    then error(xs:QName("manage:INVALID-MODE"), "Map modes must be either 'equals', 'contains' or 'textEquals'")
+    then error(xs:QName("corona:INVALID-MODE"), "Map modes must be either 'equals', 'contains' or 'textEquals'")
     else ()
 };
 
@@ -1172,7 +1173,7 @@ declare private function manage:checkForFieldValueCapability(
         xdmp:function("cts:field-value-query")
     }
     catch ($e) {
-        error(xs:QName("manage:INVALID-MODE"), "This version of MarkLogic Server does not support field value queries.  Upgrade to 5.0 or greater.")
+        error(xs:QName("corona:INVALID-MODE"), "This version of MarkLogic Server does not support field value queries.  Upgrade to 5.0 or greater.")
     }
 };
 
@@ -1184,7 +1185,7 @@ declare private function manage:validateElementName(
         xs:QName($element)[2]
     }
     catch ($e) {
-        error(xs:QName("manage:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
+        error(xs:QName("corona:INVALID-XML-ELEMENT-NAME"), concat("Invalid XML element name or undefined namespace prefix: '", $element, "'"))
     }
 };
 
@@ -1196,7 +1197,7 @@ declare private function manage:validateAttributeName(
         xs:QName($attribute)[2]
     }
     catch ($e) {
-        error(xs:QName("manage:INVALID-XML-ATTRIBUTE-NAME"), concat("Invalid XML attribute name or undefined namespace prefix: '", $attribute, "'"))
+        error(xs:QName("corona:INVALID-XML-ATTRIBUTE-NAME"), concat("Invalid XML attribute name or undefined namespace prefix: '", $attribute, "'"))
     }
 };
 
@@ -1208,9 +1209,9 @@ declare private function manage:validateBuckets(
     for $bucket at $pos in $buckets
     return
         if($pos mod 2 = 0 and local-name($bucket) != "boundary" or $pos mod 2 != 0 and local-name($bucket) != "label")
-        then error(xs:QName("manage:INVALID-BOUNDS-SEQUENCE"), "Bucket bounds elements need to follow the <label>, <boundary>, <label>, <boundary>, …, <label>, <boundary>, <label> pattern")
+        then error(xs:QName("corona:INVALID-BOUNDS-SEQUENCE"), "Bucket bounds elements need to follow the <label>, <boundary>, <label>, <boundary>, …, <label>, <boundary>, <label> pattern")
         else if(local-name($bucket) = "boundary" and not(xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, string($bucket))))
-        then error(xs:QName("manage:INVALID-BUCKET-BOUNDARY"), concat("The bucket boundary: '", string($bucket), "' is not of the right datatype"))
+        then error(xs:QName("corona:INVALID-BUCKET-BOUNDARY"), concat("The bucket boundary: '", string($bucket), "' is not of the right datatype"))
         else ()
 };
 
@@ -1219,7 +1220,7 @@ declare private function manage:validateBucketInterval(
 ) as empty-sequence()
 {
     if(not($interval = ("decade", "year", "quarter", "month", "week", "day", "hour", "minute")))
-    then error(xs:QName("manage:INVALID-BUCKET-INTERVAL"), "Valid bucket intervals are: decade, year, quarter, month, week, day, hour and minute")
+    then error(xs:QName("corona:INVALID-BUCKET-INTERVAL"), "Valid bucket intervals are: decade, year, quarter, month, week, day, hour and minute")
     else ()
 };
 
@@ -1228,6 +1229,6 @@ declare private function manage:validateStartAndStop(
 ) as empty-sequence()
 {
     if(exists($value) and not($value castable as xs:dateTime))
-    then error(xs:QName("manage:INVALID-BUCKET-BOUNDS"), "Bucket starting at and stopping at values must be dateTime values")
+    then error(xs:QName("corona:INVALID-BUCKET-BOUNDS"), "Bucket starting at and stopping at values must be dateTime values")
     else ()
 };

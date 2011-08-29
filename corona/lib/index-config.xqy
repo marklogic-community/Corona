@@ -21,6 +21,7 @@ module namespace config="http://marklogic.com/corona/index-config";
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 
+declare namespace corona="http://marklogic.com/corona";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
@@ -406,14 +407,14 @@ declare private function config:bucketElementsToString(
             else $type
         let $check :=
             if(local-name($buckets[1]) != "label" or local-name($buckets[last()]) != "label")
-            then error(xs:QName("config:INVALID-BUCKETS"), "The first and last bucket elements must be labels")
+            then error(xs:QName("corona:INVALID-BUCKETS"), "The first and last bucket elements must be labels")
             else ()
         for $bucket at $pos in $buckets
         let $check :=
             if($pos mod 2 = 0 and local-name($bucket) != "boundary")
-            then error(xs:QName("config:INVALID-BUCKETS"), "Even bucket elements need to be boundary elements")
+            then error(xs:QName("corona:INVALID-BUCKETS"), "Even bucket elements need to be boundary elements")
             else if($pos mod 2 != 0 and local-name($bucket) != "label")
-            then error(xs:QName("config:INVALID-BUCKETS"), "Odd bucket elements ned to be label elements")
+            then error(xs:QName("corona:INVALID-BUCKETS"), "Odd bucket elements ned to be label elements")
             else ()
         let $boundaryValue :=
             if(local-name($bucket) = "boundary")
@@ -424,7 +425,7 @@ declare private function config:bucketElementsToString(
             else ()
         let $check :=
             if(local-name($bucket) = "boundary" and not(xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundaryValue)))
-            then error(xs:QName("config:INVALID-BUCKETS"), concat("Bucket value '", $boundaryValue, "' is not of the correct datatype"))
+            then error(xs:QName("corona:INVALID-BUCKETS"), concat("Bucket value '", $boundaryValue, "' is not of the correct datatype"))
             else ()
         return xdmp:url-encode(string($bucket))
     , "|")

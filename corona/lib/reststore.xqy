@@ -40,7 +40,7 @@ declare function reststore:getJSONDocument(
 ) as xs:string
 {
     if(empty(doc($uri)/json:json))
-    then common:error(404, "Document not found", "json")
+    then common:error(404, "corona:DOCUMENT-NOT-FOUND", "Document not found", "json")
     else
 
     let $includeContent := $include = ("content", "all")
@@ -177,7 +177,7 @@ declare function reststore:insertJSONDocument(
             json:parse($content)
         }
         catch ($e) {
-            common:error(400, "Invalid JSON", "json"),
+            common:error(400, "corona:INVALID-PARAMETER", "Invalid JSON", "json"),
             xdmp:log($e)
         }
     return (
@@ -197,13 +197,13 @@ declare function reststore:updateJSONDocumentContent(
             json:parse($content)
         }
         catch ($e) {
-            common:error(400, "Invalid JSON", "json"),
+            common:error(400, "corona:INVALID-PAPARAMETER", "Invalid JSON", "json"),
             xdmp:log($e)
         }
     let $existing := doc($uri)/json:json
     let $test :=
         if(empty($existing))
-        then common:error(404, concat("There is no JSON document to update at '", $uri, "'"), "json")
+        then common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no JSON document to update at '", $uri, "'"), "json")
         else ()
     where exists($existing)
     return xdmp:node-replace($existing, $body)
@@ -215,7 +215,7 @@ declare function reststore:deleteJSONDocument(
 {
     if(exists(doc($uri)/json:json))
     then (json:serialize(json:array($uri)), xdmp:document-delete($uri))
-    else common:error(404, concat("There is no JSON document to delete at '", $uri, "'"), "json")
+    else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no JSON document to delete at '", $uri, "'"), "json")
 };
 
 declare function reststore:deleteJSONDocumentsWithQuery(
@@ -236,8 +236,8 @@ declare function reststore:deleteJSONDocumentsWithQuery(
         else if($count = 1)
         then json:serialize(json:array(base-uri($docs)))
         else if($count = 0)
-        then common:error(404, "DELETE query doesn't match any documents", "json")
-        else common:error(400, "DELETE query matches more than one document without enabling bulk deletes", "json")
+        then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", "json")
+        else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", "json")
 };
 
 
@@ -254,7 +254,7 @@ declare function reststore:getXMLDocument(
 ) as item()
 {
     if(empty(reststore:getRawXMLDoc($uri)))
-    then common:error(404, "Document not found", "xml")
+    then common:error(404, "corona:DOCUMENT-NOT-FOUND", "Document not found", "xml")
     else
 
     let $includeContent := $include = ("content", "all")
@@ -376,7 +376,7 @@ declare function reststore:insertXMLDocument(
             xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
         }
         catch ($e) {
-            common:error(400, "Invalid XML", "xml"),
+            common:error(400, "corona:INVALID-PARAMETER", "Invalid XML", "xml"),
             xdmp:log($e)
         }
     return (
@@ -396,13 +396,13 @@ declare function reststore:updateXMLDocumentContent(
             xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
         }
         catch ($e) {
-            common:error(400, "Invalid XML", "xml"),
+            common:error(400, "corona:INVALID-PARAMETER", "Invalid XML", "xml"),
             xdmp:log($e)
         }
     let $existing := reststore:getRawXMLDoc($uri)
     let $test :=
         if(empty($existing))
-        then common:error(404, concat("There is no XML document to update at '", $uri, "'"), "xml")
+        then common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no XML document to update at '", $uri, "'"), "xml")
         else ()
     where exists($existing)
     return xdmp:node-replace($existing, $body)
@@ -414,7 +414,7 @@ declare function reststore:deleteXMLDocument(
 {
     if(exists(reststore:getRawXMLDoc($uri)))
     then (<results><uri>{ $uri }</uri></results>, xdmp:document-delete($uri))
-    else common:error(404, concat("There is no XML document to delete at '", $uri, "'"), "xml")
+    else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no XML document to delete at '", $uri, "'"), "xml")
 };
 
 declare function reststore:deleteXMLDocumentsWithQuery(
@@ -435,8 +435,8 @@ declare function reststore:deleteXMLDocumentsWithQuery(
         else if($count = 1)
         then <results><uri>{ base-uri($docs) }</uri></results>
         else if($count = 0)
-        then common:error(404, "DELETE query doesn't match any documents", "xml")
-        else common:error(400, "DELETE query matches more than one document without enabling bulk deletes", "xml")
+        then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", "xml")
+        else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", "xml")
 };
 
 declare function reststore:getRawXMLDoc(

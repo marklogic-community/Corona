@@ -37,7 +37,7 @@ return
     then
         if(exists($existing))
         then $existing
-        else common:error(404, "Transformer not found", "xml")
+        else common:error(404, "corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "xml")
 
     else if($requestMethod = "PUT")
     then
@@ -52,5 +52,5 @@ return
     then
         if(exists($existing))
         then manage:deleteTransformer($name)
-        else common:error(404, "Transformer not found", "xml")
-    else common:error(500, concat("Unsupported method: ", $requestMethod), "xml")
+        else common:error(404, "corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "xml")
+    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "xml")

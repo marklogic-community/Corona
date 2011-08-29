@@ -70,7 +70,7 @@ declare function prop:set(
     let $existing := admin:group-get-namespaces($config, $group)[*:prefix = $key]
     let $test :=
         if(exists($existing))
-        then error("PROP:REDEFINE-PROPERTY", concat("A property with the key ", $key, " already exists"))
+        then error(xs:QName("prop:REDEFINE-PROPERTY"), concat("A property with the key ", $key, " already exists"))
         else ()
 
     let $type :=

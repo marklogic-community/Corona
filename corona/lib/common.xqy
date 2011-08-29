@@ -28,6 +28,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare function common:error(
     $statusCode as xs:integer,
+    $exceptionCode as xs:string,
     $message as xs:string,
     $outputFormat as xs:string
 )
@@ -38,14 +39,16 @@ declare function common:error(
         if($outputFormat = "xml")
         then
             <error>
-                <code>{ $statusCode }</code>
+                <status>{ $statusCode }</status>
+                <code>{ $exceptionCode }</code>
                 <message>{ $message }</message>
             </error>
         else
             json:serialize(json:document(
                 json:object((
                     "error", json:object((
-                        "code", $statusCode,
+                        "status", $statusCode,
+                        "code", $exceptionCode,
                         "message", $message
                     ))
                 ))
@@ -59,7 +62,7 @@ declare function common:errorFromException(
 )
 {
     xdmp:log($exception),
-    common:error($statusCode, $exception/*:message, $outputFormat)
+    common:error($statusCode, $exception/*:name, $exception/*:message, $outputFormat)
 };
 
 declare function common:castFromJSONType(

@@ -41,12 +41,12 @@ return
     then
         if(exists($existing))
         then json:serialize($existing)
-        else common:error(404, "Mapping not found", "json")
+        else common:error(404, "corona:MAPPING-NOT-FOUND", "Mapping not found", "json")
 
     else if($requestMethod = "POST")
     then 
         if((empty($key) and empty($element)) or (exists($key) and exists($element)))
-        then common:error(500, "Must supply either a JSON key or XML element name", "json")
+        then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a JSON key or XML element name", "json")
         else try {
             if(exists($key))
             then manage:createJSONMap($name, $key, $mode)
@@ -64,5 +64,5 @@ return
     then
         if(exists($existing))
         then manage:deleteMap($name)
-        else common:error(404, "Mapping not found", "json")
-    else common:error(500, concat("Unsupported method: ", $requestMethod), "json")
+        else common:error(404, "corona:MAPPING-NOT-FOUND", "Mapping not found", "json")
+    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

@@ -43,7 +43,7 @@ let $includeAllValues := map:get($params, "includeAllValues")
 
 let $test := (
     if(empty($queryString) and empty($customQuery))
-    then common:error(400, "Must supply either a query string or a custom query", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a query string or a custom query", $contentType)
     else ()
 )
 
@@ -55,7 +55,7 @@ let $query :=
         customquery:getCTS(customquery:getParseTree($customQuery), ())
     }
     catch ($e) {
-        xdmp:set($test, common:error(400, concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
     }
     else ()
 

@@ -136,7 +136,7 @@ let $customQuery :=
         customquery:getParseTree(map:get($params, "customquery"))
     }
     catch ($e) {
-        xdmp:set($test, common:error(400, concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
     }
 
 let $query := (parser:parse(map:get($params, "q")), customquery:getCTS($customQuery))[1]
@@ -158,7 +158,7 @@ return
             then reststore:deleteJSONDocument($uri)
             else if(exists($query))
             then reststore:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"))
-            else common:error(400, "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
+            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
@@ -171,7 +171,7 @@ return
                 else (),
                 local:syncMetadata($uri, $params)
             )
-        else common:error(400, "Unknown request", $contentType)
+        else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $contentType)
     else if($contentType = "xml")
     then
         if($requestMethod = "GET" and string-length($uri))
@@ -187,7 +187,7 @@ return
             then reststore:deleteXMLDocument($uri)
             else if(exists($query))
             then reststore:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"))
-            else common:error(400, "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
+            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
@@ -200,5 +200,5 @@ return
                 else (),
                 local:syncMetadata($uri, $params)
             )
-        else common:error(400, "Unknown request", $contentType)
+        else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $contentType)
     else ()
