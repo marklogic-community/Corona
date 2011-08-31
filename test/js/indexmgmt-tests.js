@@ -526,8 +526,8 @@ corona.addIndexes = function(callback) {
             }
         }
         else if(config.type === "field") {
-            deepEqual(config.includes, server.includedKeys, "Index includes matches");
-            deepEqual(config.excludes, server.excludedKeys, "Index excludes matches");
+            deepEqual(config.includes, server.includes, "Index includes matches");
+            deepEqual(config.excludes, server.excludes, "Index excludes matches");
             if(config.mode !== undefined) {
                 equals(config.mode, server.mode, "Index mode matches");
             }

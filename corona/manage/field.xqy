@@ -49,17 +49,13 @@ return
         else common:error(404, "corona:FIELD-NOT-FOUND", "Field not found", "json")
 
     else if($requestMethod = "POST")
-    then (
-        if(exists($existing))
-        then xdmp:set($config, admin:database-delete-field($config, $database, $name))
-        else (),
+    then
         try {
             manage:createField($name, $mode, $includeKeys, $excludes, $includeElements, $excludeElements, $config)
         }
         catch ($e) {
             common:errorFromException(400, $e, "json")
         }
-    )
 
     else if($requestMethod = "DELETE")
     then

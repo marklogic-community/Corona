@@ -782,7 +782,7 @@ declare private function manage:fieldDefinitionToJsonXml(
     json:object((
         "name", string($field/db:field-name),
         "mode", string($index/mode),
-        "includedKeys", json:array(
+        "includes", json:array(
             for $include in $field/db:included-elements/db:included-element
             for $key in tokenize(string($include/db:localname), " ")
             return
@@ -796,7 +796,7 @@ declare private function manage:fieldDefinitionToJsonXml(
                     "name", if(string-length($include/db:namespace-uri)) then concat(manage:getPrefixForNamespaceURI(string($include/db:namespace-uri)), ":", $key) else $key
                 ))
         ),
-        "excludedKeys", json:array(
+        "excludes", json:array(
             for $exclude in $field/db:excluded-elements/db:excluded-element
             for $key in tokenize(string($exclude/db:localname), " ")
             return
