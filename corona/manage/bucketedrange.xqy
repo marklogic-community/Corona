@@ -82,6 +82,14 @@ return
         then common:error(400, "corona:MISSING-PARAMETER", "Must supply an XML element along with an XML attribute", "json")
         else if(exists($bucketInterval) and exists($startingAt) and $type = ("date", "dateTime"))
         then
+            if(empty($firstFormat))
+            then common:error(400, "corona:MISSING-PARAMETER", "Must supply a firstFormat when creating a auto-bucketed range index", "json")
+            else if(empty($format))
+            then common:error(400, "corona:MISSING-PARAMETER", "Must supply a format when creating a auto-bucketed range index", "json")
+            else if(empty($lastFormat))
+            then common:error(400, "corona:MISSING-PARAMETER", "Must supply a lastFormat when creating a auto-bucketed range index", "json")
+            else
+
             if($mode = "json")
             then manage:createJSONAutoBucketedRange($name, $key, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat, $config)
             else if($mode = "xmlattribute")

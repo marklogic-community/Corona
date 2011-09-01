@@ -182,7 +182,8 @@ declare function common:dualStrftime(
         for $match in analyze-string($format, $regex)/*
         return
             if($match/self::*:non-match) then string($match)
-            else if($match/*:group/@nr = (1, 2)) then string($match)
+            else if($match/*:group/@nr = 1) then "%"
+            else if($match/*:group/@nr = 2) then "@"
             else if($match/*:group/@nr = (3, 4)) then xdmp:strftime(string($match), $date1)
             else if($match/*:group/@nr = (5, 6)) then xdmp:strftime(replace(string($match), "@", "%"), $date2)
             else string($match)
