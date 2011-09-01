@@ -156,19 +156,24 @@ declare function common:humanOperatorToMathmatical(
 };
 
 declare function common:translateSnippet(
-    $snippet as element(search:snippet)
-) as element(json:item)
+    $snippet as element(search:snippet),
+    $outputType as xs:string
+) as item()*
 {
-    json:array(
+    let $results :=
         for $match in $snippet/search:match
-        return string-join(
-            for $node in $match/node()
-            return
-                if($node instance of element(search:highlight))
-                then concat("<span class='hit'>", string($node), "</span>")
-                else string($node)
-        , "")
-    )
+        return
+            string-join(
+                for $node in $match/node()
+                return
+                    if($node instance of element(search:highlight))
+                    then concat("<span class='hit'>", string($node), "</span>")
+                    else string($node)
+            , "")
+    return
+        if($outputType = "json")
+        then json:array($results)
+        else $results
 };
 
 declare function common:dualStrftime(

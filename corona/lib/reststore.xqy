@@ -126,7 +126,7 @@ declare function reststore:outputMultipleJSONDocs(
                     "uri", $uri,
                     reststore:outputJSONDocument($uri, $content, $include),
                     if($include = ("snippet", "all"))
-                    then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*)))
+                    then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "json"))
                     else ()
                 ))
             )
@@ -333,7 +333,7 @@ declare function reststore:outputMultipleXMLDocs(
                     <uri>{ $uri }</uri>,
                     reststore:outputXMLDocument($uri, $content, $include),
                     if($include = ("snippet", "all"))
-                    then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*)))
+                    then <snippet>{ common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "xml") }</snippet>
                     else ()
                 )}</result>
             }</results>
