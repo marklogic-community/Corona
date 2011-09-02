@@ -893,15 +893,15 @@ declare function manage:setTransformer(
         if(local-name($doc) = "stylesheet" and namespace-uri($doc) = "http://www.w3.org/1999/XSL/Transform")
         then ()
         else error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer, must be an XSLT")
-    return xdmp:document-insert(concat("/transformers/", $name), $doc, xdmp:default-permissions(), $const:TransformersCollection)
+    return xdmp:document-insert(concat("_/transformers/", $name), $doc, xdmp:default-permissions(), $const:TransformersCollection)
 };
 
 declare function manage:deleteTransformer(
     $name as xs:string
 ) as empty-sequence()
 {
-    if(exists(concat("/transformers/", $name)))
-    then xdmp:document-delete(concat("/transformers/", $name))
+    if(exists(concat("_/transformers/", $name)))
+    then xdmp:document-delete(concat("_/transformers/", $name))
     else ()
 };
 
@@ -909,7 +909,7 @@ declare function manage:getTransformer(
     $name as xs:string
 ) as element()?
 {
-    doc(concat("/transformers/", $name))/*
+    doc(concat("_/transformers/", $name))/*
 };
 
 declare function manage:getAllTransformerNames(
