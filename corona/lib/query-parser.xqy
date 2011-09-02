@@ -259,7 +259,38 @@ declare private function parser:wordQuery(
 	$term as element()
 ) as cts:query
 {
-        cts:word-query(string($term))
+    let $query :=
+        for $item in config:getContentItems()
+        return
+            if($item/@mode = "contains")
+            then
+                if($item/@type = "key")
+                then cts:element-word-query(xs:QName(concat("json:", $item)), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+                else if($item/@type = "element")
+                then cts:element-word-query(xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+                else if($item/@type = "attribute")
+                then cts:element-attribute-word-query(xs:QName($item/@element), xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+                else if($item/@type = "field")
+                then cts:field-word-query($item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+                else ()
+            else if($item/@mode = "equals")
+            then
+                if($item/@type = "key")
+                then cts:element-value-query(xs:QName(concat("json:", $item)), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+                else if($item/@type = "element")
+                then cts:element-value-query(xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+                else if($item/@type = "attribute")
+                then cts:element-attribute-value-query(xs:QName($item/@element), xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+                else if($item/@type = "field")
+                then xdmp:apply(xdmp:function("cts:field-value-query"), $item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
+            else ()
+        else ()
+    return
+        if(empty($query))
+        then cts:word-query(string($term))
+        else if(count($query) = 1)
+        then $query
+        else cts:or-query($query)
 };
 
 declare private function parser:notQuery(
