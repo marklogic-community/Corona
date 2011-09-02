@@ -150,10 +150,26 @@ corona.deleteDocuments = function() {
 
     asyncTest("Deleting XML documents", function() {
         $.ajax({
-            url: '/xml/store?customquery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true',
+            url: '/xml/store?customquery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true&limit=2',
             type: 'DELETE',
             success: function() {
-                ok(true, "Deleted documents");
+                ok(true, "Deleted documents (with limit)");
+
+                asyncTest("Deleting XML documents", function() {
+                    $.ajax({
+                        url: '/xml/store?customquery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true',
+                        type: 'DELETE',
+                        success: function() {
+                            ok(true, "Deleted documents");
+                        },
+                        error: function(j, t, error) {
+                            ok(false, "Could not delete documents: " + error);
+                        },
+                        complete: function() {
+                            start();
+                        }
+                    });
+                });
             },
             error: function(j, t, error) {
                 ok(false, "Could not delete documents: " + error);

@@ -27,6 +27,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="q" required="false"/>
             <param name="customquery" required="false"/>
             <param name="bulkDelete" required="false" as="boolean" default="false"/>
+            <param name="limit" required="false" as="integer"/>
         </http>
     </request>
 

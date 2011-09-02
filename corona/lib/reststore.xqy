@@ -222,10 +222,14 @@ declare function reststore:deleteJSONDocument(
 
 declare function reststore:deleteJSONDocumentsWithQuery(
     $query as cts:query,
-    $bulkDelete as xs:boolean
+    $bulkDelete as xs:boolean,
+    $limit as xs:integer?
 ) as xs:string
 {
-    let $docs := cts:search(collection($const:JSONCollection), $query)
+    let $docs :=
+        if(exists($limit))
+        then cts:search(collection($const:JSONCollection), $query)[1 to $limit]
+        else cts:search(collection($const:JSONCollection), $query)
     let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
     return
         if($bulkDelete)
@@ -421,10 +425,14 @@ declare function reststore:deleteXMLDocument(
 
 declare function reststore:deleteXMLDocumentsWithQuery(
     $query as cts:query,
-    $bulkDelete as xs:boolean
+    $bulkDelete as xs:boolean,
+    $limit as xs:integer?
 ) as element()
 {
-    let $docs := cts:search(collection($const:XMLCollection), $query)
+    let $docs :=
+        if(exists($limit))
+        then cts:search(collection($const:XMLCollection), $query)[1 to $limit]
+        else cts:search(collection($const:XMLCollection), $query)
     let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
     return
         if($bulkDelete)
