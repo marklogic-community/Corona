@@ -27,6 +27,8 @@ import module namespace parser="http://marklogic.com/corona/query-parser" at "li
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
 
+declare namespace corona="http://marklogic.com/corona";
+
 declare option xdmp:mapping "false";
 
 let $params := rest:process-request(endpoints:request("/corona/facet.xqy"))
@@ -135,5 +137,5 @@ return
     else if($outputFormat = "json")
     then json:serialize(json:object($values))
     else if($outputFormat = "xml")
-    then <results>{ $values }</results>
+    then <corona:results>{ $values }</corona:results>
     else ()

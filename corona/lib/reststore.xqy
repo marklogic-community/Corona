@@ -17,15 +17,17 @@ limitations under the License.
 xquery version "1.0-ml";
 
 module namespace reststore="http://marklogic.com/reststore";
-declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace manage="http://marklogic.com/corona/manage" at "manage.xqy";
-
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
+
+declare namespace corona="http://marklogic.com/corona";
+
+declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 (:
     JSON Document management
@@ -281,7 +283,7 @@ declare function reststore:getXMLDocument(
     return
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
         then $content
-        else <response>{ reststore:outputXMLDocument($uri, $content, $include) }</response>
+        else <corona:response>{ reststore:outputXMLDocument($uri, $content, $include) }</corona:response>
 };
 
 declare function reststore:outputMultipleXMLDocs(
@@ -304,13 +306,13 @@ declare function reststore:outputMultipleXMLDocs(
         then $start
         else $end
     return 
-        <response>
-            <meta>
-                <start>{ $start }</start>
-                <end>{ $end }</end>
-                <total>{ $total }</total>
-            </meta>
-            <results>{
+        <corona:response>
+            <corona:meta>
+                <corona:start>{ $start }</corona:start>
+                <corona:end>{ $end }</corona:end>
+                <corona:total>{ $total }</corona:total>
+            </corona:meta>
+            <corona:results>{
                 for $doc in $docs
                 let $uri := base-uri($doc)
                 let $content :=
@@ -329,15 +331,15 @@ declare function reststore:outputMultipleXMLDocs(
                     if(namespace-uri($content) = "http://marklogic.com/reststore")
                     then $content/*
                     else $content
-                return <result>{(
-                    <uri>{ $uri }</uri>,
+                return <corona:result>{(
+                    <corona:uri>{ $uri }</corona:uri>,
                     reststore:outputXMLDocument($uri, $content, $include),
                     if($include = ("snippet", "all"))
-                    then <snippet>{ common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "xml") }</snippet>
+                    then <corona:snippet>{ common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "xml") }</corona:snippet>
                     else ()
-                )}</result>
-            }</results>
-        </response>
+                )}</corona:result>
+            }</corona:results>
+        </corona:response>
 };
 
 declare private function reststore:outputXMLDocument(
@@ -347,19 +349,19 @@ declare private function reststore:outputXMLDocument(
 ) as element()*
 {
     if($include = ("content", "all"))
-    then <content>{ $content }</content>
+    then <corona:content>{ $content }</corona:content>
     else (),
     if($include = ("collections", "all"))
-    then <collections>{ reststore:getDocumentCollections($uri, "xml") }</collections>
+    then <corona:collections>{ reststore:getDocumentCollections($uri, "xml") }</corona:collections>
     else (),
     if($include = ("properties", "all"))
-    then <properties>{ reststore:getDocumentProperties($uri, "xml") }</properties>
+    then <corona:properties>{ reststore:getDocumentProperties($uri, "xml") }</corona:properties>
     else (),
     if($include = ("permissions", "all"))
-    then <permissions>{ reststore:getDocumentPermissions($uri, "xml") }</permissions>
+    then <corona:permissions>{ reststore:getDocumentPermissions($uri, "xml") }</corona:permissions>
     else (),
     if($include = ("quality", "all"))
-    then <quality>{ reststore:getDocumentQuality($uri) }</quality>
+    then <corona:quality>{ reststore:getDocumentQuality($uri) }</corona:quality>
     else ()
 };
 
@@ -413,7 +415,7 @@ declare function reststore:deleteXMLDocument(
 ) as element()
 {
     if(exists(reststore:getRawXMLDoc($uri)))
-    then (<results><uri>{ $uri }</uri></results>, xdmp:document-delete($uri))
+    then (<corona:results><corona:uri>{ $uri }</corona:uri></corona:results>, xdmp:document-delete($uri))
     else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no XML document to delete at '", $uri, "'"), "xml")
 };
 
@@ -427,13 +429,13 @@ declare function reststore:deleteXMLDocumentsWithQuery(
     return
         if($bulkDelete)
         then
-            <results>{
+            <corona:results>{
                 for $doc in $docs
                 let $delete := xdmp:document-delete(base-uri($doc))
-                return <uri>{ base-uri($doc) }</uri>
-            }</results>
+                return <corona:uri>{ base-uri($doc) }</corona:uri>
+            }</corona:results>
         else if($count = 1)
-        then <results><uri>{ base-uri($docs) }</uri></results>
+        then <corona:results><corona:uri>{ base-uri($docs) }</corona:uri></corona:results>
         else if($count = 0)
         then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", "xml")
         else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", "xml")
@@ -560,7 +562,7 @@ declare private function reststore:getDocumentCollections(
     else
         for $collection in xdmp:document-get-collections($uri)
         where not($collection = ($const:JSONCollection, $const:XMLCollection))
-        return <collection>{ $collection }</collection>
+        return <corona:collection>{ $collection }</corona:collection>
 };
 
 declare private function reststore:getDocumentProperties(
@@ -578,7 +580,7 @@ declare private function reststore:getDocumentProperties(
     else
         for $property in xdmp:document-properties($uri)/prop:properties/*
         where namespace-uri($property) = "http://marklogic.com/reststore"
-        return element { local-name($property) } { string($property) }
+        return element { xs:QName(concat("corona:", local-name($property))) } { string($property) }
 };
 
 declare private function reststore:getDocumentPermissions(
@@ -624,7 +626,7 @@ declare private function reststore:getDocumentPermissions(
             ", (
                 xs:QName("roleId"), xs:unsignedLong($key)
             ), <options xmlns="xdmp:eval"><database>{ xdmp:security-database() }</database></options>)
-        return element { $role } { for $perm in map:get($permMap, $key) return <permission>{ $perm }</permission> }
+        return element { xs:QName(concat("corona:", $role)) } { for $perm in map:get($permMap, $key) return <corona:permission>{ $perm }</corona:permission> }
 };
 
 declare private function reststore:getDocumentQuality(
@@ -647,6 +649,5 @@ declare private function reststore:highlightXMLContent(
     $query as cts:query
 ) as node()
 {
-    xdmp:log($query),
     cts:highlight($content, $query, <span class="hit">{ $cts:text }</span>)
 };

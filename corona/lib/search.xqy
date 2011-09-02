@@ -21,6 +21,8 @@ module namespace search="http://marklogic.com/corona/search";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
+declare namespace corona="http://marklogic.com/corona";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
@@ -281,14 +283,14 @@ declare function search:rangeIndexValues(
             ))
         )
         else if($outputFormat = "xml")
-        then <facet name="{ $index/@name }">{
+        then <corona:facet name="{ $index/@name }">{
             for $item in $values
-            return <result>
-                <value>{ $item }</value>
-                <inQuery>{ $item = $valuesInQuery }</inQuery>
-                <count>{ cts:frequency($item) }</count>
-            </result>
-        }</facet>
+            return <corona:result>
+                <corona:value>{ $item }</corona:value>
+                <corona:inQuery>{ $item = $valuesInQuery }</corona:inQuery>
+                <corona:count>{ cts:frequency($item) }</corona:count>
+            </corona:result>
+        }</corona:facet>
         else ()
 };
 
@@ -354,7 +356,7 @@ declare function search:bucketIndexValues(
             ))
         )
         else if($outputFormat = "xml")
-        then <facet name="{ $index/@name }">{
+        then <corona:facet name="{ $index/@name }">{
             for $item at $pos in $values
             let $label :=
                 if($index/@type = "autobucketedrange")
@@ -367,12 +369,12 @@ declare function search:bucketIndexValues(
                     then xdmp:strftime($index/lastFormat, $item/cts:lower-bound)
                     else ()
                 else search:getLabelForBounds($index, $item/cts:lower-bound, $item/cts:upper-bound)
-            return <result>
-                <value>{ $label }</value>
-                <inQuery>{ $label = $valuesInQuery }</inQuery>
-                <count>{ cts:frequency($item) }</count>
-            </result>
-        }</facet>
+            return <corona:result>
+                <corona:value>{ $label }</corona:value>
+                <corona:inQuery>{ $label = $valuesInQuery }</corona:inQuery>
+                <corona:count>{ cts:frequency($item) }</corona:count>
+            </corona:result>
+        }</corona:facet>
         else ()
 };
 

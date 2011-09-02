@@ -24,6 +24,8 @@ import module namespace common="http://marklogic.com/corona/common" at "common.x
 import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
+declare namespace corona="http://marklogic.com/corona";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare function customquery:getCTS(
@@ -96,7 +98,7 @@ declare function customquery:searchXML(
     $end as xs:positiveInteger?,
     $extractPath as xs:string?,
     $applyTransform as xs:string?
-) as element(response)
+) as element(corona:response)
 {
     let $start := if(empty($start)) then 1 else $start
     let $cts := customquery:dispatch($json, ())

@@ -21,6 +21,7 @@ import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
 
+declare namespace corona="http://marklogic.com/corona";
 declare namespace search="http://marklogic.com/appservices/search";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
@@ -38,11 +39,11 @@ declare function common:error(
     return
         if($outputFormat = "xml")
         then
-            <error>
-                <status>{ $statusCode }</status>
-                <code>{ $exceptionCode }</code>
-                <message>{ $message }</message>
-            </error>
+            <corona:error>
+                <corona:status>{ $statusCode }</corona:status>
+                <corona:code>{ $exceptionCode }</corona:code>
+                <corona:message>{ $message }</corona:message>
+            </corona:error>
         else
             json:serialize(json:document(
                 json:object((
