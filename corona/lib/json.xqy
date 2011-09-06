@@ -36,6 +36,8 @@ import module namespace dateparser="http://marklogic.com/dateparser" at "date-pa
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare variable $newLineRegex := concat("[", codepoints-to-string((13, 10)), "]+");
+
 (:
     Converts a JSON string into an XML document that is highly indexable by
     MarkLogic. The XML that is generated is intended to be treated like a black
@@ -616,16 +618,13 @@ declare private function json:outputArray(
     "]"
 };
 
-(: Need to backslash escape any double quotes, backslashes, and newlines :)
+(: Need to backslash escape any double quotes, backslashes, newlines and tabs :)
 declare private function json:escapeJSONString(
     $string as xs:string
 ) as xs:string
 {
-    let $string := replace($string, "\\", "\\\\")
-    let $string := replace($string, """", "\\""")
-    let $string := replace($string, codepoints-to-string((13, 10)), "\\n")
-    let $string := replace($string, codepoints-to-string(13), "\\n")
-    let $string := replace($string, codepoints-to-string(10), "\\n")
+    let $string := replace($string, "(\\|"")", "\\$1")
+    let $string := replace($string, $newLineRegex, "\\n")
     let $string := replace($string, codepoints-to-string(9), "\\t")
     return $string
 };

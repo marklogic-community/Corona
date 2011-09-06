@@ -155,9 +155,9 @@ return
         else if($requestMethod = "DELETE")
         then
             if(string-length($uri))
-            then reststore:deleteJSONDocument($uri)
+            then reststore:deleteJSONDocument($uri, map:get($params, "include") = ("uri", "uris"))
             else if(exists($query))
-            then reststore:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "limit"))
+            then reststore:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
             else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
@@ -184,9 +184,9 @@ return
         else if($requestMethod = "DELETE")
         then
             if(string-length($uri))
-            then reststore:deleteXMLDocument($uri)
+            then reststore:deleteXMLDocument($uri, map:get($params, "include") = ("uri", "uris"))
             else if(exists($query))
-            then reststore:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "limit"))
+            then reststore:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
             else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)

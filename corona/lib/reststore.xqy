@@ -212,17 +212,30 @@ declare function reststore:updateJSONDocumentContent(
 };
 
 declare function reststore:deleteJSONDocument(
-    $uri as xs:string
+    $uri as xs:string,
+    $includeURIs as xs:boolean
 ) as xs:string
 {
     if(exists(doc($uri)/json:json))
-    then (json:serialize(json:array($uri)), xdmp:document-delete($uri))
+    then (
+        xdmp:document-delete($uri),
+        json:serialize(json:object((
+            "meta", json:object((
+                "deleted", 1,
+                "numRemaining", 0
+            )),
+            if($includeURIs)
+            then ("uris", json:array($uri))
+            else ()
+        )))
+    )
     else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no JSON document to delete at '", $uri, "'"), "json")
 };
 
 declare function reststore:deleteJSONDocumentsWithQuery(
     $query as cts:query,
     $bulkDelete as xs:boolean,
+    $includeURIs as xs:boolean,
     $limit as xs:integer?
 ) as xs:string
 {
@@ -231,16 +244,31 @@ declare function reststore:deleteJSONDocumentsWithQuery(
         then cts:search(collection($const:JSONCollection), $query)[1 to $limit]
         else cts:search(collection($const:JSONCollection), $query)
     let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
+    let $numDeleted :=
+        if(exists($limit))
+        then $limit
+        else $count
     return
-        if($bulkDelete)
+        if($bulkDelete or $count = 1)
         then
-            json:serialize(json:array(
-                for $doc in $docs
-                let $delete := xdmp:document-delete(base-uri($doc))
-                return base-uri($doc)
-            ))
-        else if($count = 1)
-        then json:serialize(json:array(base-uri($docs)))
+            json:serialize(json:object((
+                "meta", json:object((
+                    "deleted", $numDeleted,
+                    "numRemaining", $count - $numDeleted
+                )),
+                if($includeURIs)
+                then (
+                    "uris",
+                    json:array(
+                        for $doc in $docs
+                        let $delete := xdmp:document-delete(base-uri($doc))
+                        return base-uri($doc)
+                    )
+                )
+                else
+                    for $doc in $docs
+                    return xdmp:document-delete(base-uri($doc))
+            )))
         else if($count = 0)
         then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", "json")
         else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", "json")
@@ -415,17 +443,32 @@ declare function reststore:updateXMLDocumentContent(
 };
 
 declare function reststore:deleteXMLDocument(
-    $uri as xs:string
+    $uri as xs:string,
+    $includeURIs as xs:boolean
 ) as element()
 {
     if(exists(reststore:getRawXMLDoc($uri)))
-    then (<corona:results><corona:uri>{ $uri }</corona:uri></corona:results>, xdmp:document-delete($uri))
+    then (
+        xdmp:document-delete($uri),
+        <corona:results>
+            <corona:meta>
+                <corona:deleted>1</corona:deleted>
+                <corona:numRemaining>0</corona:numRemaining>
+            </corona:meta>
+            {
+                if($includeURIs)
+                then <corona:uris><corona:uri>{ $uri }</corona:uri></corona:uris>
+                else ()
+            }
+        </corona:results>
+    )
     else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no XML document to delete at '", $uri, "'"), "xml")
 };
 
 declare function reststore:deleteXMLDocumentsWithQuery(
     $query as cts:query,
     $bulkDelete as xs:boolean,
+    $includeURIs as xs:boolean,
     $limit as xs:integer?
 ) as element()
 {
@@ -434,16 +477,30 @@ declare function reststore:deleteXMLDocumentsWithQuery(
         then cts:search(collection($const:XMLCollection), $query)[1 to $limit]
         else cts:search(collection($const:XMLCollection), $query)
     let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
+    let $numDeleted :=
+        if(exists($limit))
+        then $limit
+        else $count
     return
-        if($bulkDelete)
+        if($bulkDelete or $count = 1)
         then
-            <corona:results>{
-                for $doc in $docs
-                let $delete := xdmp:document-delete(base-uri($doc))
-                return <corona:uri>{ base-uri($doc) }</corona:uri>
-            }</corona:results>
-        else if($count = 1)
-        then <corona:results><corona:uri>{ base-uri($docs) }</corona:uri></corona:results>
+            <corona:results>
+                <corona:meta>
+                    <corona:deleted>{ $numDeleted }</corona:deleted>
+                    <corona:numRemaining>{ $count - $numDeleted }</corona:numRemaining>
+                </corona:meta>
+                {
+                    if($includeURIs)
+                    then <corona:uris>{
+                        for $doc in $docs
+                        let $delete := xdmp:document-delete(base-uri($doc))
+                        return <corona:uri>{ base-uri($doc) }</corona:uri>
+                    }</corona:uris>
+                    else 
+                        for $doc in $docs
+                        return xdmp:document-delete(base-uri($doc))
+                }
+            </corona:results>
         else if($count = 0)
         then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", "xml")
         else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", "xml")
