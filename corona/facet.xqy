@@ -104,12 +104,28 @@ let $values :=
         then customquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
         else $query
 
-    let $query :=
+    let $query := cts:and-query((
+        $query,
         if($contentType = "json")
-        then cts:and-query(($query, cts:collection-query($const:JSONCollection)))
+        then cts:collection-query($const:JSONCollection)
         else if($contentType = "xml")
-        then cts:and-query(($query, cts:collection-query($const:XMLCollection)))
-        else $query
+        then cts:collection-query($const:XMLCollection)
+        else (),
+        for $collection in map:get($params, "collection")
+        return cts:collection-query($collection),
+        for $directory in map:get($params, "underDirectory")
+        let $directory :=
+            if(ends-with($directory, "/"))
+            then $directory
+            else concat($directory, "/")
+        return cts:directory-query($directory, "infinity"),
+        for $directory in map:get($params, "inDirectory")
+        let $directory :=
+            if(ends-with($directory, "/"))
+            then $directory
+            else concat($directory, "/")
+        return cts:directory-query($directory)
+    ))
 
     let $index := config:get($facet)
     let $options :=

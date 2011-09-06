@@ -88,6 +88,10 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="frequency" required="false" default="document" values="document|key"/>
         <param name="includeAllValues" required="false" default="no" values="no|yes"/>
         <param name="outputFormat" required="false"  values="xml|json"/>
+
+        <param name="collection" alias="collection[]" required="false" repeatable="true"/>
+        <param name="underDirectory" required="false"/>
+        <param name="inDirectory" required="false"/>
     </request>
 
     <!-- Index management -->
