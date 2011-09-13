@@ -269,16 +269,15 @@ declare private function customquery:handleRange(
     let $indexName := $step/json:name[@type = "string"]
     let $index := config:get($indexName)
     let $options := customquery:extractOptions($step, "range")
-    let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
     where if(exists($ignoreRange)) then $indexName != $ignoreRange else true() and exists($index)
     return
         if($index/@type = ("bucketedrange", "autobucketedrange") and exists($step/json:bucketLabel))
-        then search:bucketLabelToQuery($index, string($step/json:bucketLabel), $options, $weight)
+        then search:bucketLabelToQuery($index, string($step/json:bucketLabel), $options)
 
         else if(exists($step/json:from) and exists($step/json:to))
         then cts:and-query((
-            search:rangeValueToQuery($index, string($step/json:from), "ge", $options, $weight),
-            search:rangeValueToQuery($index, string($step/json:to), "le", $options, $weight)
+            search:rangeValueToQuery($index, string($step/json:from), "ge", $options),
+            search:rangeValueToQuery($index, string($step/json:to), "le", $options)
         ))
 
         else
@@ -287,7 +286,7 @@ declare private function customquery:handleRange(
                 if($step/json:value/@type = "array")
                 then $step/json:value//json:item
                 else $step/json:value
-            return search:rangeValueToQuery($index, $values, $operator, $options, $weight)
+            return search:rangeValueToQuery($index, $values, $operator, $options)
 };
 
 declare private function customquery:handleEquals(
