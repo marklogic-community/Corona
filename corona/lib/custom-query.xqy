@@ -18,6 +18,7 @@ module namespace customquery="http://marklogic.com/corona/custom-query";
 
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
+import module namespace qsparser="http://marklogic.com/corona/query-parser" at "query-parser.xqy";
 import module namespace search="http://marklogic.com/corona/search" at "search.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
@@ -165,6 +166,7 @@ declare private function customquery:dispatch(
         $step/json:range[@type = "object"],
         $step/json:equals[@type = "object"],
         $step/json:contains[@type = "object"],
+        $step/json:queryString[@type = "string"],
         $step/json:wordAnywhere[@type = ("string", "array", "object")],
         $step/json:underElement[@type = "object"],
         $step/json:underKey[@type = "object"],
@@ -197,6 +199,7 @@ declare private function customquery:process(
     case element(json:range) return customquery:handleRange($step, $ignoreRange)
     case element(json:equals) return customquery:handleEquals($step)
     case element(json:contains) return customquery:handleContains($step)
+    case element(json:queryString) return customquery:handleQueryString($step, $ignoreRange)
     case element(json:wordAnywhere) return customquery:handleWordAnywhere($step)
     case element(json:underElement) return customquery:handleUnderElement($step, $ignoreRange)
     case element(json:underKey) return customquery:handleUnderKey($step, $ignoreRange)
@@ -337,6 +340,14 @@ declare private function customquery:handleContains(
         else if(exists($step/json:element[@type = "string"]))
         then cts:element-word-query(xs:QName($step/json:element), $values, customquery:extractOptions($step, "word"), $weight)
         else ()
+};
+
+declare private function customquery:handleQueryString(
+    $step as element(json:queryString),
+    $ignoreRange as xs:string?
+) as cts:query?
+{
+    qsparser:parse(string($step), $ignoreRange)
 };
 
 declare private function customquery:handleWordAnywhere(
