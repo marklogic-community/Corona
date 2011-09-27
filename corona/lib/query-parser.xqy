@@ -43,6 +43,7 @@ declare function parser:parse(
 	let $init := xdmp:set($GROUPING-INDEX, 0)
 	let $tokens := parser:tokenize($query)
 	let $grouped := parser:groupTokens($tokens, 1)
+    let $log := xdmp:log($grouped)
 	let $folded := parser:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
     where string-length($query)
 	return parser:dispatchQueryTree($folded, $ignoreField)
@@ -80,7 +81,7 @@ declare private function parser:tokenize(
 ) as element()*
 {
 	let $phraseMatch := '"[^"]+"'
-	let $wordMatch := "[\w,\._\*\?][\w\._\-,\*\?]*"
+	let $wordMatch := "[\w,\._\*\?][\w\._\-,\*\?:]*"
 	let $constraintMatch := "[A-Za-z0-9_\-]+:"
 	let $tokens := (
 		"\(", "\)", $phraseMatch,
@@ -136,6 +137,34 @@ declare private function parser:groupTokens(
 			if($starting-index > 1)
 			then xdmp:set($continue, false())
 			else ()
+        else if(local-name($token) = "constraint")
+        then
+            if(exists(config:get($token/field)[type = ("date", "dateTime")]))
+            then 
+                <constraint>{ $token/field }<value>{(
+            let $log := xdmp:log(config:get($token/field)[type = ("date", "dateTime")][@type = "range"])
+                    let $parsedDate := ()
+                    for $dateToken at $dateIndex in $tokens[$index to count($tokens)]
+                    where local-name($dateToken) = ("term", "constraint") and empty($parsedDate)
+                    return
+                        let $possibleTokens :=
+                            for $i in $tokens[$index + 1 to $dateIndex + $index]
+                            return
+                                if(local-name($i) = "term")
+                                then string($i)
+                                else if(local-name($i) = "constraint")
+                                then concat($i/field, ":", $i/value)
+                                else ()
+                        let $dateString := string-join(($token/value, $possibleTokens), " ")
+                        let $date := common:castFromJSONType($dateString, "date")
+                        return
+                            if(exists($date))
+                            then ($date, xdmp:set($parsedDate, $date), xdmp:set($GROUPING-INDEX, $index + $dateIndex - 1))
+                            else ()
+                    ,
+                    string($token/value)
+                )[1]}</value></constraint>
+            else $token
 		else $token
 	)
 };
