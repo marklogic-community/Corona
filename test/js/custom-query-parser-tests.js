@@ -132,10 +132,9 @@ corona.queries = [
         "purpose": "wordAnywhere query with array"
     },
     {
-        "query": { "wordAnywhere": {
-                "string": "foo",
-                "weight": 2
-            }
+        "query": {
+            "wordAnywhere": "foo",
+            "weight": 2
         },
         "result": '<cts:word-query weight="2" xmlns:cts="http://marklogic.com/cts"> <cts:text xml:lang="en">foo</cts:text></cts:word-query>',
         "purpose": "wordAnywhere query with weight"
@@ -203,8 +202,8 @@ corona.queries = [
 
     /* Near */
     {
-        "query": { "near": {
-            "queries": [
+        "query": {
+            "near": [
                 {
                     "key": "foo",
                     "equals": "bar"
@@ -217,16 +216,14 @@ corona.queries = [
             "ordered": true,
             "distance": 15,
             "weight": 2
-        }},
+        },
         "result": '<cts:near-query weight="2" distance="15" xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">baz</cts:text> </cts:element-value-query> <cts:option>ordered</cts:option></cts:near-query>',
         "purpose": "Near query"
     },
 
     /* isNULL */
     {
-        "query": { "isNULL": {
-            "key": "foo"
-        }},
+        "query": { "isNULL": "foo" },
         "result": '<cts:element-attribute-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:attribute>type</cts:attribute> <cts:text xml:lang="en">null</cts:text></cts:element-attribute-value-query>',
         "purpose": "isNULL query"
     },
@@ -257,28 +254,26 @@ corona.queries = [
         "purpose": "Directory query"
     },
     {
-        "query": { "directory": {"uri": "/foo", "descendants": true}},
+        "query": { "directory": "/foo", "descendants": true},
         "result": '<cts:directory-query depth="infinity" xmlns:cts="http://marklogic.com/cts"> <cts:uri>/foo</cts:uri></cts:directory-query>',
         "purpose": "Directory query with a depth"
     },
 
     /* Properties */
     {
-        "query": { "property": {
-                "key": "foo",
-                "equals": "bar"
-            }
+        "query": {
+            "property": "foo",
+            "equals": "bar"
         },
-        "result": '<cts:properties-query xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query></cts:properties-query>',
+        "result": '<cts:properties-query xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:reststore="http://marklogic.com/reststore">reststore:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query></cts:properties-query>',
         "purpose": "Property query"
     },
 
     /* UnderKey */
     {
-        "query": { "underKey": { 
-                "key": "foo",
-                "query": "bar"
-            }
+        "query": {
+            "underKey": "foo",
+            "query": "bar"
         },
         "result": '<cts:element-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:word-query> <cts:text xml:lang="en">bar</cts:text> </cts:word-query></cts:element-query>',
         "purpose": "underKey query"
@@ -286,10 +281,9 @@ corona.queries = [
 
     /* UnderElement */
     {
-        "query": { "underElement": { 
-                "element": "foo",
-                "query": "bar"
-            }
+        "query": {
+            "underElement": "foo",
+            "query": "bar"
         },
         "result": '<cts:element-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:word-query> <cts:text xml:lang="en">bar</cts:text> </cts:word-query></cts:element-query>',
         "purpose": "underElement query"
@@ -297,92 +291,92 @@ corona.queries = [
 
     /* Range */
     {
-        "query": { "range": {
-            "name": "range1",
+        "query": {
+            "range": "range1",
             "value": "November 17th 1980"
-        }},
+        },
         "result": '<cts:element-attribute-range-query operator="=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">1980-11-17T00:00:00-07:00</cts:value></cts:element-attribute-range-query>',
         "purpose": "JSON date range query"
     },
     {
-        "query": { "range": {
-            "name": "range1",
+        "query": {
+            "range": "range1",
             "from": "November 17th 1980",
             "to": "November 17th 1981"
-        }},
+        },
         "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:element-attribute-range-query operator="&gt;="> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">1980-11-17T00:00:00-07:00</cts:value> </cts:element-attribute-range-query> <cts:element-attribute-range-query operator="&lt;="> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">1981-11-17T00:00:00-07:00</cts:value> </cts:element-attribute-range-query></cts:and-query>',
         "purpose": "JSON date range query with from and to"
     },
     {
-        "query": { "range": {
-            "name": "range2",
+        "query": {
+            "range": "range2",
             "value": "foo"
-        }},
+        },
         "result": '<cts:element-range-query operator="=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:rangeKey</cts:element> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">foo</cts:value> <cts:option>collation=http://marklogic.com/collation/</cts:option></cts:element-range-query>',
         "purpose": "JSON string range query"
     },
     {
-        "query": { "range": {
-            "name": "range4",
+        "query": {
+            "range": "range4",
             "value": "foo"
-        }},
+        },
         "result": '<cts:element-range-query operator="=" xmlns:cts="http://marklogic.com/cts"> <cts:element>rangeKey</cts:element> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">foo</cts:value> <cts:option>collation=http://marklogic.com/collation/</cts:option></cts:element-range-query>',
         "purpose": "XML element string range query"
     },
     {
-        "query": { "range": {
-            "name": "range5",
+        "query": {
+            "range": "range5",
             "value": "foo"
-        }},
+        },
         "result": '<cts:element-range-query operator="=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:testns="http://test.ns/uri">testns:rangeEl</cts:element> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">foo</cts:value> <cts:option>collation=http://marklogic.com/collation/</cts:option></cts:element-range-query>',
         "purpose": "XML namespaced element string range query"
     },
     {
-        "query": { "range": {
-            "name": "range6",
+        "query": {
+            "range": "range6",
             "value": "foo"
-        }},
+        },
         "result": '<cts:element-attribute-range-query operator="=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:testns="http://test.ns/uri">testns:rangeEl</cts:element> <cts:attribute>rangeAttrib</cts:attribute> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">foo</cts:value> <cts:option>collation=http://marklogic.com/collation/</cts:option></cts:element-attribute-range-query>',
         "purpose": "XML namespaced element attribute string range query"
     },
     {
-        "query": { "range": {
-            "name": "range1",
+        "query": {
+            "range": "range1",
             "value": "November 17th 1980",
             "operator": "ne"
-        }},
+        },
         "result": '<cts:element-attribute-range-query operator="!=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">1980-11-17T00:00:00-07:00</cts:value></cts:element-attribute-range-query>',
         "purpose": "Range query operator override"
     },
     {
-        "query": { "range": {
-            "name": "fromBucket",
+        "query": {
+            "range": "fromBucket",
             "bucketLabel": "G-M",
-        }},
+        },
         "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:element-range-query operator="&gt;="> <cts:element xmlns:json="http://marklogic.com/json">json:fromPersonal</cts:element> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">G</cts:value> <cts:option>collation=http://marklogic.com/collation/</cts:option> </cts:element-range-query> <cts:element-range-query operator="&lt;"> <cts:element xmlns:json="http://marklogic.com/json">json:fromPersonal</cts:element> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">N</cts:value> <cts:option>collation=http://marklogic.com/collation/</cts:option> </cts:element-range-query></cts:and-query>',
         "purpose": "JSON bucketed range label query"
     },
     {
-        "query": { "range": {
-            "name": "fromBucketXML",
+        "query": {
+            "range": "fromBucketXML",
             "bucketLabel": "G-M",
-        }},
+        },
         "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:element-attribute-range-query operator="&gt;="> <cts:element>from</cts:element> <cts:attribute>personal</cts:attribute> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">G</cts:value> <cts:option>collation=http://marklogic.com/collation/</cts:option> </cts:element-attribute-range-query> <cts:element-attribute-range-query operator="&lt;"> <cts:element>from</cts:element> <cts:attribute>personal</cts:attribute> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">N</cts:value> <cts:option>collation=http://marklogic.com/collation/</cts:option> </cts:element-attribute-range-query></cts:and-query>',
         "purpose": "XML bucketed range label query"
     },
     {
-        "query": { "range": {
-            "name": "messageDate",
+        "query": {
+            "range": "messageDate",
             "bucketLabel": "Sep 01 2010 - Oct 01 2010",
-        }},
+        },
         "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:element-attribute-range-query operator="&gt;="> <cts:element xmlns:json="http://marklogic.com/json">json:date_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">2010-09-01T00:00:00</cts:value> </cts:element-attribute-range-query> <cts:element-attribute-range-query operator="&lt;"> <cts:element xmlns:json="http://marklogic.com/json">json:date_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">2010-10-01T00:00:00</cts:value> </cts:element-attribute-range-query></cts:and-query>',
         "purpose": "JSON auto bucketed range label query"
     },
     {
-        "query": { "range": {
-            "name": "messageDate",
+        "query": {
+            "range": "messageDate",
             "bucketLabel": "Sep 01 2010 - Oct 01 2010",
-        }},
+        },
         "ignoreRange": "messageDate",
         "result": '',
         "purpose": "Ignore range paramater"
