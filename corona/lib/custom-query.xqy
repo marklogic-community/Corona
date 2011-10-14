@@ -162,16 +162,18 @@ declare private function customquery:dispatch(
         $step/json:near[@type = "object"],
         $step/json:isNULL[@type = "object"],
         $step/json:keyExists[@type = ("string", "array")],
-        $step/json:property[@type = "object"],
-        $step/json:range[@type = "object"],
-        $step/json:equals[@type = "object"],
-        $step/json:contains[@type = "object"],
-        $step/json:queryString[@type = "string"],
-        $step/json:wordAnywhere[@type = ("string", "array", "object")],
         $step/json:underElement[@type = "object"],
         $step/json:underKey[@type = "object"],
+
+        $step/json:key[@type = "string"],
+        $step/json:element[@type = "string"],
+        $step/json:property[@type = "object"],
+        $step/json:range[@type = "object"],
         $step/json:collection[@type = ("string", "array")],
         $step/json:directory[@type = ("string", "array", "object")],
+        $step/json:queryString[@type = "string"],
+        $step/json:wordAnywhere[@type = ("string", "array", "object")],
+
         $step/json:geo[@type = "object"],
         $step/json:point[@type = "object"],
         $step/json:circle[@type = "object"],
@@ -195,16 +197,18 @@ declare private function customquery:process(
     case element(json:near) return customquery:handleNear($step, $ignoreRange)
     case element(json:isNULL) return customquery:handleIsNULL($step)
     case element(json:keyExists) return customquery:handleKeyExists($step)
-    case element(json:property) return cts:properties-query(customquery:dispatch($step, $ignoreRange))
-    case element(json:range) return customquery:handleRange($step, $ignoreRange)
-    case element(json:equals) return customquery:handleEquals($step)
-    case element(json:contains) return customquery:handleContains($step)
-    case element(json:queryString) return customquery:handleQueryString($step, $ignoreRange)
-    case element(json:wordAnywhere) return customquery:handleWordAnywhere($step)
     case element(json:underElement) return customquery:handleUnderElement($step, $ignoreRange)
     case element(json:underKey) return customquery:handleUnderKey($step, $ignoreRange)
+
+    case element(json:key) return customquery:handleKey($step)
+    case element(json:element) return customquery:handleElement($step)
+    case element(json:property) return cts:properties-query(customquery:dispatch($step, $ignoreRange))
+    case element(json:range) return customquery:handleRange($step, $ignoreRange)
     case element(json:collection) return customquery:handleCollection($step)
     case element(json:directory) return customquery:handleDirectory($step)
+    case element(json:queryString) return customquery:handleQueryString($step, $ignoreRange)
+    case element(json:wordAnywhere) return customquery:handleWordAnywhere($step)
+
     case element(json:geo) return customquery:handleGeo($step)
     case element(json:region) return customquery:handleRegion($step)
     case element(json:point) return customquery:handleGeoPoint($step)
@@ -264,6 +268,88 @@ declare private function customquery:handleKeyExists(
     return cts:element-query($QNames, cts:and-query(()))
 };
 
+declare private function customquery:handleUnderElement(
+    $step as element(json:underElement),
+    $ignoreRange as xs:string?
+) as cts:element-query?
+{
+    let $query :=
+        if($step/json:query/@type = "string")
+        then string($step/json:query)
+        else customquery:dispatch($step/json:query, $ignoreRange)
+    where exists($step/json:element)
+    return cts:element-query(xs:QName($step/json:element), $query)
+};
+
+declare private function customquery:handleUnderKey(
+    $step as element(json:underKey),
+    $ignoreRange as xs:string?
+) as cts:element-query?
+{
+    let $query :=
+        if($step/json:query/@type = "string")
+        then string($step/json:query)
+        else customquery:dispatch($step/json:query, $ignoreRange)
+    where exists($step/json:key)
+    return cts:element-query(xs:QName(concat("json:", json:escapeNCName($step/json:key))), $query)
+};
+
+declare private function customquery:handleKey(
+    $step as element(json:key)
+) as cts:query?
+{
+    let $container := $step/..
+    let $values := customquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
+    let $key := $container/json:key
+    let $QName := xs:QName(concat("json:", json:escapeNCName($key)))
+    let $options := customquery:extractOptions($container, "word")
+    let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
+    where exists($values)
+    return
+        if(exists($container/json:equals))
+        then
+            let $castAs := json:castAs($key, true())
+            let $values :=
+                if($castAs = "date")
+                then for $value in $values return string(dateparser:parse($value))
+                else $values
+            return 
+                if(exists($container/json:equals/@boolean))
+                then cts:element-attribute-value-query($QName, xs:QName("boolean"), $values, $options, $weight)
+                else if($castAs = "date")
+                then cts:element-attribute-value-query($QName, xs:QName("normalized-date"), $values, $options, $weight)
+                else cts:element-value-query($QName, $values, $options, $weight)
+
+        else if(exists($container/json:contains))
+        then cts:element-word-query($QName, $values, $options, $weight)
+        else ()
+};
+
+declare private function customquery:handleElement(
+    $step as element(json:element)
+) as cts:query?
+{
+    let $container := $step/..
+    let $values := customquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
+    let $element := $container/json:element
+    let $attribute := $container/json:attribute[@type = "string"]
+    let $options := customquery:extractOptions($container, "word")
+    let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
+    where exists($values)
+    return
+        if(exists($container/json:equals))
+        then
+            if(exists($attribute))
+            then cts:element-attribute-value-query(xs:QName($element), xs:QName($attribute), $values, $options, $weight)
+            else cts:element-value-query(xs:QName($element), $values, $options, $weight)
+        else if(exists($container/json:contains))
+        then
+            if(exists($attribute))
+            then cts:element-attribute-word-query(xs:QName($element), xs:QName($attribute), $values, $options, $weight)
+            else cts:element-word-query(xs:QName($element), $values, $options, $weight)
+        else ()
+};
+
 declare private function customquery:handleRange(
     $step as element(json:range),
     $ignoreRange as xs:string?
@@ -295,54 +381,22 @@ declare private function customquery:handleRange(
             return search:rangeValueToQuery($index, $values, $operator, $options)
 };
 
-declare private function customquery:handleEquals(
-    $step as element(json:equals)
-) as cts:query?
+declare private function customquery:handleCollection(
+    $step as element(json:collection)
+) as cts:collection-query
 {
-    let $values := customquery:valueToStrings($step/json:value)
-    let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    where exists($values)
-    return
-        if(exists($step/json:key[@type = "string"]))
-        then
-            let $key := $step/json:key
-            let $castAs := json:castAs($key, true())
-            let $values :=
-                if($castAs = "date")
-                then
-                    for $value in $values
-                    return string(dateparser:parse($value))
-                else $values
-            let $QName := xs:QName(concat("json:", json:escapeNCName($key)))
-            return 
-                if(exists($step/json:value/@boolean) or ($step/json:value/@type = "array" and count($step/json:value/json:item/@boolean) = count($step/json:value/json:item)))
-                then cts:element-attribute-value-query($QName, xs:QName("boolean"), $values, customquery:extractOptions($step, "word"), $weight)
-                else if($castAs = "date")
-                then cts:element-attribute-value-query($QName, xs:QName("normalized-date"), $values, customquery:extractOptions($step, "word"), $weight)
-                else cts:element-value-query($QName, $values, customquery:extractOptions($step, "word"), $weight)
-
-        else if(exists($step/json:element[@type = "string"]) and exists($step/json:attribute[@type = "string"]))
-        then cts:element-attribute-value-query(xs:QName($step/json:element), xs:QName($step/json:attribute), $values, customquery:extractOptions($step, "word"), $weight)
-        else if(exists($step/json:element[@type = "string"]))
-        then cts:element-value-query(xs:QName($step/json:element), $values, customquery:extractOptions($step, "word"), $weight)
-        else ()
+    cts:collection-query(customquery:valueToStrings($step))
 };
 
-declare private function customquery:handleContains(
-    $step as element(json:contains)
-) as cts:query?
+declare private function customquery:handleDirectory(
+    $step as element(json:directory)
+) as cts:directory-query?
 {
-    let $values := customquery:valueToStrings($step/json:string)
-    let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    where exists($values)
-    return
-        if(exists($step/json:key[@type = "string"]))
-        then cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($step/json:key))), $values, customquery:extractOptions($step, "word"), $weight)
-        else if(exists($step/json:element[@type = "string"]) and exists($step/json:attribute[@type = "string"]))
-        then cts:element-attribute-word-query(xs:QName($step/json:element), xs:QName($step/json:attribute), $values, customquery:extractOptions($step, "word"), $weight)
-        else if(exists($step/json:element[@type = "string"]))
-        then cts:element-word-query(xs:QName($step/json:element), $values, customquery:extractOptions($step, "word"), $weight)
-        else ()
+    if($step/@type = "string" or $step/@type = "array")
+    then cts:directory-query(customquery:valueToStrings($step))
+    else if($step/@type = "object")
+    then cts:directory-query(customquery:valueToStrings($step/json:uri), if($step/json:descendants/@boolean = "true") then "infinity" else "1")
+    else ()
 };
 
 declare private function customquery:handleQueryString(
@@ -360,50 +414,6 @@ declare private function customquery:handleWordAnywhere(
     if($step/@type = "object")
     then cts:word-query(customquery:valueToStrings($step/json:string), customquery:extractOptions($step, "word"), xs:double(($step/json:weight[@type = "number"], 1.0)[1]))
     else cts:word-query(customquery:valueToStrings($step))
-};
-
-declare private function customquery:handleUnderKey(
-    $step as element(json:underKey),
-    $ignoreRange as xs:string?
-) as cts:element-query?
-{
-    let $query :=
-        if($step/json:query/@type = "string")
-        then string($step/json:query)
-        else customquery:dispatch($step/json:query, $ignoreRange)
-    where exists($step/json:key)
-    return cts:element-query(xs:QName(concat("json:", json:escapeNCName($step/json:key))), $query)
-};
-
-declare private function customquery:handleUnderElement(
-    $step as element(json:underElement),
-    $ignoreRange as xs:string?
-) as cts:element-query?
-{
-    let $query :=
-        if($step/json:query/@type = "string")
-        then string($step/json:query)
-        else customquery:dispatch($step/json:query, $ignoreRange)
-    where exists($step/json:element)
-    return cts:element-query(xs:QName($step/json:element), $query)
-};
-
-declare private function customquery:handleCollection(
-    $step as element(json:collection)
-) as cts:collection-query
-{
-    cts:collection-query(customquery:valueToStrings($step))
-};
-
-declare private function customquery:handleDirectory(
-    $step as element(json:directory)
-) as cts:directory-query?
-{
-    if($step/@type = "string" or $step/@type = "array")
-    then cts:directory-query(customquery:valueToStrings($step))
-    else if($step/@type = "object")
-    then cts:directory-query(customquery:valueToStrings($step/json:uri), if($step/json:descendants/@boolean = "true") then "infinity" else "1")
-    else ()
 };
 
 declare private function customquery:handleGeo(
@@ -502,8 +512,9 @@ declare private function customquery:handleGeoPolygon(
     )
 };
 
+
 declare private function customquery:valueToStrings(
-    $item as element()
+    $item as element()?
 ) as xs:string*
 {
     if($item/@type = "array")

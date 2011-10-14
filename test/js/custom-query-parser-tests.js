@@ -5,63 +5,57 @@ if(typeof corona == "undefined" || !corona) {
 corona.queries = [
     /* Contains */
     {
-        "query": { "contains": {
-                "key": "foo",
-                "string": "bar"
-            }
+        "query": { 
+            "key": "foo",
+            "contains": "bar"
         },
         "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text></cts:element-word-query>',
         "purpose": "Simple JSON contains query"
     },
     {
-        "query": { "contains": {
-                "element": "foo",
-                "string": "bar"
-            }
+        "query": {
+            "element": "foo",
+            "contains": "bar"
         },
         "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:text xml:lang="en">bar</cts:text></cts:element-word-query>',
         "purpose": "Simple XML element contains query"
     },
     {
-        "query": { "contains": {
-                "element": "testns:foo",
-                "string": "bar"
-            }
+        "query": {
+            "element": "testns:foo",
+            "contains": "bar"
         },
         "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:testns="http://test.ns/uri">testns:foo</cts:element> <cts:text xml:lang="en">bar</cts:text></cts:element-word-query>',
         "purpose": "Simple XML namespaced element contains query"
     },
     {
-        "query": { "contains": {
-                "element": "foo",
-                "attribute": "bar",
-                "string": "baz"
-            }
+        "query": {
+            "element": "foo",
+            "attribute": "bar",
+            "contains": "baz"
         },
         "result": '<cts:element-attribute-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:attribute>bar</cts:attribute> <cts:text xml:lang="en">baz</cts:text></cts:element-attribute-word-query>',
         "purpose": "Simple XML namespaced element/attribute contains query"
     },
     {
-        "query": { "contains": {
-                "key": "foo",
-                "string": "bar",
-                "caseSensitive": true,
-                "diacriticSensitive": true,
-                "punctuationSensitve": true,
-                "whitespaceSensitive": true,
-                "stemmed": false,
-                "wildcarded": true,
-                "weight": 10
-            }
+        "query": {
+            "key": "foo",
+            "contains": "bar",
+            "caseSensitive": true,
+            "diacriticSensitive": true,
+            "punctuationSensitve": true,
+            "whitespaceSensitive": true,
+            "stemmed": false,
+            "wildcarded": true,
+            "weight": 10
         },
         "result": '<cts:element-word-query weight="10" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> <cts:option>case-sensitive</cts:option> <cts:option>diacritic-sensitive</cts:option> <cts:option>punctuation-sensitive</cts:option> <cts:option>whitespace-sensitive</cts:option> <cts:option>unstemmed</cts:option> <cts:option>wildcarded</cts:option></cts:element-word-query>',
         "purpose": "Extract word options"
     },
     {
-        "query": { "contains": {
-                "key": "foo",
-                "string": ["bar", "baz"]
-            }
+        "query": {
+            "key": "foo",
+            "contains": ["bar", "baz"]
         },
         "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> <cts:text xml:lang="en">baz</cts:text></cts:element-word-query>',
         "purpose": "Value as an array"
@@ -69,65 +63,58 @@ corona.queries = [
 
     /* Equals */
     {
-        "query": { "equals": {
-                "key": "foo",
-                "value": "bar"
-            }
+        "query": {
+            "key": "foo",
+            "equals": "bar"
         },
         "result": '<cts:element-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text></cts:element-value-query>',
         "purpose": "Simple JSON equals query (string)"
     },
     {
-        "query": { "equals": {
-                "key": "foo",
-                "value": true
-            }
+        "query": {
+            "key": "foo",
+            "equals": true
         },
         "result": '<cts:element-attribute-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:attribute>boolean</cts:attribute> <cts:text xml:lang="en">true</cts:text></cts:element-attribute-value-query>',
         "purpose": "Simple JSON equals query (boolean)"
     },
     {
-        "query": { "equals": {
-                "key": "foo",
-                "value": 10
-            }
+        "query": {
+            "key": "foo",
+            "equals": 10
         },
         "result": '<cts:element-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">10</cts:text></cts:element-value-query>',
         "purpose": "Simple JSON equals query (number)"
     },
     {
-        "query": { "equals": {
-                "key": "foo::date",
-                "value": "November 10th, 1980"
-            }
+        "query": {
+            "key": "foo::date",
+            "equals": "November 10th, 1980"
         },
         "result": '<cts:element-attribute-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:text xml:lang="en">1980-11-10T00:00:00-07:00</cts:text></cts:element-attribute-value-query>',
         "purpose": "Simple JSON equals query (date)"
     },
     {
-        "query": { "equals": {
-                "element": "foo",
-                "value": "bar"
-            }
+        "query": {
+            "element": "foo",
+            "equals": "bar"
         },
         "result": '<cts:element-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:text xml:lang="en">bar</cts:text></cts:element-value-query>',
         "purpose": "Simple XML element equals query"
     },
     {
-        "query": { "equals": {
-                "element": "testns:foo",
-                "value": "bar"
-            }
+        "query": {
+            "element": "testns:foo",
+            "equals": "bar"
         },
         "result": '<cts:element-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:testns="http://test.ns/uri">testns:foo</cts:element> <cts:text xml:lang="en">bar</cts:text></cts:element-value-query>',
         "purpose": "Simple XML namespaced element equals query"
     },
     {
-        "query": { "equals": {
-                "element": "foo",
-                "attribute": "bar",
-                "value": "baz"
-            }
+        "query": {
+            "element": "foo",
+            "attribute": "bar",
+            "equals": "baz"
         },
         "result": '<cts:element-attribute-value-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:attribute>bar</cts:attribute> <cts:text xml:lang="en">baz</cts:text></cts:element-attribute-value-query>',
         "purpose": "Simple XML attribute equals query"
@@ -157,14 +144,14 @@ corona.queries = [
     /* And */
     {
         "query": { "and": [
-            { "equals": {
+            {
                 "key": "foo",
-                "value": "bar"
-            }},
-            { "equals": {
+                "equals": "bar"
+            },
+            {
                 "key": "foo",
-                "value": "baz"
-            }}
+                "equals": "baz"
+            }
         ]},
         "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">baz</cts:text> </cts:element-value-query></cts:and-query>',
         "purpose": "And query"
@@ -173,14 +160,14 @@ corona.queries = [
     /* Or */
     {
         "query": { "or": [
-            { "equals": {
+            {
                 "key": "foo",
-                "value": "bar"
-            }},
-            { "equals": {
+                "equals": "bar"
+            },
+            {
                 "key": "foo",
-                "value": "baz"
-            }}
+                "equals": "baz"
+            }
         ]},
         "result": '<cts:or-query xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">baz</cts:text> </cts:element-value-query></cts:or-query>',
         "purpose": "Or query"
@@ -189,10 +176,10 @@ corona.queries = [
     /* Not */
     {
         "query": { "not": 
-            { "equals": {
+            {
                 "key": "foo",
-                "value": "bar"
-            }}
+                "equals": "bar"
+            }
         },
         "result": '<cts:not-query xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query></cts:not-query>',
         "purpose": "Not query"
@@ -201,14 +188,14 @@ corona.queries = [
     /* And Not */
     {
         "query": { "andNot": {
-            "positive": { "equals": {
+            "positive": {
                 "key": "foo",
-                "value": "bar"
-            }},
-            "negative": { "equals": {
+                "equals": "bar"
+            },
+            "negative": {
                 "key": "foo",
-                "value": "baz"
-            }}
+                "equals": "baz"
+            }
         }},
         "result": '<cts:and-not-query xmlns:cts="http://marklogic.com/cts"> <cts:positive> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query> </cts:positive> <cts:negative> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">baz</cts:text> </cts:element-value-query> </cts:negative></cts:and-not-query>',
         "purpose": "And not query"
@@ -218,14 +205,14 @@ corona.queries = [
     {
         "query": { "near": {
             "queries": [
-                { "equals": {
+                {
                     "key": "foo",
-                    "value": "bar"
-                }},
-                { "equals": {
+                    "equals": "bar"
+                },
+                {
                     "key": "foo",
-                    "value": "baz"
-                }}
+                    "equals": "baz"
+                }
             ],
             "ordered": true,
             "distance": 15,
@@ -277,10 +264,10 @@ corona.queries = [
 
     /* Properties */
     {
-        "query": { "property": { "equals": {
+        "query": { "property": {
                 "key": "foo",
-                "value": "bar"
-            }}
+                "equals": "bar"
+            }
         },
         "result": '<cts:properties-query xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query></cts:properties-query>',
         "purpose": "Property query"
