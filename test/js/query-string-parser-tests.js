@@ -70,8 +70,18 @@ corona.queries = [
     },
     {
         "query": 'range1:2007-01-25',
-        "result": '<cts:element-attribute-range-query operator="&gt;" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">2007-01-25T00:00:00-07:00</cts:value></cts:element-attribute-range-query>',
+        "result": '<cts:element-attribute-range-query operator="=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">2007-01-25T00:00:00-07:00</cts:value></cts:element-attribute-range-query>',
         "purpose": "Date range constraint"
+    },
+    {
+        "query": 'range1-after:2007-01-25',
+        "result": '<cts:element-attribute-range-query operator="&gt;=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">2007-01-25T00:00:00-07:00</cts:value></cts:element-attribute-range-query>',
+        "purpose": "Date after range constraint"
+    },
+    {
+        "query": 'range1-before:2007-01-25',
+        "result": '<cts:element-attribute-range-query operator="&lt;=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:date1_003A_003Adate</cts:element> <cts:attribute>normalized-date</cts:attribute> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">2007-01-25T00:00:00-07:00</cts:value></cts:element-attribute-range-query>',
+        "purpose": "Date before range constraint"
     },
     {
         "query": 'range2:foo',

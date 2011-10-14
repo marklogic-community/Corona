@@ -43,7 +43,6 @@ declare function parser:parse(
 	let $init := xdmp:set($GROUPING-INDEX, 0)
 	let $tokens := parser:tokenize($query)
 	let $grouped := parser:groupTokens($tokens, 1)
-    let $log := xdmp:log($grouped)
 	let $folded := parser:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
     where string-length($query)
 	return parser:dispatchQueryTree($folded, $ignoreField)
@@ -142,7 +141,6 @@ declare private function parser:groupTokens(
             if(exists(config:get($token/field)[type = ("date", "dateTime")]))
             then 
                 <constraint>{ $token/field }<value>{(
-            let $log := xdmp:log(config:get($token/field)[type = ("date", "dateTime")][@type = "range"])
                     let $parsedDate := ()
                     for $dateToken at $dateIndex in $tokens[$index to count($tokens)]
                     where local-name($dateToken) = ("term", "constraint") and empty($parsedDate)
@@ -354,7 +352,7 @@ declare private function parser:constraintQuery(
         then search:mapValueToQuery($index, $value)
 
         else if($index/@type = "range")
-        then search:rangeValueToQuery($index, $value)
+        then search:rangeValueToQuery($index, $value, (string($index/operator), "eq")[1], ())
 
         else if($index/@type = ("bucketedrange", "autobucketedrange"))
         then search:bucketLabelToQuery($index, $value)

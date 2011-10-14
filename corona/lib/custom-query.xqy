@@ -284,7 +284,10 @@ declare private function customquery:handleRange(
         ))
 
         else
-            let $operator := string($step/json:operator[@type = "string"])
+            (: • If the user has specified an operator, use that.
+               • If the index name implies an operator, for example date-before:…, use the implied operator
+               • Otherwise default to equality :)
+            let $operator := (string($step/json:operator[@type = "string"]), string($index/operator), "eq")[1]
             let $values := 
                 if($step/json:value/@type = "array")
                 then $step/json:value//json:item

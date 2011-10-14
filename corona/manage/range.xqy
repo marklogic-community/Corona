@@ -52,7 +52,6 @@ return
             let $element := map:get($params, "element")
             let $attribute := map:get($params, "attribute")
             let $type := map:get($params, "type")
-            let $operator := map:get($params, "operator")
             return
 
             if((empty($key) and empty($element)) or (exists($key) and exists($element)))
@@ -62,11 +61,11 @@ return
             else
                 try {
                     if(exists($key))
-                    then manage:createJSONRange($name, $key, $type, $operator, $config)
+                    then manage:createJSONRange($name, $key, $type, $config)
                     else if(exists($element) and exists($attribute))
-                    then manage:createXMLAttributeRange($name, $element, $attribute, $type, $operator, $config)
+                    then manage:createXMLAttributeRange($name, $element, $attribute, $type, $config)
                     else if(exists($element) and empty($attribute))
-                    then manage:createXMLElementRange($name, $element, $type, $operator, $config)
+                    then manage:createXMLElementRange($name, $element, $type, $config)
                     else ()
                 }
                 catch ($e) {

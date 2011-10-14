@@ -106,7 +106,6 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="element" required="false"/>
             <param name="attribute" required="false"/>
             <param name="type" required="true"/>
-            <param name="operator" required="true"/>
         </http>
         <http method="DELETE"/>
     </request>

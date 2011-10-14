@@ -129,21 +129,17 @@ declare function search:rangeValueToQuery(
     $values as xs:string*
 ) as cts:query?
 {
-    search:rangeValueToQuery($index, $values, (), ())
+    search:rangeValueToQuery($index, $values, "eq", ())
 };
 
 declare function search:rangeValueToQuery(
     $index as element(index),
     $values as xs:string*,
-    $operatorOverride as xs:string?,
+    $operator as xs:string,
     $options as xs:string*
 ) as cts:query?
 {
-    let $operatorOverride :=
-        if(string-length($operatorOverride))
-        then $operatorOverride
-        else ()
-    let $operator := common:humanOperatorToMathmatical(($operatorOverride, string($index/operator))[1])
+    let $operator := common:humanOperatorToMathmatical($operator)
     let $values :=
         for $value in $values
         let $type :=

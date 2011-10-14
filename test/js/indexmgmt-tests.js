@@ -320,7 +320,6 @@ corona.addIndexes = function(callback) {
             "name": "list",
             "key": "list",
             "datatype": "string",
-            "operator": "eq",
             "shouldSucceed": true,
             "purpose": "Range index for MarkMail JSON message list"
         },
@@ -329,7 +328,6 @@ corona.addIndexes = function(callback) {
             "name": "range1",
             "key": "date1::date",
             "datatype": "date",
-            "operator": "gt",
             "shouldSucceed": true,
             "purpose": "JSON range creation on a date"
         },
@@ -338,7 +336,6 @@ corona.addIndexes = function(callback) {
             "name": "range2",
             "key": "rangeKey",
             "datatype": "string",
-            "operator": "eq",
             "shouldSucceed": true,
             "purpose": "JSON range creation on a string"
         },
@@ -347,7 +344,6 @@ corona.addIndexes = function(callback) {
             "name": "range3",
             "key": "rangeKey",
             "datatype": "number",
-            "operator": "eq",
             "shouldSucceed": true,
             "purpose": "JSON range creation on a number"
         },
@@ -356,7 +352,6 @@ corona.addIndexes = function(callback) {
             "name": "range4",
             "element": "rangeKey",
             "datatype": "string",
-            "operator": "eq",
             "shouldSucceed": true,
             "purpose": "XML element range creation on a string"
         },
@@ -365,7 +360,6 @@ corona.addIndexes = function(callback) {
             "name": "range5",
             "element": "testns:rangeEl",
             "datatype": "string",
-            "operator": "eq",
             "shouldSucceed": true,
             "purpose": "Namespaced XML element range creation on a string"
         },
@@ -375,7 +369,6 @@ corona.addIndexes = function(callback) {
             "element": "testns:rangeEl",
             "attribute": "rangeAttrib",
             "datatype": "string",
-            "operator": "eq",
             "shouldSucceed": true,
             "purpose": "Namespaced XML element attribute range creation on a string"
         },
@@ -385,7 +378,6 @@ corona.addIndexes = function(callback) {
             "element": "invalidns:rangeEl",
             "attribute": "rangeAttrib",
             "datatype": "string",
-            "operator": "eq",
             "shouldSucceed": false,
             "purpose": "Invalid XML element on a element attribute range index"
         },
@@ -395,25 +387,14 @@ corona.addIndexes = function(callback) {
             "element": "rangeEl",
             "attribute": "invalidns:rangeAttrib",
             "datatype": "string",
-            "operator": "eq",
             "shouldSucceed": false,
             "purpose": "Invalid XML element on a element attribute range index"
-        },
-        {
-            "type": "range",
-            "name": "range8",
-            "element": "rangeEl",
-            "datatype": "string",
-            "operator": "bogusoperator",
-            "shouldSucceed": false,
-            "purpose": "Invalid operator on a range index"
         },
         {
             "type": "range",
             "name": "field1",
             "key": "name1",
             "datatype": "string",
-            "operator": "eq",
             "shouldSucceed": false,
             "purpose": "Making sure you can't have duplicate names when creating a range"
         },
@@ -490,7 +471,6 @@ corona.addIndexes = function(callback) {
                 equals(config.attribute, server.attribute, "Index attribute matches");
             }
             equals(config.datatype, server.type, "Index datatype matches");
-            equals(config.operator, server.operator, "Index operator matches");
         }
         else if(config.type === "bucketedrange") {
             equals(config.datatype, server.type, "Index datatype matches");
@@ -706,7 +686,6 @@ corona.addIndexes = function(callback) {
                     data.attribute = index.attribute;
                 }
                 data.type = index.datatype;
-                data.operator = index.operator;
             }
             else if(index.type === "bucketedrange") {
                 data.type = index.datatype;

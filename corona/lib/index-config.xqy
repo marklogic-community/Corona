@@ -71,32 +71,29 @@ declare function config:setXMLMap(
 declare function config:setJSONRange(
     $name as xs:string,
     $key as xs:string,
-    $type as xs:string,
-    $operator as xs:string
+    $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("range/json/", $name, "/", $key, "/", $type, "/", $operator))
+    prop:set(concat("index-", $name), concat("range/json/", $name, "/", $key, "/", $type))
 };
 
 declare function config:setXMLElementRange(
     $name as xs:string,
     $element as xs:string,
-    $type as xs:string,
-    $operator as xs:string
+    $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("range/xmlelement/", $name, "/", $element, "/", $type, "/", $operator))
+    prop:set(concat("index-", $name), concat("range/xmlelement/", $name, "/", $element, "/", $type))
 };
 
 declare function config:setXMLAttributeRange(
     $name as xs:string,
     $element as xs:string,
     $attribute as xs:string,
-    $type as xs:string,
-    $operator as xs:string
+    $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("range/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $operator))
+    prop:set(concat("index-", $name), concat("range/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type))
 };
 
 declare function config:setJSONBucketedRange(
@@ -233,6 +230,23 @@ declare function config:get(
 ) as element(index)?
 {
     let $property := prop:get(concat("index-", $name))
+    let $isPsudo :=
+        if(empty($property) and (ends-with($name, "-above") or ends-with($name, "-below") or ends-with($name, "-before") or ends-with($name, "-after")))
+        then true()
+        else false()
+    let $property :=
+        if($isPsudo)
+        then prop:get(concat("index-", replace($name, "-above$|-below$|-before$|-after$", "")))
+        else $property
+    let $operator :=
+        if(exists($property) and $isPsudo)
+        then
+            if(ends-with($name, "-above") or ends-with($name, "-after"))
+            then "ge"
+            else if(ends-with($name, "-before") or ends-with($name, "-below"))
+            then "le"
+            else ()
+        else ()
     let $bits := tokenize($property, "/")
     where exists($property)
     return
@@ -243,22 +257,24 @@ declare function config:get(
                 if($bits[2] = "json")
                 then (
                     <key>{ $bits[4] }</key>,
-                    <type>{ $bits[5] }</type>,
-                    <operator>{ $bits[6] }</operator>
+                    <type>{ $bits[5] }</type>
                 )
                 else if($bits[2] = "xmlelement")
                 then (
                     <element>{ $bits[4] }</element>,
-                    <type>{ $bits[5] }</type>,
-                    <operator>{ $bits[6] }</operator>
+                    <type>{ $bits[5] }</type>
                 )
                 else if($bits[2] = "xmlattribute")
                 then (
                     <element>{ $bits[4] }</element>,
                     <attribute>{ $bits[5] }</attribute>,
-                    <type>{ $bits[6] }</type>,
-                    <operator>{ $bits[7] }</operator>
+                    <type>{ $bits[6] }</type>
                 )
+                else ()
+            }
+            {
+                if(exists($operator))
+                then <operator>{ $operator }</operator>
                 else ()
             }
         </index>

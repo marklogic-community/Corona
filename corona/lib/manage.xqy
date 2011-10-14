@@ -204,22 +204,16 @@ declare function manage:createJSONRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
-    $operator as xs:string,
     $config as element()
 ) as empty-sequence()
 {
     let $test := manage:validateIndexName($name)
     let $test := manage:validateJSONType($type)
-    let $test := manage:validateOperator($operator)
 
     let $key := json:escapeNCName($key)
-    let $operator :=
-        if($type = "boolean")
-        then "eq"
-        else $operator
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
-        config:setJSONRange($name, $key, $type, $operator)
+        config:setJSONRange($name, $key, $type)
     )
 };
 
@@ -227,18 +221,16 @@ declare function manage:createXMLElementRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
-    $operator as xs:string,
     $config as element()
 ) as empty-sequence()
 {
     let $test := manage:validateIndexName($name)
     let $test := manage:validateElementName($element)
     let $test := manage:validateXMLType($type)
-    let $test := manage:validateOperator($operator)
 
     return (
         manage:createXMLElementRangeIndex($name, $element, $type, $config),
-        config:setXMLElementRange($name, $element, $type, $operator)
+        config:setXMLElementRange($name, $element, $type)
     )
 };
 
@@ -247,7 +239,6 @@ declare function manage:createXMLAttributeRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
-    $operator as xs:string,
     $config as element()
 ) as empty-sequence()
 {
@@ -255,11 +246,10 @@ declare function manage:createXMLAttributeRange(
     let $test := manage:validateElementName($element)
     let $test := manage:validateAttributeName($attribute)
     let $test := manage:validateXMLType($type)
-    let $test := manage:validateOperator($operator)
 
     return (
         manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config),
-        config:setXMLAttributeRange($name, $element, $attribute, $type, $operator)
+        config:setXMLAttributeRange($name, $element, $attribute, $type)
     )
 };
 
@@ -298,16 +288,14 @@ declare function manage:getRange(
             json:object((
                 "name", $name,
                 "key", json:unescapeNCName($index/key),
-                "type", string($index/type),
-                "operator", if($index/type = "boolean") then "eq" else string($index/operator)
+                "type", string($index/type)
             ))
         else if($index/structure = "xmlelement")
         then
             json:object((
                 "name", $name,
                 "element", string($index/element),
-                "type", string($index/type),
-                "operator", string($index/operator)
+                "type", string($index/type)
             ))
         else if($index/structure = "xmlattribute")
         then
@@ -315,8 +303,7 @@ declare function manage:getRange(
                 "name", $name,
                 "element", string($index/element),
                 "attribute", string($index/attribute),
-                "type", string($index/type),
-                "operator", string($index/operator)
+                "type", string($index/type)
             ))
         else ()
 };
@@ -1145,15 +1132,6 @@ declare private function manage:validateXMLType(
 {
     if(not($type = ("int", "unsignedInt", "long", "unsignedLong", "float", "double", "decimal", "dateTime", "time", "date", "gYearMonth", "gYear", "gMonth", "gDay", "yearMonthDuration", "dayTimeDuration", "string", "anyURI")))
     then error(xs:QName("corona:INVALID-DATATYPE"), "Valid XML types are: int, unsignedInt, long, unsignedLong, float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth, gDay, yearMonthDuration, dayTimeDuration, string and anyURI")
-    else ()
-};
-
-declare private function manage:validateOperator(
-    $operator as xs:string
-) as empty-sequence()
-{
-    if(not($operator = ("eq", "ne", "lt", "le", "gt", "ge")))
-    then error(xs:QName("corona:INVALID-OPERATOR"), "Valid operators are: eq, ne, lt, le, gt and ge")
     else ()
 };
 
