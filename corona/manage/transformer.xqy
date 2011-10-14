@@ -18,6 +18,7 @@ xquery version "1.0-ml";
 
 import module namespace manage="http://marklogic.com/corona/manage" at "../lib/manage.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "../lib/common.xqy";
+import module namespace json="http://marklogic.com/json" at "../lib/json.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "../lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
@@ -35,22 +36,31 @@ let $existing := manage:getTransformer($name)
 return
     if($requestMethod = "GET")
     then
-        if(exists($existing))
-        then $existing
-        else common:error(404, "corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "xml")
+        if(exists($name))
+        then
+            if(exists($existing))
+            then $existing
+            else common:error(404, "corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
+        else json:serialize(json:array(manage:getAllTransformerNames()))
 
     else if($requestMethod = "PUT")
     then
-        try {
-            manage:setTransformer($name, $bodyContent)
-        }
-        catch ($e) {
-            common:errorFromException(400, $e, "xml")
-        }
+        if(exists($name))
+        then
+            try {
+                manage:setTransformer($name, $bodyContent)
+            }
+            catch ($e) {
+                common:errorFromException(400, $e, "xml")
+            }
+        else common:error(400, "corona:INVALID-PARAMETER", "Must specify a name for the transformer", "json")
 
     else if($requestMethod = "DELETE")
     then
-        if(exists($existing))
-        then manage:deleteTransformer($name)
-        else common:error(404, "corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "xml")
-    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "xml")
+        if(exists($name))
+        then
+            if(exists($existing))
+            then manage:deleteTransformer($name)
+            else common:error(404, "corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
+        else common:error(400, "corona:INVALID-PARAMETER", "Must specify the name of the transformer to delete", "json")
+    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

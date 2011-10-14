@@ -37,40 +37,49 @@ let $existing := manage:getRange($name)
 return
     if($requestMethod = "GET")
     then
-        if(exists($existing))
-        then json:serialize($existing)
-        else common:error(404, "corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
+        if(exists($name))
+        then
+            if(exists($existing))
+            then json:serialize($existing)
+            else common:error(404, "corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
+        else json:serialize(json:array(manage:getAllRanges()))
 
     else if($requestMethod = "POST")
     then
-        let $key := map:get($params, "key")
-        let $element := map:get($params, "element")
-        let $attribute := map:get($params, "attribute")
-        let $type := map:get($params, "type")
-        let $operator := map:get($params, "operator")
-        return
+        if(exists($name))
+        then
+            let $key := map:get($params, "key")
+            let $element := map:get($params, "element")
+            let $attribute := map:get($params, "attribute")
+            let $type := map:get($params, "type")
+            let $operator := map:get($params, "operator")
+            return
 
-        if((empty($key) and empty($element)) or (exists($key) and exists($element)))
-        then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a JSON key, an XML element name or XML element and attribute names", "json")
-        else if(exists($attribute) and empty($element))
-        then common:error(400, "corona:MISSING-PARAMETER", "Must supply an XML element along with an XML attribute", "json")
-        else
-            try {
-                if(exists($key))
-                then manage:createJSONRange($name, $key, $type, $operator, $config)
-                else if(exists($element) and exists($attribute))
-                then manage:createXMLAttributeRange($name, $element, $attribute, $type, $operator, $config)
-                else if(exists($element) and empty($attribute))
-                then manage:createXMLElementRange($name, $element, $type, $operator, $config)
-                else ()
-            }
-            catch ($e) {
-                common:errorFromException(400, $e, "json")
-            }
+            if((empty($key) and empty($element)) or (exists($key) and exists($element)))
+            then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a JSON key, an XML element name or XML element and attribute names", "json")
+            else if(exists($attribute) and empty($element))
+            then common:error(400, "corona:MISSING-PARAMETER", "Must supply an XML element along with an XML attribute", "json")
+            else
+                try {
+                    if(exists($key))
+                    then manage:createJSONRange($name, $key, $type, $operator, $config)
+                    else if(exists($element) and exists($attribute))
+                    then manage:createXMLAttributeRange($name, $element, $attribute, $type, $operator, $config)
+                    else if(exists($element) and empty($attribute))
+                    then manage:createXMLElementRange($name, $element, $type, $operator, $config)
+                    else ()
+                }
+                catch ($e) {
+                    common:errorFromException(400, $e, "json")
+                }
+        else common:error(400, "corona:INVALID-PARAMETER", "Must specify a name for the range", "json")
 
     else if($requestMethod = "DELETE")
     then
-        if(exists($existing))
-        then manage:deleteRange($name, $config)
-        else common:error(404, "corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
+        if(exists($name))
+        then
+            if(exists($existing))
+            then manage:deleteRange($name, $config)
+            else common:error(404, "corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
+        else common:error(400, "corona:INVALID-PARAMETER", "Must specify the name of for the range to delete", "json")
     else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

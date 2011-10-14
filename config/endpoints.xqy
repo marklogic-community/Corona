@@ -98,21 +98,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 
     <request uri="^/manage(/)?$" endpoint="/corona/info.xqy" user-params="ignore"/>
 
-    <request uri="^/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/corona/manage/field.xqy">
-        <uri-param name="name" as="string">$1</uri-param>
-        <http method="GET"/>
-        <http method="POST">
-            <param name="includeKey" alias="includeKey[]" required="false" repeatable="true"/>
-            <param name="excludeKey" alias="excludeKey[]" required="false" repeatable="true"/>
-            <param name="includeElement" alias="includeElement[]" required="false" repeatable="true"/>
-            <param name="excludeElement" alias="excludeElement[]" required="false" repeatable="true"/>
-            <param name="mode" required="false" default="contains"/>
-        </http>
-        <http method="DELETE"/>
-    </request>
-
-    <request uri="^/manage/range/([A-Za-z0-9_-]+)(/)?$" endpoint="/corona/manage/range.xqy">
-        <uri-param name="name" as="string">$1</uri-param>
+    <request uri="^/manage/(range|range/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/range.xqy">
+        <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST">
             <param name="key" required="false"/>
@@ -124,8 +111,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/bucketedrange/([A-Za-z0-9_-]+)(/)?$" endpoint="/corona/manage/bucketedrange.xqy">
-        <uri-param name="name" as="string">$1</uri-param>
+    <request uri="^/manage/(bucketedrange|bucketedrange/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/bucketedrange.xqy">
+        <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST">
             <param name="key" required="false"/>
@@ -143,26 +130,22 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/corona/manage/map.xqy">
-        <uri-param name="name" as="string">$1</uri-param>
-        <http method="GET"/>
-        <http method="POST">
-            <param name="key" required="false"/>
-            <param name="element" required="false"/>
-            <param name="attribute" required="false"/>
-            <param name="mode" required="true"/>
-        </http>
-        <http method="DELETE"/>
-    </request>
-
-    <request uri="^/manage/namespace/([^/]+)(/)?$" endpoint="/corona/manage/namespace.xqy">
-        <uri-param name="prefix" as="string">$1</uri-param>
+    <request uri="^/manage/(namespace|namespace/([^/]+))/?$" endpoint="/corona/manage/namespace.xqy">
+        <uri-param name="prefix" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST">
             <param name="uri" required="true"/>
         </http>
         <http method="DELETE"/>
     </request>
+
+    <request uri="^/manage/(transformer|transformer/([^/]+))/?$" endpoint="/corona/manage/transformer.xqy">
+        <uri-param name="name" as="string">$2</uri-param>
+        <http method="GET"/>
+        <http method="PUT"/>
+        <http method="DELETE"/>
+    </request>
+
 
     <request uri="^/manage/(contentItem|contentItems)(/)?$" endpoint="/corona/manage/contentitems.xqy">
         <param name="key" required="false"/>
@@ -177,10 +160,28 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/transformer/([^/]+)(/)?$" endpoint="/corona/manage/transformer.xqy">
+    <request uri="^/manage/map/([A-Za-z0-9_-]+)(/)?$" endpoint="/corona/manage/map.xqy">
         <uri-param name="name" as="string">$1</uri-param>
         <http method="GET"/>
-        <http method="PUT"/>
+        <http method="POST">
+            <param name="key" required="false"/>
+            <param name="element" required="false"/>
+            <param name="attribute" required="false"/>
+            <param name="mode" required="true"/>
+        </http>
+        <http method="DELETE"/>
+    </request>
+
+    <request uri="^/manage/field/([A-Za-z0-9-]+)(/)?$" endpoint="/corona/manage/field.xqy">
+        <uri-param name="name" as="string">$1</uri-param>
+        <http method="GET"/>
+        <http method="POST">
+            <param name="includeKey" alias="includeKey[]" required="false" repeatable="true"/>
+            <param name="excludeKey" alias="excludeKey[]" required="false" repeatable="true"/>
+            <param name="includeElement" alias="includeElement[]" required="false" repeatable="true"/>
+            <param name="excludeElement" alias="excludeElement[]" required="false" repeatable="true"/>
+            <param name="mode" required="false" default="contains"/>
+        </http>
         <http method="DELETE"/>
     </request>
 </options>;
