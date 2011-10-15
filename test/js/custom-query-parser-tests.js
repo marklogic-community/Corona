@@ -306,6 +306,22 @@ corona.queries = [
         "purpose": "underElement query"
     },
 
+    /* boolean */
+    {
+        "query": {
+            "boolean": true
+        },
+        "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"/>',
+        "purpose": "boolean true query"
+    },
+    {
+        "query": {
+            "boolean": false
+        },
+        "result": '<cts:or-query xmlns:cts="http://marklogic.com/cts"/>',
+        "purpose": "boolean false query"
+    },
+
     /* Range */
     {
         "query": {

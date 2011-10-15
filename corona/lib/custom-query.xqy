@@ -165,6 +165,7 @@ declare private function customquery:dispatch(
         $step/json:elementExists[@type = ("string", "array")],
         $step/json:underElement[@type = "string"],
         $step/json:underKey[@type = "string"],
+        $step/json:boolean[exists(@boolean)],
 
         $step/json:key[@type = "string"],
         $step/json:element[@type = "string"],
@@ -202,6 +203,7 @@ declare private function customquery:process(
     case element(json:elementExists) return customquery:handleElementExists($step)
     case element(json:underElement) return customquery:handleUnderElement($step, $ignoreRange)
     case element(json:underKey) return customquery:handleUnderKey($step, $ignoreRange)
+    case element(json:boolean) return customquery:handleBoolean($step)
 
     case element(json:key) return customquery:handleKey($step)
     case element(json:element) return customquery:handleElement($step)
@@ -304,6 +306,15 @@ declare private function customquery:handleUnderKey(
         then string($container/json:query)
         else customquery:dispatch($container/json:query, $ignoreRange)
     return cts:element-query(xs:QName(concat("json:", json:escapeNCName($step))), $query)
+};
+
+declare private function customquery:handleBoolean(
+    $step as element(json:boolean)
+) as cts:query
+{
+    if($step/@boolean = "true")
+    then cts:and-query(())
+    else cts:or-query(())
 };
 
 declare private function customquery:handleKey(
