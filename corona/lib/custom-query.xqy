@@ -168,6 +168,7 @@ declare private function customquery:dispatch(
         $step/json:key[@type = "string"],
         $step/json:element[@type = "string"],
         $step/json:property[@type = "string"],
+        $step/json:field[@type = "string"],
         $step/json:range[@type = "string"],
         $step/json:collection[@type = ("string", "array")],
         $step/json:directory[@type = ("string", "array")],
@@ -203,6 +204,7 @@ declare private function customquery:process(
     case element(json:key) return customquery:handleKey($step)
     case element(json:element) return customquery:handleElement($step)
     case element(json:property) return customquery:handleProperty($step)
+    case element(json:field) return customquery:handleField($step)
     case element(json:range) return customquery:handleRange($step, $ignoreRange)
     case element(json:collection) return customquery:handleCollection($step)
     case element(json:directory) return customquery:handleDirectory($step)
@@ -367,6 +369,23 @@ declare private function customquery:handleProperty(
             then cts:element-word-query($QName, $values, $options, $weight)
             else ()
     )
+};
+
+declare private function customquery:handleField(
+    $step as element(json:field)
+) as cts:query?
+{
+    let $container := $step/..
+    let $values := customquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
+    let $options := customquery:extractOptions($container, "word")
+    let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
+    where exists($values)
+    return
+        if(exists($container/json:equals))
+        then xdmp:apply(xdmp:function("cts:field-value-query"), string($step), $values, $options, $weight)
+        else if(exists($container/json:contains))
+        then cts:field-word-query(string($step), $values, $options, $weight)
+        else ()
 };
 
 declare private function customquery:handleRange(
@@ -595,8 +614,8 @@ declare private function customquery:extractOptions(
             else "unwildcarded"
         else ()
         ,
-        if($item/json:exact/@boolean = "true")
-        then "exact"
+        if(exists($item/json:language[@type = "string"]))
+        then concat("lang=", string($item/json:language[@type = "string"]))
         else ()
     )
     else ()

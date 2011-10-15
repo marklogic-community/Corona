@@ -269,6 +269,16 @@ corona.queries = [
         "purpose": "Property query"
     },
 
+    /* Fields */
+    {
+        "query": {
+            "field": "field1",
+            "contains": "bar"
+        },
+        "result": '<cts:field-word-query xmlns:cts="http://marklogic.com/cts"> <cts:field>field1</cts:field> <cts:text xml:lang="en">bar</cts:text></cts:field-word-query>',
+        "purpose": "Field query"
+    },
+
     /* UnderKey */
     {
         "query": {
