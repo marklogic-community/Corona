@@ -132,6 +132,9 @@ declare function reststore:outputMultipleJSONDocs(
                         reststore:outputJSONDocument($uri, $content, $include),
                         if($include = ("snippet", "all"))
                         then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "json"))
+                        else (),
+                        if($include = ("confidence", "all"))
+                        then ("confidence", cts:confidence($doc))
                         else ()
                     ))
                 )
@@ -375,6 +378,9 @@ declare function reststore:outputMultipleXMLDocs(
                         reststore:outputXMLDocument($uri, $content, $include),
                         if($include = ("snippet", "all"))
                         then <corona:snippet>{ common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "xml") }</corona:snippet>
+                        else (),
+                        if($include = ("confidence", "all"))
+                        then <corona:confidence>{ cts:confidence($doc) }</corona:confidence>
                         else ()
                     )}</corona:result>
                 }</corona:results>
