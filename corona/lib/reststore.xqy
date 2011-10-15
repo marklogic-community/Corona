@@ -103,34 +103,38 @@ declare function reststore:outputMultipleJSONDocs(
                 "end", $end,
                 "total", $total
             )),
-            "results", json:array(
-                for $doc in $docs
-                let $uri := base-uri($doc)
-                let $content :=
-                    if(exists($extractPath))
-                    then path:select($doc, $extractPath, "json")
-                    else $doc
-                let $content :=
-                    if(empty($content))
-                    then json:null()
-                    else if(count($content, 1) = 1)
-                    then $content
-                    else json:array($content)
-                let $content :=
-                    if($include = ("highlighting") and exists($query))
-                    then reststore:highlightJSONContent($content, $query)
-                    else $content
-                let $content :=
-                    if(exists($applyTransform))
-                    then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
-                    else $content
-                return json:object((
-                    "uri", $uri,
-                    reststore:outputJSONDocument($uri, $content, $include),
-                    if($include = ("snippet", "all"))
-                    then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "json"))
-                    else ()
-                ))
+            if($include = "none")
+            then ()
+            else (
+                "results", json:array(
+                    for $doc in $docs
+                    let $uri := base-uri($doc)
+                    let $content :=
+                        if(exists($extractPath))
+                        then path:select($doc, $extractPath, "json")
+                        else $doc
+                    let $content :=
+                        if(empty($content))
+                        then json:null()
+                        else if(count($content, 1) = 1)
+                        then $content
+                        else json:array($content)
+                    let $content :=
+                        if($include = ("highlighting") and exists($query))
+                        then reststore:highlightJSONContent($content, $query)
+                        else $content
+                    let $content :=
+                        if(exists($applyTransform))
+                        then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+                        else $content
+                    return json:object((
+                        "uri", $uri,
+                        reststore:outputJSONDocument($uri, $content, $include),
+                        if($include = ("snippet", "all"))
+                        then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "json"))
+                        else ()
+                    ))
+                )
             )
         ))
     )
@@ -344,33 +348,37 @@ declare function reststore:outputMultipleXMLDocs(
                 <corona:end>{ $end }</corona:end>
                 <corona:total>{ $total }</corona:total>
             </corona:meta>
-            <corona:results>{
-                for $doc in $docs
-                let $uri := base-uri($doc)
-                let $content :=
-                    if(exists($extractPath))
-                    then path:select(root($doc), $extractPath, "xml")
-                    else $doc
-                let $content :=
-                    if($include = ("highlighting") and exists($query))
-                    then reststore:highlightXMLContent(if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content, $query)
-                    else $content
-                let $content :=
-                    if(exists($applyTransform))
-                    then xdmp:xslt-eval(manage:getTransformer($applyTransform), if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content)
-                    else $content
-                let $content :=
-                    if(namespace-uri($content) = "http://marklogic.com/reststore")
-                    then $content/*
-                    else $content
-                return <corona:result>{(
-                    <corona:uri>{ $uri }</corona:uri>,
-                    reststore:outputXMLDocument($uri, $content, $include),
-                    if($include = ("snippet", "all"))
-                    then <corona:snippet>{ common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "xml") }</corona:snippet>
-                    else ()
-                )}</corona:result>
-            }</corona:results>
+            {
+            if($include = "none")
+            then ()
+            else <corona:results>{
+                    for $doc in $docs
+                    let $uri := base-uri($doc)
+                    let $content :=
+                        if(exists($extractPath))
+                        then path:select(root($doc), $extractPath, "xml")
+                        else $doc
+                    let $content :=
+                        if($include = ("highlighting") and exists($query))
+                        then reststore:highlightXMLContent(if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content, $query)
+                        else $content
+                    let $content :=
+                        if(exists($applyTransform))
+                        then xdmp:xslt-eval(manage:getTransformer($applyTransform), if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content)
+                        else $content
+                    let $content :=
+                        if(namespace-uri($content) = "http://marklogic.com/reststore")
+                        then $content/*
+                        else $content
+                    return <corona:result>{(
+                        <corona:uri>{ $uri }</corona:uri>,
+                        reststore:outputXMLDocument($uri, $content, $include),
+                        if($include = ("snippet", "all"))
+                        then <corona:snippet>{ common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "xml") }</corona:snippet>
+                        else ()
+                    )}</corona:result>
+                }</corona:results>
+            }
         </corona:response>
 };
 
