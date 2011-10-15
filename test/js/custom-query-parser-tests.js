@@ -235,6 +235,13 @@ corona.queries = [
         "purpose": "keyExists query"
     },
 
+    /* elementExists */
+    {
+        "query": { "elementExists": "foo" },
+        "result": '<cts:element-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:and-query/></cts:element-query>',
+        "purpose": "elementExists query"
+    },
+
     /* Collection */
     {
         "query": { "collection": "foo" },

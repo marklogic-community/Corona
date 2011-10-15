@@ -162,6 +162,7 @@ declare private function customquery:dispatch(
         $step/json:near[@type = "array"],
         $step/json:isNULL[@type = "string"],
         $step/json:keyExists[@type = ("string", "array")],
+        $step/json:elementExists[@type = ("string", "array")],
         $step/json:underElement[@type = "string"],
         $step/json:underKey[@type = "string"],
 
@@ -198,6 +199,7 @@ declare private function customquery:process(
     case element(json:near) return customquery:handleNear($step, $ignoreRange)
     case element(json:isNULL) return customquery:handleIsNULL($step)
     case element(json:keyExists) return customquery:handleKeyExists($step)
+    case element(json:elementExists) return customquery:handleElementExists($step)
     case element(json:underElement) return customquery:handleUnderElement($step, $ignoreRange)
     case element(json:underKey) return customquery:handleUnderKey($step, $ignoreRange)
 
@@ -265,6 +267,16 @@ declare private function customquery:handleKeyExists(
     let $QNames :=
         for $i in customquery:valueToStrings($step)
         return xs:QName(concat("json:", json:escapeNCName($i)))
+    return cts:element-query($QNames, cts:and-query(()))
+};
+
+declare private function customquery:handleElementExists(
+    $step as element(json:elementExists)
+) as cts:element-query?
+{
+    let $QNames :=
+        for $i in customquery:valueToStrings($step)
+        return xs:QName($i)
     return cts:element-query($QNames, cts:and-query(()))
 };
 
