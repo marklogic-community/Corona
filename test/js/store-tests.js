@@ -90,6 +90,15 @@ corona.documents = [
         "uri": "/doc-store-test-5.xml",
         "quality": 5,
         "content": "<foo>bar</foo>"
+    },
+    {
+        "type": "xml",
+        "uri": "/doc-store-test-6.xml",
+        "permissions": {
+            "nonexistant": ["read"]
+        },
+        "content": "<foo>bar</foo>",
+        "shouldSucceed": false
     }
 ];
 
@@ -214,6 +223,10 @@ corona.compareXMLDocuments = function(model, xmlAsString, withExtras) {
 corona.insertDocuments = function(prefix, withExtras) {
     var i = 0;
     for(i = 0; i < corona.documents.length; i += 1) {
+        if(corona.documents[i].shouldSucceed === false) {
+            continue;
+        }
+
         var wrapper = function(index) {
             var doc = corona.documents[index];
             asyncTest("Inserting document: " + prefix + doc.uri, function() {
@@ -261,6 +274,40 @@ corona.insertDocuments = function(prefix, withExtras) {
                     },
                     error: function(j, t, error) {
                         ok(false, "Could not insert document");
+                    }
+                });
+            });
+        }.call(this, i);
+    }
+};
+
+corona.runFailingTests = function(prefix) {
+    var i = 0;
+    for(i = 0; i < corona.documents.length; i += 1) {
+        if(corona.documents[i].shouldSucceed === undefined || corona.documents[i].shouldSucceed === true) {
+            continue;
+        }
+
+        var wrapper = function(index) {
+            var doc = corona.documents[index];
+            asyncTest("Inserting document: " + prefix + doc.uri, function() {
+                var docContent = doc.content;
+                if(doc.type === "json") {
+                    docContent = JSON.stringify(docContent);
+                }
+                $.ajax({
+                    url: corona.constructURL(doc, prefix, true),
+                    type: 'PUT',
+                    data: docContent,
+                    context: doc,
+                    success: function() {
+                        ok(false, "Test succeeded when it should have failed");
+                    },
+                    error: function(j, t, error) {
+                        ok(true, "Test failed, as expected");
+                    },
+                    complete: function() {
+                        start();
                     }
                 });
             });
@@ -410,4 +457,5 @@ $(document).ready(function() {
     module("Store");
     corona.insertDocuments("/no-extras", false);
     corona.insertDocuments("/extras", true);
+    corona.runFailingTests("/failures");
 });

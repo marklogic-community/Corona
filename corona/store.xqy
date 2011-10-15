@@ -124,25 +124,37 @@ let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
 let $transformer := map:get($params, "applyTransformer")
 
+let $tests := ()
+
 let $collections := local:collectionsFromRequest($params, "collection")
 let $properties := local:propertiesFromRequest($params, "property")
-let $permissions := local:permissionsFromRequest($params, "permission")
 let $quality := local:qualityFromRequest($params)
+let $permissions :=
+    try {
+        local:permissionsFromRequest($params, "permission")
+    }
+    catch ($e) {
+        if($e/*:code = "SEC-ROLEDNE")
+        then xdmp:set($tests, common:error(400, "corona:INVALID-PERMISSION", concat("The role '", $e/*:data/*:datum[. != "sec:role-name"], "' does not exist."), $contentType))
+        else common:errorFromException(500, $e, $contentType)
+    }
 
-let $test := (
-)
 let $customQuery :=
     try {
         customquery:getParseTree(map:get($params, "customquery"))
     }
     catch ($e) {
-        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($tests, common:error(400, "corona:INVALID-PARAMETER", concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
     }
 
 let $query := (parser:parse(map:get($params, "q")), customquery:getCTS($customQuery))[1]
 
-where string-length($uri) or ($requestMethod = "DELETE" and exists($query))
+where string-length($uri) or ($requestMethod = "DELETE" and exists($query)) or exists($tests)
 return
+    if(exists($tests))
+    then $tests
+    else
+
     if($contentType = "json")
     then
         if($requestMethod = "GET" and string-length($uri))
@@ -165,12 +177,20 @@ return
         then
             if(empty(doc($uri)) and exists($bodyContent))
             then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
-            else (
-                if(exists($bodyContent))
-                then reststore:updateJSONDocumentContent($uri, $bodyContent)
-                else (),
-                local:syncMetadata($uri, $params)
-            )
+            else
+                let $docError :=
+                    if(exists($bodyContent))
+                    then reststore:updateJSONDocumentContent($uri, $bodyContent)
+                    else ()
+                return
+                    if($docError)
+                    then $docError
+                    else try {
+                        local:syncMetadata($uri, $params)
+                    }
+                    catch ($e) {
+                        xdmp:log($e)
+                    }
         else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $contentType)
     else if($contentType = "xml")
     then
@@ -194,11 +214,19 @@ return
         then
             if(empty(doc($uri)) and exists($bodyContent))
             then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
-            else (
-                if(exists($bodyContent))
-                then reststore:updateXMLDocumentContent($uri, $bodyContent)
-                else (),
-                local:syncMetadata($uri, $params)
-            )
+            else
+                let $docError :=
+                    if(exists($bodyContent))
+                    then reststore:updateXMLDocumentContent($uri, $bodyContent)
+                    else ()
+                return
+                    if($docError)
+                    then $docError
+                    else try {
+                        local:syncMetadata($uri, $params)
+                    }
+                    catch ($e) {
+                        xdmp:log($e)
+                    }
         else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $contentType)
     else ()
