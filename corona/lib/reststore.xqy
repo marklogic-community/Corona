@@ -101,7 +101,8 @@ declare function reststore:outputMultipleJSONDocs(
             "meta", json:object((
                 "start", $start,
                 "end", $end,
-                "total", $total
+                "total", $total,
+                "executionTime", substring(string(xdmp:query-meters()/*:elapsed-time), 3, 4)
             )),
             if($include = "none")
             then ()
@@ -350,6 +351,7 @@ declare function reststore:outputMultipleXMLDocs(
                 <corona:start>{ $start }</corona:start>
                 <corona:end>{ $end }</corona:end>
                 <corona:total>{ $total }</corona:total>
+                <corona:executionTime>{ substring(string(xdmp:query-meters()/*:elapsed-time), 3, 4) }</corona:executionTime>
             </corona:meta>
             {
             if($include = "none")
