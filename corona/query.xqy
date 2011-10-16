@@ -31,6 +31,7 @@ let $params := rest:process-request(endpoints:request("/corona/query.xqy"))
 
 let $query := map:get($params, "q")
 let $include := map:get($params, "include")
+let $filtered := map:get($params, "filtered")
 let $contentType := map:get($params, "content-type")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
@@ -70,20 +71,25 @@ let $query := cts:and-query((
     return cts:directory-query($directory)
 ))
 
+let $options :=
+    if($filtered)
+    then "filtered"
+    else "unfiltered"
+
 let $results :=
     if($contentType = "json")
     then
         if(exists($start) and exists($end) and $end > $start)
-        then cts:search(/json:json, $query)[$start to $end]
+        then cts:search(/json:json, $query, $options)[$start to $end]
         else if(exists($start))
-        then cts:search(/json:json, $query)[$start]
+        then cts:search(/json:json, $query, $options)[$start]
         else ()
     else if($contentType = "xml")
     then
         if(exists($start) and exists($end) and $end > $start)
-        then cts:search(/*, $query)[$start to $end]
+        then cts:search(/*, $query, $options)[$start to $end]
         else if(exists($start))
-        then cts:search(/*, $query)[$start]
+        then cts:search(/*, $query, $options)[$start]
         else ()
     else ()
 

@@ -52,6 +52,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
+        <param name="filtered" required="false" default="false" as="boolean"/>
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
