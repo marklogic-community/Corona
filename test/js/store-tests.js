@@ -99,6 +99,12 @@ corona.documents = [
         },
         "content": "<foo>bar</foo>",
         "shouldSucceed": false
+    },
+    {
+        "type": "xml",
+        "uri": "",
+        "content": "<foo>bar</foo>",
+        "shouldSucceed": false
     }
 ];
 
@@ -290,13 +296,17 @@ corona.runFailingTests = function(prefix) {
 
         var wrapper = function(index) {
             var doc = corona.documents[index];
-            asyncTest("Inserting document: " + prefix + doc.uri, function() {
+            var uri = "";
+            if(doc.uri.length > 0) {
+                uri = prefix;
+            }
+            asyncTest("Inserting document: " + uri, function() {
                 var docContent = doc.content;
                 if(doc.type === "json") {
                     docContent = JSON.stringify(docContent);
                 }
                 $.ajax({
-                    url: corona.constructURL(doc, prefix, true),
+                    url: corona.constructURL(doc, uri, true),
                     type: 'PUT',
                     data: docContent,
                     context: doc,

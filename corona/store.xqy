@@ -124,7 +124,11 @@ let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
 let $transformer := map:get($params, "applyTransformer")
 
-let $tests := ()
+let $tests := (
+    if($requestMethod = ("PUT", "POST", "GET") and string-length($uri) = 0)
+    then common:error(400, "corona:INVALID-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $contentType)
+    else ()
+)
 
 let $collections := local:collectionsFromRequest($params, "collection")
 let $properties := local:propertiesFromRequest($params, "property")
@@ -149,6 +153,7 @@ let $customQuery :=
 
 let $query := (parser:parse(map:get($params, "q")), customquery:getCTS($customQuery))[1]
 
+let $log := xdmp:log(concat(":", $uri, ":"))
 where string-length($uri) or ($requestMethod = "DELETE" and exists($query)) or exists($tests)
 return
     if(exists($tests))

@@ -146,6 +146,27 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
+    <request uri="^/manage/(places|places/([^/]+))/?$" endpoint="/corona/manage/places.xqy">
+        <uri-param name="name" as="string">$2</uri-param>
+        <http method="GET"/>
+        <http method="PUT">
+            <param name="mode" required="false" values="textContains|textEquals|equals" default="contains"/>
+        </http>
+        <http method="POST">
+            <param name="key" required="false"/>
+            <param name="element" required="false"/>
+            <param name="attribute" required="false"/>
+            <param name="type" required="false" values="include|exclude" default="include"/>
+            <param name="weight" required="false" default="1.0" as="decimal"/>
+        </http>
+        <http method="DELETE">
+            <param name="key" required="false"/>
+            <param name="element" required="false"/>
+            <param name="attribute" required="false"/>
+            <param name="type" required="false" values="include|exclude" default="include"/>
+        </http>
+    </request>
+
 
     <request uri="^/manage/(contentItem|contentItems)(/)?$" endpoint="/corona/manage/contentitems.xqy">
         <param name="key" required="false"/>
