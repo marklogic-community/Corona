@@ -611,6 +611,107 @@ declare function manage:getAllNamespaces(
     ))
 };
 
+(: Places :)
+declare function manage:createPlace(
+    $name as xs:string,
+    $mode as xs:string
+) as empty-sequence()
+{
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateMode($mode)
+    return ()
+};
+
+declare function manage:deletePlace(
+    $name as xs:string
+) as empty-sequence()
+{
+    ()
+};
+
+declare function manage:addKeyToPlace(
+    $placeName as xs:string?,
+    $key as xs:string,
+    $type as xs:string,
+    $weight as xs:decimal
+) as empty-sequence()
+{
+    let $test := manage:validatePlaceType($type)
+    return ()
+};
+
+declare function manage:addElementToPlace(
+    $placeName as xs:string?,
+    $elementName as xs:string,
+    $type as xs:string,
+    $weight as xs:decimal
+) as empty-sequence()
+{
+    let $test := manage:validateElementName($elementName)
+    let $test := manage:validatePlaceType($type)
+    return ()
+};
+
+declare function manage:addAttributeToPlace(
+    $placeName as xs:string?,
+    $elementName as xs:string,
+    $attributeName as xs:string,
+    $type as xs:string,
+    $weight as xs:decimal
+) as empty-sequence()
+{
+    let $test := manage:validateElementName($elementName)
+    let $test := manage:validateAttributeName($attributeName)
+    let $test := manage:validatePlaceType($type)
+    return ()
+};
+
+declare function manage:removeKeyFromPlace(
+    $placeName as xs:string?,
+    $key as xs:string,
+    $type as xs:string
+) as empty-sequence()
+{
+    let $test := manage:validatePlaceType($type)
+    return ()
+};
+
+declare function manage:removeElementFromPlace(
+    $placeName as xs:string?,
+    $elementName as xs:string,
+    $type as xs:string
+) as empty-sequence()
+{
+    let $test := manage:validatePlaceType($type)
+    return ()
+};
+
+declare function manage:removeAttributeFromPlace(
+    $placeName as xs:string?,
+    $elementName as xs:string,
+    $attributeName as xs:string,
+    $type as xs:string
+) as empty-sequence()
+{
+    let $test := manage:validatePlaceType($type)
+    return ()
+};
+
+declare function manage:getPlace(
+    $placeName as xs:string?
+) as element(json:item)
+{
+    json:object((
+    ))
+};
+
+declare function manage:getAllPlaces(
+) as element(json:item)*
+{
+    ()
+};
+
+
 (: Content items :)
 declare function manage:addContentItem(
     $type as xs:string,
@@ -1141,6 +1242,15 @@ declare private function manage:validateMode(
 {
     if(not($mode = ("equals", "contains", "textEquals")))
     then error(xs:QName("corona:INVALID-MODE"), "Map modes must be either 'equals', 'contains' or 'textEquals'")
+    else ()
+};
+
+declare private function manage:validatePlaceType(
+    $type as xs:string
+) as empty-sequence()
+{
+    if(not($type = ("include", "exclude")))
+    then error(xs:QName("corona:INVALID-TYPE"), "Place types must be either 'include' or 'exclude'")
     else ()
 };
 

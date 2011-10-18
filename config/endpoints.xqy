@@ -146,7 +146,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/(places|places/([^/]+))/?$" endpoint="/corona/manage/places.xqy">
+    <request uri="^/manage/(place|places|place/([^/]+))/?$" endpoint="/corona/manage/places.xqy">
+        <uri-param name="scope" as="string">$1</uri-param>
         <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="PUT">
