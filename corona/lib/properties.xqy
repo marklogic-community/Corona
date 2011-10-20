@@ -51,18 +51,18 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
  : visible to all the app servers in the same group.
  :
  : $key - The property key.  Must be unique.
- : $value - The property value can be of any simple type:
+ : $value - The property value can be of any of the following types:
  : xs:string, xs:boolean, xs:decimal, xs:float, xs:double, xs:duration,
  : xs:dateTime, xs:time, xs:date, xs:gYearMonth, xs:gYear, xs:gMonthDay, xs:gDay
  : xs:gMonth, xs:hexBinary, xs:base64Binary, xs:QName, xs:integer,
  : xs:nonPositiveInteger, xs:negativeInteger, xs:long, xs:int, xs:short, xs:byte,
  : xs:nonNegativeInteger, xs:unsignedLong, xs:unsignedInt, xs:unsignedShort,
- : xs:unsignedByte, xs:positiveInteger
+ : xs:unsignedByte, xs:positiveInteger, element()
  :
  :)
 declare function prop:set(
     $key as xs:string,
-    $value as xs:anySimpleType
+    $value as item()
 ) as empty-sequence()
 {
     let $config := admin:get-configuration()
@@ -104,7 +104,12 @@ declare function prop:set(
         else if($value instance of xs:unsignedShort) then "unsignedShort"
         else if($value instance of xs:unsignedByte) then "unsignedByte"
         else if($value instance of xs:positiveInteger) then "positiveInteger"
+        else if($value instance of element()) then "xml"
         else "string"
+    let $value :=
+        if($type = "xml")
+        then xdmp:quote($value)
+        else $value
 
     let $namespace := admin:group-namespace($key, concat("http://xqdev.com/prop/", $type, "/", $value))
     return admin:save-configuration(admin:group-add-namespace($config, $group, $namespace))
@@ -131,7 +136,7 @@ declare function prop:delete(
  :)
 declare function prop:get(
 	$key as xs:string
-) as xs:anySimpleType?
+) as item()?
 {
 	try {
 		let $uri := namespace-uri-for-prefix($key, element { concat($key, ":foo") } { () })
@@ -169,7 +174,8 @@ declare function prop:get(
 			else if($type = "unsignedInt") then xs:unsignedInt($value)
 			else if($type = "unsignedShort") then xs:unsignedShort($value)
 			else if($type = "unsignedByte") then xs:unsignedByte($value)
-			else if($type = "positiveInteger") then xs:positiveInteger($value)
+            else if($type = "positiveInteger") then xs:positiveInteger($value)
+			else if($type = "xml") then xdmp:unquote($value)
 			else xs:string($value)
 	}
 	catch($e) {
