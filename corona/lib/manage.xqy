@@ -613,20 +613,20 @@ declare function manage:getAllNamespaces(
 
 (: Places :)
 declare function manage:createPlace(
-    $name as xs:string,
+    $placeName as xs:string,
     $mode as xs:string
 ) as empty-sequence()
 {
-    let $test := manage:validateIndexName($name)
+    let $test := manage:validateIndexName($placeName)
     let $test := manage:validateMode($mode)
-    return ()
+    return config:setPlace($placeName, <index type="place" name="{ $placeName }"/>)
 };
 
 declare function manage:deletePlace(
-    $name as xs:string
+    $placeName as xs:string
 ) as empty-sequence()
 {
-    ()
+    config:delete($placeName)
 };
 
 declare function manage:addKeyToPlace(
@@ -637,7 +637,23 @@ declare function manage:addKeyToPlace(
 ) as empty-sequence()
 {
     let $test := manage:validatePlaceType($type)
-    return ()
+    let $existingConfig := config:getPlace($placeName)
+    let $needsField := exists($existingConfig/query/field) or $type = "exclude"
+    let $newKey := <key key="{ $key }" weight="{ $weight }" type="{ $type }"/>
+    let $config := <index type="place" name="{ $placeName }">
+        <query>{
+            if($needsField)
+            then <field name="corona-field-{ $placeName }">{(
+                $existingConfig/query/field/*,
+                $newKey
+            )}</field>
+            else $newKey
+        }</query>
+    </index>
+    return (
+        manage:createFieldForPlace($config),
+        config:setPlace($placeName, $config)
+    )
 };
 
 declare function manage:addElementToPlace(
@@ -649,21 +665,64 @@ declare function manage:addElementToPlace(
 {
     let $test := manage:validateElementName($elementName)
     let $test := manage:validatePlaceType($type)
-    return ()
+    let $existingConfig := config:getPlace($placeName)
+    let $needsField := exists($existingConfig/query/field) or $type = "exclude"
+    let $newElement := <element element="{ $elementName }" weight="{ $weight }" type="{ $type }"/>
+    let $config := <index type="place" name="{ $placeName }">
+        <query>{
+            if($needsField)
+            then <field name="corona-field-{ $placeName }">{(
+                $existingConfig/query/field/*,
+                $newElement
+            )}</field>
+            else $newElement
+        }</query>
+    </index>
+    return (
+        manage:createFieldForPlace($config),
+        config:setPlace($placeName, $config)
+    )
 };
 
 declare function manage:addAttributeToPlace(
     $placeName as xs:string?,
     $elementName as xs:string,
     $attributeName as xs:string,
-    $type as xs:string,
     $weight as xs:decimal
 ) as empty-sequence()
 {
     let $test := manage:validateElementName($elementName)
     let $test := manage:validateAttributeName($attributeName)
-    let $test := manage:validatePlaceType($type)
-    return ()
+    let $existingConfig := config:getPlace($placeName)
+    let $config := <index type="place" name="{ $placeName }">
+        <query>{(
+            $existingConfig/query/*,
+            <attribute element="{ $elementName }" attribute="{ $attributeName }" weight="{ $weight }"/>
+        )}</query>
+    </index>
+    return (
+        manage:createFieldForPlace($config),
+        config:setPlace($placeName, $config)
+    )
+};
+
+declare function manage:addPlaceToPlace(
+    $placeName as xs:string?,
+    $subPlaceName as xs:string
+) as empty-sequence()
+{
+    let $test := manage:checkForPlaceLoops($subPlaceName, $placeName)
+    let $existingConfig := config:getPlace($placeName)
+    let $config := <index type="place" name="{ $placeName }">
+        <query>{(
+            $existingConfig/query/*,
+            <place name="{ $subPlaceName }"/>
+        )}</query>
+    </index>
+    return (
+        manage:createFieldForPlace($config),
+        config:setPlace($placeName, $config)
+    )
 };
 
 declare function manage:removeKeyFromPlace(
@@ -673,7 +732,26 @@ declare function manage:removeKeyFromPlace(
 ) as empty-sequence()
 {
     let $test := manage:validatePlaceType($type)
-    return ()
+    let $existingConfig := config:getPlace($placeName)
+    let $config := <index type="place" name="{ $placeName }">
+        <query>{(
+            if(exists($existingConfig/query/field))
+            then <field name="corona-field-{ $placeName }">{
+                for $query in $existingConfig/query/field/*
+                where not(local-name($query) = "key" and $query/@key = $key and $query/@type = $type)
+                return $query
+            }</field>
+            else (),
+
+            for $query in $existingConfig/query/*
+            where not(local-name($query) = "key" and $query/@key = $key and $query/@type = $type)
+            return $query
+        )}</query>
+    </index>
+    return (
+        manage:createFieldForPlace($config),
+        config:setPlace($placeName, $config)
+    )
 };
 
 declare function manage:removeElementFromPlace(
@@ -683,32 +761,100 @@ declare function manage:removeElementFromPlace(
 ) as empty-sequence()
 {
     let $test := manage:validatePlaceType($type)
-    return ()
+    let $existingConfig := config:getPlace($placeName)
+    let $config := <index type="place" name="{ $placeName }">
+        <query>{(
+            if(exists($existingConfig/query/field))
+            then <field name="corona-field-{ $placeName }">{
+                for $query in $existingConfig/query/field/*
+                where not(local-name($query) = "element" and $query/@element = $elementName and $query/@type = $type)
+                return $query
+            }</field>
+            else (),
+
+            for $query in $existingConfig/query/*
+            where not(local-name($query) = "element" and $query/@element = $elementName and $query/@type = $type)
+            return $query
+        )}</query>
+    </index>
+    return (
+        manage:createFieldForPlace($config),
+        config:setPlace($placeName, $config)
+    )
 };
 
 declare function manage:removeAttributeFromPlace(
     $placeName as xs:string?,
     $elementName as xs:string,
-    $attributeName as xs:string,
-    $type as xs:string
+    $attributeName as xs:string
 ) as empty-sequence()
 {
-    let $test := manage:validatePlaceType($type)
-    return ()
+    let $test := manage:validateElementName($elementName)
+    let $test := manage:validateAttributeName($attributeName)
+    let $existingConfig := config:getPlace($placeName)
+    let $config := <index type="place" name="{ $placeName }">
+        <query>{(
+            for $query in $existingConfig/query/*
+            where not(local-name($query) = "attribute" and $query/@element = $elementName and $query/@attribute = $attributeName)
+            return $query
+        )}</query>
+    </index>
+    return (
+        manage:createFieldForPlace($config),
+        config:setPlace($placeName, $config)
+    )
+};
+
+declare function manage:removePlaceFromPlace(
+    $placeName as xs:string?,
+    $subPlaceName as xs:string
+) as empty-sequence()
+{
+    let $existingConfig := config:getPlace($placeName)
+    let $config := <index type="place" name="{ $placeName }">
+        <query>{(
+            for $query in $existingConfig/query/*
+            where not(local-name($query) = "place" and $query/@name = $subPlaceName)
+            return $query
+        )}</query>
+    </index>
+    return (
+        manage:createFieldForPlace($config),
+        config:setPlace($placeName, $config)
+    )
 };
 
 declare function manage:getPlace(
     $placeName as xs:string?
-) as element(json:item)
+) as element(json:item)?
 {
-    json:object((
-    ))
+    let $existingConfig := config:getPlace($placeName)
+
+    let $places :=
+        for $place in ($existingConfig/query/field/*, $existingConfig/query/* except $existingConfig/query/field)
+        return json:object((
+            if(local-name($place) = "key")
+            then ("key", $place/@key)
+            else if(local-name($place) = "element")
+            then ("element", $place/@element)
+            else if(local-name($place) = "attribute")
+            then ("element", $place/@element, "attribute", $place/@attribute)
+            else (),
+            "weight", xs:decimal($place/@weight)
+        ))
+    where exists($existingConfig)
+    return
+        json:object((
+            "name", $existingConfig/@name,
+            "places", json:array($places)
+        ))
 };
 
 declare function manage:getAllPlaces(
 ) as element(json:item)*
 {
-    ()
+    for $placeName in config:placeNames()
+    return manage:getPlace($placeName)
 };
 
 
@@ -1319,4 +1465,57 @@ declare private function manage:validateStartAndStop(
     if(exists($value) and not($value castable as xs:dateTime))
     then error(xs:QName("corona:INVALID-BUCKET-BOUNDS"), "Bucket starting at and stopping at values must be dateTime values")
     else ()
+};
+
+declare private function manage:checkForPlaceLoops(
+    $subPlaceName as xs:string,
+    $includedPlaces as xs:string*
+) as empty-sequence()
+{
+    let $test :=
+        if($subPlaceName = $includedPlaces)
+        then error(xs:QName("corona:INVALID-SUB-PLACE"), "A circular reference to an already included place was detected")
+        else ()
+
+    let $existingConfig := config:getPlace($subPlaceName)
+    for $subSubPlace in $existingConfig/query/place
+    return manage:checkForPlaceLoops($subPlaceName, ($includedPlaces, string($subSubPlace/@name)))
+};
+
+declare private function manage:createFieldForPlace(
+    $config as element(index)
+) as empty-sequence()
+{
+    let $fieldName := concat("corona-field-", $config/@name)
+    let $database := xdmp:database()
+    let $dbConfig := admin:get-configuration()
+    let $existing :=
+        try {
+            admin:database-get-field($dbConfig, $database, $fieldName)
+        }
+        catch ($e) {()}
+    let $dbConfig :=
+        if(exists($existing))
+        then admin:database-delete-field($dbConfig, xdmp:database(), $fieldName)
+        else $dbConfig
+    let $dbConfig := admin:database-add-field($dbConfig, $database, admin:database-field($fieldName, false()))
+
+    let $add :=
+        for $item in $config/query/field/*[@type = "include"]
+        let $nsLnBits :=
+            if(local-name($item) = "element")
+            then manage:getNSAndLN($item)
+            else ("http://marklogic.com/json", json:escapeNCName($item/@key))
+        let $el := admin:database-included-element($nsLnBits[1], $nsLnBits[2], ($item/@weight, 1)[1], (), "", "")
+        return xdmp:set($dbConfig, admin:database-add-field-included-element($dbConfig, $database, $fieldName, $el))
+    let $add :=
+        for $item in $config/query/field/*[@type = "exclude"]
+        let $nsLnBits :=
+            if(local-name($item) = "element")
+            then manage:getNSAndLN($item)
+            else ("http://marklogic.com/json", json:escapeNCName($item/@key))
+        let $el := admin:database-excluded-element($nsLnBits[1], $nsLnBits[2])
+        return xdmp:set($dbConfig, admin:database-add-field-excluded-element($dbConfig, $database, $fieldName, $el))
+
+    return admin:save-configuration($dbConfig)
 };

@@ -18,6 +18,7 @@ xquery version "1.0-ml";
 
 module namespace config="http://marklogic.com/corona/index-config";
 
+import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 
@@ -225,6 +226,54 @@ declare function config:getContentItems(
     return ($elements, $attributes, $keys, $fields)
 };
 
+declare function config:setPlace(
+    $placeName as xs:string?,
+    $config as element(index)
+) as empty-sequence()
+{
+    let $placeName :=
+        if(exists($placeName))
+        then $placeName
+        else "corona-index-anonymous-place"
+    return prop:set(concat("index-", $placeName), $config)
+};
+
+declare function config:getPlace(
+    $placeName as xs:string?
+) as element(index)?
+{
+    let $placeName :=
+        if(exists($placeName))
+        then $placeName
+        else "corona-index-anonymous-place"
+    return prop:get(concat("index-", $placeName))
+};
+
+declare function config:getPlaceAsQuery(
+    $placeName as xs:string?,
+    $word as xs:string
+) as cts:or-query?
+{
+    let $config := config:getPlace($placeName)
+    let $queries :=
+        for $item in $config/query/*
+        return
+            if(local-name($item) = "field")
+            then cts:field-word-query($item/@name, $word)
+            else if(local-name($item) = "attribute")
+            then cts:element-attribute-word-query(xs:QName($item/@element), xs:QName($item/@attribute), $word, (), $item/@weight)
+            else if(local-name($item) = "element")
+            then cts:element-word-query(xs:QName($item/@element), $word, (), $item/@weight)
+            else if(local-name($item) = "key")
+            then cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($item/@key))), $word, (), $item/@weight)
+            else if(local-name($item) = "place")
+            then config:getPlaceAsQuery($item/@name, $word)
+            else ()
+    where exists($queries)
+    return cts:or-query($queries)
+};
+
+
 declare function config:get(
     $name as xs:string
 ) as element(index)?
@@ -247,10 +296,15 @@ declare function config:get(
             then "le"
             else ()
         else ()
-    let $bits := tokenize($property, "/")
+    let $bits :=
+        if($property instance of xs:string)
+        then tokenize($property, "/")
+        else ()
     where exists($property)
     return
-        if($bits[1] = "range")
+        if($property instance of element() and $property/@type = "place")
+        then $property
+        else if($bits[1] = "range")
         then <index type="range" name="{ $bits[3] }">
             <structure>{ $bits[2] }</structure>
             {
@@ -399,6 +453,15 @@ declare function config:mapNames(
     for $key in prop:all()
     let $value := prop:get($key)
     where starts-with($key, "index-") and starts-with($value, "map/")
+    return substring-after($key, "index-")
+};
+
+declare function config:placeNames(
+) as xs:string*
+{
+    for $key in prop:all()
+    let $value := prop:get($key)
+    where $value instance of element() and starts-with($key, "index-") and $value/@type = "place"
     return substring-after($key, "index-")
 };
 

@@ -157,6 +157,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="key" required="false"/>
             <param name="element" required="false"/>
             <param name="attribute" required="false"/>
+            <param name="place" required="false"/>
             <param name="type" required="false" values="include|exclude" default="include"/>
             <param name="weight" required="false" default="1.0" as="decimal"/>
         </http>
