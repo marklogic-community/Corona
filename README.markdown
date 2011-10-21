@@ -2,6 +2,8 @@
 
 The Corona project is a set REST endpoints to enable usage of the [MarkLogic Server] without knowing XQuery.
 
+Corona runs on MarkLogic 4.2 or later.
+
 ## Installation
 
 Installing Corona is fairly simple:
