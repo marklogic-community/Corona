@@ -63,7 +63,9 @@ declare function common:errorFromException(
 )
 {
     xdmp:log($exception),
-    common:error($statusCode, $exception/*:name, $exception/*:message, $outputFormat)
+    if(starts-with($exception/*:name, "corona:") or starts-with($exception/*:name, "json:"))
+    then common:error($statusCode, $exception/*:name, $exception/*:message, $outputFormat)
+    else common:error(500, "corona:INTERNAL-ERROR", concat($exception/*:message, " (", $exception/*:format-string, ")"), $outputFormat)
 };
 
 declare function common:castFromJSONType(
