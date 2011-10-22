@@ -2,107 +2,279 @@ if(typeof corona == "undefined" || !corona) {
     corona = {};
 }
 
-corona.removeIndexes = function(info, callback) {
+corona.removeNamespaces = function(info, callback) {
+    var i = 0;
+    var namespaces = [];
+    for(i = 0; i < info.xmlNamespaces.length; i += 1) {
+        namespaces.push(info.xmlNamespaces[i]);
+    }
+
+    var processingPosition = 0;
+    var removeNextItem = function() {
+        removeItem(namespaces[processingPosition]);
+    };
+
+    var removeItem = function(namespace) {
+        if(namespace === undefined) {
+            callback.call();
+            return;
+        }
+
+        asyncTest("Remove the " + namespace.prefix + " namespace", function() {
+            var url = "/manage/namespace/" + namespace.prefix;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function() {
+                    ok(true, "Removed namespace: " + namespace.prefix);
+                    asyncTest("Check to make sure the namespace is gone", function() {
+                        $.ajax({
+                            url: url,
+                            success: function(data) {
+                                ok(false, "Namespace still exists");
+                            },
+                            error: function() {
+                                ok(true, "Namespace is gone");
+                            },
+                            complete: function() { start(); }
+                        });
+                    });
+                    processingPosition++;
+                    removeNextItem();
+                },
+                error: function(j, t, error) {
+                    ok(false, "Could not delete namespace: " + namespace.prefix + ": " + error);
+                },
+                complete: function() { start(); }
+            });
+        });
+    }
+
+    removeNextItem();
+};
+
+corona.removeTransformers = function(info, callback) {
+    var i = 0;
+    var transformers = [];
+    for(i = 0; i < info.transformers.length; i += 1) {
+        transformers.push(info.transformers[i]);
+    }
+    
+    var processingPosition = 0;
+    var removeNextItem = function() {
+        removeTransformer(transformers[processingPosition]);
+    };
+
+    var removeTransformer = function(transformer) {
+        if(transformer === undefined) {
+            callback.call();
+            return;
+        }
+
+        asyncTest("Remove the " + transformer + " transformer", function() {
+            var url = "/manage/transformer/" + transformer;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function() {
+                    ok(true, "Removed transformer: " + transformer);
+                    asyncTest("Check to make sure the transformer is gone", function() {
+                        $.ajax({
+                            url: url,
+                            success: function(data) {
+                                ok(false, "Transformer still exists");
+                            },
+                            error: function() {
+                                ok(true, "Transformer is gone");
+                            },
+                            complete: function() { start(); }
+                        });
+                    });
+                    processingPosition++;
+                    removeNextItem();
+                },
+                error: function(j, t, error) {
+                    ok(false, "Could not delete transformer: " + transformer + ": " + error);
+                },
+                complete: function() { start(); }
+            });
+        });
+    }
+
+    removeNextItem();
+}
+
+corona.removeRangeIndexes = function(info, callback) {
     var i = 0;
     var indexes = [];
-    for(i = 0; i < info.indexes.fields.length; i += 1) {
-        indexes.push({"type": "field", "name": info.indexes.fields[i].name});
-    }
-    for(i = 0; i < info.indexes.mappings.length; i += 1) {
-        indexes.push({"type": "map", "name": info.indexes.mappings[i].name});
-    }
     for(i = 0; i < info.indexes.ranges.length; i += 1) {
         indexes.push({"type": "range", "name": info.indexes.ranges[i].name});
     }
     for(i = 0; i < info.indexes.bucketedRanges.length; i += 1) {
         indexes.push({"type": "bucketedrange", "name": info.indexes.bucketedRanges[i].name});
     }
-    for(i = 0; i < info.contentItems.length; i += 1) {
-        var item = info.contentItems[i];
-        indexes.push({"type": "contentItem", "name": "content item", "key": item.key, "element": item.element, "attribute": item.attribute, "field": item.field, "mode": item.mode});
-    }
-    for(i = 0; i < info.xmlNamespaces.length; i += 1) {
-        indexes.push({"type": "namespace", "name": info.xmlNamespaces[i].prefix});
-    }
-    for(i = 0; i < info.transformers.length; i += 1) {
-        indexes.push({"type": "transformer", "name": info.transformers[i]});
-    }
-    
-    var processingPosition = 0;
 
-    var removeNextIndex = function() {
-        removeIndex(processingPosition);
+    var processingPosition = 0;
+    var removeNextItem = function() {
+        removeItem(indexes[processingPosition]);
     };
 
-    var removeIndex = function(pos) {
-        var index = indexes[pos];
+    var removeItem = function(index) {
         if(index === undefined) {
-            asyncTest("Check for no indexes", function() {
-                $.ajax({
-                    url: '/manage',
-                    success: function(data) {
-                        var info = JSON.parse(data);
-                        ok(info.indexes.fields.length === 0, "All fields removed");
-                        ok(info.indexes.mappings.length === 0, "All mappings removed");
-                        ok(info.indexes.ranges.length === 0, "All ranges removed");
-                        ok(info.xmlNamespaces.length === 0, "All namespaces removed");
-                        callback.call();
-                    },
-                    error: function() {
-                        ok(false, "Could not fetch server info");
-                    },
-                    complete: function() { start(); }
-                });
-            });
+            callback.call();
             return;
         }
 
-        asyncTest("Remove the " + index.name + " index", function() {
+        asyncTest("Remove the " + index.name + " range index", function() {
             var url = "/manage/" + index.type + "/" + index.name;
-            if(index.type === "contentItem") {
-                url = "/manage/contentItem?";
-                if(index.key !== undefined) {
-                    url += "key=" + escape(index.key) + "&";
-                }
-                if(index.element !== undefined) {
-                    url += "element=" + escape(index.element) + "&";
-                }
-                if(index.attribute !== undefined) {
-                    url += "attribute=" + escape(index.attribute) + "&";
-                }
-                if(index.field !== undefined) {
-                    url += "field=" + escape(index.field) + "&";
-                }
-                if(index.mode !== undefined) {
-                    url += "mode=" + escape(index.mode) + "&";
-                }
-            }
             $.ajax({
                 url: url,
                 type: 'DELETE',
                 success: function() {
+                    ok(true, "Removed range index: " + index.name);
+                    asyncTest("Check to make sure the range index is gone", function() {
+                        $.ajax({
+                            url: url,
+                            success: function(data) {
+                                ok(false, "Range index still exists");
+                            },
+                            error: function() {
+                                ok(true, "Range index is gone");
+                            },
+                            complete: function() { start(); }
+                        });
+                    });
                     processingPosition++;
-                    ok(true, "Removed the " + index.name + " " + index.type);
-                    removeNextIndex();
+                    removeNextItem();
                 },
                 error: function(j, t, error) {
-                console.log(index);
-                    ok(false, "Could not delete " + index.type + ": " + error);
+                    ok(false, "Could not delete range index: " + index.name + ": " + error);
                 },
-                complete: function() {
-                    start();
-                }
+                complete: function() { start(); }
             });
         });
     }
 
-    removeNextIndex();
+    removeNextItem();
+}
+
+corona.removeAnonymousPlaces = function(info, callback) {
+    var processingPosition = 0;
+    var removeNextItem = function() {
+        removeItem(info.indexes.anonymousPlace.places[processingPosition]);
+        processingPosition++;
+    };
+
+    var removeItem = function(place) {
+        if(place === undefined) {
+            asyncTest("Check to make sure the anonymous places are gone", function() {
+                $.ajax({
+                    url: "/manage/place",
+                    success: function(data) {
+                        var config = JSON.parse(data);
+                        equals(0, config.places.length, "Number of anonymous places remaining");
+                        callback.call();
+                    },
+                    error: function() {
+                        ok(false, "Could not fetch anonymous place definition");
+                    },
+                    complete: function() { start(); }
+                });
+            });
+
+            return;
+        }
+
+        var url = "/manage/place?";
+        var params = [];
+        if(place.key !== undefined) {
+            params.push("key=" + escape(place.key))
+        }
+        if(place.element !== undefined) {
+            params.push("element=" + escape(place.element));
+        }
+        if(place.attribute !== undefined) {
+            params.push("attribute=" + escape(place.attribute));
+        }
+        if(place.place !== undefined) {
+            params.push("place=" + escape(place.place));
+        }
+        if(place.type !== undefined) {
+            params.push("type=" + escape(place.type));
+        }
+        if(params.length) {
+            url += params.join("&");
+        }
+        asyncTest("Remove the anonymous place: " + url, function() {
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function() {
+                    ok(true, "Deleted the anonymous place");
+                    removeNextItem();
+                },
+                error: function(j, t, error) {
+                    ok(false, "Could not delete anonymous place: " + error);
+                },
+                complete: function() { start(); }
+            });
+        });
+    }
+
+    removeNextItem();
 };
 
-corona.addIndexes = function(callback) {
-    // These are the index to try and create
-    var indexes = [
-        // Namespaces
+corona.removePlaces = function(info, callback) {
+    var processingPosition = 0;
+    var removeNextItem = function() {
+        removeItem(info.indexes.places[processingPosition]);
+        processingPosition++;
+    };
+
+    var removeItem = function(place) {
+        if(place === undefined) {
+            callback.call();
+            return;
+        }
+
+        if(place.name === "") {
+            removeNextItem();
+        }
+
+        var url = "/manage/place/" + place.name;
+        asyncTest("Remove the place: " + place.name, function() {
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function() {
+                    ok(true, "Deleted the place: " + place.name);
+                    asyncTest("Check to make sure the place is gone", function() {
+                        $.ajax({
+                            url: url,
+                            success: function(data) {
+                                ok(false, "Place still exists");
+                            },
+                            error: function() {
+                                ok(true, "Place is gone");
+                            },
+                            complete: function() { start(); }
+                        });
+                    });
+                    removeNextItem();
+                },
+                error: function(j, t, error) {
+                    ok(false, "Could not delete place: " + error);
+                },
+                complete: function() { start(); }
+            });
+        });
+    }
+
+    removeNextItem();
+};
+
+corona.addNamespaces = function(callback) {
+    var namespaces = [
         {
             "type": "namespace",
             "prefix": "test:ns",
@@ -116,205 +288,65 @@ corona.addIndexes = function(callback) {
             "uri": "http://test.ns/uri",
             "shouldSucceed": true,
             "purpose": "Creation of XML namespace"
-        },
+        }
+    ];
 
-        // Transformers
-        {
-            "type": "transformer",
-            "name": "generic",
-            "xslt": '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><div>XSLT\'d!</div></xsl:template></xsl:stylesheet>',
-            "shouldSucceed": true,
-            "purpose": "Storing a XSLT transformer"
-        },
+    var processingPosition = 0;
+    var addNextItem = function() {
+        addItem(namespaces[processingPosition]);
+        processingPosition++;
+    };
 
-        // Content items
-        {
-            "type": "contentItem",
-            "key": "subject",
-            "weight": 10,
-            "shouldSucceed": true,
-            "purpose": "Adding a JSON key as a content item"
-        },
-        {
-            "type": "contentItem",
-            "element": "testns:subject",
-            "weight": 8,
-            "shouldSucceed": true,
-            "purpose": "Adding a XML element as a content item"
-        },
-        {
-            "type": "contentItem",
-            "element": "testns:subject",
-            "attribute": "normalized",
-            "weight": 8,
-            "shouldSucceed": true,
-            "purpose": "Adding a XML attribute as a content item"
-        },
-        {
-            "type": "contentItem",
-            "key": "tri=ck|ey",
-            "weight": -10,
-            "shouldSucceed": true,
-            "purpose": "Adding a JSON key with seperators as a content item"
-        },
-        {
-            "type": "contentItem",
-            "field": "field1",
-            "weight": 5,
-            "shouldSucceed": true,
-            "purpose": "Adding a field as a content item"
-        },
-        {
-            "type": "contentItem",
-            "field": "field1",
-            "mode": "equals",
-            "weight": 16,
-            "shouldSucceed": false,
-            "purpose": "Adding a field as a content item with a mode of equals"
-        },
+    var addItem = function(namespace) {
+        if(namespace === undefined) {
+            callback.call();
+            return;
+        }
 
-        // Fields
-        {
-            "type": "field",
-            "name": "field1",
-            "includes": [
-                { "type": "key", "name": "included1"},
-                { "type": "key", "name": "included2"},
-                { "type": "element", "name": "nonselment"},
-                { "type": "element", "name": "testns:nselement"}
-            ],
-            "excludes": [
-                { "type": "key", "name": "excluded1"},
-                { "type": "element", "name": "excludenonsel"},
-                { "type": "element", "name": "testns:excludensel"}
-            ],
-            "shouldSucceed": true,
-            "purpose": "Field with includes and excludes of JSON keys and XML elements, with and without namespaces",
-        },
-        {
-            "type": "field",
-            "name": "field2",
-            "mode": "equals",
-            "includes": [
-                { "type": "key", "name": "included1"}
-            ],
-            "excludes": [],
-            "shouldSucceed": false,
-            "purpose": "Field with includes and a mode of equals",
-        },
-        {
-            "type": "field",
-            "name": "field3",
-            "includes": [],
-            "excludes": [],
-            "shouldSucceed": false,
-            "purpose": "Checking for at least one included key or element"
-        },
-        {
-            "type": "field",
-            "name": "field4",
-            "includes": [
-                { "type": "element", "name": "invalidns:included1"}
-            ],
-            "excludes": [],
-            "shouldSucceed": false,
-            "purpose": "Checking for bogus XML element names"
-        },
-        {
-            "type": "field",
-            "name": "field1",
-            "includes": [
-                { "type": "key", "name": "included1"}
-            ],
-            "excludes": [],
-            "shouldSucceed": false,
-            "purpose": "Making sure you can't have duplicate names when creating a field"
-        },
+        asyncTest(namespace.purpose, function() {
+            var url = "/manage/namespace/" + namespace.prefix;
+            var data = {"uri": namespace.uri};
+            $.ajax({
+                url: url,
+                data: data,
+                type: "POST",
+                success: function() {
+                    if(namespace.shouldSucceed) {
+                        ok(true, "Namespace was created");
+                        asyncTest("Checking to make sure the namespace was created correctly", function() {
+                            $.ajax({
+                                url: url,
+                                success: function(data) {
+                                    var info = JSON.parse(data);
+                                    equal(namespace.prefix, info.prefix, "Namespace prefixes matches");
+                                    equal(namespace.uri, info.uri, "Namespace uris matches");
+                                },
+                                error: function() {
+                                    ok(false, "Could not check for added namespace");
+                                },
+                                complete: function() { start(); }
+                            });
+                        });
+                    }
+                    else {
+                        ok(false, "Namespace was created when it should have errored");
+                    }
+                    addNextItem();
+                },
+                error: function(j, t, error) {
+                    ok(!namespace.shouldSucceed, "Could not add namespace: " + error);
+                    addNextItem();
+                },
+                complete: function() { start(); }
+            });
+        });
+    };
 
-        // Maps
-        {
-            "type": "map",
-            "name": "map1",
-            "key": "name1",
-            "mode": "contains",
-            "shouldSucceed": true,
-            "purpose": "JSON contains map"
-        },
-        {
-            "type": "map",
-            "name": "map2",
-            "element": "element1",
-            "mode": "contains",
-            "shouldSucceed": true,
-            "purpose": "XML contains map"
-        },
-        {
-            "type": "map",
-            "name": "map3",
-            "key": "name1",
-            "mode": "equals",
-            "shouldSucceed": true,
-            "purpose": "JSON contains map"
-        },
-        {
-            "type": "map",
-            "name": "map4",
-            "element": "element1",
-            "mode": "equals",
-            "shouldSucceed": true,
-            "purpose": "XML contains map"
-        },
-        {
-            "type": "map",
-            "name": "map5",
-            "element": "testns:element1",
-            "mode": "equals",
-            "shouldSucceed": true,
-            "purpose": "XML contains map with valid namespace"
-        },
-        {
-            "type": "map",
-            "name": "map6",
-            "element": "testns:element1",
-            "attribute": "mapattr",
-            "mode": "equals",
-            "shouldSucceed": true,
-            "purpose": "XML contains map with valid namespace and attribute"
-        },
-        {
-            "type": "map",
-            "name": "map7",
-            "element": "testns:element1",
-            "mode": "textEquals",
-            "shouldSucceed": true,
-            "purpose": "XML textEquals map"
-        },
-        {
-            "type": "map",
-            "name": "map8",
-            "element": "invalidns:element1",
-            "mode": "equals",
-            "shouldSucceed": false,
-            "purpose": "XML contains map with invalid namespace"
-        },
-        {
-            "type": "map",
-            "name": "map9",
-            "key": "name1",
-            "mode": "invalidmode",
-            "shouldSucceed": false,
-            "purpose": "Checking for invalid map modes"
-        },
-        {
-            "type": "map",
-            "name": "field1",
-            "key": "name1",
-            "mode": "equals",
-            "shouldSucceed": false,
-            "purpose": "Making sure you can't have duplicate names when creating a map"
-        },
+    addNextItem();
+};
 
-        // Ranges
+corona.addRangeIndexes = function(callback) {
+    var indexes = [
         {
             "type": "range",
             "name": "list",
@@ -392,7 +424,7 @@ corona.addIndexes = function(callback) {
         },
         {
             "type": "range",
-            "name": "field1",
+            "name": "list",
             "key": "name1",
             "datatype": "string",
             "shouldSucceed": false,
@@ -434,7 +466,7 @@ corona.addIndexes = function(callback) {
         },
         {
             "type": "bucketedrange",
-            "name": "field1",
+            "name": "list",
             "key": "date::date",
             "datatype": "date",
             "startingAt": "1970-01-01T00:00:00-07:00",
@@ -448,19 +480,7 @@ corona.addIndexes = function(callback) {
     ];
 
     var compareIndexes = function(config, server) {
-        if(config.type === "map") {
-            if(config.key !== undefined) {
-                equals(config.key, server.key, "Index key matches");
-            }
-            if(config.element !== undefined) {
-                equals(config.element, server.element, "Index element matches");
-            }
-            if(config.attribute !== undefined) {
-                equals(config.attribute, server.attribute, "Index attribute matches");
-            }
-            equals(config.mode, server.mode, "Index mode matches");
-        }
-        else if(config.type === "range") {
+        if(config.type === "range") {
             if(config.key !== undefined) {
                 equals(config.key, server.key, "Index key matches");
             }
@@ -505,326 +525,320 @@ corona.addIndexes = function(callback) {
                 equals(config.lastFormat, server.lastFormat, "Index lastFormat matches");
             }
         }
-        else if(config.type === "field") {
-            deepEqual(config.includes, server.includes, "Index includes matches");
-            deepEqual(config.excludes, server.excludes, "Index excludes matches");
-            if(config.mode !== undefined) {
-                equals(config.mode, server.mode, "Index mode matches");
-            }
-        }
-        else if(config.type === "namespace") {
-            equal(config.prefix, server.prefix, "Namespace prefixes matches");
-            equal(config.uri, server.uri, "Namespace uris matches");
-        }
     };
-    
+
     var processingPosition = 0;
-
-    var addNextIndex = function() {
-        addIndex(processingPosition);
+    var addNextItem = function() {
+        addItem(indexes[processingPosition]);
+        processingPosition++;
     };
 
-    var addIndex = function(pos) {
-        var index = indexes[pos];
-
+    var addItem = function(index) {
         if(index === undefined) {
-            asyncTest("Checking created indexes", function() {
-                $.ajax({
-                    url: '/manage',
-                    context: this,
-                    success: function(data) {
-                        var info = JSON.parse(data);
-                        var i = 0;
-                        var j = 0;
-                        for (i = 0; i < indexes.length; i += 1) {
-                            var config = indexes[i];
-                            if(!config.shouldSucceed) {
-                                continue;
-                            }
-                            var foundIndex = false;
-                            if(config.type === "namespace") {
-                                for(j = 0; j < info.xmlNamespaces.length; j += 1) {
-                                    var server = info.xmlNamespaces[j];
-                                    if(server.prefix === config.prefix) {
-                                        foundIndex = true;
-                                        compareIndexes(config, server);
-                                    }
-                                }
-                            }
-                            else if(config.type === "contentItem") {
-                                var foundContentItem = false;
-                                for(j = 0; j < info.contentItems.length; j += 1) {
-                                    var server = info.contentItems[j];
-                                    if(server.element === config.element && server.attribute === config.attribute && server.key === config.key && server.field === config.field && server.weight === config.weight) {
-                                        if(config.mode !== undefined && server.mode === config.mode) {
-                                            foundContentItem = true;
-                                        }
-                                        else {
-                                            foundContentItem = true;
-                                        }
-                                    }
-                                }
-                                if(config.key) {
-                                    ok(foundContentItem, "Found content item: " + config.key);
-                                }
-                                else if(config.element && config.attribute) {
-                                    ok(foundContentItem, "Found content item: " + config.attribute);
-                                }
-                                else if(config.element) {
-                                    ok(foundContentItem, "Found content item: " + config.element);
-                                }
-                                else {
-                                    ok(foundContentItem, "Found content item: " + config.field);
-                                }
-                                foundIndex = true;
-                            }
-                            else if(config.type === "transformer") {
-                                var foundTransformer = false;
-                                for(j = 0; j < info.transformers.length; j += 1) {
-                                    if(info.transformers[j] === config.name) {
-                                        foundTransformer = true;
-                                    }
-                                }
-                                ok(foundTransformer, "Found transformer: " + config.name);
-                                foundIndex = true;
-                            }
-                            else {
-                                var pluralName = {
-                                    "range": "ranges",
-                                    "field": "fields",
-                                    "map": "mappings",
-                                    "bucketedrange": "bucketedRanges"
-                                }
-                                for(j = 0; j < info.indexes[pluralName[config.type]].length; j += 1) {
-                                    var server = info.indexes[pluralName[config.type]][j];
-                                    if(server.name === config.name) {
-                                        foundIndex = true;
-                                        compareIndexes(config, server);
-                                    }
-                                }
-                            }
-                            if(!foundIndex) {
-                                ok(false, "Could not find newly added index or namespace: " + config.name);
-                            }
-                        }
-                        callback.call();
-                    },
-                    error: function() {
-                        ok(false, "Could not check for added index or namespace");
-                    },
-                    complete: function() { start(); }
-                });
-            });
+            callback.call();
             return;
         }
 
         asyncTest(index.purpose, function() {
             var url = "/manage/" + index.type + "/" + index.name;
             var data = {};
-            if(index.type === "namespace") {
-                url = "/manage/" + index.type + "/" + index.prefix;
-                data.uri = index.uri;
-            }
-            if(index.type === "transformer") {
-                url = "/manage/" + index.type + "/" + index.name;
-                data = index.xslt;
-            }
-            else if(index.type === "contentItem") {
-                url = "/manage/contentItem";
+            if(index.type === "range") {
                 data.key = index.key;
                 data.element = index.element;
                 data.attribute = index.attribute;
-                data.field = index.field;
-                data.mode = index.mode;
-                data.weight = index.weight;
-            }
-            else if(index.type === "map") {
-                if(index.key !== undefined) {
-                    data.key = index.key;
-                }
-                if(index.element !== undefined) {
-                    data.element = index.element;
-                }
-                if(index.attribute !== undefined) {
-                    data.attribute = index.attribute;
-                }
-                data.mode = index.mode;
-            }
-            else if(index.type === "field") {
-                data.mode = index.mode;
-                data.includeKey = [];
-                data.excludeKey = [];
-                data.includeElement = [];
-                data.excludeElement = [];
-
-                var i = 0;
-                for(i = 0; i < index.includes.length; i += 1) {
-                    if(index.includes[i].type === "key") {
-                        data.includeKey.push(index.includes[i].name);
-                    }
-                    else {
-                        data.includeElement.push(index.includes[i].name);
-                    }
-                }
-                for(i = 0; i < index.excludes.length; i += 1) {
-                    if(index.excludes[i].type === "key") {
-                        data.excludeKey.push(index.excludes[i].name);
-                    }
-                    else {
-                        data.excludeElement.push(index.excludes[i].name);
-                    }
-                }
-            }
-            else if(index.type === "range") {
-                if(index.key !== undefined) {
-                    data.key = index.key;
-                }
-                if(index.element !== undefined) {
-                    data.element = index.element;
-                }
-                if(index.attribute !== undefined) {
-                    data.attribute = index.attribute;
-                }
                 data.type = index.datatype;
             }
             else if(index.type === "bucketedrange") {
                 data.type = index.datatype;
-                if(index.key !== undefined) {
-                    data.key = index.key;
-                }
-                if(index.element !== undefined) {
-                    data.element = index.element;
-                }
-                if(index.attribute !== undefined) {
-                    data.attribute = index.attribute;
-                }
-                if(index.buckets !== undefined) {
-                    data.buckets = index.buckets;
-                }
-                if(index.startingAt !== undefined) {
-                    data.startingAt = index.startingAt;
-                }
-                if(index.stoppingAt !== undefined) {
-                    data.stoppingAt = index.stoppingAt;
-                }
-                if(index.bucketInterval !== undefined) {
-                    data.bucketInterval = index.bucketInterval;
-                }
-                if(index.firstFormat !== undefined) {
-                    data.firstFormat = index.firstFormat;
-                }
-                if(index.format !== undefined) {
-                    data.format = index.format;
-                }
-                if(index.lastFormat !== undefined) {
-                    data.lastFormat = index.lastFormat;
-                }
+                data.key = index.key;
+                data.element = index.element;
+                data.attribute = index.attribute;
+                data.buckets = index.buckets;
+                data.startingAt = index.startingAt;
+                data.stoppingAt = index.stoppingAt;
+                data.bucketInterval = index.bucketInterval;
+                data.firstFormat = index.firstFormat;
+                data.format = index.format;
+                data.lastFormat = index.lastFormat;
             }
 
-            var type = "POST";
-            if(index.type === "transformer") {
-                type = "PUT";
-            }
             $.ajax({
                 url: url,
                 data: data,
-                type: type,
-                context: index,
+                type: "POST",
                 success: function() {
-                    if(this.shouldSucceed) {
-                        ok(true, "Index/namespace was created");
+                    if(index.shouldSucceed) {
+                        ok(true, "Range index was created");
+                        asyncTest("Checking to make sure the range index was created correctly", function() {
+                            $.ajax({
+                                url: url,
+                                success: function(data) {
+                                    var info = JSON.parse(data);
+                                    compareIndexes(index, info);
+                                },
+                                error: function() {
+                                    ok(false, "Could not check for added range index");
+                                },
+                                complete: function() { start(); }
+                            });
+                        });
                     }
                     else {
-                        ok(false, "Index/namespace was created when it should have errored");
+                        ok(false, "Range index was created when it should have errored");
                     }
-                    processingPosition++;
-                    addNextIndex();
+                    addNextItem();
                 },
                 error: function(j, t, error) {
-                    ok(!this.shouldSucceed, "Could not add index/namespace: " + error);
-                    processingPosition++;
-                    addNextIndex();
+                    ok(!index.shouldSucceed, "Could not add range index: " + error);
+                    addNextItem();
                 },
-                complete: function() {
-                    start();
-                }
+                complete: function() { start(); }
             });
         });
     };
 
-    addNextIndex();
+    addNextItem();
 };
 
-corona.insertDocuments = function() {
-    var documents = [
+corona.addTransformers = function(callback) {
+    var transformers = [
         {
-            "name1": "Musical Animals",
-            "date1::date": "January 5th 1977",
-            "included1": "chicken",
-            "included2": {
-                "animal": "snake",
-                "excluded1": "mastodon"
-            },
-            "uri": "/document1.json"
-        },
-        {
-            "name1": "Other Musical Animals",
-            "date1::date": "January 5th 1977",
-            "included1": "duck",
-            "included2": {
-                "animal": "snake",
-                "excluded1": "mastodon"
-            },
-            "uri": "/document2.json"
-        },
-        {
-            "name1": "Other Musical Animals",
-            "date1::date": "January 7th 1977",
-            "included1": "duck",
-            "included2": {
-                "animal": "snake",
-                "excluded1": "mastodon"
-            },
-            "uri": "/document3.json"
+            "type": "transformer",
+            "name": "generic",
+            "xslt": '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><div>XSLT\'d!</div></xsl:template></xsl:stylesheet>',
+            "shouldSucceed": true,
+            "purpose": "Storing a XSLT transformer"
         }
     ];
-    
-    var processingPosition = 0;
 
-    var insertNextDocument = function() {
-        addDocument(processingPosition);
+    var processingPosition = 0;
+    var addNextItem = function() {
+        addItem(transformers[processingPosition]);
+        processingPosition++;
     };
 
-    var addDocument = function(pos) {
-        var doc = documents[pos];
-
-        if(doc === undefined) {
+    var addItem = function(transformer) {
+        if(transformer === undefined) {
+            callback.call();
             return;
         }
 
-        asyncTest("Inserting document: " + doc.uri, function() {
+        asyncTest(transformer.purpose, function() {
+            var url = "/manage/transformer/" + transformer.name;
+            var data = transformer.xslt;
             $.ajax({
-                url: "/json/store" + doc.uri,
-                type: 'PUT',
-                data: JSON.stringify(doc),
+                url: url,
+                data: data,
+                type: "PUT",
                 success: function() {
-                    ok(true, "Inserted document");
-                    processingPosition++;
-                    insertNextDocument();
+                    if(transformer.shouldSucceed) {
+                        ok(true, "Transformer was created");
+                    }
+                    else {
+                        ok(false, "Transformer was created when it should have errored");
+                    }
+                    addNextItem();
                 },
                 error: function(j, t, error) {
-                    ok(false, "Could not insert document");
-                    processingPosition++;
-                    insertNextDocument();
+                    ok(!transformer.shouldSucceed, "Could not add transformer: " + error);
+                    addNextItem();
                 },
-                complete: function() {
-                    start();
-                }
+                complete: function() { start(); }
             });
         });
     };
 
-    insertNextDocument();
+    addNextItem();
+};
+
+corona.addPlaces = function(callback) {
+    var places = [
+        // Anonymous place configuration
+        {
+            "type": "place",
+            "name": "",
+            "places": [
+                { "key": "subject", "type": "include", "weight": 10},
+                { "element": "testns:subject", "type": "include", "weight": 8},
+                { "element": "testns:subject", "attribute": "normalized", "type": "include", "weight": 8},
+                { "key": "tri=ck|ey", "type": "include", "weight": 10}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Anonymous place configuration with keys, element and attribute"
+        },
+
+        // Named places
+        {
+            "type": "place",
+            "name": "place1",
+            "places": [
+                { "key": "included1", "type": "include", "weight": 10},
+                { "key": "included2", "type": "include", "weight": 9},
+                { "element": "nonselment", "type": "include", "weight": 8},
+                { "element": "testns:nselement", "type": "include", "weight": 7},
+                { "key": "excluded1", "type": "exclude"},
+                { "element": "excludenonsel", "type": "exclude"},
+                { "element": "testns:excludensel", "type": "exclude"}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Place with includes and excludes of JSON keys and XML elements, with and without namespaces",
+        },
+        {
+            "type": "place",
+            "name": "place2",
+            "mode": "equals",
+            "places": [
+                { "key": "included1", "type": "include"}
+            ],
+            "shouldSucceed": false,
+            "purpose": "Place with includes and a mode of equals (unsupported mode)",
+        },
+        {
+            "type": "place",
+            "name": "place3",
+            "places": [
+                { "element": "invalidns:included1", "type": "include", "shouldSucceed": false}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Checking for bogus XML element names"
+        },
+        {
+            "type": "place",
+            "name": "place1",
+            "places": [
+                { "key": "included1", "type": "include"}
+            ],
+            "shouldSucceed": false,
+            "purpose": "Making sure you can't have duplicate names when creating a place"
+        }
+    ];
+
+    var processingPosition = 0;
+    var addNextItem = function() {
+        addItem(places[processingPosition]);
+        processingPosition++;
+    };
+
+    var addItem = function(place) {
+        if(place === undefined) {
+            callback.call();
+            return;
+        }
+
+        asyncTest(place.purpose, function() {
+            var url = "/manage/place/" + place.name;
+            var extras = [];
+            if(place.mode) {
+                extras.push("mode=" + place.mode);
+            }
+            if(extras.length) {
+                url += "?" + extras.join("&");
+            }
+            $.ajax({
+                url: url,
+                type: "PUT",
+                success: function() {
+                    if(place.shouldSucceed) {
+                        ok(true, "Place " + place.name + " was created");
+
+                        var items = place.places;
+                        var processingItemPosition = 0;
+                        var addNextPlaceItem = function() {
+                            addPlaceItem(items[processingItemPosition], processingItemPosition);
+                            processingItemPosition++;
+                        };
+
+                        var addPlaceItem = function(item, pos) {
+                            if(item === undefined) {
+                                return;
+                            }
+
+                            if(item.shouldSucceed === undefined) {
+                                item.shouldSucceed = true;
+                            }
+
+                            asyncTest("Adding an item into the place: " + place.name,  function() {
+
+                                var data = {};
+                                data.key = item.key;
+                                data.element = item.element;
+                                data.attribute = item.attribute;
+                                data.place = item.place;
+                                data.type = item.type;
+                                data.weight = item.weight;
+
+                                $.ajax({
+                                    url: url,
+                                    data: data,
+                                    type: "POST",
+                                    success: function(data) {
+                                        ok(true, "Item was added to place");
+                                        if(pos === place.places.length - 1) {
+                                            asyncTest("Checking to make sure the place items were created correctly", function() {
+                                                $.ajax({
+                                                    url: url,
+                                                    success: function(data) {
+                                                        var info = JSON.parse(data);
+
+                                                        $(place.places).each(function(index, configItem) {
+                                                            if(configItem.shouldSucceed === false) {
+                                                                return;
+                                                            }
+
+                                                            var found = false;
+                                                            $(info.places).each(function(index, serverItem) {
+                                                                if(configItem.key == serverItem.key &&
+                                                                    configItem.element == serverItem.element &&
+                                                                    configItem.attribute == serverItem.attribute &&
+                                                                    configItem.place == serverItem.place) {
+
+                                                                    found = true;
+                                                                    if(configItem.weight !== undefined) {
+                                                                        equals(configItem.weight, serverItem.weight, "Item weight");
+                                                                    }
+                                                                }
+                                                            });
+                                                            ok(found, "Found configured item");
+                                                        });
+
+                                                        if(place.mode !== undefined) {
+                                                            equals(place.mode, info.mode, "Place mode matches");
+                                                        }
+                                                    },
+                                                    error: function(j, t, error) {
+                                                        ok(false, "Could not check if the item was added to the place: " + error);
+                                                    },
+                                                    complete: function() { start(); }
+                                                });
+                                            });
+                                        }
+                                        addNextPlaceItem();
+                                    },
+                                    error: function(j, t, error) {
+                                        ok(!item.shouldSucceed, "Could not item add place: " + error);
+                                    },
+                                    complete: function() { start(); }
+                                });
+                            });
+                        }
+
+                        addNextPlaceItem();
+                    }
+                    else {
+                        ok(false, "Place was created when it should have errored");
+                    }
+                    addNextItem();
+                },
+                error: function(j, t, error) {
+                    ok(!place.shouldSucceed, "Could not add place: " + error);
+                    addNextItem();
+                },
+                complete: function() { start(); }
+            });
+        });
+    };
+
+    addNextItem();
 };
 
 $(document).ready(function() {
@@ -834,9 +848,22 @@ $(document).ready(function() {
             url: '/manage',
             success: function(data) {
                 var info = JSON.parse(data);
-                corona.removeIndexes(info, function() {
-                    corona.addIndexes(function() {
-                        corona.insertDocuments();
+                corona.removeTransformers(info, function() {
+                    corona.removeRangeIndexes(info, function() {
+                        corona.removeAnonymousPlaces(info, function() {
+                            corona.removePlaces(info, function() {
+                                corona.removeNamespaces(info, function() {
+                                    corona.addNamespaces(function() {
+                                        corona.addTransformers(function() {
+                                            corona.addRangeIndexes(function() {
+                                                corona.addPlaces(function() {
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
                     });
                 });
             },

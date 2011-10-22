@@ -151,21 +151,22 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="PUT">
-            <param name="mode" required="false" values="textContains|textEquals|equals" default="contains"/>
+            <param name="mode" required="false" default="textContains"/>
         </http>
         <http method="POST">
             <param name="key" required="false"/>
             <param name="element" required="false"/>
             <param name="attribute" required="false"/>
             <param name="place" required="false"/>
-            <param name="type" required="false" values="include|exclude" default="include"/>
+            <param name="type" required="false" default="include"/>
             <param name="weight" required="false" default="1.0" as="decimal"/>
         </http>
         <http method="DELETE">
             <param name="key" required="false"/>
             <param name="element" required="false"/>
             <param name="attribute" required="false"/>
-            <param name="type" required="false" values="include|exclude" default="include"/>
+            <param name="place" required="false"/>
+            <param name="type" required="false" default="include"/>
         </http>
     </request>
 

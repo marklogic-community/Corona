@@ -62,7 +62,7 @@ return
             then manage:createPlace($name, $mode)
             else if($scope = "places")
             then common:error(400, "corona:INVALID-REQUEST", "Can not create a new place under /manage/places, use /manage/place instead", "json")
-            else common:error(400, "corona:INVALID-INDEX-NAME", "The anonymous place is automatically created for you. Must supply a name for the place when creating.", "json")
+            else ()
 
         else if($requestMethod = "POST")
         then
@@ -86,7 +86,9 @@ return
             then manage:removeElementFromPlace($name, $element, $type)
             else if(exists($subPlace))
             then manage:removePlaceFromPlace($name, $subPlace)
-            else common:error(400, "corona:INVALID-REQUEST", "Must specify a key, element, element/attribute pair or a sub-place to remove from the place", "json")
+            else if(empty(($key, $element, $attribute, $subPlace)) and $scope = "place" and exists($name))
+            then manage:deletePlace($name)
+            else common:error(400, "corona:INVALID-REQUEST", "Must specify a key, element, element/attribute pair or a sub-place to remove from the place. Or simply specify the place to delete it's entire configuration.", "json")
         else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
     }
     catch ($e) {

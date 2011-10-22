@@ -30,7 +30,7 @@ declare function config:delete(
     $name as xs:string
 ) as empty-sequence()
 {
-    prop:delete(concat("index-", $name))
+    prop:delete(concat("corona-index-", $name))
 };
 
 declare function config:setField(
@@ -38,7 +38,7 @@ declare function config:setField(
     $mode as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("field/", $name, "/", $mode))
+    prop:set(concat("corona-index-", $name), concat("field/", $name, "/", $mode))
 };
 
 declare function config:setJSONMap(
@@ -47,7 +47,7 @@ declare function config:setJSONMap(
     $mode as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("map/json/", $name, "/", $key, "/", $mode))
+    prop:set(concat("corona-index-", $name), concat("map/json/", $name, "/", $key, "/", $mode))
 };
 
 declare function config:setXMLMap(
@@ -56,7 +56,7 @@ declare function config:setXMLMap(
     $mode as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("map/xmlelement/", $name, "/", $element, "/", $mode))
+    prop:set(concat("corona-index-", $name), concat("map/xmlelement/", $name, "/", $element, "/", $mode))
 };
 
 declare function config:setXMLMap(
@@ -66,7 +66,7 @@ declare function config:setXMLMap(
     $mode as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("map/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $mode))
+    prop:set(concat("corona-index-", $name), concat("map/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $mode))
 };
 
 declare function config:setJSONRange(
@@ -75,7 +75,7 @@ declare function config:setJSONRange(
     $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("range/json/", $name, "/", $key, "/", $type))
+    prop:set(concat("corona-index-", $name), concat("range/json/", $name, "/", $key, "/", $type))
 };
 
 declare function config:setXMLElementRange(
@@ -84,7 +84,7 @@ declare function config:setXMLElementRange(
     $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("range/xmlelement/", $name, "/", $element, "/", $type))
+    prop:set(concat("corona-index-", $name), concat("range/xmlelement/", $name, "/", $element, "/", $type))
 };
 
 declare function config:setXMLAttributeRange(
@@ -94,7 +94,7 @@ declare function config:setXMLAttributeRange(
     $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("range/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type))
+    prop:set(concat("corona-index-", $name), concat("range/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type))
 };
 
 declare function config:setJSONBucketedRange(
@@ -104,7 +104,7 @@ declare function config:setJSONBucketedRange(
     $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("bucketedrange/json/", $name, "/", $key, "/", $type, "/", config:bucketElementsToString($buckets, $type, "json")))
+    prop:set(concat("corona-index-", $name), concat("bucketedrange/json/", $name, "/", $key, "/", $type, "/", config:bucketElementsToString($buckets, $type, "json")))
 };
 
 declare function config:setJSONAutoBucketedRange(
@@ -119,7 +119,7 @@ declare function config:setJSONAutoBucketedRange(
     $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("autobucketedrange/json/", $name, "/", $key, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("corona-index-", $name), concat("autobucketedrange/json/", $name, "/", $key, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
 };
 
 declare function config:setXMLElementBucketedRange(
@@ -129,7 +129,7 @@ declare function config:setXMLElementBucketedRange(
     $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("bucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
+    prop:set(concat("corona-index-", $name), concat("bucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
 };
 
 declare function config:setXMLElementAutoBucketedRange(
@@ -144,7 +144,7 @@ declare function config:setXMLElementAutoBucketedRange(
     $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("autobucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("corona-index-", $name), concat("autobucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
 };
 
 declare function config:setXMLAttributeBucketedRange(
@@ -155,7 +155,7 @@ declare function config:setXMLAttributeBucketedRange(
     $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("bucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
+    prop:set(concat("corona-index-", $name), concat("bucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
 };
 
 declare function config:setXMLAttributeAutoBucketedRange(
@@ -171,7 +171,7 @@ declare function config:setXMLAttributeAutoBucketedRange(
     $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("index-", $name), concat("autobucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("corona-index-", $name), concat("autobucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
 };
 
 declare function config:setContentItems(
@@ -233,20 +233,24 @@ declare function config:setPlace(
 {
     let $placeName :=
         if(exists($placeName))
-        then $placeName
-        else "corona-index-anonymous-place"
-    return prop:set(concat("index-", $placeName), $config)
+        then concat("corona-index-", $placeName)
+        else "corona-index--anonymous-place"
+    return prop:set($placeName, $config, true())
 };
 
 declare function config:getPlace(
     $placeName as xs:string?
 ) as element(index)?
 {
-    let $placeName :=
+    let $name :=
         if(exists($placeName))
-        then $placeName
-        else "corona-index-anonymous-place"
-    return prop:get(concat("index-", $placeName))
+        then concat("corona-index-", $placeName)
+        else "corona-index--anonymous-place"
+    let $config := prop:get($name)
+    return
+        if(empty($placeName) and empty($config))
+        then <index type="place" anonymous="true"/>
+        else $config
 };
 
 declare function config:getPlaceAsQuery(
@@ -278,14 +282,14 @@ declare function config:get(
     $name as xs:string
 ) as element(index)?
 {
-    let $property := prop:get(concat("index-", $name))
+    let $property := prop:get(concat("corona-index-", $name))
     let $isPsudo :=
         if(empty($property) and (ends-with($name, "-above") or ends-with($name, "-below") or ends-with($name, "-before") or ends-with($name, "-after")))
         then true()
         else false()
     let $property :=
         if($isPsudo)
-        then prop:get(concat("index-", replace($name, "-above$|-below$|-before$|-after$", "")))
+        then prop:get(concat("corona-index-", replace($name, "-above$|-below$|-before$|-after$", "")))
         else $property
     let $operator :=
         if(exists($property) and $isPsudo)
@@ -434,8 +438,8 @@ declare function config:rangeNames(
 {
     for $key in prop:all()
     let $value := prop:get($key)
-    where starts-with($key, "index-") and starts-with($value, "range/")
-    return substring-after($key, "index-")
+    where starts-with($key, "corona-index-") and starts-with($value, "range/")
+    return substring-after($key, "corona-index-")
 };
 
 declare function config:bucketedRangeNames(
@@ -443,8 +447,8 @@ declare function config:bucketedRangeNames(
 {
     for $key in prop:all()
     let $value := prop:get($key)
-    where starts-with($key, "index-") and (starts-with($value, "bucketedrange/") or starts-with($value, "autobucketedrange/"))
-    return substring-after($key, "index-")
+    where starts-with($key, "corona-index-") and (starts-with($value, "bucketedrange/") or starts-with($value, "autobucketedrange/"))
+    return substring-after($key, "corona-index-")
 };
 
 declare function config:mapNames(
@@ -452,8 +456,8 @@ declare function config:mapNames(
 {
     for $key in prop:all()
     let $value := prop:get($key)
-    where starts-with($key, "index-") and starts-with($value, "map/")
-    return substring-after($key, "index-")
+    where starts-with($key, "corona-index-") and starts-with($value, "map/")
+    return substring-after($key, "corona-index-")
 };
 
 declare function config:placeNames(
@@ -461,8 +465,8 @@ declare function config:placeNames(
 {
     for $key in prop:all()
     let $value := prop:get($key)
-    where $value instance of element() and starts-with($key, "index-") and $value/@type = "place"
-    return substring-after($key, "index-")
+    where $value instance of element() and starts-with($key, "corona-index-") and $value/@type = "place" and exists($value/@name)
+    return string($value/@name)
 };
 
 

@@ -49,13 +49,11 @@ json:document(
             "keyValueWords", admin:database-get-fast-element-word-searches($config, $database),
             "keyValuePhrases", admin:database-get-fast-element-phrase-searches($config, $database),
             "keyValueTrailingWildcards", admin:database-get-fast-element-trailing-wildcard-searches($config, $database),
-            "geo", json:array(),
             "ranges", json:array(manage:getAllRanges()),
             "bucketedRanges", json:array(manage:getAllBucketedRanges()),
-            "fields", json:array(manage:getAllFields($config)),
-            "mappings", json:array(manage:getAllMaps())
+            "places", json:array(manage:getAllPlaces()),
+            "anonymousPlace", manage:getPlace(())
         )),
-        "contentItems", json:array(manage:getAllContentItems()),
         "transformers", json:array(manage:getAllTransformerNames()),
         "settings", json:object((
             "directoryCreation", admin:database-get-directory-creation($config, $database)
