@@ -2,6 +2,8 @@
 
 The Corona project is a set REST endpoints to enable usage of the [MarkLogic Server] without knowing XQuery.
 
+Corona runs on MarkLogic 4.2 or later.
+
 ## Installation
 
 Installing Corona is fairly simple:
@@ -15,7 +17,7 @@ But keep the `config` and `corona` directories structured as they are. You can
 augment the functionality of Corona by writing your own XQuery and having it
 live alongside the Corona files.
 
-The URL rewritter is configured in the config/endpoints.xqy file. You can
+The URL rewriter is configured in the config/endpoints.xqy file. You can
 change the URL structure or add in more rules if need be there.
 
 ## API Documentation
