@@ -65,13 +65,24 @@ declare function prop:set(
     $value as item()
 ) as empty-sequence()
 {
+    prop:set($key, $value, false())
+};
+
+declare function prop:set(
+    $key as xs:string,
+    $value as item(),
+    $overwrite as xs:boolean
+) as empty-sequence()
+{
     let $config := admin:get-configuration()
     let $group := xdmp:group()
     let $existing := admin:group-get-namespaces($config, $group)[*:prefix = $key]
-    let $test :=
-        if(exists($existing))
+    let $config :=
+        if(exists($existing) and $overwrite)
+        then admin:group-delete-namespace($config, $group, $existing)
+        else if(exists($existing) and $overwrite = false())
         then error(xs:QName("prop:REDEFINE-PROPERTY"), concat("A property with the key ", $key, " already exists"))
-        else ()
+        else $config
 
     let $type :=
         if($value instance of xs:string) then "string"
@@ -108,7 +119,7 @@ declare function prop:set(
         else "string"
     let $value :=
         if($type = "xml")
-        then xdmp:quote($value)
+        then xdmp:url-encode(xdmp:quote($value))
         else $value
 
     let $namespace := admin:group-namespace($key, concat("http://xqdev.com/prop/", $type, "/", $value))
@@ -175,7 +186,7 @@ declare function prop:get(
 			else if($type = "unsignedShort") then xs:unsignedShort($value)
 			else if($type = "unsignedByte") then xs:unsignedByte($value)
             else if($type = "positiveInteger") then xs:positiveInteger($value)
-			else if($type = "xml") then xdmp:unquote($value)
+			else if($type = "xml") then xdmp:unquote(xdmp:url-decode($value))/*
 			else xs:string($value)
 	}
 	catch($e) {
