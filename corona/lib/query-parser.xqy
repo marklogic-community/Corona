@@ -286,38 +286,12 @@ declare private function parser:wordQuery(
 	$term as element()
 ) as cts:query
 {
-    let $query :=
-        for $item in config:getContentItems()
-        return
-            if($item/@mode = "contains")
-            then
-                if($item/@type = "key")
-                then cts:element-word-query(xs:QName(concat("json:", $item)), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
-                else if($item/@type = "element")
-                then cts:element-word-query(xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
-                else if($item/@type = "attribute")
-                then cts:element-attribute-word-query(xs:QName($item/@element), xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
-                else if($item/@type = "field")
-                then cts:field-word-query($item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
-                else ()
-            else if($item/@mode = "equals")
-            then
-                if($item/@type = "key")
-                then cts:element-value-query(xs:QName(concat("json:", $item)), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
-                else if($item/@type = "element")
-                then cts:element-value-query(xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
-                else if($item/@type = "attribute")
-                then cts:element-attribute-value-query(xs:QName($item/@element), xs:QName($item), string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
-                else if($item/@type = "field")
-                then xdmp:apply(xdmp:function("cts:field-value-query"), $item, string($term), ("punctuation-insensitive", "whitespace-insensitive"), $item/@weight)
-            else ()
-        else ()
+    let $index := config:getPlace(())
+    let $query := search:placeValueToQuery($index, string($term))
     return
         if(empty($query))
         then cts:word-query(string($term))
-        else if(count($query) = 1)
-        then $query
-        else cts:or-query($query)
+        else $query
 };
 
 declare private function parser:notQuery(
@@ -345,11 +319,8 @@ declare private function parser:constraintQuery(
     let $index := config:get($term/field)
     where if(exists($ignoreField)) then string($term/field) != $ignoreField else true()
     return
-        if($index/@type = "field")
-        then search:fieldValueToQuery($index, $value)
-
-        else if($index/@type = "map")
-        then search:mapValueToQuery($index, $value)
+        if($index/@type = "place")
+        then search:placeValueToQuery($index, $value)
 
         else if($index/@type = "range")
         then search:rangeValueToQuery($index, $value, (string($index/operator), "eq")[1], ())

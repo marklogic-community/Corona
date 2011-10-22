@@ -177,57 +177,32 @@ declare function search:rangeValueToQuery(
         else ()
 };
 
-declare function search:mapValueToQuery(
+declare function search:placeValueToQuery(
     $index as element(index),
-    $value as xs:string
+    $value as xs:string*
 ) as cts:query?
 {
-    let $QName :=
-        if($index/structure = "json")
-        then xs:QName(concat("json:", $index/key))
-        else if($index/structure = "xmlelement")
-        then xs:QName($index/element)
-        else ()
-    let $options :=
-        if($index/mode = "equals")
-        then "exact"
-        else (
-            "case-insensitive", 
-            "punctuation-insensitive",
-            "whitespace-insensitive"
-        )
+    let $queries :=
+        for $item in $index/query/*
+        return
+            if(local-name($item) = "field")
+            then cts:field-word-query($item/@name, $value)
+            else if(local-name($item) = "attribute")
+            then cts:element-attribute-word-query(xs:QName($item/@element), xs:QName($item/@attribute), $value, (), $item/@weight)
+            else if(local-name($item) = "element")
+            then cts:element-word-query(xs:QName($item/@element), $value, (), $item/@weight)
+            else if(local-name($item) = "key")
+            then cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($item/@key))), $value, (), $item/@weight)
+            else if(local-name($item) = "place")
+            then search:placeValueToQuery($index, $value)
+            else ()
+    where exists($queries)
     return
-        if($index/structure = "xmlattribute")
-        then
-            if($index/mode = ("equals", "textEquals"))
-            then cts:element-attribute-value-query($QName, xs:QName($index/attribute), $value, $options)
-            else cts:element-attribute-word-query($QName, xs:QName($index/attribute), $value, $options)
-        else
-            if($index/mode = "equals")
-            then
-                if($value = ("true", "false"))
-                then cts:or-query((
-                    cts:element-value-query($QName, $value, $options),
-                    cts:element-attribute-value-query($QName, xs:QName("boolean"), $value, $options)
-                ))
-                else cts:element-value-query($QName, $value, $options)
-            else cts:element-word-query($QName, $value, $options)
-};
+        if(count($queries) = 1)
+        then $queries
+        else cts:or-query($queries)
 
-declare function search:fieldValueToQuery(
-    $index as element(index),
-    $value as xs:string
-) as cts:query?
-{
-    if($index/mode = "contains")
-    then cts:field-word-query($index/@name, $value)
-    else if($index/mode = "textEquals")
-    then xdmp:apply(xdmp:function("cts:field-value-query"), $index/@name, $value, ("punctuation-insensitive", "whitespace-insensitive"))
-    else if($index/mode = "equals")
-    then xdmp:apply(xdmp:function("cts:field-value-query"), $index/@name, $value, "exact")
-    else ()
 };
-
 
 declare function search:rangeIndexValues(
     $index as element(index),

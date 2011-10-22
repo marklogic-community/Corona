@@ -27,176 +27,12 @@ declare namespace corona="http://marklogic.com/corona";
 declare namespace db="http://marklogic.com/xdmp/database";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-
-
-(: Fields :)
-declare function manage:createField(
-    $name as xs:string,
-    $mode as xs:string,
-    $includeKeys as xs:string*,
-    $excludeKeys as xs:string*,
-    $includeElements as xs:string*,
-    $excludeElements as xs:string*,
-    $config as element()
-) as empty-sequence()
-{
-    let $test := manage:validateIndexName($name)
-    let $test := manage:validateMode($mode)
-    let $test := if($mode = "equals") then manage:checkForFieldValueCapability() else ()
-    let $test :=
-        for $element in ($includeElements, $excludeElements)
-        return manage:validateElementName($element)
-    let $test :=
-        if(empty($includeKeys) and empty($includeElements))
-        then error(xs:QName("corona:MISSING-KEY-OR-ELEMENT"), "Must supply at least one JSON key or XML element to be included in the field")
-        else ()
-
-    let $database := xdmp:database()
-    let $config := admin:database-add-field($config, $database, admin:database-field($name, false()))
-    let $add :=
-        for $include in $includeKeys[string-length(.) > 0]
-        let $include := json:escapeNCName($include)
-        let $el := admin:database-included-element("http://marklogic.com/json", $include, 1, (), "", "")
-        return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
-    let $add :=
-        for $exclude in $excludeKeys[string-length(.) > 0]
-        let $exclude := json:escapeNCName($exclude)
-        let $el := admin:database-excluded-element("http://marklogic.com/json", $exclude)
-        return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
-
-    let $add :=
-        for $include in $includeElements[string-length(.) > 0]
-        let $nsLnBits := manage:getNSAndLN($include)
-        let $el := admin:database-included-element($nsLnBits[1], $nsLnBits[2], 1, (), "", "")
-        return xdmp:set($config, admin:database-add-field-included-element($config, $database, $name, $el))
-    let $add :=
-        for $exclude in $excludeElements[string-length(.) > 0]
-        let $nsLnBits := manage:getNSAndLN($exclude)
-        let $el := admin:database-excluded-element($nsLnBits[1], $nsLnBits[2])
-        return xdmp:set($config, admin:database-add-field-excluded-element($config, $database, $name, $el))
-    return admin:save-configuration($config)
-    ,
-    config:setField($name, $mode)
-};
-
-declare function manage:deleteField(
-    $name as xs:string,
-    $config as element()
-) as empty-sequence()
-{
-    admin:save-configuration(admin:database-delete-field($config, xdmp:database(), $name)),
-    config:delete($name)
-};
-
-declare function manage:getField(
-    $name as xs:string,
-    $config as element()
-) as element(json:item)?
-{
-    let $database := xdmp:database()
-    let $def :=
-        try {
-            admin:database-get-field($config, $database, $name)
-        }
-        catch ($e) {()}
-    where exists($def)
-    return manage:fieldDefinitionToJsonXml($def, config:get($name))
-};
-
-declare function manage:getAllFields(
-    $config as element()
-) as element(json:item)*
-{
-    let $database := xdmp:database()
-    let $config := admin:get-configuration()
-    for $field in admin:database-get-fields($config, $database)
-    where string-length($field/*:field-name) > 0
-    return manage:fieldDefinitionToJsonXml($field, config:get($field/*:field-name))
-};
-
-
-(: Maps :)
-declare function manage:createJSONMap(
-    $name as xs:string,
-    $key as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    let $test := manage:validateIndexName($name)
-    let $test := manage:validateMode($mode)
-    return config:setJSONMap($name, json:escapeNCName($key), $mode)
-};
-
-declare function manage:createXMLMap(
-    $name as xs:string,
-    $element as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    let $test := manage:validateIndexName($name)
-    let $test := manage:validateElementName($element)
-    let $test := manage:validateMode($mode)
-    return config:setXMLMap($name, $element, $mode)
-};
-
-declare function manage:createXMLMap(
-    $name as xs:string,
-    $element as xs:string,
-    $attribute as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    let $test := manage:validateIndexName($name)
-    let $test := manage:validateElementName($element)
-    let $test := manage:validateAttributeName($attribute)
-    let $test := manage:validateMode($mode)
-    return config:setXMLMap($name, $element, $attribute, $mode)
-};
-
-declare function manage:deleteMap(
-    $name as xs:string
-) as empty-sequence()
-{
-    config:delete($name)
-};
-
-declare function manage:getMap(
-    $name as xs:string
-) as element(json:item)?
-{
-    let $index := config:get($name)
-    let $type := string($index/structure)
-    let $mode := string($index/mode)
-    where $index/@type = "map"
-    return
-        if($type = "json")
-        then json:object((
-            "name", $name,
-            "key", string($index/key),
-            "mode", $mode
-        ))
-        else if($type = "xmlelement")
-        then json:object((
-            "name", $name,
-            "element", string($index/element),
-            "mode", $mode
-        ))
-        else if($type = "xmlattribute")
-        then json:object((
-            "name", $name,
-            "element", string($index/element),
-            "attribute", string($index/attribute),
-            "mode", $mode
-        ))
-        else ()
-};
-
-declare function manage:getAllMaps(
-) as element(json:item)*
-{
-    for $mapName in config:mapNames()
-    return manage:getMap($mapName)
-};
+(:
+let $test :=
+    if(empty($includeKeys) and empty($includeElements))
+    then error(xs:QName("corona:MISSING-KEY-OR-ELEMENT"), "Must supply at least one JSON key or XML element to be included in the field")
+    else ()
+:)
 
 
 (: Ranges :)
@@ -888,258 +724,6 @@ declare function manage:getAllPlaces(
 };
 
 
-(: Content items :)
-declare function manage:addContentItem(
-    $type as xs:string,
-    $name as xs:string,
-    $mode as xs:string,
-    $weight as xs:decimal
-) as empty-sequence()
-{
-    let $test :=
-        if($type = "field" and $mode = "equals")
-        then manage:checkForFieldValueCapability()
-        else ()
-    let $QName :=
-        if($type = "key")
-        then json:escapeNCName($name)
-        else if($type = "element")
-        then (
-            manage:validateElementName($name),
-            $name
-        )
-        else $name
-    let $existing := config:getContentItems()
-    let $new := (
-        for $item in $existing
-        where not($item/@type = $type and $item = $QName and $item/@mode = $mode) or exists($item/@element)
-        return $item
-        ,
-        <item type="{ $type }" weight="{ $weight }" mode="{ $mode }">{ $QName }</item>
-    )
-    return config:setContentItems($new)
-};
-
-declare function manage:addContentItem(
-    $type as xs:string,
-    $elementName as xs:string,
-    $attributeName as xs:string,
-    $mode as xs:string,
-    $weight as xs:decimal
-) as empty-sequence()
-{
-    let $test := manage:validateElementName($elementName)
-    let $test := manage:validateAttributeName($attributeName)
-    let $existing := config:getContentItems()
-    let $new := (
-        for $item in $existing
-        where not($item/@type = $type and $item/@element = $elementName and $item = $attributeName and $item/@mode = $mode) or empty($item/@element)
-        return $item
-        ,
-        <item type="attribute" element="{ $elementName }" weight="{ $weight }" mode="{ $mode }">{ $attributeName }</item>
-    )
-    return config:setContentItems($new)
-};
-
-declare function manage:deleteContentItem(
-    $type as xs:string,
-    $name as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    let $QName :=
-        if($type = "key")
-        then json:escapeNCName($name)
-        else $name
-    let $new :=
-        for $item in config:getContentItems()
-        where not($item/@type = $type and $item = $QName and $item/@mode = $mode)
-        return $item
-    return config:setContentItems($new)
-};
-
-declare function manage:deleteContentItem(
-    $type as xs:string,
-    $elementName as xs:string,
-    $attributeName as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    config:setContentItems(
-        for $item in config:getContentItems()
-        where not($item/@type = $type and $item/@element = $elementName and $item = $attributeName and $item/@mode = $mode)
-        return $item
-    )
-};
-
-declare function manage:getContentItem(
-    $type as xs:string,
-    $name as xs:string,
-    $mode as xs:string
-) as element(json:item)?
-{
-    let $QName :=
-        if($type = "key")
-        then json:escapeNCName($name)
-        else $name
-    for $item in config:getContentItems()
-    where $item/@type = $type and $item = $QName and $item/@mode = $mode
-    return json:object((
-        string($item/@type), $name,
-        "weight", xs:decimal($item/@weight)
-    ))
-};
-
-declare function manage:getContentItem(
-    $type as xs:string,
-    $elementName as xs:string,
-    $attributeName as xs:string,
-    $mode as xs:string
-) as element(json:item)?
-{
-    for $item in config:getContentItems()
-    where $item/@type = $type and $item/@element = $elementName and $item = $attributeName and $item/@mode = $mode
-    return json:object((
-        "element", $elementName,
-        "attribute", $attributeName,
-        "weight", xs:decimal($item/@weight)
-    ))
-};
-
-declare function manage:getAllContentItems(
-) as element(json:item)*
-{
-    for $item in config:getContentItems()
-    let $name :=
-        if($item/@type = "key")
-        then json:unescapeNCName($item)
-        else string($item)
-    return json:object((
-        if($item/@type = "attribute")
-        then ("element", string($item/@element))
-        else (),
-        string($item/@type), $name,
-        "mode", string($item/@mode),
-        "weight", xs:decimal($item/@weight)
-    ))
-};
-
-
-(: Private functions :)
-
-declare private function manage:getPrefixForNamespaceURI(
-    $uri as xs:string
-) as xs:string?
-{
-    let $config := admin:get-configuration()
-    let $group := xdmp:group()
-    for $namespace in admin:group-get-namespaces($config, $group)
-    where string($namespace/*:namespace-uri) = $uri
-    return string($namespace/*:prefix)
-};
-
-declare private function manage:fieldDefinitionToJsonXml(
-    $field as element(db:field),
-    $index as element(index)
-) as element(json:item)
-{
-    json:object((
-        "name", string($field/db:field-name),
-        "mode", string($index/mode),
-        "includes", json:array(
-            for $include in $field/db:included-elements/db:included-element
-            for $key in tokenize(string($include/db:localname), " ")
-            return
-                if($include/db:namespace-uri = "http://marklogic.com/json")
-                then json:object((
-                    "type", "key",
-                    "name", json:unescapeNCName($key)
-                ))
-                else json:object((
-                    "type", "element",
-                    "name", if(string-length($include/db:namespace-uri)) then concat(manage:getPrefixForNamespaceURI(string($include/db:namespace-uri)), ":", $key) else $key
-                ))
-        ),
-        "excludes", json:array(
-            for $exclude in $field/db:excluded-elements/db:excluded-element
-            for $key in tokenize(string($exclude/db:localname), " ")
-            return
-                if($exclude/db:namespace-uri = "http://marklogic.com/json")
-                then json:object((
-                    "type", "key",
-                    "name", json:unescapeNCName($key)
-                ))
-                else json:object((
-                    "type", "element",
-                    "name", if(string-length($exclude/db:namespace-uri)) then concat(manage:getPrefixForNamespaceURI(string($exclude/db:namespace-uri)), ":", $key) else $key
-                ))
-        )
-    ))
-};
-
-declare private function manage:createJSONRangeIndex(
-    $name as xs:string,
-    $key as xs:string,
-    $type as xs:string,
-    $config as element()
-) as empty-sequence()
-{
-    if(exists(manage:getJSONRangeDefinition($key, $type, $config)))
-    then ()
-    else if($type = "string")
-    then
-        let $index := admin:database-range-element-index("string", "http://marklogic.com/json", $key, "http://marklogic.com/collation/", false())
-        let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
-        return admin:save-configuration($config)
-    else if($type = "date")
-    then
-        let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, "", "normalized-date", "", false())
-        let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
-        return admin:save-configuration($config)
-    else if($type = "number")
-    then
-        let $index := admin:database-range-element-index("decimal", "http://marklogic.com/json", $key, "", false())
-        let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
-        return admin:save-configuration($config)
-    else if($type = "boolean")
-    then
-        let $index := admin:database-range-element-attribute-index("string", "http://marklogic.com/json", $key, "", "boolean", "", false())
-        let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
-        return admin:save-configuration($config)
-    else ()
-};
-
-declare function manage:createXMLElementRangeIndex(
-    $name as xs:string,
-    $element as xs:string,
-    $type as xs:string,
-    $config as element()
-) as empty-sequence()
-{
-    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
-    let $nsLnBits := manage:getNSAndLN($element)
-    let $index := admin:database-range-element-index($type, $nsLnBits[1], $nsLnBits[2], $collation, false())
-    where empty(manage:getXMLElementRangeDefinition($element, $type, $config))
-    return admin:save-configuration(admin:database-add-range-element-index($config, xdmp:database(), $index))
-};
-
-declare function manage:createXMLAttributeRangeIndex(
-    $name as xs:string,
-    $element as xs:string,
-    $attribute as xs:string,
-    $type as xs:string,
-    $config as element()
-) as empty-sequence()
-{
-    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
-    let $elementNsLnBits := manage:getNSAndLN($element)
-    let $attributeNsLnBits := manage:getNSAndLN($attribute)
-    let $index := admin:database-range-element-attribute-index($type, $elementNsLnBits[1], $elementNsLnBits[2], $attributeNsLnBits[1], $attributeNsLnBits[2], $collation, false())
-    where empty(manage:getXMLAttributeRangeDefinition($element, $attribute, $type, $config))
-    return admin:save-configuration(admin:database-add-range-element-attribute-index($config, xdmp:database(), $index))
-};
-
-
 (: Transformers :)
 declare function manage:setTransformer(
     $name as xs:string,
@@ -1185,6 +769,69 @@ declare function manage:getAllTransformerNames(
 
 
 (: Private functions :)
+
+declare private function manage:createJSONRangeIndex(
+    $name as xs:string,
+    $key as xs:string,
+    $type as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    if(exists(manage:getJSONRangeDefinition($key, $type, $config)))
+    then ()
+    else if($type = "string")
+    then
+        let $index := admin:database-range-element-index("string", "http://marklogic.com/json", $key, "http://marklogic.com/collation/", false())
+        let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
+        return admin:save-configuration($config)
+    else if($type = "date")
+    then
+        let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, "", "normalized-date", "", false())
+        let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
+        return admin:save-configuration($config)
+    else if($type = "number")
+    then
+        let $index := admin:database-range-element-index("decimal", "http://marklogic.com/json", $key, "", false())
+        let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
+        return admin:save-configuration($config)
+    else if($type = "boolean")
+    then
+        let $index := admin:database-range-element-attribute-index("string", "http://marklogic.com/json", $key, "", "boolean", "", false())
+        let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
+        return admin:save-configuration($config)
+    else ()
+};
+
+declare private function manage:createXMLElementRangeIndex(
+    $name as xs:string,
+    $element as xs:string,
+    $type as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
+    let $nsLnBits := manage:getNSAndLN($element)
+    let $index := admin:database-range-element-index($type, $nsLnBits[1], $nsLnBits[2], $collation, false())
+    where empty(manage:getXMLElementRangeDefinition($element, $type, $config))
+    return admin:save-configuration(admin:database-add-range-element-index($config, xdmp:database(), $index))
+};
+
+declare private function manage:createXMLAttributeRangeIndex(
+    $name as xs:string,
+    $element as xs:string,
+    $attribute as xs:string,
+    $type as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
+    let $elementNsLnBits := manage:getNSAndLN($element)
+    let $attributeNsLnBits := manage:getNSAndLN($attribute)
+    let $index := admin:database-range-element-attribute-index($type, $elementNsLnBits[1], $elementNsLnBits[2], $attributeNsLnBits[1], $attributeNsLnBits[2], $collation, false())
+    where empty(manage:getXMLAttributeRangeDefinition($element, $attribute, $type, $config))
+    return admin:save-configuration(admin:database-add-range-element-attribute-index($config, xdmp:database(), $index))
+};
+
 
 declare private function manage:getJSONRangeDefinition(
     $key as xs:string,
@@ -1352,21 +999,6 @@ declare private function manage:jsonTypeToSchemaType(
     then "string"
     else if($type = "date")
     then "dateTime"
-    else "decimal"
-};
-
-declare private function manage:schemaTypeToJsonType(
-    $type as xs:string?
-) as xs:string?
-{
-    if(empty($type))
-    then ()
-    else if($type = "string")
-    then "string"
-    else if($type = "dateTime")
-    then "date"
-    else if($type = "boolean")
-    then "boolean"
     else "decimal"
 };
 

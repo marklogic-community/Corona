@@ -33,42 +33,6 @@ declare function config:delete(
     prop:delete(concat("corona-index-", $name))
 };
 
-declare function config:setField(
-    $name as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    prop:set(concat("corona-index-", $name), concat("field/", $name, "/", $mode))
-};
-
-declare function config:setJSONMap(
-    $name as xs:string,
-    $key as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    prop:set(concat("corona-index-", $name), concat("map/json/", $name, "/", $key, "/", $mode))
-};
-
-declare function config:setXMLMap(
-    $name as xs:string,
-    $element as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    prop:set(concat("corona-index-", $name), concat("map/xmlelement/", $name, "/", $element, "/", $mode))
-};
-
-declare function config:setXMLMap(
-    $name as xs:string,
-    $element as xs:string,
-    $attribute as xs:string,
-    $mode as xs:string
-) as empty-sequence()
-{
-    prop:set(concat("corona-index-", $name), concat("map/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $mode))
-};
-
 declare function config:setJSONRange(
     $name as xs:string,
     $key as xs:string,
@@ -174,58 +138,6 @@ declare function config:setXMLAttributeAutoBucketedRange(
     prop:set(concat("corona-index-", $name), concat("autobucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
 };
 
-declare function config:setContentItems(
-    $items as element(item)*
-) as empty-sequence()
-{
-    prop:delete("corona-content-items"),
-    let $elements := string-join(
-        for $item in $items[@type = "element"]
-        return concat(string($item), "=", $item/@mode, "@", $item/@weight)
-    , "|")
-    let $attributes := string-join(
-        for $item in $items[@type = "attribute"]
-        return concat($item/@element, "@", string($item), "=", $item/@mode, "@", $item/@weight)
-    , "|")
-    let $keys := string-join(
-        for $item in $items[@type = "key"]
-        return concat(string($item), "=", $item/@mode, "@", $item/@weight)
-    , "|")
-    let $fields := string-join(
-        for $item in $items[@type = "field"]
-        return concat(string($item), "=", $item/@mode, "@", $item/@weight)
-    , "|")
-    return prop:set("corona-content-items", concat($elements, "/", $attributes, "/", $keys, "/", $fields))
-};
-
-declare function config:getContentItems(
-) as element(item)*
-{
-    let $bits := tokenize(prop:get("corona-content-items"), "/")
-    let $elements :=
-        for $item in tokenize($bits[1], "\|")
-        let $elementBits := tokenize($item, "=")
-        let $valueBits := tokenize($elementBits[2], "@")
-        return <item type="element" mode="{ $valueBits[1] }" weight="{ $valueBits[2] }">{ $elementBits[1] }</item>
-    let $attributes :=
-        for $item in tokenize($bits[2], "\|")
-        let $attributeBits := tokenize($item, "=")
-        let $nameBits := tokenize($attributeBits[1], "@")
-        let $valueBits := tokenize($attributeBits[2], "@")
-        return <item type="attribute" element="{ $nameBits[1] }" mode="{ $valueBits[1] }" weight="{ $valueBits[2] }">{ $nameBits[2] }</item>
-    let $keys :=
-        for $item in tokenize($bits[3], "\|")
-        let $keyBits := tokenize($item, "=")
-        let $valueBits := tokenize($keyBits[2], "@")
-        return <item type="key" mode="{ $valueBits[1] }" weight="{ $valueBits[2] }">{ $keyBits[1] }</item>
-    let $fields :=
-        for $item in tokenize($bits[4], "\|")
-        let $fieldBits := tokenize($item, "=")
-        let $valueBits := tokenize($fieldBits[2], "@")
-        return <item type="field" mode="{ $valueBits[1] }" weight="{ $valueBits[2] }">{ $fieldBits[1] }</item>
-    return ($elements, $attributes, $keys, $fields)
-};
-
 declare function config:setPlace(
     $placeName as xs:string?,
     $config as element(index)
@@ -252,31 +164,6 @@ declare function config:getPlace(
         then <index type="place" anonymous="true"/>
         else $config
 };
-
-declare function config:getPlaceAsQuery(
-    $placeName as xs:string?,
-    $word as xs:string
-) as cts:or-query?
-{
-    let $config := config:getPlace($placeName)
-    let $queries :=
-        for $item in $config/query/*
-        return
-            if(local-name($item) = "field")
-            then cts:field-word-query($item/@name, $word)
-            else if(local-name($item) = "attribute")
-            then cts:element-attribute-word-query(xs:QName($item/@element), xs:QName($item/@attribute), $word, (), $item/@weight)
-            else if(local-name($item) = "element")
-            then cts:element-word-query(xs:QName($item/@element), $word, (), $item/@weight)
-            else if(local-name($item) = "key")
-            then cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($item/@key))), $word, (), $item/@weight)
-            else if(local-name($item) = "place")
-            then config:getPlaceAsQuery($item/@name, $word)
-            else ()
-    where exists($queries)
-    return cts:or-query($queries)
-};
-
 
 declare function config:get(
     $name as xs:string
@@ -403,33 +290,6 @@ declare function config:get(
                 else ()
             }
         </index>
-        else if($bits[1] = "map")
-        then <index type="map" name="{ $bits[3] }">
-            <structure>{ $bits[2] }</structure>
-            {
-                if($bits[2] = "json")
-                then (
-                    <key>{ $bits[4] }</key>,
-                    <mode>{ $bits[5] }</mode>
-                )
-                else if($bits[2] = "xmlelement")
-                then (
-                    <element>{ $bits[4] }</element>,
-                    <mode>{ $bits[5] }</mode>
-                )
-                else if($bits[2] = "xmlattribute")
-                then (
-                    <element>{ $bits[4] }</element>,
-                    <attribute>{ $bits[5] }</attribute>,
-                    <mode>{ $bits[6] }</mode>
-                )
-                else ()
-            }
-        </index>
-        else if($bits[1] = "field")
-        then <index type="field" name="{ $bits[2] }">
-            <mode>{ $bits[3] }</mode>
-        </index>
         else ()
 };
 
@@ -448,15 +308,6 @@ declare function config:bucketedRangeNames(
     for $key in prop:all()
     let $value := prop:get($key)
     where starts-with($key, "corona-index-") and (starts-with($value, "bucketedrange/") or starts-with($value, "autobucketedrange/"))
-    return substring-after($key, "corona-index-")
-};
-
-declare function config:mapNames(
-) as xs:string*
-{
-    for $key in prop:all()
-    let $value := prop:get($key)
-    where starts-with($key, "corona-index-") and starts-with($value, "map/")
     return substring-after($key, "corona-index-")
 };
 

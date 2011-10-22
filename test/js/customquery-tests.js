@@ -13,15 +13,14 @@ corona.queries = [
         },
         "query": {
             "q": JSON.stringify({
-                "equals": {
-                    "key": "foo",
-                    "value": "bar 123.45-6"
-                }
+                "key": "foo",
+                "equals": "bar 123.45-6"
             }),
          },
         "shouldSucceed": true,
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
+            console.log(data);
             equals(data.results[0].uri, "/customquery/doc1.json", "Correct document URI was found");
             equals(data.results[0].content.foo, "bar 123.45-6", "Correct document content was found");
         },
@@ -36,10 +35,8 @@ corona.queries = [
         },
         "query": {
             "q": JSON.stringify({
-                "equals": {
-                    "key": "foo",
-                    "value": "bar 123.45-7"
-                }
+                "key": "foo",
+                "equals": "bar 123.45-7"
             }),
             "include": ["collections"]
          },
@@ -47,7 +44,7 @@ corona.queries = [
         "assert": function(data, config) {
             equals(data.results.length, 1, "Got one document");
             equals(data.results[0].uri, "/customquery/doc3.json", "Correct document URI was found");
-            deepEqual(data.results[0].collections, config.prereqDoc.collection, "Correct document URI was found");
+            deepEqual(data.results[0].collections, config.prereqDoc.collection, "Correct document collections were found");
         },
         "purpose": "Extracting collection"
     },
@@ -66,10 +63,8 @@ corona.queries = [
         },
         "query": {
             "q": JSON.stringify({
-                "equals": {
-                    "key": "foo",
-                    "value": "bar 123.45-9"
-                }
+                "key": "foo",
+                "equals": "bar 123.45-9"
             }),
             "extractPath": "foo2.bar[0]"
          },
@@ -89,10 +84,8 @@ corona.queries = [
         },
         "query": {
             "q": JSON.stringify({
-                "equals": {
-                    "element": "foo",
-                    "value": "bar 123.45-1"
-                }
+                "element": "foo",
+                "equals": "bar 123.45-1"
             }),
             "applyTransform": "generic",
             "extractPath": ""
@@ -217,6 +210,6 @@ corona.runQueries = function() {
 };
 
 $(document).ready(function() {
-    module("Key/Value Queries");
+    module("Custom Queries");
     corona.runQueries();
 });
