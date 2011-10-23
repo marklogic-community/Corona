@@ -182,19 +182,29 @@ declare function search:placeValueToQuery(
     $value as xs:string*
 ) as cts:query?
 {
+    search:placeValueToQuery($index, $value, (), ())
+};
+
+declare function search:placeValueToQuery(
+    $index as element(index),
+    $value as xs:string*,
+    $options as xs:string*,
+    $weight as xs:double?
+) as cts:query?
+{
     let $queries :=
         for $item in $index/query/*
         return
             if(local-name($item) = "field")
-            then cts:field-word-query($item/@name, $value)
+            then cts:field-word-query($item/@name, $value, $options, $weight)
             else if(local-name($item) = "attribute")
-            then cts:element-attribute-word-query(xs:QName($item/@element), xs:QName($item/@attribute), $value, (), $item/@weight)
+            then cts:element-attribute-word-query(xs:QName($item/@element), xs:QName($item/@attribute), $value, $options, $item/@weight)
             else if(local-name($item) = "element")
-            then cts:element-word-query(xs:QName($item/@element), $value, (), $item/@weight)
+            then cts:element-word-query(xs:QName($item/@element), $value, $options, $item/@weight)
             else if(local-name($item) = "key")
-            then cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($item/@key))), $value, (), $item/@weight)
+            then cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($item/@key))), $value, $options, $item/@weight)
             else if(local-name($item) = "place")
-            then search:placeValueToQuery($index, $value)
+            then search:placeValueToQuery($index, $value, $options, $weight)
             else ()
     where exists($queries)
     return

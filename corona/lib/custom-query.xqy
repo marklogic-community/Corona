@@ -403,10 +403,8 @@ declare private function customquery:handlePlace(
     let $values := customquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
     let $options := customquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
-    (: XXX - do something about the weight :)
-    (: XXX - do something about the options :)
     where exists($values)
-    return search:placeValueToQuery($index, $values)
+    return search:placeValueToQuery($index, $values, $options, $weight)
 };
 
 declare private function customquery:handleRange(
