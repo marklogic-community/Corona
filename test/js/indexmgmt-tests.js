@@ -686,6 +686,80 @@ corona.addPlaces = function(callback) {
         {
             "type": "place",
             "name": "place2",
+            "places": [
+                { "key": "included1", "type": "include"},
+                { "place": "place1", "type": "include"}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Place with sub-place",
+        },
+
+        {
+            "type": "place",
+            "name": "place3",
+            "places": [
+                { "key": "included1", "type": "include"},
+                { "key": "included1", "type": "include", "shouldSucceed": false}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Detecting duplicate items in a place (key, include)",
+        },
+        {
+            "type": "place",
+            "name": "place4",
+            "places": [
+                { "key": "included1", "type": "include"},
+                { "key": "excluded1", "type": "exclude"},
+                { "key": "excluded1", "type": "exclude", "shouldSucceed": false}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Detecting duplicate items in a place (key, exclude)",
+        },
+        {
+            "type": "place",
+            "name": "place5",
+            "places": [
+                { "element": "included1", "type": "include"},
+                { "element": "included1", "type": "include", "shouldSucceed": false}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Detecting duplicate items in a place (element, include)",
+        },
+        {
+            "type": "place",
+            "name": "place6",
+            "places": [
+                { "element": "included1", "type": "include"},
+                { "element": "excluded1", "type": "exclude"},
+                { "element": "excluded1", "type": "exclude", "shouldSucceed": false}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Detecting duplicate items in a place (element, exclude)",
+        },
+        {
+            "type": "place",
+            "name": "place7",
+            "places": [
+                { "element": "included1", "attribute": "norm"},
+                { "element": "included1", "attribute": "norm", "shouldSucceed": false}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Detecting duplicate items in a place (attribute)",
+        },
+        {
+            "type": "place",
+            "name": "place8",
+            "places": [
+                { "place": "place1"},
+                { "place": "place1", "shouldSucceed": false}
+            ],
+            "shouldSucceed": true,
+            "purpose": "Detecting duplicate items in a place (place)",
+        },
+
+        {
+            "type": "place",
+            "name": "place9",
             "mode": "equals",
             "places": [
                 { "key": "included1", "type": "include"}
@@ -695,7 +769,7 @@ corona.addPlaces = function(callback) {
         },
         {
             "type": "place",
-            "name": "place3",
+            "name": "place10",
             "places": [
                 { "element": "invalidns:included1", "type": "include", "shouldSucceed": false}
             ],
@@ -772,7 +846,7 @@ corona.addPlaces = function(callback) {
                                     data: data,
                                     type: "POST",
                                     success: function(data) {
-                                        ok(true, "Item was added to place");
+                                        ok(item.shouldSucceed, "Item was added to place");
                                         if(pos === place.places.length - 1) {
                                             asyncTest("Checking to make sure the place items were created correctly", function() {
                                                 $.ajax({

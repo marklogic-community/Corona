@@ -27,14 +27,6 @@ declare namespace corona="http://marklogic.com/corona";
 declare namespace db="http://marklogic.com/xdmp/database";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-(:
-let $test :=
-    if(empty($includeKeys) and empty($includeElements))
-    then error(xs:QName("corona:MISSING-KEY-OR-ELEMENT"), "Must supply at least one JSON key or XML element to be included in the field")
-    else ()
-:)
-
-
 (: Ranges :)
 declare function manage:createJSONRange(
     $name as xs:string,
@@ -495,6 +487,7 @@ declare function manage:addKeyToPlace(
             else ($existingConfig/query/* except $existingConfig/query/field, $newKey)
         }</query>
     </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
     return (
         manage:createFieldForPlace($config),
         config:setPlace($placeName, $config)
@@ -529,6 +522,7 @@ declare function manage:addElementToPlace(
             else ($existingConfig/query/* except $existingConfig/query/field, $newElement)
         }</query>
     </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
     return (
         manage:createFieldForPlace($config),
         config:setPlace($placeName, $config)
@@ -553,6 +547,7 @@ declare function manage:addAttributeToPlace(
             <attribute element="{ $elementName }" attribute="{ $attributeName }" weight="{ $weight }"/>
         )}</query>
     </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
     return (
         manage:createFieldForPlace($config),
         config:setPlace($placeName, $config)
@@ -574,6 +569,7 @@ declare function manage:addPlaceToPlace(
             <place name="{ $subPlaceName }"/>
         )}</query>
     </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
     return (
         manage:createFieldForPlace($config),
         config:setPlace($placeName, $config)
@@ -605,6 +601,7 @@ declare function manage:removeKeyFromPlace(
             return $query
         )}</query>
     </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
     return (
         manage:createFieldForPlace($config),
         config:setPlace($placeName, $config)
@@ -636,6 +633,7 @@ declare function manage:removeElementFromPlace(
             return $query
         )}</query>
     </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
     return (
         manage:createFieldForPlace($config),
         config:setPlace($placeName, $config)
@@ -660,6 +658,7 @@ declare function manage:removeAttributeFromPlace(
             return $query
         )}</query>
     </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
     return (
         manage:createFieldForPlace($config),
         config:setPlace($placeName, $config)
@@ -681,6 +680,7 @@ declare function manage:removePlaceFromPlace(
             return $query
         )}</query>
     </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
     return (
         manage:createFieldForPlace($config),
         config:setPlace($placeName, $config)
@@ -1151,7 +1151,30 @@ declare private function manage:checkPlaceConfig(
 {
     if(empty($config))
     then error(xs:QName("corona:MISSING-PLACE"), concat("The place '", $placeName, "' does not exist"))
-    else ()
+    else (),
+    if(count($config/query//(element, key)[@type = "exclude"]) > 0 and count($config/query//(element, key)[@type = "include"]) = 0)
+    then error(xs:QName("corona:INVALID-PLACE"), "Before specifying a key or element to exclude, at least one key or element must be included")
+    else (),
+    let $items := ($config/query/field/*, $config/query/* except $config/query/field)
+    for $item in $items
+    let $duplicateItems :=
+        if(exists($item/@attribute))
+        then $items[@element = $item/@element][@attribute = $item/@attribute]
+        else if(exists($item/@element))
+        then $items[@element = $item/@element][@type = $item/@type]
+        else if(exists($item/@key))
+        then $items[@key = $item/@key][@type = $item/@type]
+        else if(exists($item/@name))
+        then $items[@name = $item/@name]
+        else ()
+    let $description :=
+        if(exists($item/@attribute))
+        then concat("with element name ", string($item/@element), " and attribute name ", string($item/@attribute))
+        else if(exists($item/@place))
+        then concat("named ", string($item/@name))
+        else concat("named ", string($item/(@element, @key)), if($item/@type = "exclude") then " (excluded)" else " (included)")
+    where count($duplicateItems) > 1
+    return error(xs:QName("corona:DUPLICATE-PLACE-ITEM"), concat("The ", local-name($item), " ", $description, " is already configured"))
 };
 
 declare private function manage:generateFieldName(
