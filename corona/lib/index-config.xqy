@@ -39,7 +39,11 @@ declare function config:setJSONRange(
     $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("range/json/", $name, "/", $key, "/", $type))
+    prop:set(concat("corona-index-", $name), <index type="range" name="{ $name }">
+        <structure>json</structure>
+        <key>{ $key }</key>
+        <type>{ $type }</type>
+    </index>)
 };
 
 declare function config:setXMLElementRange(
@@ -48,7 +52,11 @@ declare function config:setXMLElementRange(
     $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("range/xmlelement/", $name, "/", $element, "/", $type))
+    prop:set(concat("corona-index-", $name), <index type="range" name="{ $name }">
+        <structure>xmlelement</structure>
+        <element>{ $element }</element>
+        <type>{ $type }</type>
+    </index>)
 };
 
 declare function config:setXMLAttributeRange(
@@ -58,7 +66,12 @@ declare function config:setXMLAttributeRange(
     $type as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("range/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type))
+    prop:set(concat("corona-index-", $name), <index type="range" name="{ $name }">
+        <structure>xmlattribute</structure>
+        <element>{ $element }</element>
+        <attribute>{ $attribute }</attribute>
+        <type>{ $type }</type>
+    </index>)
 };
 
 declare function config:setJSONBucketedRange(
@@ -68,7 +81,12 @@ declare function config:setJSONBucketedRange(
     $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("bucketedrange/json/", $name, "/", $key, "/", $type, "/", config:bucketElementsToString($buckets, $type, "json")))
+    prop:set(concat("corona-index-", $name), <index type="bucketedrange" name="{ $name }">
+        <structure>json</structure>
+        <key>{ $key }</key>
+        <type>{ $type }</type>
+        { config:generateBucketStructure($buckets, $type, "json") }
+    </index>)
 };
 
 declare function config:setJSONAutoBucketedRange(
@@ -83,7 +101,17 @@ declare function config:setJSONAutoBucketedRange(
     $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("autobucketedrange/json/", $name, "/", $key, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("corona-index-", $name), <index type="autobucketedrange" name="{ $name }">
+        <structure>json</structure>
+        <key>{ $key }</key>
+        <type>{ $type }</type>
+        <bucketInterval>{ $bucketInterval }</bucketInterval>
+        <startingAt>{ $startingAt }</startingAt>
+        { if(exists($stoppingAt)) then <stoppingAt>{ $stoppingAt }</stoppingAt> else () }
+        <firstFormat>{ $firstFormat }</firstFormat>
+        <format>{ $format }</format>
+        <lastFormat>{ $lastFormat }</lastFormat>
+    </index>)
 };
 
 declare function config:setXMLElementBucketedRange(
@@ -93,7 +121,12 @@ declare function config:setXMLElementBucketedRange(
     $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("bucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
+    prop:set(concat("corona-index-", $name), <index type="bucketedrange" name="{ $name }">
+        <structure>xmlelement</structure>
+        <element>{ $element }</element>
+        <type>{ $type }</type>
+        { config:generateBucketStructure($buckets, $type, "xml") }
+    </index>)
 };
 
 declare function config:setXMLElementAutoBucketedRange(
@@ -108,7 +141,17 @@ declare function config:setXMLElementAutoBucketedRange(
     $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("autobucketedrange/xmlelement/", $name, "/", $element, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("corona-index-", $name), <index type="autobucketedrange" name="{ $name }">
+        <structure>xmlelement</structure>
+        <element>{ $element }</element>
+        <type>{ $type }</type>
+        <bucketInterval>{ $bucketInterval }</bucketInterval>
+        <startingAt>{ $startingAt }</startingAt>
+        { if(exists($stoppingAt)) then <stoppingAt>{ $stoppingAt }</stoppingAt> else () }
+        <firstFormat>{ $firstFormat }</firstFormat>
+        <format>{ $format }</format>
+        <lastFormat>{ $lastFormat }</lastFormat>
+    </index>)
 };
 
 declare function config:setXMLAttributeBucketedRange(
@@ -119,7 +162,13 @@ declare function config:setXMLAttributeBucketedRange(
     $buckets as element()+
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("bucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", config:bucketElementsToString($buckets, $type, "xml")))
+    prop:set(concat("corona-index-", $name), <index type="bucketedrange" name="{ $name }">
+        <structure>xmlattribute</structure>
+        <element>{ $element }</element>
+        <attribute>{ $attribute }</attribute>
+        <type>{ $type }</type>
+        { config:generateBucketStructure($buckets, $type, "xml") }
+    </index>)
 };
 
 declare function config:setXMLAttributeAutoBucketedRange(
@@ -135,7 +184,18 @@ declare function config:setXMLAttributeAutoBucketedRange(
     $lastFormat as xs:string
 ) as empty-sequence()
 {
-    prop:set(concat("corona-index-", $name), concat("autobucketedrange/xmlattribute/", $name, "/", $element, "/", $attribute, "/", $type, "/", $bucketInterval, "/", $startingAt, "/", $stoppingAt, "/", xdmp:url-encode($firstFormat), "/", xdmp:url-encode($format), "/", xdmp:url-encode($lastFormat)))
+    prop:set(concat("corona-index-", $name), <index type="autobucketedrange" name="{ $name }">
+        <structure>xmlattribute</structure>
+        <element>{ $element }</element>
+        <attribute>{ $attribute }</attribute>
+        <type>{ $type }</type>
+        <bucketInterval>{ $bucketInterval }</bucketInterval>
+        <startingAt>{ $startingAt }</startingAt>
+        { if(exists($stoppingAt)) then <stoppingAt>{ $stoppingAt }</stoppingAt> else () }
+        <firstFormat>{ $firstFormat }</firstFormat>
+        <format>{ $format }</format>
+        <lastFormat>{ $lastFormat }</lastFormat>
+    </index>)
 };
 
 declare function config:setPlace(
@@ -187,110 +247,15 @@ declare function config:get(
             then "le"
             else ()
         else ()
-    let $bits :=
-        if($property instance of xs:string)
-        then tokenize($property, "/")
-        else ()
     where exists($property)
     return
-        if($property instance of element() and $property/@type = "place")
-        then $property
-        else if($bits[1] = "range")
-        then <index type="range" name="{ $bits[3] }">
-            <structure>{ $bits[2] }</structure>
-            {
-                if($bits[2] = "json")
-                then (
-                    <key>{ $bits[4] }</key>,
-                    <type>{ $bits[5] }</type>
-                )
-                else if($bits[2] = "xmlelement")
-                then (
-                    <element>{ $bits[4] }</element>,
-                    <type>{ $bits[5] }</type>
-                )
-                else if($bits[2] = "xmlattribute")
-                then (
-                    <element>{ $bits[4] }</element>,
-                    <attribute>{ $bits[5] }</attribute>,
-                    <type>{ $bits[6] }</type>
-                )
-                else ()
-            }
-            {
-                if(exists($operator))
-                then <operator>{ $operator }</operator>
-                else ()
-            }
+        if($property/@type = "range" and $isPsudo)
+        then <index>
+            { $property/@* }
+            { $property/* }
+            <operator>{ $operator }</operator>
         </index>
-        else if($bits[1] = "bucketedrange")
-        then <index type="bucketedrange" name="{ $bits[3] }">
-            <structure>{ $bits[2] }</structure>
-            {
-                if($bits[2] = "json")
-                then (
-                    <key>{ $bits[4] }</key>,
-                    <type>{ $bits[5] }</type>,
-                    <buckets>{ config:bucketStringToElements($bits[6]) }</buckets>
-                )
-                else if($bits[2] = "xmlelement")
-                then (
-                    <element>{ $bits[4] }</element>,
-                    <type>{ $bits[5] }</type>,
-                    <buckets>{ config:bucketStringToElements($bits[6]) }</buckets>
-                )
-                else if($bits[2] = "xmlattribute")
-                then (
-                    <element>{ $bits[4] }</element>,
-                    <attribute>{ $bits[5] }</attribute>,
-                    <type>{ $bits[6] }</type>,
-                    <buckets>{ config:bucketStringToElements($bits[7]) }</buckets>
-                )
-                else ()
-            }
-        </index>
-        else if($bits[1] = "autobucketedrange")
-        then <index type="autobucketedrange" name="{ $bits[3] }">
-            <structure>{ $bits[2] }</structure>
-            {
-                if($bits[2] = "json")
-                then (
-                    <key>{ $bits[4] }</key>,
-                    <type>{ $bits[5] }</type>,
-                    <bucketInterval>{ $bits[6] }</bucketInterval>,
-                    <startingAt>{ $bits[7] }</startingAt>,
-                    if(string-length($bits[8])) then <stoppingAt>{ $bits[8] }</stoppingAt> else (),
-                    <firstFormat>{ xdmp:url-decode($bits[9]) }</firstFormat>,
-                    <format>{ xdmp:url-decode($bits[10]) }</format>,
-                    <lastFormat>{ xdmp:url-decode($bits[11]) }</lastFormat>
-                )
-                else if($bits[2] = "xmlelement")
-                then (
-                    <element>{ $bits[4] }</element>,
-                    <type>{ $bits[5] }</type>,
-                    <bucketInterval>{ $bits[6] }</bucketInterval>,
-                    <startingAt>{ $bits[7] }</startingAt>,
-                    if(string-length($bits[8])) then <stoppingAt>{ $bits[8] }</stoppingAt> else (),
-                    <firstFormat>{ xdmp:url-decode($bits[9]) }</firstFormat>,
-                    <format>{ xdmp:url-decode($bits[10]) }</format>,
-                    <lastFormat>{ xdmp:url-decode($bits[11]) }</lastFormat>
-                )
-                else if($bits[2] = "xmlattribute")
-                then (
-                    <element>{ $bits[4] }</element>,
-                    <attribute>{ $bits[5] }</attribute>,
-                    <type>{ $bits[6] }</type>,
-                    <bucketInterval>{ $bits[7] }</bucketInterval>,
-                    <startingAt>{ $bits[8] }</startingAt>,
-                    if(string-length($bits[9])) then <stoppingAt>{ $bits[9] }</stoppingAt> else (),
-                    <firstFormat>{ xdmp:url-decode($bits[10]) }</firstFormat>,
-                    <format>{ xdmp:url-decode($bits[11]) }</format>,
-                    <lastFormat>{ xdmp:url-decode($bits[12]) }</lastFormat>
-                )
-                else ()
-            }
-        </index>
-        else ()
+        else $property
 };
 
 declare function config:rangeNames(
@@ -298,7 +263,7 @@ declare function config:rangeNames(
 {
     for $key in prop:all()
     let $value := prop:get($key)
-    where starts-with($key, "corona-index-") and starts-with($value, "range/")
+    where starts-with($key, "corona-index-") and $value/@type = "range"
     return substring-after($key, "corona-index-")
 };
 
@@ -307,7 +272,7 @@ declare function config:bucketedRangeNames(
 {
     for $key in prop:all()
     let $value := prop:get($key)
-    where starts-with($key, "corona-index-") and (starts-with($value, "bucketedrange/") or starts-with($value, "autobucketedrange/"))
+    where starts-with($key, "corona-index-") and $value/@type = ("bucketedrange", "autobucketedrange")
     return substring-after($key, "corona-index-")
 };
 
@@ -316,20 +281,20 @@ declare function config:placeNames(
 {
     for $key in prop:all()
     let $value := prop:get($key)
-    where $value instance of element() and starts-with($key, "corona-index-") and $value/@type = "place" and exists($value/@name)
+    where starts-with($key, "corona-index-") and $value/@type = "place" and exists($value/@name)
     return string($value/@name)
 };
 
 
+(: Private functions :)
 
-declare private function config:bucketElementsToString(
+declare private function config:generateBucketStructure(
     $buckets as element()+,
     $type as xs:string,
     $format as xs:string
-) as xs:string
+) as element(buckets)
 {
-    string-join(
-
+    <buckets>{
         let $xsType :=
             if($format = "json")
             then
@@ -339,12 +304,12 @@ declare private function config:bucketElementsToString(
                 then "dateTime"
                 else "string"
             else $type
-        let $check :=
+        let $test :=
             if(local-name($buckets[1]) != "label" or local-name($buckets[last()]) != "label")
             then error(xs:QName("corona:INVALID-BUCKETS"), "The first and last bucket elements must be labels")
             else ()
         for $bucket at $pos in $buckets
-        let $check :=
+        let $test :=
             if($pos mod 2 = 0 and local-name($bucket) != "boundary")
             then error(xs:QName("corona:INVALID-BUCKETS"), "Even bucket elements need to be boundary elements")
             else if($pos mod 2 != 0 and local-name($bucket) != "label")
@@ -357,22 +322,10 @@ declare private function config:bucketElementsToString(
                 then string(dateparser:parse(string($bucket)))
                 else string($bucket)
             else ()
-        let $check :=
+        let $test :=
             if(local-name($bucket) = "boundary" and not(xdmp:castable-as("http://www.w3.org/2001/XMLSchema", $xsType, $boundaryValue)))
             then error(xs:QName("corona:INVALID-BUCKETS"), concat("Bucket value '", $boundaryValue, "' is not of the correct datatype"))
             else ()
-        return xdmp:url-encode(string($bucket))
-    , "|")
-};
-
-declare private function config:bucketStringToElements(
-    $string as xs:string
-) as element()+
-{
-    for $bit at $pos in tokenize($string, "\|")
-    let $bit := xdmp:url-decode($bit)
-    return
-        if($pos mod 2)
-        then <label>{ $bit }</label>
-        else <boundary>{ $bit }</boundary>
+        return $bucket
+    }</buckets>
 };

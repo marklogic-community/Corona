@@ -442,13 +442,19 @@ declare function manage:getAllNamespaces(
 (: Places :)
 declare function manage:createPlace(
     $placeName as xs:string,
-    $mode as xs:string
+    $mode as xs:string,
+    $options as xs:string*
 ) as empty-sequence()
 {
     let $test := manage:validateIndexName($placeName)
     let $test := manage:validateMode($mode)
     let $test := if($mode = "equals") then manage:checkForFieldValueCapability() else ()
-    return config:setPlace($placeName, <index type="place" name="{ $placeName }" mode="{ $mode }"/>)
+    let $config := <index type="place" name="{ $placeName }" mode="{ $mode }">
+        <options>{
+        }</options>
+    </index>
+    let $test := manage:checkPlaceConfig($config, $placeName)
+    return config:setPlace($placeName, $config)
 };
 
 declare function manage:deletePlace(
@@ -474,6 +480,7 @@ declare function manage:addKeyToPlace(
     let $newKey := <key key="{ $key }" weight="{ $weight }" type="{ $type }"/>
     let $config := <index>
         { $existingConfig/@* }
+        { $existingConfig/options }
         <query>{
             if($needsField)
             then (
@@ -509,6 +516,7 @@ declare function manage:addElementToPlace(
     let $newElement := <element element="{ $elementName }" weight="{ $weight }" type="{ $type }"/>
     let $config := <index>
         { $existingConfig/@* }
+        { $existingConfig/options }
         <query>{
             if($needsField)
             then (
@@ -542,6 +550,7 @@ declare function manage:addAttributeToPlace(
     let $test := manage:checkPlaceConfig($existingConfig, $placeName)
     let $config := <index>
         { $existingConfig/@* }
+        { $existingConfig/options }
         <query>{(
             $existingConfig/query/*,
             <attribute element="{ $elementName }" attribute="{ $attributeName }" weight="{ $weight }"/>
@@ -564,6 +573,7 @@ declare function manage:addPlaceToPlace(
     let $test := manage:checkPlaceConfig($existingConfig, $placeName)
     let $config := <index>
         { $existingConfig/@* }
+        { $existingConfig/options }
         <query>{(
             $existingConfig/query/*,
             <place name="{ $subPlaceName }"/>
@@ -587,6 +597,7 @@ declare function manage:removeKeyFromPlace(
     let $test := manage:checkPlaceConfig($existingConfig, $placeName)
     let $config := <index>
         { $existingConfig/@* }
+        { $existingConfig/options }
         <query>{(
             if(exists($existingConfig/query/field))
             then <field name="{ manage:generateFieldName($placeName) }">{
@@ -619,6 +630,7 @@ declare function manage:removeElementFromPlace(
     let $test := manage:checkPlaceConfig($existingConfig, $placeName)
     let $config := <index>
         { $existingConfig/@* }
+        { $existingConfig/options }
         <query>{(
             if(exists($existingConfig/query/field))
             then <field name="{ manage:generateFieldName($placeName) }">{
@@ -652,6 +664,7 @@ declare function manage:removeAttributeFromPlace(
     let $test := manage:checkPlaceConfig($existingConfig, $placeName)
     let $config := <index>
         { $existingConfig/@* }
+        { $existingConfig/options }
         <query>{(
             for $query in $existingConfig/query/*
             where not(local-name($query) = "attribute" and $query/@element = $elementName and $query/@attribute = $attributeName)
@@ -674,6 +687,7 @@ declare function manage:removePlaceFromPlace(
     let $test := manage:checkPlaceConfig($existingConfig, $placeName)
     let $config := <index>
         { $existingConfig/@* }
+        { $existingConfig/options }
         <query>{(
             for $query in $existingConfig/query/*
             where not(local-name($query) = "place" and $query/@name = $subPlaceName)

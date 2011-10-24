@@ -59,7 +59,7 @@ return
         else if($requestMethod = "PUT")
         then
             if($scope = "place" and exists($name))
-            then manage:createPlace($name, $mode)
+            then manage:createPlace($name, $mode, map:get($params, "option"))
             else if($scope = "places")
             then common:error(400, "corona:INVALID-REQUEST", "Can not create a new place under /manage/places, use /manage/place instead", "json")
             else ()
