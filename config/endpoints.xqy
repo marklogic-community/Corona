@@ -15,7 +15,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="content-type">$1</uri-param>
         <uri-param name="uri" as="string">$2</uri-param>
         <http method="GET">
-            <param name="q" required="false"/>
+            <param name="stringQuery" required="false"/>
             <param name="structuredQuery" required="false"/>
             <param name="extractPath" required="false"/>
             <param name="applyTransform" required="false"/>
@@ -82,7 +82,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <request uri="^/(json|xml)/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/corona/facet.xqy">
         <uri-param name="content-type">$1</uri-param>
         <uri-param name="facets">$2</uri-param>
-        <param name="q" required="false"/>
+        <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
         <param name="limit" as="integer" default="25" required="false"/>
         <param name="order" required="false" default="frequency" values="descending|ascending|frequency"/>

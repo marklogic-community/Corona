@@ -35,7 +35,7 @@ let $params := rest:process-request(endpoints:request("/corona/facet.xqy"))
 let $facets := tokenize(map:get($params, "facets"), ",")
 let $contentType := map:get($params, "content-type")
 let $outputFormat := (map:get($params, "outputFormat"), $contentType)[1]
-let $queryString := map:get($params, "q")
+let $stringQuery := map:get($params, "stringQuery")
 let $structuredQuery := map:get($params, "structuredQuery")
 
 let $limit := map:get($params, "limit")
@@ -44,14 +44,14 @@ let $frequency := map:get($params, "frequency")
 let $includeAllValues := map:get($params, "includeAllValues")
 
 let $test := (
-    if(empty($queryString) and empty($structuredQuery))
+    if(empty($stringQuery) and empty($structuredQuery))
     then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $contentType)
     else ()
 )
 
 let $query :=
-    if(exists($queryString))
-    then stringquery:parse($queryString)
+    if(exists($stringQuery))
+    then stringquery:parse($stringQuery)
     else if(exists($structuredQuery))
     then try {
         structquery:getCTS(structquery:getParseTree($structuredQuery), ())
@@ -79,14 +79,14 @@ let $values :=
     for $facet in $facets
 
     let $rawQuery :=
-        if(exists($queryString))
-        then stringquery:getParseTree($queryString)
+        if(exists($stringQuery))
+        then stringquery:getParseTree($stringQuery)
         else if(exists($structuredQuery))
         then structquery:getParseTree($structuredQuery)
         else ()
 
     let $valuesInQuery :=
-        if(exists($queryString))
+        if(exists($stringQuery))
         then stringquery:valuesForFacet($rawQuery, $facet)
         else if(exists($structuredQuery))
         then structquery:valuesForFacet($rawQuery, $facet)
@@ -98,7 +98,7 @@ let $values :=
         else ()
 
     let $query :=
-        if(exists($queryString))
+        if(exists($stringQuery))
         then stringquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
         else if(exists($structuredQuery))
         then structquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
