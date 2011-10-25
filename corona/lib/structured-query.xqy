@@ -174,7 +174,7 @@ declare private function structquery:dispatch(
         $step/json:range[@type = "string"],
         $step/json:collection[@type = ("string", "array")],
         $step/json:directory[@type = ("string", "array")],
-        $step/json:queryString[@type = "string"],
+        $step/json:stringQuery[@type = "string"],
         $step/json:wordAnywhere[@type = ("string", "array")],
 
         $step/json:geo[@type = "object"],
@@ -212,7 +212,7 @@ declare private function structquery:process(
     case element(json:range) return structquery:handleRange($step, $ignoreRange)
     case element(json:collection) return structquery:handleCollection($step)
     case element(json:directory) return structquery:handleDirectory($step)
-    case element(json:queryString) return structquery:handleQueryString($step, $ignoreRange)
+    case element(json:stringQuery) return structquery:handleStringQuery($step, $ignoreRange)
     case element(json:wordAnywhere) return structquery:handleWordAnywhere($step)
 
     case element(json:geo) return structquery:handleGeo($step)
@@ -454,8 +454,8 @@ declare private function structquery:handleDirectory(
     cts:directory-query(structquery:valueToStrings($step), if($step/../json:descendants/@boolean = "true") then "infinity" else "1")
 };
 
-declare private function structquery:handleQueryString(
-    $step as element(json:queryString),
+declare private function structquery:handleStringQuery(
+    $step as element(json:stringQuery),
     $ignoreRange as xs:string?
 ) as cts:query?
 {
