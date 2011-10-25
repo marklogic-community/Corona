@@ -38,7 +38,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
-        <param name="end" required="false" as="positiveInteger"/>
+        <param name="length" required="false" as="positiveInteger" default="10"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         <param name="filtered" required="false" default="false" as="boolean"/>
         <param name="extractPath" required="false"/>
@@ -57,7 +57,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="property" required="false"/>
         <param name="value" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
-        <param name="end" required="false" as="positiveInteger"/>
+        <param name="length" required="false" as="positiveInteger" default="1"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>

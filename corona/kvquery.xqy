@@ -39,7 +39,7 @@ let $property := map:get($params, "property")
 let $value := map:get($params, "value")
 
 let $start := map:get($params, "start")
-let $end := map:get($params, "end")
+let $length := map:get($params, "length")
 let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
@@ -51,8 +51,6 @@ let $test := (
     then common:error(400, "corona:MISSING-PARAMETER", "Must supply a value along with the key, element, element/attribute or property", $contentType)
     else if(exists($value) and empty($key) and empty($element) and empty($property))
     then common:error(400, "corona:MISSING-PARAMETER", "Must supply a key, element, element/attribute or property along with the value", $contentType)
-    else if(exists($end) and exists($start) and $start > $end)
-    then common:error(400, "corona:INVALID-PARAMETER", "The end must be greater than the start", $contentType)
     else ()
 )
 
@@ -105,21 +103,13 @@ let $query := cts:and-query((
     return cts:directory-query($directory)
 ))
 
+let $end := $start + $length - 1
+
 let $results :=
     if($contentType = "json")
-    then
-        if(exists($start) and exists($end) and $end > $start)
-        then cts:search(/json:json, $query)[$start to $end]
-        else if(exists($start))
-        then cts:search(/json:json, $query)[$start]
-        else ()
+    then cts:search(/json:json, $query)[$start to $end]
     else if($contentType = "xml")
-    then
-        if(exists($start) and exists($end) and $end > $start)
-        then cts:search(/*, $query)[$start to $end]
-        else if(exists($start))
-        then cts:search(/*, $query)[$start]
-        else ()
+    then cts:search(/*, $query)[$start to $end]
     else ()
 
 let $total :=

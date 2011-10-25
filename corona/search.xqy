@@ -38,13 +38,11 @@ let $contentType := map:get($params, "content-type")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 let $start := map:get($params, "start")
-let $end := map:get($params, "end")
+let $length := map:get($params, "length")
 
 let $test := (
     if(empty(($stringQuery, $structuredQuery)) or (exists($structuredQuery) and string-length(normalize-space($structuredQuery)) = 0))
     then common:error(400, "corona:MISSING-PARAMETER", "Must supply a string query or a structured query", $contentType)
-    else if(exists($end) and exists($start) and $start > $end)
-    then common:error(400, "corona:INVALID-PARAMETER", "The end must be greater than the start", $contentType)
     else ()
 )
 
@@ -94,21 +92,13 @@ let $options :=
     then "filtered"
     else "unfiltered"
 
+let $end := $start + $length - 1
+
 let $results :=
     if($contentType = "json")
-    then
-        if(exists($start) and exists($end) and $end > $start)
-        then cts:search(/json:json, $query, $options)[$start to $end]
-        else if(exists($start))
-        then cts:search(/json:json, $query, $options)[$start]
-        else ()
+    then cts:search(/json:json, $query, $options)[$start to $end]
     else if($contentType = "xml")
-    then
-        if(exists($start) and exists($end) and $end > $start)
-        then cts:search(/*, $query, $options)[$start to $end]
-        else if(exists($start))
-        then cts:search(/*, $query, $options)[$start]
-        else ()
+    then cts:search(/*, $query, $options)[$start to $end]
     else ()
 
 let $total :=
