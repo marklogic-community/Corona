@@ -24,7 +24,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="POST"/>
         <http method="PUT"/>
         <http method="DELETE">
-            <param name="q" required="false"/>
+            <param name="stringQuery" required="false"/>
             <param name="structuredQuery" required="false"/>
             <param name="bulkDelete" required="false" as="boolean" default="false"/>
             <param name="include" alias="include[]" repeatable="true" required="false"/>

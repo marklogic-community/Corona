@@ -151,7 +151,7 @@ let $structuredQuery :=
         xdmp:set($tests, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $contentType))
     }
 
-let $query := (stringquery:parse(map:get($params, "q")), structquery:getCTS($structuredQuery))[1]
+let $query := (stringquery:parse(map:get($params, "stringQuery")), structquery:getCTS($structuredQuery))[1]
 
 let $log := xdmp:log(concat(":", $uri, ":"))
 where string-length($uri) or ($requestMethod = "DELETE" and exists($query)) or exists($tests)
