@@ -54,82 +54,6 @@ declare function structquery:getCTSFromParseTree(
     structquery:dispatch($parseTree, $ignoreRange)
 };
 
-declare function structquery:searchJSON(
-    $json as element(json:json),
-    $include as xs:string*,
-    $start as xs:positiveInteger?,
-    $end as xs:positiveInteger?,
-    $extractPath as xs:string?,
-    $applyTransform as xs:string?
-) as xs:string
-{
-    let $start := if(empty($start)) then 1 else $start
-    let $cts := structquery:dispatch($json, ())
-    let $options := structquery:extractOptions($json, "search")
-    let $weight := structquery:extractWeight($json)
-    let $debug :=
-        if($json/json:debug[@boolean = "true"])
-        then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
-        else ()
-
-    let $results :=
-        if(exists($start) and exists($end))
-        then cts:search(collection($const:JSONCollection)/json:json, $cts, $options, $weight)[$start to $end]
-        else if(exists($start))
-        then cts:search(collection($const:JSONCollection)/json:json, $cts, $options, $weight)[$start]
-        else cts:search(collection($const:JSONCollection)/json:json, $cts, $options, $weight)
-
-    let $total :=
-        if(exists($results[1]))
-        then cts:remainder($results[1]) + $start - 1
-        else 0
-
-    let $end :=
-        if($end > $total)
-        then $total
-        else $end
-
-    return reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $cts, $extractPath, $applyTransform)
-};
-
-declare function structquery:searchXML(
-    $json as element(json:json),
-    $include as xs:string*,
-    $start as xs:positiveInteger?,
-    $end as xs:positiveInteger?,
-    $extractPath as xs:string?,
-    $applyTransform as xs:string?
-) as element(corona:response)
-{
-    let $start := if(empty($start)) then 1 else $start
-    let $cts := structquery:dispatch($json, ())
-    let $options := structquery:extractOptions($json, "search")
-    let $weight := structquery:extractWeight($json)
-    let $debug :=
-        if($json/json:debug[@boolean = "true"])
-        then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
-        else ()
-
-    let $results :=
-        if(exists($start) and exists($end))
-        then cts:search(collection($const:XMLCollection)/*, $cts, $options, $weight)[$start to $end]
-        else if(exists($start))
-        then cts:search(collection($const:XMLCollection)/*, $cts, $options, $weight)[$start]
-        else cts:search(collection($const:XMLCollection)/*, $cts, $options, $weight)
-
-    let $total :=
-        if(exists($results[1]))
-        then cts:remainder($results[1]) + $start - 1
-        else 0
-
-    let $end :=
-        if($end > $total)
-        then $total
-        else $end
-
-    return reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $cts, $extractPath, $applyTransform)
-};
-
 declare function structquery:getParseTree(
     $query as xs:string?
 ) as element(json:json)?
@@ -647,21 +571,6 @@ declare private function structquery:extractOptions(
         ,
         if(exists($item/json:maximumOccurances[@type = "number"]))
         then concat("max-occurs=", string($item/json:maximumOccurances[@type = "number"]))
-        else ()
-    )
-    else ()
-    ,
-    if($optionSet = "search")
-    then (
-        if(exists($item/json:filtered))
-        then
-            if($item/json:filtered/@boolean = "true")
-            then "filtered"
-            else "unfiltered"
-        else ()
-        ,
-        if(exists($item/json:score[@type = "string"]))
-        then concat("score-", string($item/json:score[@type = "string"]))
         else ()
     )
     else ()

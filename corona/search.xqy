@@ -19,17 +19,19 @@ xquery version "1.0-ml";
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
 import module namespace const="http://marklogic.com/corona/constants" at "lib/constants.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
-import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
+import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
+import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
 
 declare option xdmp:mapping "false";
 
-let $params := rest:process-request(endpoints:request("/corona/stringQuery.xqy"))
+let $params := rest:process-request(endpoints:request("/corona/search.xqy"))
 
 let $stringQuery := map:get($params, "stringQuery")
+let $structuredQuery := map:get($params, "structuredQuery")
 let $include := map:get($params, "include")
 let $filtered := map:get($params, "filtered")
 let $contentType := map:get($params, "content-type")
@@ -39,14 +41,30 @@ let $start := map:get($params, "start")
 let $end := map:get($params, "end")
 
 let $test := (
-    if(empty($stringQuery))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a string query", $contentType)
+    if(empty(($stringQuery, $structuredQuery)) or (exists($structuredQuery) and string-length(normalize-space($structuredQuery)) = 0))
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a string query or a structured query", $contentType)
     else if(exists($end) and exists($start) and $start > $end)
     then common:error(400, "corona:INVALID-PARAMETER", "The end must be greater than the start", $contentType)
     else ()
 )
 
-let $query := stringquery:parse($stringQuery)
+let $structuredQueryJSON :=
+    if(exists($structuredQuery))
+    then
+        try {
+            structquery:getParseTree($structuredQuery)
+        }
+        catch ($e) {
+            xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $contentType))
+        }
+    else ()
+
+let $query :=
+    if(exists($stringQuery))
+    then stringquery:parse($stringQuery)
+    else if(exists($structuredQuery))
+    then structquery:getCTS($structuredQueryJSON)
+    else ()
 
 let $query := cts:and-query((
     $query,

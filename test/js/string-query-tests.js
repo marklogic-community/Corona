@@ -119,10 +119,10 @@ corona.constructURL = function(query, purpose) {
     if(purpose === "query") {
         var base;
         if(query.type === "json") {
-            base = "/json/stringQuery";
+            base = "/json/search";
         }
         else {
-            base = "/xml/stringQuery";
+            base = "/xml/search";
         }
         return base;
     }
