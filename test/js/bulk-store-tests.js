@@ -103,7 +103,7 @@ corona.insertDocuments = function(prefix, callback) {
 corona.deleteDocuments = function() {
     asyncTest("Bulk delete check", function() {
         $.ajax({
-            url: '/json/store?customquery={"keyExists": "foo"}',
+            url: '/json/store?structuredQuery={"keyExists": "foo"}',
             type: 'DELETE',
             success: function() {
                 ok(false, "Deleted documents");
@@ -118,7 +118,7 @@ corona.deleteDocuments = function() {
     });
     asyncTest("No documents check", function() {
         $.ajax({
-            url: '/json/store?customquery={"keyExists": "bar"}',
+            url: '/json/store?structuredQuery={"keyExists": "bar"}',
             type: 'DELETE',
             success: function() {
                 ok(false, "Deleted documents");
@@ -134,7 +134,7 @@ corona.deleteDocuments = function() {
 
     asyncTest("Deleting JSON documents", function() {
         $.ajax({
-            url: '/json/store?customquery={"keyExists": "foo"}&bulkDelete=true',
+            url: '/json/store?structuredQuery={"keyExists": "foo"}&bulkDelete=true',
             type: 'DELETE',
             success: function() {
                 ok(true, "Deleted documents");
@@ -150,14 +150,14 @@ corona.deleteDocuments = function() {
 
     asyncTest("Deleting XML documents", function() {
         $.ajax({
-            url: '/xml/store?customquery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true&limit=2',
+            url: '/xml/store?structuredQuery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true&limit=2',
             type: 'DELETE',
             success: function() {
                 ok(true, "Deleted documents (with limit)");
 
                 asyncTest("Deleting XML documents", function() {
                     $.ajax({
-                        url: '/xml/store?customquery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true',
+                        url: '/xml/store?structuredQuery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true',
                         type: 'DELETE',
                         success: function() {
                             ok(true, "Deleted documents");

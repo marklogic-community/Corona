@@ -18,7 +18,7 @@ xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
 import module namespace parser="http://marklogic.com/corona/query-parser" at "lib/query-parser.xqy";
-import module namespace customquery="http://marklogic.com/corona/custom-query" at "lib/custom-query.xqy";
+import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
 import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 
@@ -143,15 +143,15 @@ let $permissions :=
         else common:errorFromException(500, $e, $contentType)
     }
 
-let $customQuery :=
+let $structuredQuery :=
     try {
-        customquery:getParseTree(map:get($params, "customquery"))
+        structquery:getParseTree(map:get($params, "structuredQuery"))
     }
     catch ($e) {
-        xdmp:set($tests, common:error(400, "corona:INVALID-PARAMETER", concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($tests, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $contentType))
     }
 
-let $query := (parser:parse(map:get($params, "q")), customquery:getCTS($customQuery))[1]
+let $query := (parser:parse(map:get($params, "q")), structquery:getCTS($structuredQuery))[1]
 
 let $log := xdmp:log(concat(":", $uri, ":"))
 where string-length($uri) or ($requestMethod = "DELETE" and exists($query)) or exists($tests)
@@ -175,7 +175,7 @@ return
             then reststore:deleteJSONDocument($uri, map:get($params, "include") = ("uri", "uris"))
             else if(exists($query))
             then reststore:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
-            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
+            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
@@ -212,7 +212,7 @@ return
             then reststore:deleteXMLDocument($uri, map:get($params, "include") = ("uri", "uris"))
             else if(exists($query))
             then reststore:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
-            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a query string or a custom query with DELETE requests", $contentType)
+            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
         then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))

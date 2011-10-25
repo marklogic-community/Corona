@@ -18,7 +18,7 @@ corona.queries = [
             equals(data.results[0].uri, "/querystring/doc1.json", "Correct document URI was found");
             equals(data.results[0].content.subject, "bar00001", "Correct document content was found");
         },
-        "purpose": "Simple JSON custom query"
+        "purpose": "Simple keyword search"
     },
     {
         "type": "json",

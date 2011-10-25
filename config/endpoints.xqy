@@ -16,7 +16,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="uri" as="string">$2</uri-param>
         <http method="GET">
             <param name="q" required="false"/>
-            <param name="customquery" required="false"/>
+            <param name="structuredQuery" required="false"/>
             <param name="extractPath" required="false"/>
             <param name="applyTransform" required="false"/>
             <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
@@ -25,15 +25,15 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="PUT"/>
         <http method="DELETE">
             <param name="q" required="false"/>
-            <param name="customquery" required="false"/>
+            <param name="structuredQuery" required="false"/>
             <param name="bulkDelete" required="false" as="boolean" default="false"/>
             <param name="include" alias="include[]" repeatable="true" required="false"/>
             <param name="limit" required="false" as="integer"/>
         </http>
     </request>
 
-    <!-- Custom queries -->
-    <request uri="^/(json|xml)/customquery(/)?$" endpoint="/corona/customquery.xqy">
+    <!-- Structured queries -->
+    <request uri="^/(json|xml)/structuredQuery(/)?$" endpoint="/corona/structuredQuery.xqy">
         <uri-param name="content-type">$1</uri-param>
         <param name="q" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
@@ -83,7 +83,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="content-type">$1</uri-param>
         <uri-param name="facets">$2</uri-param>
         <param name="q" required="false"/>
-        <param name="customquery" required="false"/>
+        <param name="structuredQuery" required="false"/>
         <param name="limit" as="integer" default="25" required="false"/>
         <param name="order" required="false" default="frequency" values="descending|ascending|frequency"/>
         <param name="frequency" required="false" default="document" values="document|key"/>

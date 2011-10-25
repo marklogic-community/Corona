@@ -44,7 +44,7 @@ let $weight := map:get($params, "weight")
 let $name := if(string-length($name)) then $name else () 
 let $scope := if(starts-with($scope, "places")) then "places" else "place"
 
-return
+let $output :=
     try {
         if($requestMethod = "GET")
         then
@@ -57,7 +57,7 @@ return
             else common:error(400, "corona:INVALID-REQUEST", "Must supply a place name, request all the places or the anonymous place", "json")
 
         else if($requestMethod = "PUT")
-        then
+        then 
             if($scope = "place" and exists($name))
             then manage:createPlace($name, $mode, map:get($params, "option"))
             else if($scope = "places")
@@ -94,3 +94,7 @@ return
     catch ($e) {
         common:errorFromException(400, $e, "json")
     }
+return
+    if(empty($output))
+    then xdmp:set-response-code(204, "Request successful")
+    else $output

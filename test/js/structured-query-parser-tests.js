@@ -571,7 +571,7 @@ corona.queries = [
 ];
 
 $(document).ready(function() {
-    module("Custom Queries");
+    module("Structured Queries");
     for (var i = 0; i < corona.queries.length; i += 1) {
         corona.queryFromServerTest(corona.queries[i]);
     }
@@ -585,7 +585,7 @@ corona.queryFromServer = function(test, success, error) {
             data.ignoreRange = test.ignoreRange;
         }
         $.ajax({
-            url: '/test/xq/parsecustomquery.xqy',
+            url: '/test/xq/parse-structured-query.xqy',
             data: data,
             success: success,
             error: error,

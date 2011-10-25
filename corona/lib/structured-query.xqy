@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 :)
 
-module namespace customquery="http://marklogic.com/corona/custom-query";
+module namespace structquery="http://marklogic.com/corona/structured-query";
 
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
@@ -29,32 +29,32 @@ declare namespace corona="http://marklogic.com/corona";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-declare function customquery:getCTS(
+declare function structquery:getCTS(
     $json as element(json:json)?
 ) as cts:query?
 {
-    customquery:getCTS($json, ())
+    structquery:getCTS($json, ())
 };
 
-declare function customquery:getCTS(
+declare function structquery:getCTS(
     $json as element(json:json)?,
     $ignoreRange as xs:string?
 ) as cts:query?
 {
     if(exists($json))
-    then customquery:dispatch($json, $ignoreRange)
+    then structquery:dispatch($json, $ignoreRange)
     else ()
 };
 
-declare function customquery:getCTSFromParseTree(
+declare function structquery:getCTSFromParseTree(
     $parseTree as element(json:json),
     $ignoreRange as xs:string?
 ) as cts:query?
 {
-    customquery:dispatch($parseTree, $ignoreRange)
+    structquery:dispatch($parseTree, $ignoreRange)
 };
 
-declare function customquery:searchJSON(
+declare function structquery:searchJSON(
     $json as element(json:json),
     $include as xs:string*,
     $start as xs:positiveInteger?,
@@ -64,9 +64,9 @@ declare function customquery:searchJSON(
 ) as xs:string
 {
     let $start := if(empty($start)) then 1 else $start
-    let $cts := customquery:dispatch($json, ())
-    let $options := customquery:extractOptions($json, "search")
-    let $weight := customquery:extractWeight($json)
+    let $cts := structquery:dispatch($json, ())
+    let $options := structquery:extractOptions($json, "search")
+    let $weight := structquery:extractWeight($json)
     let $debug :=
         if($json/json:debug[@boolean = "true"])
         then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
@@ -92,7 +92,7 @@ declare function customquery:searchJSON(
     return reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $cts, $extractPath, $applyTransform)
 };
 
-declare function customquery:searchXML(
+declare function structquery:searchXML(
     $json as element(json:json),
     $include as xs:string*,
     $start as xs:positiveInteger?,
@@ -102,9 +102,9 @@ declare function customquery:searchXML(
 ) as element(corona:response)
 {
     let $start := if(empty($start)) then 1 else $start
-    let $cts := customquery:dispatch($json, ())
-    let $options := customquery:extractOptions($json, "search")
-    let $weight := customquery:extractWeight($json)
+    let $cts := structquery:dispatch($json, ())
+    let $options := structquery:extractOptions($json, "search")
+    let $weight := structquery:extractWeight($json)
     let $debug :=
         if($json/json:debug[@boolean = "true"])
         then (xdmp:log(concat("Constructed search constraint: ", $cts)), xdmp:log(concat("Constructed search options: ", string-join($options, ", "))))
@@ -130,7 +130,7 @@ declare function customquery:searchXML(
     return reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $cts, $extractPath, $applyTransform)
 };
 
-declare function customquery:getParseTree(
+declare function structquery:getParseTree(
     $query as xs:string?
 ) as element(json:json)?
 {
@@ -139,7 +139,7 @@ declare function customquery:getParseTree(
     else json:parse($query)
 };
 
-declare function customquery:valuesForFacet(
+declare function structquery:valuesForFacet(
     $parseTree as element(json:json),
     $facetName as xs:string
 ) as xs:string*
@@ -149,7 +149,7 @@ declare function customquery:valuesForFacet(
 };
 
 
-declare private function customquery:dispatch(
+declare private function structquery:dispatch(
     $step as element(),
     $ignoreRange as xs:string?
 )
@@ -183,48 +183,48 @@ declare private function customquery:dispatch(
         $step/json:box[@type = "object"],
         $step/json:polygon[@type = "array"]
     )[1]
-    return customquery:process($precedent, $ignoreRange)
+    return structquery:process($precedent, $ignoreRange)
 };
 
-declare private function customquery:process(
+declare private function structquery:process(
     $step as element(),
     $ignoreRange as xs:string?
 )
 {
     typeswitch($step)
-    case element(json:item) return customquery:dispatch($step, $ignoreRange)
-    case element(json:and) return cts:and-query(for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreRange))
-    case element(json:or) return cts:or-query(for $item in $step/json:item[@type = "object"] return customquery:process($item, $ignoreRange))
-    case element(json:not) return cts:not-query(customquery:dispatch($step, $ignoreRange))
-    case element(json:andNot) return customquery:handleAndNot($step, $ignoreRange)
-    case element(json:near) return customquery:handleNear($step, $ignoreRange)
-    case element(json:isNULL) return customquery:handleIsNULL($step)
-    case element(json:keyExists) return customquery:handleKeyExists($step)
-    case element(json:elementExists) return customquery:handleElementExists($step)
-    case element(json:underElement) return customquery:handleUnderElement($step, $ignoreRange)
-    case element(json:underKey) return customquery:handleUnderKey($step, $ignoreRange)
-    case element(json:boolean) return customquery:handleBoolean($step)
+    case element(json:item) return structquery:dispatch($step, $ignoreRange)
+    case element(json:and) return cts:and-query(for $item in $step/json:item[@type = "object"] return structquery:process($item, $ignoreRange))
+    case element(json:or) return cts:or-query(for $item in $step/json:item[@type = "object"] return structquery:process($item, $ignoreRange))
+    case element(json:not) return cts:not-query(structquery:dispatch($step, $ignoreRange))
+    case element(json:andNot) return structquery:handleAndNot($step, $ignoreRange)
+    case element(json:near) return structquery:handleNear($step, $ignoreRange)
+    case element(json:isNULL) return structquery:handleIsNULL($step)
+    case element(json:keyExists) return structquery:handleKeyExists($step)
+    case element(json:elementExists) return structquery:handleElementExists($step)
+    case element(json:underElement) return structquery:handleUnderElement($step, $ignoreRange)
+    case element(json:underKey) return structquery:handleUnderKey($step, $ignoreRange)
+    case element(json:boolean) return structquery:handleBoolean($step)
 
-    case element(json:key) return customquery:handleKey($step)
-    case element(json:element) return customquery:handleElement($step)
-    case element(json:property) return customquery:handleProperty($step)
-    case element(json:place) return customquery:handlePlace($step)
-    case element(json:range) return customquery:handleRange($step, $ignoreRange)
-    case element(json:collection) return customquery:handleCollection($step)
-    case element(json:directory) return customquery:handleDirectory($step)
-    case element(json:queryString) return customquery:handleQueryString($step, $ignoreRange)
-    case element(json:wordAnywhere) return customquery:handleWordAnywhere($step)
+    case element(json:key) return structquery:handleKey($step)
+    case element(json:element) return structquery:handleElement($step)
+    case element(json:property) return structquery:handleProperty($step)
+    case element(json:place) return structquery:handlePlace($step)
+    case element(json:range) return structquery:handleRange($step, $ignoreRange)
+    case element(json:collection) return structquery:handleCollection($step)
+    case element(json:directory) return structquery:handleDirectory($step)
+    case element(json:queryString) return structquery:handleQueryString($step, $ignoreRange)
+    case element(json:wordAnywhere) return structquery:handleWordAnywhere($step)
 
-    case element(json:geo) return customquery:handleGeo($step)
-    case element(json:region) return customquery:handleRegion($step)
-    case element(json:point) return customquery:handleGeoPoint($step)
-    case element(json:circle) return customquery:handleGeoCircle($step)
-    case element(json:box) return customquery:handleGeoBox($step)
-    case element(json:polygon) return customquery:handleGeoPolygon($step)
+    case element(json:geo) return structquery:handleGeo($step)
+    case element(json:region) return structquery:handleRegion($step)
+    case element(json:point) return structquery:handleGeoPoint($step)
+    case element(json:circle) return structquery:handleGeoCircle($step)
+    case element(json:box) return structquery:handleGeoBox($step)
+    case element(json:polygon) return structquery:handleGeoPolygon($step)
     default return ()
 };
 
-declare private function customquery:handleAndNot(
+declare private function structquery:handleAndNot(
     $step as element(json:andNot),
     $ignoreRange as xs:string?
 ) as cts:and-not-query?
@@ -232,16 +232,16 @@ declare private function customquery:handleAndNot(
     let $positive := $step/json:positive[@type = "object"]
     let $negative := $step/json:negative[@type = "object"]
     where exists($positive) and exists($negative)
-    return cts:and-not-query(customquery:dispatch($positive, $ignoreRange), customquery:dispatch($negative, $ignoreRange))
+    return cts:and-not-query(structquery:dispatch($positive, $ignoreRange), structquery:dispatch($negative, $ignoreRange))
 };
 
-declare private function customquery:handleNear(
+declare private function structquery:handleNear(
     $step as element(json:near),
     $ignoreRange as xs:string?
 ) as cts:near-query
 {
     let $container := $step/..
-    let $queries := for $item in $step/json:item return customquery:dispatch($item, $ignoreRange)
+    let $queries := for $item in $step/json:item return structquery:dispatch($item, $ignoreRange)
     let $distance := xs:double(($container/json:distance[@type = "number"], 10.0)[1]) 
     let $options :=
         if($container/json:ordered/@boolean = "true")
@@ -253,7 +253,7 @@ declare private function customquery:handleNear(
     return cts:near-query($queries, $distance, $options, $weight)
 };
 
-declare private function customquery:handleIsNULL(
+declare private function structquery:handleIsNULL(
     $step as element(json:isNULL)
 ) as cts:element-attribute-value-query
 {
@@ -262,27 +262,27 @@ declare private function customquery:handleIsNULL(
     return cts:element-attribute-value-query($QName, xs:QName("type"), "null", (), $weight)
 };
 
-declare private function customquery:handleKeyExists(
+declare private function structquery:handleKeyExists(
     $step as element(json:keyExists)
 ) as cts:element-query?
 {
     let $QNames :=
-        for $i in customquery:valueToStrings($step)
+        for $i in structquery:valueToStrings($step)
         return xs:QName(concat("json:", json:escapeNCName($i)))
     return cts:element-query($QNames, cts:and-query(()))
 };
 
-declare private function customquery:handleElementExists(
+declare private function structquery:handleElementExists(
     $step as element(json:elementExists)
 ) as cts:element-query?
 {
     let $QNames :=
-        for $i in customquery:valueToStrings($step)
+        for $i in structquery:valueToStrings($step)
         return xs:QName($i)
     return cts:element-query($QNames, cts:and-query(()))
 };
 
-declare private function customquery:handleUnderElement(
+declare private function structquery:handleUnderElement(
     $step as element(json:underElement),
     $ignoreRange as xs:string?
 ) as cts:element-query?
@@ -291,11 +291,11 @@ declare private function customquery:handleUnderElement(
     let $query :=
         if($container/json:query/@type = "string")
         then string($container/json:query)
-        else customquery:dispatch($container/json:query, $ignoreRange)
+        else structquery:dispatch($container/json:query, $ignoreRange)
     return cts:element-query(xs:QName($step), $query)
 };
 
-declare private function customquery:handleUnderKey(
+declare private function structquery:handleUnderKey(
     $step as element(json:underKey),
     $ignoreRange as xs:string?
 ) as cts:element-query?
@@ -304,11 +304,11 @@ declare private function customquery:handleUnderKey(
     let $query :=
         if($container/json:query/@type = "string")
         then string($container/json:query)
-        else customquery:dispatch($container/json:query, $ignoreRange)
+        else structquery:dispatch($container/json:query, $ignoreRange)
     return cts:element-query(xs:QName(concat("json:", json:escapeNCName($step))), $query)
 };
 
-declare private function customquery:handleBoolean(
+declare private function structquery:handleBoolean(
     $step as element(json:boolean)
 ) as cts:query
 {
@@ -317,15 +317,15 @@ declare private function customquery:handleBoolean(
     else cts:or-query(())
 };
 
-declare private function customquery:handleKey(
+declare private function structquery:handleKey(
     $step as element(json:key)
 ) as cts:query?
 {
     let $container := $step/..
-    let $values := customquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
+    let $values := structquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
     let $key := $container/json:key
     let $QName := xs:QName(concat("json:", json:escapeNCName($key)))
-    let $options := customquery:extractOptions($container, "word")
+    let $options := structquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
     where exists($values)
     return
@@ -348,15 +348,15 @@ declare private function customquery:handleKey(
         else ()
 };
 
-declare private function customquery:handleElement(
+declare private function structquery:handleElement(
     $step as element(json:element)
 ) as cts:query?
 {
     let $container := $step/..
-    let $values := customquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
+    let $values := structquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
     let $element := $container/json:element
     let $attribute := $container/json:attribute[@type = "string"]
-    let $options := customquery:extractOptions($container, "word")
+    let $options := structquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
     where exists($values)
     return
@@ -373,15 +373,15 @@ declare private function customquery:handleElement(
         else ()
 };
 
-declare private function customquery:handleProperty(
+declare private function structquery:handleProperty(
     $step as element(json:property)
 ) as cts:query
 {
     cts:properties-query(
         let $container := $step/..
-        let $values := customquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
+        let $values := structquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
         let $QName := xs:QName(concat("reststore:", $step))
-        let $options := customquery:extractOptions($container, "word")
+        let $options := structquery:extractOptions($container, "word")
         let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
         where exists($values)
         return
@@ -394,20 +394,20 @@ declare private function customquery:handleProperty(
     )
 };
 
-declare private function customquery:handlePlace(
+declare private function structquery:handlePlace(
     $step as element(json:place)
 ) as cts:query?
 {
     let $container := $step/..
     let $index := config:get(string($step))
-    let $values := customquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
-    let $options := customquery:extractOptions($container, "word")
+    let $values := structquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
+    let $options := structquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
     where exists($values)
     return search:placeValueToQuery($index, $values, $options, $weight)
 };
 
-declare private function customquery:handleRange(
+declare private function structquery:handleRange(
     $step as element(json:range),
     $ignoreRange as xs:string?
 ) as cts:query?
@@ -415,7 +415,7 @@ declare private function customquery:handleRange(
     let $container := $step/..
     let $indexName := string($step)
     let $index := config:get($indexName)
-    let $options := customquery:extractOptions($container, "range")
+    let $options := structquery:extractOptions($container, "range")
     where if(exists($ignoreRange)) then $indexName != $ignoreRange else true() and exists($index)
     return
 
@@ -440,21 +440,21 @@ declare private function customquery:handleRange(
             return search:rangeValueToQuery($index, $values, $operator, $options)
 };
 
-declare private function customquery:handleCollection(
+declare private function structquery:handleCollection(
     $step as element(json:collection)
 ) as cts:collection-query
 {
-    cts:collection-query(customquery:valueToStrings($step))
+    cts:collection-query(structquery:valueToStrings($step))
 };
 
-declare private function customquery:handleDirectory(
+declare private function structquery:handleDirectory(
     $step as element(json:directory)
 ) as cts:directory-query?
 {
-    cts:directory-query(customquery:valueToStrings($step), if($step/../json:descendants/@boolean = "true") then "infinity" else "1")
+    cts:directory-query(structquery:valueToStrings($step), if($step/../json:descendants/@boolean = "true") then "infinity" else "1")
 };
 
-declare private function customquery:handleQueryString(
+declare private function structquery:handleQueryString(
     $step as element(json:queryString),
     $ignoreRange as xs:string?
 ) as cts:query?
@@ -462,17 +462,17 @@ declare private function customquery:handleQueryString(
     qsparser:parse(string($step), $ignoreRange)
 };
 
-declare private function customquery:handleWordAnywhere(
+declare private function structquery:handleWordAnywhere(
     $step as element(json:wordAnywhere)
 ) as cts:word-query?
 {
     let $container := $step/..
-    let $options := customquery:extractOptions($container, "word")
+    let $options := structquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
-    return cts:word-query(customquery:valueToStrings($step), $options, $weight)
+    return cts:word-query(structquery:valueToStrings($step), $options, $weight)
 };
 
-declare private function customquery:handleGeo(
+declare private function structquery:handleGeo(
     $step as element(json:geo)
 ) as cts:query?
 {
@@ -512,26 +512,26 @@ declare private function customquery:handleGeo(
 
     return
         if(exists($parent) and exists($latKey) and exists($longKey))
-        then cts:element-pair-geospatial-query($parent, $latKey, $longKey, customquery:process($step/json:region, ()), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-pair-geospatial-query($parent, $latKey, $longKey, structquery:process($step/json:region, ()), structquery:extractOptions($step, "geo"), $weight)
         else if(exists($parent) and exists($latLongPair))
-        then cts:element-child-geospatial-query($parent, $latLongPair, customquery:process($step/json:region, ()), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-child-geospatial-query($parent, $latLongPair, structquery:process($step/json:region, ()), structquery:extractOptions($step, "geo"), $weight)
         else if(exists($parent) and exists($latAttribute) and exists($longAttribute))
-        then cts:element-attribute-pair-geospatial-query($parent, $latAttribute, $longAttribute, customquery:process($step/json:region, ()), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-attribute-pair-geospatial-query($parent, $latAttribute, $longAttribute, structquery:process($step/json:region, ()), structquery:extractOptions($step, "geo"), $weight)
         else if(exists($latLongPair))
-        then cts:element-geospatial-query($latLongPair, customquery:process($step/json:region, ()), customquery:extractOptions($step, "geo"), $weight)
+        then cts:element-geospatial-query($latLongPair, structquery:process($step/json:region, ()), structquery:extractOptions($step, "geo"), $weight)
         else ()
 };
 
-declare private function customquery:handleRegion(
+declare private function structquery:handleRegion(
     $step as element()
 )
 {
     if($step[@type = "array"])
-    then for $item in $step/json:item[@type = "object"] return customquery:process($item, ())
-    else customquery:dispatch($step, ())
+    then for $item in $step/json:item[@type = "object"] return structquery:process($item, ())
+    else structquery:dispatch($step, ())
 };
 
-declare private function customquery:handleGeoPoint(
+declare private function structquery:handleGeoPoint(
     $step as element()
 ) as cts:point?
 {
@@ -540,16 +540,16 @@ declare private function customquery:handleGeoPoint(
     else ()
 };
 
-declare private function customquery:handleGeoCircle(
+declare private function structquery:handleGeoCircle(
     $step as element(json:circle)
 ) as cts:circle?
 {
     if(exists($step/json:radius) and exists($step/json:latitude) and exists($step/json:longitude))
-    then cts:circle($step/json:radius, customquery:handleGeoPoint($step))
+    then cts:circle($step/json:radius, structquery:handleGeoPoint($step))
     else ()
 };
 
-declare private function customquery:handleGeoBox(
+declare private function structquery:handleGeoBox(
     $step as element(json:box)
 ) as cts:box
 {
@@ -558,25 +558,25 @@ declare private function customquery:handleGeoBox(
     else ()
 };
 
-declare private function customquery:handleGeoPolygon(
+declare private function structquery:handleGeoPolygon(
     $step as element(json:polygon)
 ) as cts:polygon
 {
     cts:polygon(
         for $point in $step/json:item
-        return customquery:handleGeoPoint($point)
+        return structquery:handleGeoPoint($point)
     )
 };
 
 
-declare private function customquery:valueToStrings(
+declare private function structquery:valueToStrings(
     $item as element()?
 ) as xs:string*
 {
     if($item/@type = "array")
     then
         for $i in $item/json:item
-        return customquery:valueToStrings($i)
+        return structquery:valueToStrings($i)
     else if(exists($item/@boolean))
     then string($item/@boolean)
     else if($item/@type = "object")
@@ -584,7 +584,7 @@ declare private function customquery:valueToStrings(
     else string($item)
 };
 
-declare private function customquery:extractOptions(
+declare private function structquery:extractOptions(
     $item as element(),
     $optionSet as xs:string
 ) as xs:string*
@@ -734,7 +734,7 @@ declare private function customquery:extractOptions(
     else ()
 };
 
-declare private function customquery:extractWeight(
+declare private function structquery:extractWeight(
     $tree as element(json:json)
 ) as xs:double
 {

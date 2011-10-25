@@ -17,7 +17,7 @@ limitations under the License.
 xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
-import module namespace customquery="http://marklogic.com/corona/custom-query" at "lib/custom-query.xqy";
+import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
@@ -37,7 +37,7 @@ let $query := string(map:get($params, "q"))
 
 let $test := (
     if(empty($query) or string-length($query) = 0)
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a query string", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a structured query", $contentType)
     else if(exists($end) and exists($start) and $start > $end)
     then common:error(400, "corona:INVALID-PARAMETER", "The end must be greater than the start", $contentType)
     else ()
@@ -49,7 +49,7 @@ let $query :=
     else $query
 
 let $json := try {
-        customquery:getParseTree($query)
+        structquery:getParseTree($query)
     }
     catch ($e) {
         xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The query JSON isn't valid: ", $e/*:message), $contentType))
@@ -60,7 +60,7 @@ return
     if(exists($test))
     then $test
     else if($contentType = "json")
-    then customquery:searchJSON($json, $include, $start, $end, $extractPath, $applyTransform)
+    then structquery:searchJSON($json, $include, $start, $end, $extractPath, $applyTransform)
     else if($contentType = "xml")
-    then customquery:searchXML($json, $include, $start, $end, $extractPath, $applyTransform)
+    then structquery:searchXML($json, $include, $start, $end, $extractPath, $applyTransform)
     else ()

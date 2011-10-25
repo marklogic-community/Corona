@@ -21,7 +21,7 @@ import module namespace config="http://marklogic.com/corona/index-config" at "li
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
 import module namespace search="http://marklogic.com/corona/search" at "lib/search.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
-import module namespace customquery="http://marklogic.com/corona/custom-query" at "lib/custom-query.xqy";
+import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
 import module namespace parser="http://marklogic.com/corona/query-parser" at "lib/query-parser.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
@@ -36,7 +36,7 @@ let $facets := tokenize(map:get($params, "facets"), ",")
 let $contentType := map:get($params, "content-type")
 let $outputFormat := (map:get($params, "outputFormat"), $contentType)[1]
 let $queryString := map:get($params, "q")
-let $customQuery := map:get($params, "customquery")
+let $structuredQuery := map:get($params, "structuredQuery")
 
 let $limit := map:get($params, "limit")
 let $order := map:get($params, "order")
@@ -44,20 +44,20 @@ let $frequency := map:get($params, "frequency")
 let $includeAllValues := map:get($params, "includeAllValues")
 
 let $test := (
-    if(empty($queryString) and empty($customQuery))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a query string or a custom query", $contentType)
+    if(empty($queryString) and empty($structuredQuery))
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $contentType)
     else ()
 )
 
 let $query :=
     if(exists($queryString))
     then parser:parse($queryString)
-    else if(exists($customQuery))
+    else if(exists($structuredQuery))
     then try {
-        customquery:getCTS(customquery:getParseTree($customQuery), ())
+        structquery:getCTS(structquery:getParseTree($structuredQuery), ())
     }
     catch ($e) {
-        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The custom query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $contentType))
     }
     else ()
 
@@ -81,15 +81,15 @@ let $values :=
     let $rawQuery :=
         if(exists($queryString))
         then parser:getParseTree($queryString)
-        else if(exists($customQuery))
-        then customquery:getParseTree($customQuery)
+        else if(exists($structuredQuery))
+        then structquery:getParseTree($structuredQuery)
         else ()
 
     let $valuesInQuery :=
         if(exists($queryString))
         then parser:valuesForFacet($rawQuery, $facet)
-        else if(exists($customQuery))
-        then customquery:valuesForFacet($rawQuery, $facet)
+        else if(exists($structuredQuery))
+        then structquery:valuesForFacet($rawQuery, $facet)
         else ()
 
     let $ignoreFacet :=
@@ -100,8 +100,8 @@ let $values :=
     let $query :=
         if(exists($queryString))
         then parser:getCTSFromParseTree($rawQuery, $ignoreFacet)
-        else if(exists($customQuery))
-        then customquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
+        else if(exists($structuredQuery))
+        then structquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
         else $query
 
     let $query := cts:and-query((

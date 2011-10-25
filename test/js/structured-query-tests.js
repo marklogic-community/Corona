@@ -6,7 +6,7 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/customquery/doc1.json",
+            "uri": "/structquery/doc1.json",
             "content": {
                 "foo": "bar 123.45-6"
             }
@@ -21,15 +21,15 @@ corona.queries = [
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
             console.log(data);
-            equals(data.results[0].uri, "/customquery/doc1.json", "Correct document URI was found");
+            equals(data.results[0].uri, "/structquery/doc1.json", "Correct document URI was found");
             equals(data.results[0].content.foo, "bar 123.45-6", "Correct document content was found");
         },
-        "purpose": "Simple JSON custom query"
+        "purpose": "Simple JSON structured query"
     },
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/customquery/doc3.json",
+            "uri": "/structquery/doc3.json",
             "content": {"foo": "bar 123.45-7"},
             "collection": ["testcol"]
         },
@@ -43,7 +43,7 @@ corona.queries = [
         "shouldSucceed": true,
         "assert": function(data, config) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].uri, "/customquery/doc3.json", "Correct document URI was found");
+            equals(data.results[0].uri, "/structquery/doc3.json", "Correct document URI was found");
             deepEqual(data.results[0].collections, config.prereqDoc.collection, "Correct document collections were found");
         },
         "purpose": "Extracting collection"
@@ -51,7 +51,7 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/customquery/doc2.json",
+            "uri": "/structquery/doc2.json",
             "content": {
                 "foo": "bar 123.45-9",
                 "foo2": {
@@ -71,7 +71,7 @@ corona.queries = [
         "shouldSucceed": true,
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].uri, "/customquery/doc2.json", "Correct document URI was found");
+            equals(data.results[0].uri, "/structquery/doc2.json", "Correct document URI was found");
             equals(data.results[0].content, "baz", "Correct document content was found");
         },
         "purpose": "Using extractPath"
@@ -79,7 +79,7 @@ corona.queries = [
     {
         "type": "xml",
         "prereqDoc": {
-            "uri": "/customquery/doc1.xml",
+            "uri": "/structquery/doc1.xml",
             "content": "<foo>bar 123.45-1</foo>"
         },
         "query": {
@@ -94,7 +94,7 @@ corona.queries = [
         "assert": function(data) {
             equals(data.getElementsByTagName("results")[0].childNodes.length, 1, "Got one document");
             var result = data.getElementsByTagName("results")[0].childNodes[0];
-            equals(result.getElementsByTagName("uri")[0].childNodes[0].nodeValue, "/customquery/doc1.xml", "Correct document URI was found");
+            equals(result.getElementsByTagName("uri")[0].childNodes[0].nodeValue, "/structquery/doc1.xml", "Correct document URI was found");
             equals(result.getElementsByTagName("content")[0].childNodes[0].childNodes[0].nodeValue, "XSLT'd!", "Correct document content was found");
         },
         "purpose": "Applying transform"
@@ -102,7 +102,7 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/customquery/doc8.json",
+            "uri": "/structquery/doc8.json",
             "content": {}
         },
         "query": {
@@ -135,10 +135,10 @@ corona.constructURL = function(query, purpose) {
     if(purpose === "query") {
         var base;
         if(query.type === "json") {
-            base = "/json/customquery";
+            base = "/json/structuredQuery";
         }
         else {
-            base = "/xml/customquery";
+            base = "/xml/structuredQuery";
         }
         return base;
     }
@@ -210,6 +210,6 @@ corona.runQueries = function() {
 };
 
 $(document).ready(function() {
-    module("Custom Queries");
+    module("Structured Queries");
     corona.runQueries();
 });
