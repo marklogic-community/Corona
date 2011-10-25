@@ -12,7 +12,7 @@ corona.queries = [
             }
         },
         "query": {
-            "q": JSON.stringify({
+            "structuredQuery": JSON.stringify({
                 "key": "foo",
                 "equals": "bar 123.45-6"
             }),
@@ -34,7 +34,7 @@ corona.queries = [
             "collection": ["testcol"]
         },
         "query": {
-            "q": JSON.stringify({
+            "structuredQuery": JSON.stringify({
                 "key": "foo",
                 "equals": "bar 123.45-7"
             }),
@@ -62,7 +62,7 @@ corona.queries = [
             }
         },
         "query": {
-            "q": JSON.stringify({
+            "structuredQuery": JSON.stringify({
                 "key": "foo",
                 "equals": "bar 123.45-9"
             }),
@@ -83,7 +83,7 @@ corona.queries = [
             "content": "<foo>bar 123.45-1</foo>"
         },
         "query": {
-            "q": JSON.stringify({
+            "structuredQuery": JSON.stringify({
                 "element": "foo",
                 "equals": "bar 123.45-1"
             }),

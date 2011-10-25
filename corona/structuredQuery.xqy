@@ -24,7 +24,7 @@ import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/c
 
 declare option xdmp:mapping "false";
 
-let $params := rest:process-request(endpoints:request("/corona/query.xqy"))
+let $params := rest:process-request(endpoints:request("/corona/structuredQuery.xqy"))
 
 let $requestMethod := xdmp:get-request-method()
 let $include := map:get($params, "include")
@@ -33,26 +33,26 @@ let $start := map:get($params, "start")
 let $end := map:get($params, "end")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
-let $query := string(map:get($params, "q"))
+let $structuredQuery := string(map:get($params, "structuredQuery"))
 
 let $test := (
-    if(empty($query) or string-length($query) = 0)
+    if(empty($structuredQuery) or string-length($structuredQuery) = 0)
     then common:error(400, "corona:MISSING-PARAMETER", "Must supply a structured query", $contentType)
     else if(exists($end) and exists($start) and $start > $end)
     then common:error(400, "corona:INVALID-PARAMETER", "The end must be greater than the start", $contentType)
     else ()
 )
 
-let $query :=
-    if(string-length(normalize-space($query)) = 0)
+let $structuredQuery :=
+    if(string-length(normalize-space($structuredQuery)) = 0)
     then "{}"
-    else $query
+    else $structuredQuery
 
 let $json := try {
-        structquery:getParseTree($query)
+        structquery:getParseTree($structuredQuery)
     }
     catch ($e) {
-        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $contentType))
     }
 
 where $requestMethod = ("GET", "POST")

@@ -35,7 +35,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <!-- Structured queries -->
     <request uri="^/(json|xml)/structuredQuery(/)?$" endpoint="/corona/structuredQuery.xqy">
         <uri-param name="content-type">$1</uri-param>
-        <param name="q" required="false"/>
+        <param name="structuredQuery" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
