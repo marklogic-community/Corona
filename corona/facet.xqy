@@ -22,7 +22,7 @@ import module namespace common="http://marklogic.com/corona/common" at "lib/comm
 import module namespace search="http://marklogic.com/corona/search" at "lib/search.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
-import module namespace parser="http://marklogic.com/corona/query-parser" at "lib/query-parser.xqy";
+import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
@@ -51,7 +51,7 @@ let $test := (
 
 let $query :=
     if(exists($queryString))
-    then parser:parse($queryString)
+    then stringquery:parse($queryString)
     else if(exists($structuredQuery))
     then try {
         structquery:getCTS(structquery:getParseTree($structuredQuery), ())
@@ -80,14 +80,14 @@ let $values :=
 
     let $rawQuery :=
         if(exists($queryString))
-        then parser:getParseTree($queryString)
+        then stringquery:getParseTree($queryString)
         else if(exists($structuredQuery))
         then structquery:getParseTree($structuredQuery)
         else ()
 
     let $valuesInQuery :=
         if(exists($queryString))
-        then parser:valuesForFacet($rawQuery, $facet)
+        then stringquery:valuesForFacet($rawQuery, $facet)
         else if(exists($structuredQuery))
         then structquery:valuesForFacet($rawQuery, $facet)
         else ()
@@ -99,7 +99,7 @@ let $values :=
 
     let $query :=
         if(exists($queryString))
-        then parser:getCTSFromParseTree($rawQuery, $ignoreFacet)
+        then stringquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
         else if(exists($structuredQuery))
         then structquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
         else $query

@@ -18,7 +18,7 @@ module namespace structquery="http://marklogic.com/corona/structured-query";
 
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
-import module namespace qsparser="http://marklogic.com/corona/query-parser" at "query-parser.xqy";
+import module namespace stringquery="http://marklogic.com/corona/string-query" at "string-query.xqy";
 import module namespace search="http://marklogic.com/corona/search" at "search.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
@@ -459,7 +459,7 @@ declare private function structquery:handleQueryString(
     $ignoreRange as xs:string?
 ) as cts:query?
 {
-    qsparser:parse(string($step), $ignoreRange)
+    stringquery:parse(string($step), $ignoreRange)
 };
 
 declare private function structquery:handleWordAnywhere(

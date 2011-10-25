@@ -16,7 +16,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
-module namespace parser = "http://marklogic.com/corona/query-parser";
+module namespace stringquery = "http://marklogic.com/corona/string-query";
 
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
@@ -28,45 +28,45 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare private variable $GROUPING-INDEX as xs:integer := 0;
 
 
-declare function parser:parse(
+declare function stringquery:parse(
 	$query as xs:string?
 ) as cts:query?
 {
-    parser:parse($query, ())
+    stringquery:parse($query, ())
 };
 
-declare function parser:parse(
+declare function stringquery:parse(
 	$query as xs:string?,
     $ignoreField as xs:string?
 ) as cts:query?
 {
 	let $init := xdmp:set($GROUPING-INDEX, 0)
-	let $tokens := parser:tokenize($query)
-	let $grouped := parser:groupTokens($tokens, 1)
-	let $folded := parser:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
+	let $tokens := stringquery:tokenize($query)
+	let $grouped := stringquery:groupTokens($tokens, 1)
+	let $folded := stringquery:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
     where string-length($query)
-	return parser:dispatchQueryTree($folded, $ignoreField)
+	return stringquery:dispatchQueryTree($folded, $ignoreField)
 };
 
-declare function parser:getParseTree(
+declare function stringquery:getParseTree(
     $query as xs:string
 ) as element(group)
 {
 	let $init := xdmp:set($GROUPING-INDEX, 0)
-	let $tokens := parser:tokenize($query)
-	let $grouped := parser:groupTokens($tokens, 1)
-	return parser:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
+	let $tokens := stringquery:tokenize($query)
+	let $grouped := stringquery:groupTokens($tokens, 1)
+	return stringquery:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
 };
 
-declare function parser:getCTSFromParseTree(
+declare function stringquery:getCTSFromParseTree(
     $parseTree as element(group),
     $ignoreField as xs:string?
 ) as cts:query?
 {
-	parser:dispatchQueryTree($parseTree, $ignoreField)
+	stringquery:dispatchQueryTree($parseTree, $ignoreField)
 };
 
-declare function parser:valuesForFacet(
+declare function stringquery:valuesForFacet(
     $parseTree as element(group),
     $facetName as xs:string
 ) as xs:string*
@@ -75,7 +75,7 @@ declare function parser:valuesForFacet(
     return string($constraint/value)
 };
 
-declare private function parser:tokenize(
+declare private function stringquery:tokenize(
 	$query as xs:string
 ) as element()*
 {
@@ -117,7 +117,7 @@ declare private function parser:tokenize(
 		else <error>{ string($match) }</error>
 };
 
-declare private function parser:groupTokens(
+declare private function stringquery:groupTokens(
 	$tokens as element()*,
 	$starting-index as xs:integer
 ) as element()*
@@ -130,7 +130,7 @@ declare private function parser:groupTokens(
 		xdmp:set($GROUPING-INDEX, $GROUPING-INDEX + 1)
 		,
 		if(local-name($token) = "startgroup")
-		then <group>{ parser:groupTokens($tokens, $index + 1) }</group>
+		then <group>{ stringquery:groupTokens($tokens, $index + 1) }</group>
 		else if(local-name($token) = "endgroup")
 		then
 			if($starting-index > 1)
@@ -167,7 +167,7 @@ declare private function parser:groupTokens(
 	)
 };
 
-declare private function parser:foldTokens(
+declare private function stringquery:foldTokens(
 	$group as element(group),
 	$order as xs:string*
 ) as element(group)
@@ -189,50 +189,50 @@ declare private function parser:foldTokens(
 
 				if($order[1] = "and" and $nextName = "and" and $foundOne = false())
 				then (
-					parser:extractSequence($tokens, "and", $index, $order),
+					stringquery:extractSequence($tokens, "and", $index, $order),
 					xdmp:set($foundOne, true()),
 					xdmp:set($nextIndex, $index + 3)
 				)
 				else if($order[1] = "or" and $nextName = "or" and $foundOne = false())
 				then (
-					parser:extractSequence($tokens, "or", $index, $order),
+					stringquery:extractSequence($tokens, "or", $index, $order),
 					xdmp:set($foundOne, true()),
 					xdmp:set($nextIndex, $index + 3)
 				)
 				else if($order[1] = "not" and local-name($token) = "not" and $foundOne = false())
 				then (
-					<notQuery>{ parser:foldIfNeeded($tokens[$index + 1], $order) }</notQuery>,
+					<notQuery>{ stringquery:foldIfNeeded($tokens[$index + 1], $order) }</notQuery>,
 					xdmp:set($foundOne, true()),
 					xdmp:set($nextIndex, $index + 2)
 				)
 				else if($order[1] = "near" and $nextName = "near" and $foundOne = false())
 				then (
-					parser:extractSequence($tokens, "near", $index, $order),
+					stringquery:extractSequence($tokens, "near", $index, $order),
 					xdmp:set($foundOne, true()),
 					xdmp:set($nextIndex, $index + 3)
 				)
 				else if(local-name($token) = "group")
-				then parser:foldTokens($token, $order)
+				then stringquery:foldTokens($token, $order)
 				else $token
 			)
 		}</group>
 	return
 		if(exists($newGroup//(and, or, not, near)))
-		then parser:foldTokens($newGroup, $order)
+		then stringquery:foldTokens($newGroup, $order)
 		else $newGroup
 };
 
-declare private function parser:foldIfNeeded(
+declare private function stringquery:foldIfNeeded(
 	$token as element(),
 	$order as xs:string*
 ) as element()
 {
 	if(local-name($token) = "group")
-	then parser:foldTokens($token, $order)
+	then stringquery:foldTokens($token, $order)
 	else $token
 };
 
-declare private function parser:extractSequence(
+declare private function stringquery:extractSequence(
 	$tokens as element()*,
 	$operator as xs:string,
 	$index as xs:integer,
@@ -242,47 +242,47 @@ declare private function parser:extractSequence(
 	element { concat($operator, "Query") } {(
 		if(local-name($tokens[$index]) = concat($operator, "Query"))
 		then ($tokens[$index]/@*, $tokens[$index]/*)
-		else ($tokens[$index + 1]/@*, parser:foldIfNeeded($tokens[$index], $order))
+		else ($tokens[$index + 1]/@*, stringquery:foldIfNeeded($tokens[$index], $order))
 		,
-		parser:foldIfNeeded($tokens[$index + 2], $order)
+		stringquery:foldIfNeeded($tokens[$index + 2], $order)
 	)}
 };
 
 
-declare private function parser:dispatchQueryTree(
+declare private function stringquery:dispatchQueryTree(
 	$token as element(),
     $ignoreField as xs:string?
 ) as cts:query*
 {
 	let $queries :=
 		for $term in $token/*
-		return parser:termToQuery($term, $ignoreField)
+		return stringquery:termToQuery($term, $ignoreField)
 	return
 		if(count($queries) = 1 or local-name($token) = ("andQuery", "orQuery"))
 		then $queries
 		else cts:and-query($queries)
 };
 
-declare private function parser:termToQuery(
+declare private function stringquery:termToQuery(
 	$term as element(),
     $ignoreField as xs:string?
 ) as cts:query?
 {
 	typeswitch ($term)
-	case element(andQuery) return cts:and-query(parser:dispatchQueryTree($term, $ignoreField))
-	case element(orQuery) return cts:or-query(parser:dispatchQueryTree($term, $ignoreField))
-	case element(notQuery) return parser:notQuery($term, $ignoreField)
-	case element(nearQuery) return parser:nearQuery($term, $ignoreField)
-	case element(constraint) return parser:constraintQuery($term, $ignoreField)
-	case element(term) return parser:wordQuery($term)
-	case element(phrase) return parser:wordQuery($term)
-	case element(group) return parser:dispatchQueryTree($term, $ignoreField)
+	case element(andQuery) return cts:and-query(stringquery:dispatchQueryTree($term, $ignoreField))
+	case element(orQuery) return cts:or-query(stringquery:dispatchQueryTree($term, $ignoreField))
+	case element(notQuery) return stringquery:notQuery($term, $ignoreField)
+	case element(nearQuery) return stringquery:nearQuery($term, $ignoreField)
+	case element(constraint) return stringquery:constraintQuery($term, $ignoreField)
+	case element(term) return stringquery:wordQuery($term)
+	case element(phrase) return stringquery:wordQuery($term)
+	case element(group) return stringquery:dispatchQueryTree($term, $ignoreField)
 	case element(whitespace) return ()
 
 	default return xdmp:log(concat("Unhandled query token: ", xdmp:quote($term)))
 };
 
-declare private function parser:wordQuery(
+declare private function stringquery:wordQuery(
 	$term as element()
 ) as cts:query
 {
@@ -294,23 +294,23 @@ declare private function parser:wordQuery(
         else $query
 };
 
-declare private function parser:notQuery(
+declare private function stringquery:notQuery(
 	$term as element(notQuery),
     $ignoreField as xs:string?
 ) as cts:not-query
 {
-	cts:not-query(parser:dispatchQueryTree($term, $ignoreField))
+	cts:not-query(stringquery:dispatchQueryTree($term, $ignoreField))
 };
 
-declare private function parser:nearQuery(
+declare private function stringquery:nearQuery(
 	$term as element(nearQuery),
     $ignoreField as xs:string?
 ) as cts:near-query
 {
-	cts:near-query(parser:dispatchQueryTree($term, $ignoreField), $term/@distance)
+	cts:near-query(stringquery:dispatchQueryTree($term, $ignoreField), $term/@distance)
 };
 
-declare private function parser:constraintQuery(
+declare private function stringquery:constraintQuery(
 	$term as element(constraint),
     $ignoreField as xs:string?
 ) as cts:query?
@@ -328,24 +328,24 @@ declare private function parser:constraintQuery(
         else if($index/@type = ("bucketedrange", "autobucketedrange"))
         then search:bucketLabelToQuery($index, $value)
 
-        else parser:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)
+        else stringquery:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)
 };
 
-declare private function parser:treeToString(
+declare private function stringquery:treeToString(
 	$tree as element()
 ) as xs:string
 {
 	typeswitch ($tree)
-	case element(andQuery) return string-join(for $i in $tree/* return parser:treeToString($i), " AND ")
-	case element(orQuery) return string-join(for $i in $tree/* return parser:treeToString($i), " OR ")
-	case element(notQuery) return concat("-", parser:treeToString($tree/*[1]))
+	case element(andQuery) return string-join(for $i in $tree/* return stringquery:treeToString($i), " AND ")
+	case element(orQuery) return string-join(for $i in $tree/* return stringquery:treeToString($i), " OR ")
+	case element(notQuery) return concat("-", stringquery:treeToString($tree/*[1]))
 	case element(nearQuery) return
 		let $near := if(exists($tree/@distance)) then concat(" NEAR/", $tree/@distance, " ") else " NEAR "
-		return string-join(for $i in $tree/* return parser:treeToString($i), $near)
+		return string-join(for $i in $tree/* return stringquery:treeToString($i), $near)
 	case element(constraint) return concat($tree/field, ":", $tree/value)
 	case element(term) return string($tree)
 	case element(phrase) return concat('"', string($tree), '"')
-	case element(group) return concat("(", for $i in $tree/* return parser:treeToString($i), ")")
+	case element(group) return concat("(", for $i in $tree/* return stringquery:treeToString($i), ")")
 	case element(whitespace) return " "
 
 	default return xdmp:log(concat("Unhandled token: ", xdmp:quote($tree)))

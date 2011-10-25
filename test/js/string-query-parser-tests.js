@@ -115,7 +115,7 @@ corona.queries = [
 ];
 
 $(document).ready(function() {
-    module("Queries");
+    module("String Queries");
     for (var i = 0; i < corona.queries.length; i += 1) {
         corona.queryFromServerTest(corona.queries[i]);
     }
@@ -125,8 +125,8 @@ $(document).ready(function() {
 corona.queryFromServer = function(test, success, error) {
     asyncTest(test.purpose, function() {
         $.ajax({
-            url: '/test/xq/parsequerystring.xqy',
-            data: {"q": test.query},
+            url: '/test/xq/parse-string-query.xqy',
+            data: {"stringQuery": test.query},
             success: success,
             error: error,
             complete: function() { start(); }

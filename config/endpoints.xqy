@@ -45,10 +45,10 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="POST"/>
     </request>
 
-    <!-- Query strings -->
-    <request uri="^/(json|xml)/query(/)?$" endpoint="/corona/query.xqy">
+    <!-- String queries -->
+    <request uri="^/(json|xml)/stringQuery(/)?$" endpoint="/corona/stringQuery.xqy">
         <uri-param name="content-type">$1</uri-param>
-        <param name="q" required="false"/>
+        <param name="stringQuery" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="end" required="false" as="positiveInteger"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>

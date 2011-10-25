@@ -6,16 +6,16 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/querystring/doc1.json",
+            "uri": "/stringquery/doc1.json",
             "content": {"subject": "bar00001"}
         },
         "query": {
-            "q": "bar00001"
+            "stringQuery": "bar00001"
          },
         "shouldSucceed": true,
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].uri, "/querystring/doc1.json", "Correct document URI was found");
+            equals(data.results[0].uri, "/stringquery/doc1.json", "Correct document URI was found");
             equals(data.results[0].content.subject, "bar00001", "Correct document content was found");
         },
         "purpose": "Simple keyword search"
@@ -23,18 +23,18 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/querystring/doc3.json",
+            "uri": "/stringquery/doc3.json",
             "content": {"subject": "bar00002"},
             "collection": ["testcol"]
         },
         "query": {
-            "q": "bar00002",
+            "stringQuery": "bar00002",
             "include": ["collections"]
          },
         "shouldSucceed": true,
         "assert": function(data, config) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].uri, "/querystring/doc3.json", "Correct document URI was found");
+            equals(data.results[0].uri, "/stringquery/doc3.json", "Correct document URI was found");
             deepEqual(data.results[0].collections, config.prereqDoc.collection, "Correct document URI was found");
         },
         "purpose": "Extracting collection"
@@ -42,7 +42,7 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/querystring/doc2.json",
+            "uri": "/stringquery/doc2.json",
             "content": {
                 "subject": "bar00003",
                 "foo2": {
@@ -53,13 +53,13 @@ corona.queries = [
             }
         },
         "query": {
-            "q": "bar00003",
+            "stringQuery": "bar00003",
             "extractPath": "foo2.bar[0]"
          },
         "shouldSucceed": true,
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].uri, "/querystring/doc2.json", "Correct document URI was found");
+            equals(data.results[0].uri, "/stringquery/doc2.json", "Correct document URI was found");
             equals(data.results[0].content, "baz", "Correct document content was found");
         },
         "purpose": "Using extractPath"
@@ -67,11 +67,11 @@ corona.queries = [
     {
         "type": "xml",
         "prereqDoc": {
-            "uri": "/querystring/doc1.xml",
+            "uri": "/stringquery/doc1.xml",
             "content": "<testns:subject xmlns:testns='http://test.ns/uri'>bar00004</testns:subject>"
         },
         "query": {
-            "q": "bar00004",
+            "stringQuery": "bar00004",
             "applyTransform": "generic",
             "extractPath": ""
         },
@@ -79,7 +79,7 @@ corona.queries = [
         "assert": function(data) {
             equals(data.getElementsByTagName("results")[0].childNodes.length, 1, "Got one document");
             var result = data.getElementsByTagName("results")[0].childNodes[0];
-            equals(result.getElementsByTagName("uri")[0].childNodes[0].nodeValue, "/querystring/doc1.xml", "Correct document URI was found");
+            equals(result.getElementsByTagName("uri")[0].childNodes[0].nodeValue, "/stringquery/doc1.xml", "Correct document URI was found");
             equals(result.getElementsByTagName("content")[0].childNodes[0].childNodes[0].nodeValue, "XSLT'd!", "Correct document content was found");
         },
         "purpose": "Applying transform"
@@ -87,7 +87,7 @@ corona.queries = [
     {
         "type": "json",
         "prereqDoc": {
-            "uri": "/querystring/doc8.json",
+            "uri": "/stringquery/doc8.json",
             "content": {}
         },
         "query": {},
@@ -119,10 +119,10 @@ corona.constructURL = function(query, purpose) {
     if(purpose === "query") {
         var base;
         if(query.type === "json") {
-            base = "/json/query";
+            base = "/json/stringQuery";
         }
         else {
-            base = "/xml/query";
+            base = "/xml/stringQuery";
         }
         return base;
     }
@@ -194,6 +194,6 @@ corona.runQueries = function() {
 };
 
 $(document).ready(function() {
-    module("Key/Value Queries");
+    module("String Query Endpoint");
     corona.runQueries();
 });
