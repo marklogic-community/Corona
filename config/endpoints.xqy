@@ -33,8 +33,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Search endpoint -->
-    <request uri="^/(json|xml)/search(/)?$" endpoint="/corona/search.xqy">
-        <uri-param name="content-type">$1</uri-param>
+    <request uri="^/search(/)?$" endpoint="/corona/search.xqy">
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
@@ -46,11 +45,12 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
+        <param name="outputFormat" required="false" values="json|xml" default="json"/>
+        <param name="contentType" required="false" repeatable="true" values="all|json|xml" default="all"/>
     </request>
 
     <!-- Key value queryies -->
-    <request uri="^/(json|xml)/kvquery$" endpoint="/corona/kvquery.xqy">
-        <uri-param name="content-type">$1</uri-param>
+    <request uri="^/kvquery$" endpoint="/corona/kvquery.xqy">
         <param name="key" required="false"/>
         <param name="element" required="false"/>
         <param name="attribute" required="false"/>
@@ -64,6 +64,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
+        <param name="outputFormat" required="false" values="json|xml" default="json"/>
+        <param name="contentType" required="false" repeatable="true" values="all|json|xml" default="all"/>
     </request>
 
     <!-- Facets -->

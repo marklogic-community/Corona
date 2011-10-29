@@ -34,15 +34,17 @@ let $stringQuery := map:get($params, "stringQuery")
 let $structuredQuery := map:get($params, "structuredQuery")
 let $include := map:get($params, "include")
 let $filtered := map:get($params, "filtered")
-let $contentType := map:get($params, "content-type")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 let $start := map:get($params, "start")
 let $length := map:get($params, "length")
 
+let $contentType := map:get($params, "contentType")
+let $outputFormat := map:get($params, "outputFormat")
+
 let $test := (
     if(empty(($stringQuery, $structuredQuery)) or (exists($structuredQuery) and string-length(normalize-space($structuredQuery)) = 0))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a string query or a structured query", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a string query or a structured query", $outputFormat)
     else ()
 )
 
@@ -53,7 +55,7 @@ let $structuredQueryJSON :=
             structquery:getParseTree($structuredQuery)
         }
         catch ($e) {
-            xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $contentType))
+            xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
         }
     else ()
 
@@ -94,12 +96,7 @@ let $options :=
 
 let $end := $start + $length - 1
 
-let $results :=
-    if($contentType = "json")
-    then cts:search(/json:json, $query, $options)[$start to $end]
-    else if($contentType = "xml")
-    then cts:search(/*, $query, $options)[$start to $end]
-    else ()
+let $results := cts:search(/*, $query, $options)[$start to $end]
 
 let $total :=
     if(exists($results[1]))
@@ -114,8 +111,4 @@ let $end :=
 return
     if(exists($test))
     then $test
-    else if($contentType = "json")
-    then reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
-    else if($contentType = "xml")
-    then reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
-    else ()
+    else reststore:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)

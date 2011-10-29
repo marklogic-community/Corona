@@ -10,7 +10,8 @@ corona.queries = [
             "content": {"subject": "bar00001"}
         },
         "query": {
-            "stringQuery": "bar00001"
+            "stringQuery": "bar00001",
+            "outputFormat": "json"
          },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -29,7 +30,8 @@ corona.queries = [
         },
         "query": {
             "stringQuery": "bar00002",
-            "include": ["collections"]
+            "include": ["collections"],
+            "outputFormat": "json"
          },
         "shouldSucceed": true,
         "assert": function(data, config) {
@@ -54,7 +56,8 @@ corona.queries = [
         },
         "query": {
             "stringQuery": "bar00003",
-            "extractPath": "foo2.bar[0]"
+            "extractPath": "foo2.bar[0]",
+            "outputFormat": "json"
          },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -73,7 +76,8 @@ corona.queries = [
         "query": {
             "stringQuery": "bar00004",
             "applyTransform": "generic",
-            "extractPath": ""
+            "extractPath": "/*/..",
+            "outputFormat": "xml"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -117,14 +121,7 @@ corona.constructURL = function(query, purpose) {
         return base;
     }
     if(purpose === "query") {
-        var base;
-        if(query.type === "json") {
-            base = "/json/search";
-        }
-        else {
-            base = "/xml/search";
-        }
-        return base;
+        return "/search";
     }
 }
 

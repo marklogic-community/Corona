@@ -30,7 +30,6 @@ declare option xdmp:mapping "false";
 
 let $params := rest:process-request(endpoints:request("/corona/kvquery.xqy"))
 
-let $contentType := map:get($params, "content-type")
 
 let $key := map:get($params, "key")
 let $element := map:get($params, "element")
@@ -44,13 +43,16 @@ let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 
+let $contentType := map:get($params, "contentType")
+let $outputFormat := map:get($params, "outputFormat")
+
 let $test := (
     if(exists($attribute) and empty($element))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply the parent element name when searching for an attribute value", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply the parent element name when searching for an attribute value", $outputFormat)
     else if((exists($key) or exists($element) or exists($property)) and empty($value))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a value along with the key, element, element/attribute or property", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a value along with the key, element, element/attribute or property", $outputFormat)
     else if(exists($value) and empty($key) and empty($element) and empty($property))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a key, element, element/attribute or property along with the value", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a key, element, element/attribute or property along with the value", $outputFormat)
     else ()
 )
 
@@ -105,12 +107,7 @@ let $query := cts:and-query((
 
 let $end := $start + $length - 1
 
-let $results :=
-    if($contentType = "json")
-    then cts:search(/json:json, $query)[$start to $end]
-    else if($contentType = "xml")
-    then cts:search(/*, $query)[$start to $end]
-    else ()
+let $results := cts:search(/*, $query)[$start to $end]
 
 let $total :=
     if(exists($results[1]))
@@ -125,8 +122,4 @@ let $end :=
 return
     if(exists($test))
     then $test
-    else if($contentType = "json")
-    then reststore:outputMultipleJSONDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
-    else if($contentType = "xml")
-    then reststore:outputMultipleXMLDocs($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform)
-    else ()
+    else reststore:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)

@@ -16,6 +16,7 @@ corona.queries = [
                 "key": "foo",
                 "equals": "bar 123.45-6"
             }),
+            "outputFormat": "json"
          },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -38,7 +39,8 @@ corona.queries = [
                 "key": "foo",
                 "equals": "bar 123.45-7"
             }),
-            "include": ["collections"]
+            "include": ["collections"],
+            "outputFormat": "json"
          },
         "shouldSucceed": true,
         "assert": function(data, config) {
@@ -66,7 +68,8 @@ corona.queries = [
                 "key": "foo",
                 "equals": "bar 123.45-9"
             }),
-            "extractPath": "foo2.bar[0]"
+            "extractPath": "foo2.bar[0]",
+            "outputFormat": "json"
          },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -88,7 +91,8 @@ corona.queries = [
                 "equals": "bar 123.45-1"
             }),
             "applyTransform": "generic",
-            "extractPath": ""
+            "extractPath": "/foo/..",
+            "outputFormat": "xml"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -133,14 +137,7 @@ corona.constructURL = function(query, purpose) {
         return base;
     }
     if(purpose === "query") {
-        var base;
-        if(query.type === "json") {
-            base = "/json/search";
-        }
-        else {
-            base = "/xml/search";
-        }
-        return base;
+        return "/search";
     }
 }
 

@@ -13,7 +13,8 @@ corona.queries = [
         },
         "query": {
             "key": "foo",
-            "value": "bar 123.45-6"
+            "value": "bar 123.45-6",
+            "outputFormat": "json"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -33,7 +34,8 @@ corona.queries = [
         },
         "query": {
             "element": "bar",
-            "value": "baz"
+            "value": "baz",
+            "outputFormat": "json"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -59,7 +61,8 @@ corona.queries = [
         "query": {
             "key": "foo",
             "value": "bar",
-            "extractPath": "foo2.bar[0]"
+            "extractPath": "foo2.bar[0]",
+            "outputFormat": "json"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -80,7 +83,8 @@ corona.queries = [
         "query": {
             "key": "foo",
             "value": "bar 123.45-7",
-            "underDirectory": "/"
+            "underDirectory": "/",
+            "outputFormat": "json"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -101,7 +105,8 @@ corona.queries = [
         "query": {
             "key": "foo",
             "value": "bar 123.45-8",
-            "inDirectory": "/kvq"
+            "inDirectory": "/kvq",
+            "outputFormat": "json"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -123,7 +128,8 @@ corona.queries = [
         "query": {
             "key": "foo",
             "value": "bar 123.45-9",
-            "collection": "col1"
+            "collection": "col1",
+            "outputFormat": "json"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -144,7 +150,8 @@ corona.queries = [
         "query": {
             "key": "foo",
             "value": "bar 123.45-9",
-            "collection": "bogus"
+            "collection": "bogus",
+            "outputFormat": "json"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -161,7 +168,8 @@ corona.queries = [
         },
         "query": {
             "property": "foo",
-            "value": "bar"
+            "value": "bar",
+            "outputFormat": "json"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -177,7 +185,8 @@ corona.queries = [
             "content": {}
         },
         "query": {
-            "property": "foo"
+            "property": "foo",
+            "outputFormat": "json"
         },
         "shouldSucceed": false,
         "purpose": "Mising value"
@@ -189,23 +198,11 @@ corona.queries = [
             "content": {}
         },
         "query": {
-            "value": "foo"
+            "value": "foo",
+            "outputFormat": "json"
         },
         "shouldSucceed": false,
         "purpose": "Mising key"
-    },
-    {
-        "type": "json",
-        "prereqDoc": {
-            "uri": "/kvq/doc8.json",
-            "content": {}
-        },
-        "query": {
-            "start": 10,
-            "end": 1
-        },
-        "shouldSucceed": false,
-        "purpose": "Messed up start and end"
     },
     {
         "type": "xml",
@@ -217,7 +214,8 @@ corona.queries = [
             "element": "foo",
             "value": "bar 123.45-1",
             "applyTransform": "generic",
-            "extractPath": ""
+            "extractPath": "/*/..",
+            "outputFormat": "xml"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -237,7 +235,8 @@ corona.queries = [
         "query": {
             "element": "foo",
             "attribute": "bar",
-            "value": "baz"
+            "value": "baz",
+            "outputFormat": "xml"
         },
         "shouldSucceed": true,
         "assert": function(data) {
@@ -270,14 +269,7 @@ corona.constructURL = function(query, purpose) {
         return base;
     }
     if(purpose === "query") {
-        var base;
-        if(query.type === "json") {
-            base = "/json/kvquery";
-        }
-        else {
-            base = "/xml/kvquery";
-        }
-        return base;
+        return "/kvquery";
     }
 }
 

@@ -153,7 +153,6 @@ let $structuredQuery :=
 
 let $query := (stringquery:parse(map:get($params, "stringQuery")), structquery:getCTS($structuredQuery))[1]
 
-let $log := xdmp:log(concat(":", $uri, ":"))
 where string-length($uri) or ($requestMethod = "DELETE" and exists($query)) or exists($tests)
 return
     if(exists($tests))

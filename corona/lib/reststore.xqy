@@ -29,6 +29,127 @@ declare namespace corona="http://marklogic.com/corona";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+
+declare function reststore:outputMultipleDocuments(
+    $docs as element()*,
+    $start as xs:integer,
+    $end as xs:integer?,
+    $total as xs:integer,
+    $include as xs:string*,
+    $query as cts:query?,
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?,
+    $outputFormat as xs:string
+)
+{
+    let $start :=
+        if($total = 0)
+        then 0
+        else $start
+    let $end :=
+        if(empty($end))
+        then $start
+        else $end
+
+    let $results :=
+        for $doc in $docs
+        let $uri := base-uri($doc)
+        let $collections := xdmp:document-get-collections($uri)
+        let $documentType :=
+            if($collections = $const:JSONCollection)
+            then "json"
+            else if($collections = $const:XMLCollection)
+            then "xml"
+            else ()
+
+        (: Perform the path extraction if one was provided :)
+        let $content :=
+            if(exists($extractPath))
+            then reststore:wrapContentNodes(path:select($doc, $extractPath, $documentType), $documentType)
+            else $doc
+
+        (: Highlight the content body :)
+        let $content :=
+            if($include = ("highlighting") and exists($query))
+            then reststore:highlightContent($content, $query, $outputFormat)
+            else $content
+
+        (: Apply the transformation :)
+        let $content :=
+            if(exists($applyTransform))
+            then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+            else $content
+
+        (: If the wrapper element from wrapContentNodes is still sticking around, remove it :)
+        let $content :=
+            if($documentType = "xml" and namespace-uri($content) = "http://marklogic.com/reststore")
+            then $content/*
+            else $content
+
+        let $snippet :=
+            if($include = ("snippet", "all"))
+            then common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), $outputFormat)
+            else ()
+
+        where exists($documentType)
+        return
+            if($outputFormat = "json")
+            then json:object((
+                "uri", $uri,
+                reststore:outputDocument($uri, $content, $include, $documentType, $outputFormat),
+                if($include = ("snippet", "all"))
+                then ("snippet", $snippet)
+                else (),
+                if($include = ("confidence", "all"))
+                then ("confidence", cts:confidence($doc))
+                else ()
+            ))
+            else if($outputFormat = "xml")
+            then <corona:result>{(
+                <corona:uri>{ $uri }</corona:uri>,
+                reststore:outputDocument($uri, $content, $include, $documentType, $outputFormat),
+                if($include = ("snippet", "all"))
+                then <corona:snippet>{ $snippet }</corona:snippet>
+                else (),
+                if($include = ("confidence", "all"))
+                then <corona:confidence>{ cts:confidence($doc) }</corona:confidence>
+                else ()
+            )}</corona:result>
+            else ()
+
+    let $executionTime := substring(string(xdmp:query-meters()/*:elapsed-time), 3, 4)
+    return
+        if($outputFormat = "json")
+        then json:serialize(
+            json:object((
+                "meta", json:object((
+                    "start", $start,
+                    "end", $end,
+                    "total", $total,
+                    "executionTime", $executionTime
+                )),
+                if($include = "none") then () else ("results", json:array($results))
+            ))
+        )
+        else if($outputFormat = "xml")
+        then <corona:response>
+                <corona:meta>
+                    <corona:start>{ $start }</corona:start>
+                    <corona:end>{ $end }</corona:end>
+                    <corona:total>{ $total }</corona:total>
+                    <corona:executionTime>{ $executionTime }</corona:executionTime>
+                </corona:meta>
+                { if($include = "none") then () else <corona:results>{ $results }</corona:results> }
+            </corona:response>
+        else ()
+};
+
+
+
+
+
+
+
 (:
     JSON Document management
 :)
@@ -62,7 +183,7 @@ declare function reststore:getJSONDocument(
         else json:array($content)
     let $content :=
         if($include = ("highlighting") and exists($highlightQuery))
-        then reststore:highlightJSONContent($content, $highlightQuery)
+        then reststore:highlightContent($content, $highlightQuery, "json")
         else $content
     let $content :=
         if(exists($applyTransform))
@@ -72,106 +193,8 @@ declare function reststore:getJSONDocument(
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
         then json:serialize($content)
         else json:serialize(json:document(
-            json:object(reststore:outputJSONDocument($uri, $content, $include))
+            json:object(reststore:outputDocument($uri, $content, $include, "json", "json"))
         ))
-};
-
-declare function reststore:outputMultipleJSONDocs(
-    $docs as element(json:json)*,
-    $start as xs:integer,
-    $end as xs:integer?,
-    $total as xs:integer,
-    $include as xs:string*,
-    $query as cts:query?,
-    $extractPath as xs:string?,
-    $applyTransform as xs:string?
-) as xs:string
-{
-    let $start :=
-        if($total = 0)
-        then 0
-        else $start
-    let $end :=
-        if(empty($end))
-        then $start
-        else $end
-
-    return json:serialize(
-        json:object((
-            "meta", json:object((
-                "start", $start,
-                "end", $end,
-                "total", $total,
-                "executionTime", substring(string(xdmp:query-meters()/*:elapsed-time), 3, 4)
-            )),
-            if($include = "none")
-            then ()
-            else (
-                "results", json:array(
-                    for $doc in $docs
-                    let $uri := base-uri($doc)
-                    let $content :=
-                        if(exists($extractPath))
-                        then path:select($doc, $extractPath, "json")
-                        else $doc
-                    let $content :=
-                        if(empty($content))
-                        then json:null()
-                        else if(count($content, 1) = 1)
-                        then $content
-                        else json:array($content)
-                    let $content :=
-                        if($include = ("highlighting") and exists($query))
-                        then reststore:highlightJSONContent($content, $query)
-                        else $content
-                    let $content :=
-                        if(exists($applyTransform))
-                        then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
-                        else $content
-                    return json:object((
-                        "uri", $uri,
-                        reststore:outputJSONDocument($uri, $content, $include),
-                        if($include = ("snippet", "all"))
-                        then ("snippet", common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "json"))
-                        else (),
-                        if($include = ("confidence", "all"))
-                        then ("confidence", cts:confidence($doc))
-                        else ()
-                    ))
-                )
-            )
-        ))
-    )
-};
-
-declare private function reststore:outputJSONDocument(
-    $uri as xs:string,
-    $content as node()*,
-    $include as xs:string*
-)
-{
-    let $content :=
-        if(empty($content))
-        then json:null()
-        else if(count($content, 1) = 1)
-        then $content
-        else json:array($content)
-    return
-    if($include = ("content", "all"))
-    then ("content", $content)
-    else (),
-    if($include = ("collections", "all"))
-    then ("collections", reststore:getDocumentCollections($uri, "json"))
-    else (),
-    if($include = ("properties", "all"))
-    then ("properties", reststore:getDocumentProperties($uri, "json"))
-    else (),
-    if($include = ("permissions", "all"))
-    then ("permissions", reststore:getDocumentPermissions($uri, "json"))
-    else (),
-    if($include = ("quality", "all"))
-    then ("quality", reststore:getDocumentQuality($uri))
-    else ()
 };
 
 declare function reststore:insertJSONDocument(
@@ -310,7 +333,7 @@ declare function reststore:getXMLDocument(
         else reststore:getRawXMLDoc($uri)
     let $content :=
         if($include = ("highlighting") and exists($highlightQuery))
-        then reststore:highlightXMLContent(if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content, $highlightQuery)
+        then reststore:highlightContent(if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content, $highlightQuery, "xml")
         else $content
     let $content :=
         if(exists($applyTransform))
@@ -323,94 +346,7 @@ declare function reststore:getXMLDocument(
     return
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
         then $content
-        else <corona:response>{ reststore:outputXMLDocument($uri, $content, $include) }</corona:response>
-};
-
-declare function reststore:outputMultipleXMLDocs(
-    $docs as element()*,
-    $start as xs:integer,
-    $end as xs:integer?,
-    $total as xs:integer,
-    $include as xs:string*,
-    $query as cts:query?,
-    $extractPath as xs:string?,
-    $applyTransform as xs:string?
-) as element()
-{
-    let $start :=
-        if($total = 0)
-        then 0
-        else $start
-    let $end :=
-        if(empty($end))
-        then $start
-        else $end
-    return 
-        <corona:response>
-            <corona:meta>
-                <corona:start>{ $start }</corona:start>
-                <corona:end>{ $end }</corona:end>
-                <corona:total>{ $total }</corona:total>
-                <corona:executionTime>{ substring(string(xdmp:query-meters()/*:elapsed-time), 3, 4) }</corona:executionTime>
-            </corona:meta>
-            {
-            if($include = "none")
-            then ()
-            else <corona:results>{
-                    for $doc in $docs
-                    let $uri := base-uri($doc)
-                    let $content :=
-                        if(exists($extractPath))
-                        then path:select(root($doc), $extractPath, "xml")
-                        else $doc
-                    let $content :=
-                        if($include = ("highlighting") and exists($query))
-                        then reststore:highlightXMLContent(if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content, $query)
-                        else $content
-                    let $content :=
-                        if(exists($applyTransform))
-                        then xdmp:xslt-eval(manage:getTransformer($applyTransform), if(count($content, 2) > 1) then <reststore:content>{ $content }</reststore:content> else $content)
-                        else $content
-                    let $content :=
-                        if(namespace-uri($content) = "http://marklogic.com/reststore")
-                        then $content/*
-                        else $content
-                    return <corona:result>{(
-                        <corona:uri>{ $uri }</corona:uri>,
-                        reststore:outputXMLDocument($uri, $content, $include),
-                        if($include = ("snippet", "all"))
-                        then <corona:snippet>{ common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), "xml") }</corona:snippet>
-                        else (),
-                        if($include = ("confidence", "all"))
-                        then <corona:confidence>{ cts:confidence($doc) }</corona:confidence>
-                        else ()
-                    )}</corona:result>
-                }</corona:results>
-            }
-        </corona:response>
-};
-
-declare private function reststore:outputXMLDocument(
-    $uri as xs:string,
-    $content as node()*,
-    $include as xs:string*
-) as element()*
-{
-    if($include = ("content", "all"))
-    then <corona:content>{ $content }</corona:content>
-    else (),
-    if($include = ("collections", "all"))
-    then <corona:collections>{ reststore:getDocumentCollections($uri, "xml") }</corona:collections>
-    else (),
-    if($include = ("properties", "all"))
-    then <corona:properties>{ reststore:getDocumentProperties($uri, "xml") }</corona:properties>
-    else (),
-    if($include = ("permissions", "all"))
-    then <corona:permissions>{ reststore:getDocumentPermissions($uri, "xml") }</corona:permissions>
-    else (),
-    if($include = ("quality", "all"))
-    then <corona:quality>{ reststore:getDocumentQuality($uri) }</corona:quality>
-    else ()
+        else <corona:response>{ reststore:outputDocument($uri, $content, $include, "xml", "xml") }</corona:response>
 };
 
 declare function reststore:insertXMLDocument(
@@ -522,7 +458,7 @@ declare function reststore:deleteXMLDocumentsWithQuery(
         else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", "xml")
 };
 
-declare function reststore:getRawXMLDoc(
+declare private function reststore:getRawXMLDoc(
     $uri as xs:string
 ) as node()?
 {
@@ -717,18 +653,90 @@ declare private function reststore:getDocumentQuality(
     xdmp:document-get-quality($uri)
 };
 
-declare private function reststore:highlightJSONContent(
+declare private function reststore:highlightContent(
     $content as node(),
-    $query as cts:query
-) as node()
+    $query as cts:query,
+    $outputFormat as xs:string
+) as node()?
 {
-    cts:highlight($content, $query, concat('<span class="hit">', $cts:text, '</span>'))
+    if($outputFormat = "json")
+    then cts:highlight($content, $query, concat('<span class="hit">', $cts:text, '</span>'))
+    else if($outputFormat = "xml")
+    then cts:highlight($content, $query, <span class="hit">{ $cts:text }</span>)
+    else ()
 };
 
-declare private function reststore:highlightXMLContent(
-    $content as node(),
-    $query as cts:query
+declare private function reststore:wrapContentNodes(
+    $nodes as node()*,
+    $documentType as xs:string
 ) as node()
 {
-    cts:highlight($content, $query, <span class="hit">{ $cts:text }</span>)
+    (: If there is more than one node, wrap it :)
+    if(count($nodes, 2) = 1)
+    then $nodes
+    else
+        if($documentType = "json")
+        then
+            if(empty($nodes))
+            then json:null()
+            else json:array($nodes)
+        else if($documentType = "xml")
+        then <reststore:content>{ $nodes }</reststore:content>
+        else $nodes
+};
+
+declare private function reststore:outputDocument(
+    $uri as xs:string,
+    $content as node()*,
+    $include as xs:string*,
+    $documentType as xs:string,
+    $outputFormat as xs:string
+)
+{
+    if($outputFormat = "json")
+    then
+        let $content :=
+            if($documentType = "json")
+            then reststore:wrapContentNodes($content, $documentType)
+            else $content
+        return (
+            if($include = ("content", "all"))
+            then ("content", $content)
+            else (),
+            if($include = ("collections", "all"))
+            then ("collections", reststore:getDocumentCollections($uri, "json"))
+            else (),
+            if($include = ("properties", "all"))
+            then ("properties", reststore:getDocumentProperties($uri, "json"))
+            else (),
+            if($include = ("permissions", "all"))
+            then ("permissions", reststore:getDocumentPermissions($uri, "json"))
+            else (),
+            if($include = ("quality", "all"))
+            then ("quality", reststore:getDocumentQuality($uri))
+            else ()
+        )
+    else if($outputFormat = "xml")
+    then (
+        if($include = ("content", "all"))
+        then <corona:content>{
+            if($documentType = "json")
+            then json:serialize(reststore:wrapContentNodes($content, $documentType))
+            else $content
+        }</corona:content>
+        else (),
+        if($include = ("collections", "all"))
+        then <corona:collections>{ reststore:getDocumentCollections($uri, "xml") }</corona:collections>
+        else (),
+        if($include = ("properties", "all"))
+        then <corona:properties>{ reststore:getDocumentProperties($uri, "xml") }</corona:properties>
+        else (),
+        if($include = ("permissions", "all"))
+        then <corona:permissions>{ reststore:getDocumentPermissions($uri, "xml") }</corona:permissions>
+        else (),
+        if($include = ("quality", "all"))
+        then <corona:quality>{ reststore:getDocumentQuality($uri) }</corona:quality>
+        else ()
+    )
+    else ()
 };
