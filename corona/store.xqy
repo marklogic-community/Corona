@@ -19,7 +19,7 @@ xquery version "1.0-ml";
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
-import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
+import module namespace store="http://marklogic.com/corona/store" at "lib/store.xqy";
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
@@ -47,7 +47,7 @@ declare function local:propertiesFromRequest(
     let $date := dateparser:parse($value)
     let $dateAttribute := if(exists($date)) then attribute normalized-date { $date } else ()
     where exists($name)
-    return element { QName("http://marklogic.com/reststore", $name) } { ($dateAttribute, $value) }
+    return element { QName("http://marklogic.com/corona", $name) } { ($dateAttribute, $value) }
 };
 
 declare function local:permissionsFromRequest(
@@ -94,24 +94,24 @@ declare function local:syncMetadata(
 
     return (
         if(exists($properties))
-        then reststore:setProperties($uri, $properties)
+        then store:setProperties($uri, $properties)
         else (
-            reststore:addProperties($uri, $addProperties),
-            reststore:removeProperties($uri, $removeProperties)
+            store:addProperties($uri, $addProperties),
+            store:removeProperties($uri, $removeProperties)
         ),
         if(exists($permissions))
-        then reststore:setPermissions($uri, $permissions)
+        then store:setPermissions($uri, $permissions)
         else (
-            reststore:addPermissions($uri, $addPermisssions),
-            reststore:removePermissions($uri, $removePermissions)
+            store:addPermissions($uri, $addPermisssions),
+            store:removePermissions($uri, $removePermissions)
         ),
         if(exists($collections))
-        then reststore:setCollections($uri, $collections)
+        then store:setCollections($uri, $collections)
         else (
-            reststore:addCollections($uri, $addCollections),
-            reststore:removeCollections($uri, $removeCollections)
+            store:addCollections($uri, $addCollections),
+            store:removeCollections($uri, $removeCollections)
         ),
-        reststore:setQuality($uri, $quality)
+        store:setQuality($uri, $quality)
     )
 };
 
@@ -163,7 +163,7 @@ return
     then
         if($requestMethod = "GET" and string-length($uri))
         then try {
-            reststore:getJSONDocument($uri, $include, $extractPath, $transformer, $query)
+            store:getJSONDocument($uri, $include, $extractPath, $transformer, $query)
         }
         catch ($e) {
             common:errorFromException(400, $e, $contentType)
@@ -171,20 +171,20 @@ return
         else if($requestMethod = "DELETE")
         then
             if(string-length($uri))
-            then reststore:deleteJSONDocument($uri, map:get($params, "include") = ("uri", "uris"))
+            then store:deleteJSONDocument($uri, map:get($params, "include") = ("uri", "uris"))
             else if(exists($query))
-            then reststore:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
+            then store:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
             else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
-        then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+        then store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
         then
             if(empty(doc($uri)) and exists($bodyContent))
-            then reststore:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+            then store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
             else
                 let $docError :=
                     if(exists($bodyContent))
-                    then reststore:updateJSONDocumentContent($uri, $bodyContent)
+                    then store:updateJSONDocumentContent($uri, $bodyContent)
                     else ()
                 return
                     if($docError)
@@ -200,7 +200,7 @@ return
     then
         if($requestMethod = "GET" and string-length($uri))
         then try {
-            reststore:getXMLDocument($uri, $include, $extractPath, $transformer, $query)
+            store:getXMLDocument($uri, $include, $extractPath, $transformer, $query)
         }
         catch ($e) {
             common:errorFromException(400, $e, $contentType)
@@ -208,20 +208,20 @@ return
         else if($requestMethod = "DELETE")
         then
             if(string-length($uri))
-            then reststore:deleteXMLDocument($uri, map:get($params, "include") = ("uri", "uris"))
+            then store:deleteXMLDocument($uri, map:get($params, "include") = ("uri", "uris"))
             else if(exists($query))
-            then reststore:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
+            then store:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
             else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $contentType)
         else if($requestMethod = "PUT" and string-length($uri))
-        then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+        then store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
         then
             if(empty(doc($uri)) and exists($bodyContent))
-            then reststore:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+            then store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
             else
                 let $docError :=
                     if(exists($bodyContent))
-                    then reststore:updateXMLDocumentContent($uri, $bodyContent)
+                    then store:updateXMLDocumentContent($uri, $bodyContent)
                     else ()
                 return
                     if($docError)

@@ -22,7 +22,7 @@ import module namespace stringquery="http://marklogic.com/corona/string-query" a
 import module namespace search="http://marklogic.com/corona/search" at "search.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
-import module namespace reststore="http://marklogic.com/reststore" at "reststore.xqy";
+import module namespace store="http://marklogic.com/corona/store" at "store.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 
 declare namespace corona="http://marklogic.com/corona";
@@ -304,7 +304,7 @@ declare private function structquery:handleProperty(
     cts:properties-query(
         let $container := $step/..
         let $values := structquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
-        let $QName := xs:QName(concat("reststore:", $step))
+        let $QName := xs:QName(concat("corona:", $step))
         let $options := structquery:extractOptions($container, "word")
         let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
         where exists($values)

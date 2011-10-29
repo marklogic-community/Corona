@@ -19,7 +19,7 @@ xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
 import module namespace const="http://marklogic.com/corona/constants" at "lib/constants.xqy";
-import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
+import module namespace store="http://marklogic.com/corona/store" at "lib/store.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "lib/date-parser.xqy";
 
@@ -79,7 +79,7 @@ let $query :=
     else if(exists($element))
     then cts:element-value-query(xs:QName($element), $value, "exact")
     else if(exists($property))
-    then cts:properties-query(cts:element-value-query(QName("http://marklogic.com/reststore", $property), $value, "exact"))
+    then cts:properties-query(cts:element-value-query(QName("http://marklogic.com/corona", $property), $value, "exact"))
     else ()
 
 let $query := cts:and-query((
@@ -122,4 +122,4 @@ let $end :=
 return
     if(exists($test))
     then $test
-    else reststore:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)
+    else store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)

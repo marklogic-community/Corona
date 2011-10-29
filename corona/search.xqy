@@ -21,7 +21,7 @@ import module namespace const="http://marklogic.com/corona/constants" at "lib/co
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
-import module namespace reststore="http://marklogic.com/reststore" at "lib/reststore.xqy";
+import module namespace store="http://marklogic.com/corona/store" at "lib/store.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
@@ -111,4 +111,4 @@ let $end :=
 return
     if(exists($test))
     then $test
-    else reststore:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)
+    else store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)

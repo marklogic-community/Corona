@@ -272,7 +272,7 @@ corona.queries = [
             "property": "foo",
             "equals": "bar"
         },
-        "result": '<cts:properties-query xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:reststore="http://marklogic.com/reststore">reststore:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query></cts:properties-query>',
+        "result": '<cts:properties-query xmlns:cts="http://marklogic.com/cts"> <cts:element-value-query> <cts:element xmlns:corona="http://marklogic.com/corona">corona:foo</cts:element> <cts:text xml:lang="en">bar</cts:text> </cts:element-value-query></cts:properties-query>',
         "purpose": "Property query"
     },
 
