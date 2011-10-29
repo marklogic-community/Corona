@@ -23,7 +23,6 @@ import module namespace store="http://marklogic.com/corona/store" at "lib/store.
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
-import module namespace dateparser="http://marklogic.com/dateparser" at "lib/date-parser.xqy";
 
 declare option xdmp:mapping "false";
 
@@ -44,10 +43,8 @@ declare function local:propertiesFromRequest(
     let $bits := tokenize($property, ":")
     let $name := $bits[1]
     let $value := string-join($bits[2 to last()], ":")
-    let $date := dateparser:parse($value)
-    let $dateAttribute := if(exists($date)) then attribute normalized-date { $date } else ()
     where exists($name)
-    return element { QName("http://marklogic.com/corona", $name) } { ($dateAttribute, $value) }
+    return store:createProperty($name, $value)
 };
 
 declare function local:permissionsFromRequest(
@@ -124,14 +121,20 @@ let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
 let $transformer := map:get($params, "applyTransformer")
 
-let $tests := (
+let $tests :=
     if($requestMethod = ("PUT", "POST", "GET") and string-length($uri) = 0)
     then common:error(400, "corona:INVALID-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $contentType)
     else ()
-)
 
 let $collections := local:collectionsFromRequest($params, "collection")
-let $properties := local:propertiesFromRequest($params, "property")
+let $properties :=
+    try {
+        local:propertiesFromRequest($params, "property")
+    }
+    catch ($e) {
+        xdmp:set($tests, common:errorFromException(400, $e, $contentType))
+    }
+
 let $quality := local:qualityFromRequest($params)
 let $permissions :=
     try {
@@ -140,7 +143,7 @@ let $permissions :=
     catch ($e) {
         if($e/*:code = "SEC-ROLEDNE")
         then xdmp:set($tests, common:error(400, "corona:INVALID-PERMISSION", concat("The role '", $e/*:data/*:datum[. != "sec:role-name"], "' does not exist."), $contentType))
-        else common:errorFromException(500, $e, $contentType)
+        else xdmp:set($tests, common:errorFromException(500, $e, $contentType))
     }
 
 let $structuredQuery :=
@@ -193,7 +196,7 @@ return
                         local:syncMetadata($uri, $params)
                     }
                     catch ($e) {
-                        xdmp:log($e)
+                        common:errorFromException(400, $e, $contentType)
                     }
         else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $contentType)
     else if($contentType = "xml")
@@ -230,7 +233,7 @@ return
                         local:syncMetadata($uri, $params)
                     }
                     catch ($e) {
-                        xdmp:log($e)
+                        common:errorFromException(400, $e, $contentType)
                     }
         else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $contentType)
     else ()

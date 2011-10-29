@@ -24,6 +24,7 @@ import module namespace common="http://marklogic.com/corona/common" at "common.x
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace manage="http://marklogic.com/corona/manage" at "manage.xqy";
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
+import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 
 declare namespace corona="http://marklogic.com/corona";
 
@@ -144,9 +145,19 @@ declare function store:outputMultipleDocuments(
         else ()
 };
 
-
-
-
+declare function store:createProperty(
+    $name as xs:string,
+    $value as xs:string
+) as element()
+{
+    let $test :=
+        if(not(matches($name, "[A-Za-z0-9][A-Za-z0-9_\-]*")))
+        then error(xs:QName("corona:INVALID-PROPERTY"), concat("The property name '", $name, "' is not valid"))
+        else ()
+    let $date := dateparser:parse($value)
+    let $dateAttribute := if(exists($date)) then attribute normalized-date { $date } else ()
+    return element { QName("http://marklogic.com/corona", $name) } { ($dateAttribute, $value) }
+};
 
 
 
