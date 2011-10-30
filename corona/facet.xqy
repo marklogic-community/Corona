@@ -33,10 +33,11 @@ declare option xdmp:mapping "false";
 
 let $params := rest:process-request(endpoints:request("/corona/facet.xqy"))
 let $facets := tokenize(map:get($params, "facets"), ",")
-let $contentType := map:get($params, "content-type")
-let $outputFormat := (map:get($params, "outputFormat"), $contentType)[1]
 let $stringQuery := map:get($params, "stringQuery")
 let $structuredQuery := map:get($params, "structuredQuery")
+
+let $contentType := map:get($params, "contentType")
+let $outputFormat := common:getOutputFormat($contentType, map:get($params, "outputFormat"))
 
 let $limit := map:get($params, "limit")
 let $order := map:get($params, "order")
@@ -45,7 +46,7 @@ let $includeAllValues := map:get($params, "includeAllValues")
 
 let $test := (
     if(empty($stringQuery) and empty($structuredQuery))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $contentType)
+    then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $outputFormat)
     else ()
 )
 
@@ -57,7 +58,7 @@ let $query :=
         structquery:getCTS(structquery:getParseTree($structuredQuery), ())
     }
     catch ($e) {
-        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
     }
     else ()
 
@@ -106,11 +107,14 @@ let $values :=
 
     let $query := cts:and-query((
         $query,
-        if($contentType = "json")
-        then cts:collection-query($const:JSONCollection)
-        else if($contentType = "xml")
-        then cts:collection-query($const:XMLCollection)
-        else (),
+        cts:collection-query((
+            if($contentType = ("json", "all"))
+            then $const:JSONCollection
+            else (),
+            if($contentType = ("xml", "all"))
+            then $const:XMLCollection
+            else ()
+        )),
         for $collection in map:get($params, "collection")
         return cts:collection-query($collection),
         for $directory in map:get($params, "underDirectory")
@@ -145,7 +149,7 @@ let $values :=
         if($outputFormat = "json")
         then ($facet, $values)
         else if($outputFormat = "xml")
-        then $values
+        then <corona:facet name="{ $facet }">{ $values }</corona:facet>
         else ()
 return
     if(exists($test))

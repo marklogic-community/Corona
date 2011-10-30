@@ -40,7 +40,7 @@ let $start := map:get($params, "start")
 let $length := map:get($params, "length")
 
 let $contentType := map:get($params, "contentType")
-let $outputFormat := map:get($params, "outputFormat")
+let $outputFormat := common:getOutputFormat($contentType, map:get($params, "outputFormat"))
 
 let $test := (
     if(empty(($stringQuery, $structuredQuery)) or (exists($structuredQuery) and string-length(normalize-space($structuredQuery)) = 0))
@@ -68,11 +68,14 @@ let $query :=
 
 let $query := cts:and-query((
     $query,
-    if($contentType = "json")
-    then cts:collection-query($const:JSONCollection)
-    else if($contentType = "xml")
-    then cts:collection-query($const:XMLCollection)
-    else (),
+    cts:collection-query((
+        if($contentType = ("json", "all"))
+        then $const:JSONCollection
+        else (),
+        if($contentType = ("xml", "all"))
+        then $const:XMLCollection
+        else ()
+    )),
     for $collection in map:get($params, "collection")
     return cts:collection-query($collection),
     for $directory in map:get($params, "underDirectory")

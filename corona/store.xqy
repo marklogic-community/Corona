@@ -115,15 +115,17 @@ declare function local:syncMetadata(
 let $requestMethod := xdmp:get-request-method()
 let $bodyContent := xdmp:get-request-body("text")/text()
 let $params := rest:process-request(endpoints:request("/corona/store.xqy"))
-let $contentType := map:get($params, "content-type")
 let $uri := map:get($params, "uri")
 let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
 let $transformer := map:get($params, "applyTransformer")
 
+let $contentType := map:get($params, "contentType")
+let $outputFormat := common:getOutputFormat($contentType, map:get($params, "outputFormat"))
+
 let $tests :=
     if($requestMethod = ("PUT", "POST", "GET") and string-length($uri) = 0)
-    then common:error(400, "corona:INVALID-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $contentType)
+    then common:error(400, "corona:INVALID-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $outputFormat)
     else ()
 
 let $collections := local:collectionsFromRequest($params, "collection")
@@ -132,7 +134,7 @@ let $properties :=
         local:propertiesFromRequest($params, "property")
     }
     catch ($e) {
-        xdmp:set($tests, common:errorFromException(400, $e, $contentType))
+        xdmp:set($tests, common:errorFromException(400, $e, $outputFormat))
     }
 
 let $quality := local:qualityFromRequest($params)
@@ -142,8 +144,8 @@ let $permissions :=
     }
     catch ($e) {
         if($e/*:code = "SEC-ROLEDNE")
-        then xdmp:set($tests, common:error(400, "corona:INVALID-PERMISSION", concat("The role '", $e/*:data/*:datum[. != "sec:role-name"], "' does not exist."), $contentType))
-        else xdmp:set($tests, common:errorFromException(500, $e, $contentType))
+        then xdmp:set($tests, common:error(400, "corona:INVALID-PERMISSION", concat("The role '", $e/*:data/*:datum[. != "sec:role-name"], "' does not exist."), $outputFormat))
+        else xdmp:set($tests, common:errorFromException(500, $e, $outputFormat))
     }
 
 let $structuredQuery :=
@@ -151,7 +153,7 @@ let $structuredQuery :=
         structquery:getParseTree(map:get($params, "structuredQuery"))
     }
     catch ($e) {
-        xdmp:set($tests, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $contentType))
+        xdmp:set($tests, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
     }
 
 let $query := (stringquery:parse(map:get($params, "stringQuery")), structquery:getCTS($structuredQuery))[1]
@@ -169,7 +171,7 @@ return
             store:getJSONDocument($uri, $include, $extractPath, $transformer, $query)
         }
         catch ($e) {
-            common:errorFromException(400, $e, $contentType)
+            common:errorFromException(400, $e, $outputFormat)
         }
         else if($requestMethod = "DELETE")
         then
@@ -177,7 +179,7 @@ return
             then store:deleteJSONDocument($uri, map:get($params, "include") = ("uri", "uris"))
             else if(exists($query))
             then store:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
-            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $contentType)
+            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $outputFormat)
         else if($requestMethod = "PUT" and string-length($uri))
         then store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
@@ -196,9 +198,9 @@ return
                         local:syncMetadata($uri, $params)
                     }
                     catch ($e) {
-                        common:errorFromException(400, $e, $contentType)
+                        common:errorFromException(400, $e, $outputFormat)
                     }
-        else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $contentType)
+        else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $outputFormat)
     else if($contentType = "xml")
     then
         if($requestMethod = "GET" and string-length($uri))
@@ -206,7 +208,7 @@ return
             store:getXMLDocument($uri, $include, $extractPath, $transformer, $query)
         }
         catch ($e) {
-            common:errorFromException(400, $e, $contentType)
+            common:errorFromException(400, $e, $outputFormat)
         }
         else if($requestMethod = "DELETE")
         then
@@ -214,7 +216,7 @@ return
             then store:deleteXMLDocument($uri, map:get($params, "include") = ("uri", "uris"))
             else if(exists($query))
             then store:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
-            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $contentType)
+            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $outputFormat)
         else if($requestMethod = "PUT" and string-length($uri))
         then store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
@@ -233,7 +235,7 @@ return
                         local:syncMetadata($uri, $params)
                     }
                     catch ($e) {
-                        common:errorFromException(400, $e, $contentType)
+                        common:errorFromException(400, $e, $outputFormat)
                     }
-        else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $contentType)
+        else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $outputFormat)
     else ()

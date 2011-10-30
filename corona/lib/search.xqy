@@ -221,7 +221,7 @@ declare function search:rangeIndexValues(
     $limit as xs:positiveInteger,
     $valuesInQuery as xs:string*,
     $outputFormat as xs:string
-) as xs:string*
+) as element()*
 {
     let $xsType :=
         if($index/structure = ("xmlelement", "xmlattribute"))

@@ -197,3 +197,15 @@ declare function common:dualStrftime(
             else string($match)
     return string-join($bits, "")
 };
+
+declare function common:getOutputFormat(
+    $contentType as xs:string+,
+    $outputFormat as xs:string?
+) as xs:string
+{
+    if(exists($outputFormat))
+    then $outputFormat
+    else if($contentType = ("json", "xml"))
+    then $contentType
+    else "json"
+};

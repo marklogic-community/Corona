@@ -12,7 +12,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 <options xmlns="http://marklogic.com/appservices/rest">
     <!-- Manage documents in the database -->
     <request uri="^/(json|xml)/store(/.+)?$" endpoint="/corona/store.xqy" user-params="allow">
-        <uri-param name="content-type">$1</uri-param>
+        <uri-param name="contentType">$1</uri-param>
         <uri-param name="uri" as="string">$2</uri-param>
         <http method="GET">
             <param name="stringQuery" required="false"/>
@@ -45,7 +45,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
-        <param name="outputFormat" required="false" values="json|xml" default="json"/>
+        <param name="outputFormat" required="false" values="json|xml"/>
         <param name="contentType" required="false" repeatable="true" values="all|json|xml" default="all"/>
     </request>
 
@@ -64,25 +64,24 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
-        <param name="outputFormat" required="false" values="json|xml" default="json"/>
+        <param name="outputFormat" required="false" values="json|xml"/>
         <param name="contentType" required="false" repeatable="true" values="all|json|xml" default="all"/>
     </request>
 
     <!-- Facets -->
-    <request uri="^/(json|xml)/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/corona/facet.xqy">
-        <uri-param name="content-type">$1</uri-param>
-        <uri-param name="facets">$2</uri-param>
+    <request uri="^/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/corona/facet.xqy">
+        <uri-param name="facets">$1</uri-param>
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
         <param name="limit" as="integer" default="25" required="false"/>
         <param name="order" required="false" default="frequency" values="descending|ascending|frequency"/>
         <param name="frequency" required="false" default="document" values="document|key"/>
         <param name="includeAllValues" required="false" default="no" values="no|yes"/>
-        <param name="outputFormat" required="false"  values="xml|json"/>
-
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
+        <param name="outputFormat" required="false"  values="xml|json"/>
+        <param name="contentType" required="false" repeatable="true" values="all|json|xml" default="all"/>
     </request>
 
     <!-- Index management -->
