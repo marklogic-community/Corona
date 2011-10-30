@@ -57,13 +57,7 @@ corona.documents = [
 ];
 
 corona.constructURL = function(doc, prefix, processExtras) {
-    var extras = "";
-    if(doc.type === "json") {
-        return "/json/store" + prefix + doc.uri + "?" + extras;
-    }
-    else {
-        return "/xml/store" + prefix + doc.uri + "?" + extras;
-    }
+    return "/store" + prefix + doc.uri + "?contentType=" + doc.type;
 };
 
 corona.insertDocuments = function(prefix, callback) {
@@ -103,7 +97,7 @@ corona.insertDocuments = function(prefix, callback) {
 corona.deleteDocuments = function() {
     asyncTest("Bulk delete check", function() {
         $.ajax({
-            url: '/json/store?structuredQuery={"keyExists": "foo"}',
+            url: '/store?structuredQuery={"keyExists": "foo"}',
             type: 'DELETE',
             success: function() {
                 ok(false, "Deleted documents");
@@ -118,7 +112,7 @@ corona.deleteDocuments = function() {
     });
     asyncTest("No documents check", function() {
         $.ajax({
-            url: '/json/store?structuredQuery={"keyExists": "bar"}',
+            url: '/store?structuredQuery={"keyExists": "bar"}',
             type: 'DELETE',
             success: function() {
                 ok(false, "Deleted documents");
@@ -134,7 +128,7 @@ corona.deleteDocuments = function() {
 
     asyncTest("Deleting JSON documents", function() {
         $.ajax({
-            url: '/json/store?structuredQuery={"keyExists": "foo"}&bulkDelete=true',
+            url: '/store?structuredQuery={"keyExists": "foo"}&bulkDelete=true',
             type: 'DELETE',
             success: function() {
                 ok(true, "Deleted documents");
@@ -150,14 +144,14 @@ corona.deleteDocuments = function() {
 
     asyncTest("Deleting XML documents", function() {
         $.ajax({
-            url: '/xml/store?structuredQuery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true&limit=2',
+            url: '/store?structuredQuery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true&limit=2',
             type: 'DELETE',
             success: function() {
                 ok(true, "Deleted documents (with limit)");
 
                 asyncTest("Deleting XML documents", function() {
                     $.ajax({
-                        url: '/xml/store?structuredQuery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true',
+                        url: '/store?structuredQuery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true',
                         type: 'DELETE',
                         success: function() {
                             ok(true, "Deleted documents");

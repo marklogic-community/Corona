@@ -108,8 +108,11 @@ corona.documents = [
     }
 ];
 
-corona.constructURL = function(doc, prefix, processExtras) {
-    var extras = "";
+corona.constructURL = function(doc, prefix, processExtras, includeContentType, staticExtras) {
+    var extras = [];
+    if(staticExtras) {
+        extras.push(staticExtras);
+    }
 
     var permissionArg = "permission";
     var propertyArg = "property";
@@ -132,7 +135,7 @@ corona.constructURL = function(doc, prefix, processExtras) {
                     var roles = doc.permissions[role];
                     var j = 0;
                     for(j = 0; j < roles.length; j += 1) {
-                        extras += permissionArg + "=" + role + ":" + roles[j] + "&";
+                        extras.push(permissionArg + "=" + role + ":" + roles[j]);
                     }
                 }
             }
@@ -142,10 +145,10 @@ corona.constructURL = function(doc, prefix, processExtras) {
                 if(!(doc.properties[property] instanceof Function)) {
                     var value = doc.properties[property];
                     if(propertyArg === "removeProperty") {
-                        extras += propertyArg + "=" + property + "&";
+                        extras.push(propertyArg + "=" + property);
                     }
                     else {
-                        extras += propertyArg + "=" + property + ":" + value + "&";
+                        extras.push(propertyArg + "=" + property + ":" + value);
                     }
                 }
             }
@@ -153,20 +156,19 @@ corona.constructURL = function(doc, prefix, processExtras) {
         if(doc.collections !== undefined) {
             var j = 0;
             for(j = 0; j < doc.collections.length; j += 1) {
-                extras += collectionArg + "=" + doc.collections[j] + "&";
+                extras.push(collectionArg + "=" + doc.collections[j]);
             }
         }
         if(doc.quality !== undefined) {
-            extras += "quality=" + doc.quality + "&";
+            extras.push("quality=" + doc.quality);
         }
     }
 
-    if(doc.type === "json") {
-        return "/json/store" + prefix + doc.uri + "?" + extras;
+    if(includeContentType) {
+        extras.push("contentType=" + doc.type);
     }
-    else {
-        return "/xml/store" + prefix + doc.uri + "?" + extras;
-    }
+
+    return "/store" + prefix + doc.uri + "?" + extras.join("&");
 };
 
 corona.compareJSONDocuments = function(model, actual, withExtras) {
@@ -245,14 +247,14 @@ corona.insertDocuments = function(prefix, withExtras) {
                     processExtras = "set";
                 }
                 $.ajax({
-                    url: corona.constructURL(doc, prefix, processExtras),
+                    url: corona.constructURL(doc, prefix, processExtras, true),
                     type: 'PUT',
                     data: docContent,
                     context: doc,
                     success: function() {
                         ok(true, "Inserted document");
                         $.ajax({
-                            url: corona.constructURL(doc, prefix, "ignore") + "include=all",
+                            url: corona.constructURL(doc, prefix, "ignore", false, "include=all"),
                             type: 'GET',
                             context: this,
                             success: function(data) {
@@ -306,7 +308,7 @@ corona.runFailingTests = function(prefix) {
                     docContent = JSON.stringify(docContent);
                 }
                 $.ajax({
-                    url: corona.constructURL(doc, uri, true),
+                    url: corona.constructURL(doc, uri, true, true),
                     type: 'PUT',
                     data: docContent,
                     context: doc,
@@ -328,13 +330,13 @@ corona.runFailingTests = function(prefix) {
 corona.setExtras = function(prefix, doc) {
     asyncTest("Setting document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: corona.constructURL(doc, prefix, "set"),
+            url: corona.constructURL(doc, prefix, "set", true),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore", false, "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -364,13 +366,13 @@ corona.setExtras = function(prefix, doc) {
 corona.removeExtras = function(prefix, doc) {
     asyncTest("Removing document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: corona.constructURL(doc, prefix, "remove"),
+            url: corona.constructURL(doc, prefix, "remove", true),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore", false, "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -400,13 +402,13 @@ corona.removeExtras = function(prefix, doc) {
 corona.addExtras = function(prefix, doc) {
     asyncTest("Adding document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: corona.constructURL(doc, prefix, "add"),
+            url: corona.constructURL(doc, prefix, "add", true),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore", false, "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -436,13 +438,13 @@ corona.addExtras = function(prefix, doc) {
 corona.deleteDocument = function(prefix, doc) {
     asyncTest("Deleting document: " + prefix + doc.uri, function() {
         $.ajax({
-            url: corona.constructURL(doc, prefix, "remove"),
+            url: corona.constructURL(doc, prefix, "ignore", false),
             type: 'DELETE',
             context: doc,
             success: function() {
                 ok(true, "Deleted document");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore") + "include=all",
+                    url:  corona.constructURL(doc, prefix, "ignore", false, "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {

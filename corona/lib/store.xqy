@@ -145,6 +145,162 @@ declare function store:outputMultipleDocuments(
         else ()
 };
 
+declare function store:deleteDocument(
+    $uri as xs:string,
+    $includeURIs as xs:boolean,
+    $outputFormat as xs:string
+) as xs:string
+{
+    if(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection))
+    then (
+        xdmp:document-delete($uri),
+        if($outputFormat = "json")
+        then json:serialize(json:object((
+            "meta", json:object((
+                "deleted", 1,
+                "numRemaining", 0
+            )),
+            if($includeURIs)
+            then ("uris", json:array($uri))
+            else ()
+        )))
+        else if($outputFormat = "xml")
+        then <corona:results>
+            <corona:meta>
+                <corona:deleted>1</corona:deleted>
+                <corona:numRemaining>0</corona:numRemaining>
+            </corona:meta>
+            {
+                if($includeURIs)
+                then <corona:uris><corona:uri>{ $uri }</corona:uri></corona:uris>
+                else ()
+            }
+        </corona:results>
+        else common:error(400, "corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
+    )
+    else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no document to delete at '", $uri, "'"), $outputFormat)
+};
+
+declare function store:deleteDocumentsWithQuery(
+    $query as cts:query,
+    $bulkDelete as xs:boolean,
+    $includeURIs as xs:boolean,
+    $limit as xs:integer?,
+    $outputFormat as xs:string
+) as xs:string
+{
+    let $docs :=
+        if(exists($limit))
+        then cts:search(collection(($const:JSONCollection, $const:XMLCollection)), $query)[1 to $limit]
+        else cts:search(collection(($const:JSONCollection, $const:XMLCollection)), $query)
+    let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
+    let $numDeleted :=
+        if(exists($limit))
+        then $limit
+        else $count
+    return
+        if($bulkDelete or $count = 1)
+        then
+            if($outputFormat = "json")
+            then json:serialize(json:object((
+                "meta", json:object((
+                    "deleted", $numDeleted,
+                    "numRemaining", $count - $numDeleted
+                )),
+                if($includeURIs)
+                then (
+                    "uris",
+                    json:array(
+                        for $doc in $docs
+                        let $delete := xdmp:document-delete(base-uri($doc))
+                        return base-uri($doc)
+                    )
+                )
+                else
+                    for $doc in $docs
+                    return xdmp:document-delete(base-uri($doc))
+            )))
+            else if($outputFormat = "xml")
+            then <corona:results>
+                <corona:meta>
+                    <corona:deleted>{ $numDeleted }</corona:deleted>
+                    <corona:numRemaining>{ $count - $numDeleted }</corona:numRemaining>
+                </corona:meta>
+                {
+                    if($includeURIs)
+                    then <corona:uris>{
+                        for $doc in $docs
+                        let $delete := xdmp:document-delete(base-uri($doc))
+                        return <corona:uri>{ base-uri($doc) }</corona:uri>
+                    }</corona:uris>
+                    else 
+                        for $doc in $docs
+                        return xdmp:document-delete(base-uri($doc))
+                }
+            </corona:results>
+            else common:error(400, "corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
+        else if($count = 0)
+        then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", $outputFormat)
+        else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", $outputFormat)
+};
+
+declare function store:getDocument(
+    $uri as xs:string,
+    $include as xs:string*,
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?,
+    $highlightQuery as cts:query?,
+    $outputFormat as xs:string
+) as xs:string
+{
+    if(not(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection)))
+    then common:error(404, "corona:DOCUMENT-NOT-FOUND", "Document not found", $outputFormat)
+    else
+
+    let $includeContent := $include = ("content", "all")
+    let $includeCollections := $include = ("collections", "all")
+    let $includeProperties := $include = ("properties", "all")
+    let $includePermissions := $include = ("permissions", "all")
+    let $includeQuality := $include = ("quality", "all")
+
+    let $collections := xdmp:document-get-collections($uri)
+    let $documentType :=
+        if($collections = $const:JSONCollection)
+        then "json"
+        else if($collections = $const:XMLCollection)
+        then "xml"
+        else ()
+
+    let $content :=
+        if(exists($extractPath))
+        then store:wrapContentNodes(path:select(doc($uri)/*, $extractPath, $documentType), $documentType)
+        else doc($uri)
+    let $content :=
+        if($include = ("highlighting") and exists($highlightQuery))
+        then store:highlightContent($content, $highlightQuery, $documentType)
+        else $content
+    let $content :=
+        if(exists($applyTransform))
+        then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+        else $content
+    let $content :=
+        if(namespace-uri($content) = "http://marklogic.com/corona/store")
+        then $content/*
+        else $content
+    return
+        if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
+        then
+            if($outputFormat = "xml")
+            then $content
+            else json:serialize($content)
+        else
+            if($outputFormat = "xml")
+            then <corona:response>{ store:outputDocument($uri, $content, $include, "xml", "xml") }</corona:response>
+            else json:serialize(json:document(
+                json:object(store:outputDocument($uri, $content, $include, "json", "json"))
+            ))
+};
+
 declare function store:createProperty(
     $name as xs:string,
     $value as xs:string
@@ -164,49 +320,6 @@ declare function store:createProperty(
 (:
     JSON Document management
 :)
-
-declare function store:getJSONDocument(
-    $uri as xs:string,
-    $include as xs:string*,
-    $extractPath as xs:string?,
-    $applyTransform as xs:string?,
-    $highlightQuery as cts:query?
-) as xs:string
-{
-    if(empty(doc($uri)/json:json))
-    then common:error(404, "corona:DOCUMENT-NOT-FOUND", "Document not found", "json")
-    else
-
-    let $includeContent := $include = ("content", "all")
-    let $includeCollections := $include = ("collections", "all")
-    let $includeProperties := $include = ("properties", "all")
-    let $includePermissions := $include = ("permissions", "all")
-    let $includeQuality := $include = ("quality", "all")
-    let $content :=
-        if(exists($extractPath))
-        then path:select(doc($uri)/json:json, $extractPath, "json")
-        else root(doc($uri)/json:json)
-    let $content :=
-        if(empty($content))
-        then json:null()
-        else if(count($content, 1) = 1)
-        then $content
-        else json:array($content)
-    let $content :=
-        if($include = ("highlighting") and exists($highlightQuery))
-        then store:highlightContent($content, $highlightQuery, "json")
-        else $content
-    let $content :=
-        if(exists($applyTransform))
-        then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
-        else $content
-    return
-        if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-        then json:serialize($content)
-        else json:serialize(json:document(
-            json:object(store:outputDocument($uri, $content, $include, "json", "json"))
-        ))
-};
 
 declare function store:insertJSONDocument(
     $uri as xs:string,
@@ -253,112 +366,10 @@ declare function store:updateJSONDocumentContent(
     return xdmp:node-replace($existing, $body)
 };
 
-declare function store:deleteJSONDocument(
-    $uri as xs:string,
-    $includeURIs as xs:boolean
-) as xs:string
-{
-    if(exists(doc($uri)/json:json))
-    then (
-        xdmp:document-delete($uri),
-        json:serialize(json:object((
-            "meta", json:object((
-                "deleted", 1,
-                "numRemaining", 0
-            )),
-            if($includeURIs)
-            then ("uris", json:array($uri))
-            else ()
-        )))
-    )
-    else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no JSON document to delete at '", $uri, "'"), "json")
-};
-
-declare function store:deleteJSONDocumentsWithQuery(
-    $query as cts:query,
-    $bulkDelete as xs:boolean,
-    $includeURIs as xs:boolean,
-    $limit as xs:integer?
-) as xs:string
-{
-    let $docs :=
-        if(exists($limit))
-        then cts:search(collection($const:JSONCollection), $query)[1 to $limit]
-        else cts:search(collection($const:JSONCollection), $query)
-    let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
-    let $numDeleted :=
-        if(exists($limit))
-        then $limit
-        else $count
-    return
-        if($bulkDelete or $count = 1)
-        then
-            json:serialize(json:object((
-                "meta", json:object((
-                    "deleted", $numDeleted,
-                    "numRemaining", $count - $numDeleted
-                )),
-                if($includeURIs)
-                then (
-                    "uris",
-                    json:array(
-                        for $doc in $docs
-                        let $delete := xdmp:document-delete(base-uri($doc))
-                        return base-uri($doc)
-                    )
-                )
-                else
-                    for $doc in $docs
-                    return xdmp:document-delete(base-uri($doc))
-            )))
-        else if($count = 0)
-        then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", "json")
-        else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", "json")
-};
-
 
 (:
     XML Document management
 :)
-
-declare function store:getXMLDocument(
-    $uri as xs:string,
-    $include as xs:string*,
-    $extractPath as xs:string?,
-    $applyTransform as xs:string?,
-    $highlightQuery as cts:query?
-) as item()
-{
-    if(empty(store:getRawXMLDoc($uri)))
-    then common:error(404, "corona:DOCUMENT-NOT-FOUND", "Document not found", "xml")
-    else
-
-    let $includeContent := $include = ("content", "all")
-    let $includeCollections := $include = ("collections", "all")
-    let $includeProperties := $include = ("properties", "all")
-    let $includePermissions := $include = ("permissions", "all")
-    let $includeQuality := $include = ("quality", "all")
-    let $content :=
-        if(exists($extractPath))
-        then path:select(store:getRawXMLDoc($uri), $extractPath, "xml")
-        else store:getRawXMLDoc($uri)
-    let $content :=
-        if($include = ("highlighting") and exists($highlightQuery))
-        then store:highlightContent(if(count($content, 2) > 1) then <store:content>{ $content }</store:content> else $content, $highlightQuery, "xml")
-        else $content
-    let $content :=
-        if(exists($applyTransform))
-        then xdmp:xslt-eval(manage:getTransformer($applyTransform), if(count($content, 2) > 1) then <store:content>{ $content }</store:content> else $content)
-        else $content
-    let $content :=
-        if(namespace-uri($content) = "http://marklogic.com/corona/store")
-        then $content/*
-        else $content
-    return
-        if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-        then $content
-        else <corona:response>{ store:outputDocument($uri, $content, $include, "xml", "xml") }</corona:response>
-};
 
 declare function store:insertXMLDocument(
     $uri as xs:string,
@@ -403,70 +414,6 @@ declare function store:updateXMLDocumentContent(
         else ()
     where exists($existing)
     return xdmp:node-replace($existing, $body)
-};
-
-declare function store:deleteXMLDocument(
-    $uri as xs:string,
-    $includeURIs as xs:boolean
-) as element()
-{
-    if(exists(store:getRawXMLDoc($uri)))
-    then (
-        xdmp:document-delete($uri),
-        <corona:results>
-            <corona:meta>
-                <corona:deleted>1</corona:deleted>
-                <corona:numRemaining>0</corona:numRemaining>
-            </corona:meta>
-            {
-                if($includeURIs)
-                then <corona:uris><corona:uri>{ $uri }</corona:uri></corona:uris>
-                else ()
-            }
-        </corona:results>
-    )
-    else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no XML document to delete at '", $uri, "'"), "xml")
-};
-
-declare function store:deleteXMLDocumentsWithQuery(
-    $query as cts:query,
-    $bulkDelete as xs:boolean,
-    $includeURIs as xs:boolean,
-    $limit as xs:integer?
-) as element()
-{
-    let $docs :=
-        if(exists($limit))
-        then cts:search(collection($const:XMLCollection), $query)[1 to $limit]
-        else cts:search(collection($const:XMLCollection), $query)
-    let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
-    let $numDeleted :=
-        if(exists($limit))
-        then $limit
-        else $count
-    return
-        if($bulkDelete or $count = 1)
-        then
-            <corona:results>
-                <corona:meta>
-                    <corona:deleted>{ $numDeleted }</corona:deleted>
-                    <corona:numRemaining>{ $count - $numDeleted }</corona:numRemaining>
-                </corona:meta>
-                {
-                    if($includeURIs)
-                    then <corona:uris>{
-                        for $doc in $docs
-                        let $delete := xdmp:document-delete(base-uri($doc))
-                        return <corona:uri>{ base-uri($doc) }</corona:uri>
-                    }</corona:uris>
-                    else 
-                        for $doc in $docs
-                        return xdmp:document-delete(base-uri($doc))
-                }
-            </corona:results>
-        else if($count = 0)
-        then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", "xml")
-        else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", "xml")
 };
 
 declare private function store:getRawXMLDoc(

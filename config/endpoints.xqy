@@ -11,24 +11,44 @@ declare option xdmp:mapping "false";
 declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 <options xmlns="http://marklogic.com/appservices/rest">
     <!-- Manage documents in the database -->
-    <request uri="^/(json|xml)/store(/.+)?$" endpoint="/corona/store.xqy" user-params="allow">
-        <uri-param name="contentType">$1</uri-param>
-        <uri-param name="uri" as="string">$2</uri-param>
+    <request uri="^/store(/.+)?$" endpoint="/corona/store.xqy">
+        <uri-param name="uri" as="string">$1</uri-param>
+
         <http method="GET">
             <param name="stringQuery" required="false"/>
             <param name="structuredQuery" required="false"/>
             <param name="extractPath" required="false"/>
             <param name="applyTransform" required="false"/>
             <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
+            <param name="outputFormat" required="false" values="json|xml"/>
         </http>
-        <http method="POST"/>
-        <http method="PUT"/>
+        <http method="POST">
+            <param name="contentType" required="true" values="json|xml|text|binary"/>
+            <param name="collection" alias="collection[]" repeatable="true" required="false"/>
+            <param name="addCollection" alias="addCollection[]" repeatable="true" required="false"/>
+            <param name="removeCollection" alias="removeCollection[]" repeatable="true" required="false"/>
+            <param name="property" alias="property[]" repeatable="true" required="false"/>
+            <param name="addProperty" alias="addProperty[]" repeatable="true" required="false"/>
+            <param name="removeProperty" alias="removeProperty[]" repeatable="true" required="false"/>
+            <param name="permission" alias="permission[]" repeatable="true" required="false"/>
+            <param name="addPermission" alias="addPermission[]" repeatable="true" required="false"/>
+            <param name="removePermission" alias="removePermission[]" repeatable="true" required="false"/>
+            <param name="quality" required="false"/>
+        </http>
+        <http method="PUT">
+            <param name="contentType" required="true" values="json|xml|text|binary"/>
+            <param name="collection" alias="collection[]" repeatable="true" required="false"/>
+            <param name="property" alias="property[]" repeatable="true" required="false"/>
+            <param name="permission" alias="permission[]" repeatable="true" required="false"/>
+            <param name="quality" required="false"/>
+        </http>
         <http method="DELETE">
             <param name="stringQuery" required="false"/>
             <param name="structuredQuery" required="false"/>
             <param name="bulkDelete" required="false" as="boolean" default="false"/>
             <param name="include" alias="include[]" repeatable="true" required="false"/>
             <param name="limit" required="false" as="integer"/>
+            <param name="outputFormat" required="false" values="json|xml"/>
         </http>
     </request>
 

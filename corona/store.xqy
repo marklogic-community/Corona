@@ -164,23 +164,25 @@ return
     then $tests
     else
 
-    if($contentType = "json")
+    if($requestMethod = "DELETE")
     then
-        if($requestMethod = "GET" and string-length($uri))
-        then try {
-            store:getJSONDocument($uri, $include, $extractPath, $transformer, $query)
-        }
-        catch ($e) {
-            common:errorFromException(400, $e, $outputFormat)
-        }
-        else if($requestMethod = "DELETE")
-        then
-            if(string-length($uri))
-            then store:deleteJSONDocument($uri, map:get($params, "include") = ("uri", "uris"))
-            else if(exists($query))
-            then store:deleteJSONDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
-            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $outputFormat)
-        else if($requestMethod = "PUT" and string-length($uri))
+        if(string-length($uri))
+        then store:deleteDocument($uri, map:get($params, "include") = ("uri", "uris"), $outputFormat)
+        else if(exists($query))
+        then store:deleteDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"), $outputFormat)
+        else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $outputFormat)
+
+    else if($requestMethod = "GET" and string-length($uri))
+    then try {
+        store:getDocument($uri, $include, $extractPath, $transformer, $query, $outputFormat)
+    }
+    catch ($e) {
+        common:errorFromException(400, $e, $outputFormat)
+    }
+
+    else if($contentType = "json")
+    then
+        if($requestMethod = "PUT" and string-length($uri))
         then store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
         then
@@ -203,21 +205,7 @@ return
         else common:error(400, "corona:INVALID-PARAMETER", "Unknown request", $outputFormat)
     else if($contentType = "xml")
     then
-        if($requestMethod = "GET" and string-length($uri))
-        then try {
-            store:getXMLDocument($uri, $include, $extractPath, $transformer, $query)
-        }
-        catch ($e) {
-            common:errorFromException(400, $e, $outputFormat)
-        }
-        else if($requestMethod = "DELETE")
-        then
-            if(string-length($uri))
-            then store:deleteXMLDocument($uri, map:get($params, "include") = ("uri", "uris"))
-            else if(exists($query))
-            then store:deleteXMLDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"))
-            else common:error(400, "corona:MISSING-PARAMETER", "Missing parameters: must specify a URI, a string query or a structured query with DELETE requests", $outputFormat)
-        else if($requestMethod = "PUT" and string-length($uri))
+        if($requestMethod = "PUT" and string-length($uri))
         then store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
         else if($requestMethod = "POST" and string-length($uri))
         then

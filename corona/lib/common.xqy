@@ -199,7 +199,7 @@ declare function common:dualStrftime(
 };
 
 declare function common:getOutputFormat(
-    $contentType as xs:string+,
+    $contentType as xs:string*,
     $outputFormat as xs:string?
 ) as xs:string
 {
