@@ -183,22 +183,32 @@ return
     else if($contentType = "json")
     then
         if($requestMethod = "PUT" and string-length($uri))
-        then store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+        then (
+            xdmp:set-response-code(204, "Document inserted"),
+            store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+        )
         else if($requestMethod = "POST" and string-length($uri))
         then
             if(empty(doc($uri)) and exists($bodyContent))
-            then store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+            then (
+                xdmp:set-response-code(204, "Document inserted"),
+                store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+            )
             else
                 let $docError :=
                     if(exists($bodyContent))
-                    then store:updateJSONDocumentContent($uri, $bodyContent)
+                    then (
+                        xdmp:set-response-code(204, "Document updated"),
+                        store:updateJSONDocumentContent($uri, $bodyContent)
+                    )
                     else ()
                 return
                     if($docError)
                     then $docError
-                    else try {
+                    else try {(
+                        xdmp:set-response-code(204, "Document metadata updated"),
                         local:syncMetadata($uri, $params)
-                    }
+                    )}
                     catch ($e) {
                         common:errorFromException(400, $e, $outputFormat)
                     }
@@ -206,22 +216,32 @@ return
     else if($contentType = "xml")
     then
         if($requestMethod = "PUT" and string-length($uri))
-        then store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+        then (
+            xdmp:set-response-code(204, "Document inserted"),
+            store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+        )
         else if($requestMethod = "POST" and string-length($uri))
         then
             if(empty(doc($uri)) and exists($bodyContent))
-            then store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+            then (
+                xdmp:set-response-code(204, "Document inserted"),
+                store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
+            )
             else
                 let $docError :=
                     if(exists($bodyContent))
-                    then store:updateXMLDocumentContent($uri, $bodyContent)
+                    then (
+                        xdmp:set-response-code(204, "Document updated"),
+                        store:updateXMLDocumentContent($uri, $bodyContent)
+                    )
                     else ()
                 return
                     if($docError)
                     then $docError
-                    else try {
+                    else try {(
+                        xdmp:set-response-code(204, "Document metadata updated"),
                         local:syncMetadata($uri, $params)
-                    }
+                    )}
                     catch ($e) {
                         common:errorFromException(400, $e, $outputFormat)
                     }
