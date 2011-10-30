@@ -102,23 +102,18 @@ corona.queries = [
 
 corona.constructURL = function(query, purpose) {
     if(purpose === "prereq" || purpose === "delete") {
-        var base;
-        if(query.type === "json") {
-            base = "/json/store";
-        }
-        else {
-            base = "/xml/store";
-        }
-        base += query.prereqDoc.uri + "?";
+        var base = "/store" + query.prereqDoc.uri;
+        var extras = []
         if(purpose === "prereq") {
             if(query.prereqDoc.collection !== undefined) {
-                base += "collection=" + query.prereqDoc.collection + "&";
+                extras.push("collection=" + query.prereqDoc.collection);
             }
             if(query.prereqDoc.property !== undefined) {
-                base += "property=" + query.prereqDoc.property + "&";
+                extras.push("property=" + query.prereqDoc.property);
             }
+            extras.push("contentType=" + query.type);
         }
-        return base;
+        return base + "?" + extras.join("&");
     }
     if(purpose === "query") {
         return "/search";

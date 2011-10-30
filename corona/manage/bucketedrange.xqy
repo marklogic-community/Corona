@@ -41,7 +41,7 @@ return
         then
             if(exists($existing))
             then json:serialize($existing)
-            else common:error(404, "corona:RANGE-INDEX-NOT-FOUND", "Bucketed range index not found", "json")
+            else common:error("corona:RANGE-INDEX-NOT-FOUND", "Bucketed range index not found", "json")
     else json:serialize(json:array(manage:getAllBucketedRanges()))
 
     else if($requestMethod = "POST")
@@ -82,17 +82,17 @@ return
             return
 
             if((empty($key) and empty($element)) or (exists($key) and exists($element)))
-            then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a JSON key or XML element name", "json")
+            then common:error("corona:MISSING-PARAMETER", "Must supply either a JSON key or XML element name", "json")
             else if(exists($attribute) and empty($element))
-            then common:error(400, "corona:MISSING-PARAMETER", "Must supply an XML element along with an XML attribute", "json")
+            then common:error("corona:MISSING-PARAMETER", "Must supply an XML element along with an XML attribute", "json")
             else if(exists($bucketInterval) and exists($startingAt) and $type = ("date", "dateTime"))
             then
                 if(empty($firstFormat))
-                then common:error(400, "corona:MISSING-PARAMETER", "Must supply a firstFormat when creating a auto-bucketed range index", "json")
+                then common:error("corona:MISSING-PARAMETER", "Must supply a firstFormat when creating a auto-bucketed range index", "json")
                 else if(empty($format))
-                then common:error(400, "corona:MISSING-PARAMETER", "Must supply a format when creating a auto-bucketed range index", "json")
+                then common:error("corona:MISSING-PARAMETER", "Must supply a format when creating a auto-bucketed range index", "json")
                 else if(empty($lastFormat))
-                then common:error(400, "corona:MISSING-PARAMETER", "Must supply a lastFormat when creating a auto-bucketed range index", "json")
+                then common:error("corona:MISSING-PARAMETER", "Must supply a lastFormat when creating a auto-bucketed range index", "json")
                 else
 
                 if($mode = "json")
@@ -111,8 +111,8 @@ return
                 else if($mode = "xmlelement")
                 then manage:createXMLElementBucketedRange($name, $element, $type, $buckets, $config)
                 else ()
-            else common:error(400, "corona:MISSING-PARAMETER", "Must supply either the bucket definitions or a bucket interval with a starting date", "json")
-        else common:error(400, "corona:MISSING-PARAMETER", "Must supply a name for the bucketed range", "json")
+            else common:error("corona:MISSING-PARAMETER", "Must supply either the bucket definitions or a bucket interval with a starting date", "json")
+        else common:error("corona:MISSING-PARAMETER", "Must supply a name for the bucketed range", "json")
 
     else if($requestMethod = "DELETE")
     then
@@ -120,6 +120,6 @@ return
         then
             if(exists($existing))
             then manage:deleteBucketedRange($name, $config)
-            else common:error(404, "corona:RANGE-INDEX-NOT-FOUND", "Bucketed range index not found", "json")
-        else common:error(400, "corona:MISSING-PARAMETER", "Must supply the name of the bucketed range to delete", "json")
-    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+            else common:error("corona:RANGE-INDEX-NOT-FOUND", "Bucketed range index not found", "json")
+        else common:error("corona:MISSING-PARAMETER", "Must supply the name of the bucketed range to delete", "json")
+    else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

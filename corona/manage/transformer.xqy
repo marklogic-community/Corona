@@ -40,7 +40,7 @@ return
         then
             if(exists($existing))
             then $existing
-            else common:error(404, "corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
+            else common:error("corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
         else json:serialize(json:array(manage:getAllTransformerNames()))
 
     else if($requestMethod = "PUT")
@@ -51,9 +51,9 @@ return
                 manage:setTransformer($name, $bodyContent)
             }
             catch ($e) {
-                common:errorFromException(400, $e, "xml")
+                common:errorFromException($e, "xml")
             }
-        else common:error(400, "corona:INVALID-PARAMETER", "Must specify a name for the transformer", "json")
+        else common:error("corona:INVALID-PARAMETER", "Must specify a name for the transformer", "json")
 
     else if($requestMethod = "DELETE")
     then
@@ -61,6 +61,6 @@ return
         then
             if(exists($existing))
             then manage:deleteTransformer($name)
-            else common:error(404, "corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
-        else common:error(400, "corona:INVALID-PARAMETER", "Must specify the name of the transformer to delete", "json")
-    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+            else common:error("corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
+        else common:error("corona:INVALID-PARAMETER", "Must specify the name of the transformer to delete", "json")
+    else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

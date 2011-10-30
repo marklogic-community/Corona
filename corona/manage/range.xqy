@@ -41,7 +41,7 @@ return
         then
             if(exists($existing))
             then json:serialize($existing)
-            else common:error(404, "corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
+            else common:error("corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
         else json:serialize(json:array(manage:getAllRanges()))
 
     else if($requestMethod = "POST")
@@ -55,9 +55,9 @@ return
             return
 
             if((empty($key) and empty($element)) or (exists($key) and exists($element)))
-            then common:error(400, "corona:MISSING-PARAMETER", "Must supply either a JSON key, an XML element name or XML element and attribute names", "json")
+            then common:error("corona:MISSING-PARAMETER", "Must supply either a JSON key, an XML element name or XML element and attribute names", "json")
             else if(exists($attribute) and empty($element))
-            then common:error(400, "corona:MISSING-PARAMETER", "Must supply an XML element along with an XML attribute", "json")
+            then common:error("corona:MISSING-PARAMETER", "Must supply an XML element along with an XML attribute", "json")
             else
                 try {
                     if(exists($key))
@@ -69,9 +69,9 @@ return
                     else ()
                 }
                 catch ($e) {
-                    common:errorFromException(400, $e, "json")
+                    common:errorFromException($e, "json")
                 }
-        else common:error(400, "corona:INVALID-PARAMETER", "Must specify a name for the range", "json")
+        else common:error("corona:INVALID-PARAMETER", "Must specify a name for the range", "json")
 
     else if($requestMethod = "DELETE")
     then
@@ -79,6 +79,6 @@ return
         then
             if(exists($existing))
             then manage:deleteRange($name, $config)
-            else common:error(404, "corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
-        else common:error(400, "corona:INVALID-PARAMETER", "Must specify the name of for the range to delete", "json")
-    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+            else common:error("corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
+        else common:error("corona:INVALID-PARAMETER", "Must specify the name of for the range to delete", "json")
+    else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

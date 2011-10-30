@@ -44,7 +44,7 @@ let $outputFormat := common:getOutputFormat($contentType, map:get($params, "outp
 
 let $test := (
     if(empty(($stringQuery, $structuredQuery)) or (exists($structuredQuery) and string-length(normalize-space($structuredQuery)) = 0))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a string query or a structured query", $outputFormat)
+    then common:error("corona:MISSING-PARAMETER", "Must supply a string query or a structured query", $outputFormat)
     else ()
 )
 
@@ -55,7 +55,7 @@ let $structuredQueryJSON :=
             structquery:getParseTree($structuredQuery)
         }
         catch ($e) {
-            xdmp:set($test, common:error(400, "corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
+            xdmp:set($test, common:error("corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
         }
     else ()
 

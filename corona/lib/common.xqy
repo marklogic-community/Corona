@@ -27,13 +27,37 @@ declare namespace search="http://marklogic.com/appservices/search";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
+declare function common:validateOutputFormat(
+    $outputFormat as xs:string
+) as xs:boolean
+{
+    $outputFormat = ("json", "xml")
+};
+
 declare function common:error(
-    $statusCode as xs:integer,
     $exceptionCode as xs:string,
     $message as xs:string,
     $outputFormat as xs:string
 )
 {
+    let $isA400 := (
+        "corona:DUPLICATE-INDEX-NAME",
+        "corona:DUPLICATE-PLACE-ITEM",
+        "corona:REQUIRES-BULK-DELETE"
+    )
+    let $isA500 := (
+        "corona:UNSUPPORTED-METHOD",
+        "corona:INTERNAL-ERROR"
+    )
+    let $statusCode :=
+        if(starts-with($exceptionCode, "corona:INVALID-") or starts-with($exceptionCode, "corona:MISSING-") or $exceptionCode = $isA400)
+        then 400
+        else if(ends-with($exceptionCode, "-NOT-FOUND"))
+        then 404
+        else if($exceptionCode = $isA500)
+        then 500
+        else 400
+
     let $set := xdmp:set-response-code($statusCode, $message)
     let $add := xdmp:add-response-header("Date", string(current-dateTime()))
     return
@@ -57,15 +81,16 @@ declare function common:error(
 };
 
 declare function common:errorFromException(
-    $statusCode as xs:integer,
     $exception as element(),
     $outputFormat as xs:string
 )
 {
-    xdmp:log($exception),
     if(starts-with($exception/*:name, "corona:") or starts-with($exception/*:name, "json:"))
-    then common:error($statusCode, $exception/*:name, $exception/*:message, $outputFormat)
-    else common:error(500, "corona:INTERNAL-ERROR", concat($exception/*:message, " (", $exception/*:format-string, ")"), $outputFormat)
+    then common:error($exception/*:name, $exception/*:message, $outputFormat)
+    else (
+        xdmp:log($exception),
+        common:error("corona:INTERNAL-ERROR", concat($exception/*:message, " (", $exception/*:format-string, ")"), $outputFormat)
+    )
 };
 
 declare function common:castFromJSONType(

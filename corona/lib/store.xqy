@@ -176,9 +176,9 @@ declare function store:deleteDocument(
                 else ()
             }
         </corona:results>
-        else common:error(400, "corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
+        else ()
     )
-    else common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no document to delete at '", $uri, "'"), $outputFormat)
+    else error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document to delete at '", $uri, "'"))
 };
 
 declare function store:deleteDocumentsWithQuery(
@@ -238,10 +238,10 @@ declare function store:deleteDocumentsWithQuery(
                         return xdmp:document-delete(base-uri($doc))
                 }
             </corona:results>
-            else common:error(400, "corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
+            else ()
         else if($count = 0)
-        then common:error(404, "corona:DOCUMENT-NOT-FOUND", "DELETE query doesn't match any documents", $outputFormat)
-        else common:error(400, "corona:BULK-DELETE", "DELETE query matches more than one document without enabling bulk deletes", $outputFormat)
+        then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), "DELETE query doesn't match any documents")
+        else error(xs:QName("corona:REQUIRES-BULK-DELETE"), "DELETE query matches more than one document without enabling bulk deletes")
 };
 
 declare function store:getDocument(
@@ -254,7 +254,7 @@ declare function store:getDocument(
 )
 {
     if(not(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection)))
-    then common:error(404, "corona:DOCUMENT-NOT-FOUND", "Document not found", $outputFormat)
+    then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), "Document not found")
     else
 
     let $includeContent := $include = ("content", "all")
@@ -334,7 +334,7 @@ declare function store:insertJSONDocument(
             json:parse($content)
         }
         catch ($e) {
-            common:error(400, "corona:INVALID-PARAMETER", "Invalid JSON", "json"),
+            common:error("corona:INVALID-PARAMETER", "Invalid JSON", "json"),
             xdmp:log($e)
         }
     return (
@@ -354,13 +354,13 @@ declare function store:updateJSONDocumentContent(
             json:parse($content)
         }
         catch ($e) {
-            common:error(400, "corona:INVALID-PAPARAMETER", "Invalid JSON", "json"),
+            common:error("corona:INVALID-PARAMETER", "Invalid JSON", "json"),
             xdmp:log($e)
         }
     let $existing := doc($uri)/json:json
     let $test :=
         if(empty($existing))
-        then common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no JSON document to update at '", $uri, "'"), "json")
+        then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no JSON document to update at '", $uri, "'"), "json")
         else ()
     where exists($existing)
     return xdmp:node-replace($existing, $body)
@@ -384,7 +384,7 @@ declare function store:insertXMLDocument(
             xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
         }
         catch ($e) {
-            common:error(400, "corona:INVALID-PARAMETER", "Invalid XML", "xml"),
+            common:error("corona:INVALID-PARAMETER", "Invalid XML", "xml"),
             xdmp:log($e)
         }
     return (
@@ -404,13 +404,13 @@ declare function store:updateXMLDocumentContent(
             xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
         }
         catch ($e) {
-            common:error(400, "corona:INVALID-PARAMETER", "Invalid XML", "xml"),
+            common:error("corona:INVALID-PARAMETER", "Invalid XML", "xml"),
             xdmp:log($e)
         }
     let $existing := store:getRawXMLDoc($uri)
     let $test :=
         if(empty($existing))
-        then common:error(404, "corona:DOCUMENT-NOT-FOUND", concat("There is no XML document to update at '", $uri, "'"), "xml")
+        then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no XML document to update at '", $uri, "'"), "xml")
         else ()
     where exists($existing)
     return xdmp:node-replace($existing, $body)

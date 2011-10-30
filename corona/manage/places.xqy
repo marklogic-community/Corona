@@ -54,14 +54,14 @@ let $output :=
             then json:serialize(json:array(manage:getAllPlaces()))
             else if(exists($name))
             then json:serialize(manage:getPlace($name))
-            else common:error(400, "corona:INVALID-REQUEST", "Must supply a place name, request all the places or the anonymous place", "json")
+            else common:error("corona:INVALID-REQUEST", "Must supply a place name, request all the places or the anonymous place", "json")
 
         else if($requestMethod = "PUT")
         then 
             if($scope = "place" and exists($name))
             then manage:createPlace($name, $mode, map:get($params, "option"))
             else if($scope = "places")
-            then common:error(400, "corona:INVALID-REQUEST", "Can not create a new place under /manage/places, use /manage/place instead", "json")
+            then common:error("corona:INVALID-REQUEST", "Can not create a new place under /manage/places, use /manage/place instead", "json")
             else ()
 
         else if($requestMethod = "POST")
@@ -74,7 +74,7 @@ let $output :=
             then manage:addElementToPlace($name, $element, $type, $weight)
             else if(exists($subPlace))
             then manage:addPlaceToPlace($name, $subPlace)
-            else common:error(400, "corona:INVALID-REQUEST", "Must specify a key, element, element/attribute pair, or a sub-place to add to the place", "json")
+            else common:error("corona:INVALID-REQUEST", "Must specify a key, element, element/attribute pair, or a sub-place to add to the place", "json")
 
         else if($requestMethod = "DELETE")
         then
@@ -88,11 +88,11 @@ let $output :=
             then manage:removePlaceFromPlace($name, $subPlace)
             else if(empty(($key, $element, $attribute, $subPlace)) and $scope = "place" and exists($name))
             then manage:deletePlace($name)
-            else common:error(400, "corona:INVALID-REQUEST", "Must specify a key, element, element/attribute pair or a sub-place to remove from the place. Or simply specify the place to delete it's entire configuration.", "json")
-        else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+            else common:error("corona:INVALID-REQUEST", "Must specify a key, element, element/attribute pair or a sub-place to remove from the place. Or simply specify the place to delete it's entire configuration.", "json")
+        else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
     }
     catch ($e) {
-        common:errorFromException(400, $e, "json")
+        common:errorFromException($e, "json")
     }
 return
     if(empty($output))

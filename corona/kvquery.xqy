@@ -48,11 +48,11 @@ let $outputFormat := map:get($params, "outputFormat")
 
 let $test := (
     if(exists($attribute) and empty($element))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply the parent element name when searching for an attribute value", $outputFormat)
+    then common:error("corona:MISSING-PARAMETER", "Must supply the parent element name when searching for an attribute value", $outputFormat)
     else if((exists($key) or exists($element) or exists($property)) and empty($value))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a value along with the key, element, element/attribute or property", $outputFormat)
+    then common:error("corona:MISSING-PARAMETER", "Must supply a value along with the key, element, element/attribute or property", $outputFormat)
     else if(exists($value) and empty($key) and empty($element) and empty($property))
-    then common:error(400, "corona:MISSING-PARAMETER", "Must supply a key, element, element/attribute or property along with the value", $outputFormat)
+    then common:error("corona:MISSING-PARAMETER", "Must supply a key, element, element/attribute or property along with the value", $outputFormat)
     else ()
 )
 

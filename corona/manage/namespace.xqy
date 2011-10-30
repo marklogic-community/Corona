@@ -40,7 +40,7 @@ return
         then
             if(exists($existing))
             then json:serialize($existing)
-            else common:error(404, "corona:NAMESPACE-NOT-FOUND", "Namespace not found", "json")
+            else common:error("corona:NAMESPACE-NOT-FOUND", "Namespace not found", "json")
         else json:serialize(json:array(manage:getAllNamespaces()))
 
     else if($requestMethod = "POST")
@@ -48,9 +48,9 @@ return
         if(exists($prefix))
         then
             if(not(matches($prefix, "^[A-Za-z_][A-Za-z0-9_\.]*$")))
-            then common:error(400, "corona:INVALID-PARAMETER", "Invalid namespace prefix", "json")
+            then common:error("corona:INVALID-PARAMETER", "Invalid namespace prefix", "json")
             else manage:setNamespaceURI($prefix, $uri)
-        else common:error(400, "corona:INVALID-PARAMETER", "Must specify a prefix for the namespace", "json")
+        else common:error("corona:INVALID-PARAMETER", "Must specify a prefix for the namespace", "json")
 
     else if($requestMethod = "DELETE")
     then
@@ -58,6 +58,6 @@ return
         then
             if(exists($existing))
             then manage:deleteNamespace($prefix)
-            else common:error(404, "common:NAMESPACE-NOT-FOUND", "Namespace not found", "json")
-        else common:error(400, "corona:INVALID-PARAMETER", "Must specify a namespace prefix to delete", "json")
-    else common:error(500, "corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+            else common:error("common:NAMESPACE-NOT-FOUND", "Namespace not found", "json")
+        else common:error("corona:INVALID-PARAMETER", "Must specify a namespace prefix to delete", "json")
+    else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
