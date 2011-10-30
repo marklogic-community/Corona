@@ -149,7 +149,7 @@ declare function store:deleteDocument(
     $uri as xs:string,
     $includeURIs as xs:boolean,
     $outputFormat as xs:string
-) as xs:string
+)
 {
     if(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection))
     then (
@@ -187,7 +187,7 @@ declare function store:deleteDocumentsWithQuery(
     $includeURIs as xs:boolean,
     $limit as xs:integer?,
     $outputFormat as xs:string
-) as xs:string
+)
 {
     let $docs :=
         if(exists($limit))
@@ -251,7 +251,7 @@ declare function store:getDocument(
     $applyTransform as xs:string?,
     $highlightQuery as cts:query?,
     $outputFormat as xs:string
-) as xs:string
+)
 {
     if(not(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection)))
     then common:error(404, "corona:DOCUMENT-NOT-FOUND", "Document not found", $outputFormat)
