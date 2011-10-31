@@ -67,10 +67,11 @@ declare function local:qualityFromRequest(
 ) as xs:integer?
 {
     let $quality := map:get($params, "quality")
+    where exists($quality)
     return
         if($quality castable as xs:integer)
         then xs:integer($quality)
-        else ()
+        else error(xs:QName("corona:INVALID-PARAMETER"), "Document quality must be an integer")
 };
 
 declare function local:queryFromRequest(
@@ -136,15 +137,9 @@ declare function local:syncMetadata(
 };
 
 let $requestMethod := xdmp:get-request-method()
-let $bodyContent := xdmp:get-request-body("text")/text()
 let $params := rest:process-request(endpoints:request("/corona/store.xqy"))
 let $uri := map:get($params, "uri")
-let $include := map:get($params, "include")
-let $extractPath := map:get($params, "extractPath")
-let $transformer := map:get($params, "applyTransformer")
-
-let $contentType := map:get($params, "contentType")
-let $outputFormat := common:getOutputFormat($contentType, map:get($params, "outputFormat"))
+let $outputFormat := common:getOutputFormat((), map:get($params, "outputFormat"))
 
 let $errors :=
     if($requestMethod = ("PUT", "POST", "GET") and string-length($uri) = 0)
@@ -152,26 +147,6 @@ let $errors :=
     else if(not(common:validateOutputFormat($outputFormat)))
     then common:error("corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
     else ()
-
-let $collections := local:collectionsFromRequest($params, "collection")
-let $properties :=
-    try {
-        local:propertiesFromRequest($params, "property")
-    }
-    catch ($e) {
-        xdmp:set($errors, common:errorFromException($e, $outputFormat))
-    }
-
-let $quality := local:qualityFromRequest($params)
-let $permissions :=
-    try {
-        local:permissionsFromRequest($params, "permission")
-    }
-    catch ($e) {
-        if($e/*:code = "SEC-ROLEDNE")
-        then xdmp:set($errors, common:error("corona:INVALID-PERMISSION", concat("The role '", $e/*:data/*:datum[. != "sec:role-name"], "' does not exist."), $outputFormat))
-        else xdmp:set($errors, common:errorFromException($e, $outputFormat))
-    }
 
 return
     if(exists($errors))
@@ -181,6 +156,7 @@ return
     if($requestMethod = "DELETE")
     then try {
         let $query := local:queryFromRequest($params)
+        let $include := map:get($params, "include")
         return
             if(string-length($uri))
             then store:deleteDocument($uri, map:get($params, "include") = ("uri", "uris"), $outputFormat)
@@ -194,7 +170,10 @@ return
 
     else if($requestMethod = "GET" and string-length($uri))
     then try {
-        store:getDocument($uri, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
+        let $include := map:get($params, "include")
+        let $extractPath := map:get($params, "extractPath")
+        let $transformer := map:get($params, "applyTransformer")
+        return store:getDocument($uri, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
     }
     catch ($e) {
         common:errorFromException($e, $outputFormat)
@@ -202,25 +181,37 @@ return
 
     else if($requestMethod = "PUT" and string-length($uri))
     then try {
-            xdmp:set-response-code(204, "Document inserted"),
-            store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+        let $bodyContent := xdmp:get-request-body("text")/text()
+        let $collections := local:collectionsFromRequest($params, "collection")
+        let $properties := local:propertiesFromRequest($params, "property")
+        let $permissions := local:permissionsFromRequest($params, "permission")
+        let $quality := local:qualityFromRequest($params)
+        let $contentType := map:get($params, "contentType")
+        let $set := xdmp:set-response-code(204, "Document inserted")
+        return store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
     }
     catch ($e) {
         common:errorFromException($e, $outputFormat)
     }
 
     else if($requestMethod = "POST" and string-length($uri))
-    then try {(
-        xdmp:set-response-code(204, "Document updated"),
-
-        if(empty(doc($uri)) and exists($bodyContent))
-        then store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
-        else if(exists($bodyContent))
-        then store:updateDocumentContent($uri, $bodyContent, $contentType)
-        else (),
-
-        local:syncMetadata($uri, $params)
-    )}
+    then try {
+        let $bodyContent := xdmp:get-request-body("text")/text()
+        let $collections := local:collectionsFromRequest($params, "collection")
+        let $properties := local:propertiesFromRequest($params, "property")
+        let $permissions := local:permissionsFromRequest($params, "permission")
+        let $quality := local:qualityFromRequest($params)
+        let $contentType := map:get($params, "contentType")
+        let $set := xdmp:set-response-code(204, "Document updated")
+        return (
+            if(empty(doc($uri)) and exists($bodyContent))
+            then store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+            else if(exists($bodyContent))
+            then store:updateDocumentContent($uri, $bodyContent, $contentType)
+            else (),
+            local:syncMetadata($uri, $params)
+        )
+    }
     catch ($e) {
         common:errorFromException($e, $outputFormat)
     }

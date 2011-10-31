@@ -85,7 +85,9 @@ declare function common:errorFromException(
     $outputFormat as xs:string
 )
 {
-    if(starts-with($exception/*:name, "corona:") or starts-with($exception/*:name, "json:"))
+    if($exception/*:code = "SEC-ROLEDNE")
+    then common:error("corona:INVALID-PERMISSION", concat("The role '", $exception/*:data/*:datum[. != "sec:role-name"], "' does not exist."), $outputFormat)
+    else if(starts-with($exception/*:name, "corona:") or starts-with($exception/*:name, "json:"))
     then common:error($exception/*:name, $exception/*:message, $outputFormat)
     else (
         xdmp:log($exception),
