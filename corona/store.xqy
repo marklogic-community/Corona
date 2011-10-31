@@ -188,70 +188,28 @@ return
         common:errorFromException($e, $outputFormat)
     }
 
-    else if($contentType = "json")
-    then
-        if($requestMethod = "PUT" and string-length($uri))
-        then (
+    else if($requestMethod = "PUT" and string-length($uri))
+    then try {
             xdmp:set-response-code(204, "Document inserted"),
-            store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
-        )
-        else if($requestMethod = "POST" and string-length($uri))
-        then
-            if(empty(doc($uri)) and exists($bodyContent))
-            then (
-                xdmp:set-response-code(204, "Document inserted"),
-                store:insertJSONDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
-            )
-            else
-                let $docError :=
-                    if(exists($bodyContent))
-                    then (
-                        xdmp:set-response-code(204, "Document updated"),
-                        store:updateJSONDocumentContent($uri, $bodyContent)
-                    )
-                    else ()
-                return
-                    if($docError)
-                    then $docError
-                    else try {(
-                        xdmp:set-response-code(204, "Document metadata updated"),
-                        local:syncMetadata($uri, $params)
-                    )}
-                    catch ($e) {
-                        common:errorFromException($e, $outputFormat)
-                    }
-        else common:error("corona:INVALID-PARAMETER", "Unknown request", $outputFormat)
-    else if($contentType = "xml")
-    then
-        if($requestMethod = "PUT" and string-length($uri))
-        then (
-            xdmp:set-response-code(204, "Document inserted"),
-            store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
-        )
-        else if($requestMethod = "POST" and string-length($uri))
-        then
-            if(empty(doc($uri)) and exists($bodyContent))
-            then (
-                xdmp:set-response-code(204, "Document inserted"),
-                store:insertXMLDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality)
-            )
-            else
-                let $docError :=
-                    if(exists($bodyContent))
-                    then (
-                        xdmp:set-response-code(204, "Document updated"),
-                        store:updateXMLDocumentContent($uri, $bodyContent)
-                    )
-                    else ()
-                return
-                    if($docError)
-                    then $docError
-                    else try {(
-                        xdmp:set-response-code(204, "Document metadata updated"),
-                        local:syncMetadata($uri, $params)
-                    )}
-                    catch ($e) {
-                        common:errorFromException($e, $outputFormat)
-                    }
-        else common:error("corona:INVALID-PARAMETER", "Unknown request", $outputFormat)
-    else ()
+            store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+    }
+    catch ($e) {
+        common:errorFromException($e, $outputFormat)
+    }
+
+    else if($requestMethod = "POST" and string-length($uri))
+    then try {(
+        xdmp:set-response-code(204, "Document updated"),
+
+        if(empty(doc($uri)) and exists($bodyContent))
+        then store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+        else if(exists($bodyContent))
+        then store:updateDocumentContent($uri, $bodyContent, $contentType)
+        else (),
+
+        local:syncMetadata($uri, $params)
+    )}
+    catch ($e) {
+        common:errorFromException($e, $outputFormat)
+    }
+    else common:error("corona:INVALID-PARAMETER", "Unknown request", $outputFormat)

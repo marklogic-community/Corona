@@ -254,7 +254,7 @@ declare function store:getDocument(
 )
 {
     if(not(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection)))
-    then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), "Document not found")
+    then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("Document at '", $uri, "' not found"))
     else
 
     let $includeContent := $include = ("content", "all")
@@ -301,6 +301,59 @@ declare function store:getDocument(
             ))
 };
 
+declare function store:insertDocument(
+    $uri as xs:string,
+    $content as xs:string,
+    $collections as xs:string*,
+    $properties as element()*,
+    $permissions as element()*,
+    $quality as xs:integer?,
+    $contentType as xs:string
+) as empty-sequence()
+{
+    let $body :=
+        if($contentType = "json")
+        then json:parse($content)
+        else if($contentType = "xml")
+        then xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+        else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
+    let $collections := (
+        if($contentType = "json")
+        then $const:JSONCollection
+        else if($contentType = "xml")
+        then $const:XMLCollection
+        else (),
+        $collections
+    )
+    return (
+        xdmp:document-insert($uri, $body, $permissions, $collections, $quality),
+        if(exists($properties))
+        then xdmp:document-set-properties($uri, $properties)
+        else ()
+    )
+};
+
+declare function store:updateDocumentContent(
+    $uri as xs:string,
+    $content as xs:string,
+    $contentType as xs:string
+) as empty-sequence()
+{
+    let $existing := doc($uri)/*
+    let $test :=
+        if(empty($existing))
+        then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document to update at '", $uri, "'"))
+        else ()
+    let $body :=
+        if($contentType = "json")
+        then json:parse($content)
+        else if($contentType = "xml")
+        then xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+        else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
+    where exists($existing)
+    return xdmp:node-replace($existing, $body)
+};
+
 declare function store:createProperty(
     $name as xs:string,
     $value as xs:string
@@ -313,116 +366,6 @@ declare function store:createProperty(
     let $date := dateparser:parse($value)
     let $dateAttribute := if(exists($date)) then attribute normalized-date { $date } else ()
     return element { QName("http://marklogic.com/corona", $name) } { ($dateAttribute, $value) }
-};
-
-
-
-(:
-    JSON Document management
-:)
-
-declare function store:insertJSONDocument(
-    $uri as xs:string,
-    $content as xs:string,
-    $collections as xs:string*,
-    $properties as element()*,
-    $permissions as element()*,
-    $quality as xs:integer?
-) as xs:string?
-{
-    let $body := try {
-            json:parse($content)
-        }
-        catch ($e) {
-            common:error("corona:INVALID-PARAMETER", "Invalid JSON", "json"),
-            xdmp:log($e)
-        }
-    return (
-        xdmp:document-insert($uri, $body, $permissions, ($const:JSONCollection, $collections), $quality),
-        if(exists($properties))
-        then xdmp:document-set-properties($uri, $properties)
-        else ()
-    )
-};
-
-declare function store:updateJSONDocumentContent(
-    $uri as xs:string,
-    $content as xs:string
-) as xs:string?
-{
-    let $body := try {
-            json:parse($content)
-        }
-        catch ($e) {
-            common:error("corona:INVALID-PARAMETER", "Invalid JSON", "json"),
-            xdmp:log($e)
-        }
-    let $existing := doc($uri)/json:json
-    let $test :=
-        if(empty($existing))
-        then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no JSON document to update at '", $uri, "'"), "json")
-        else ()
-    where exists($existing)
-    return xdmp:node-replace($existing, $body)
-};
-
-
-(:
-    XML Document management
-:)
-
-declare function store:insertXMLDocument(
-    $uri as xs:string,
-    $content as xs:string,
-    $collections as xs:string*,
-    $properties as element()*,
-    $permissions as element()*,
-    $quality as xs:integer?
-) as element()?
-{
-    let $body := try {
-            xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
-        }
-        catch ($e) {
-            common:error("corona:INVALID-PARAMETER", "Invalid XML", "xml"),
-            xdmp:log($e)
-        }
-    return (
-        xdmp:document-insert($uri, $body, $permissions, ($const:XMLCollection, $collections), $quality),
-        if(exists($properties))
-        then xdmp:document-set-properties($uri, $properties)
-        else ()
-    )
-};
-
-declare function store:updateXMLDocumentContent(
-    $uri as xs:string,
-    $content as xs:string
-) as element()?
-{
-    let $body := try {
-            xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
-        }
-        catch ($e) {
-            common:error("corona:INVALID-PARAMETER", "Invalid XML", "xml"),
-            xdmp:log($e)
-        }
-    let $existing := store:getRawXMLDoc($uri)
-    let $test :=
-        if(empty($existing))
-        then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no XML document to update at '", $uri, "'"), "xml")
-        else ()
-    where exists($existing)
-    return xdmp:node-replace($existing, $body)
-};
-
-declare private function store:getRawXMLDoc(
-    $uri as xs:string
-) as node()?
-{
-    let $doc := doc($uri)
-    where xdmp:document-get-collections($uri) = $const:XMLCollection
-    return $doc
 };
 
 
