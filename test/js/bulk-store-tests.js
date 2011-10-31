@@ -144,14 +144,14 @@ corona.deleteDocuments = function() {
 
     asyncTest("Deleting XML documents", function() {
         $.ajax({
-            url: '/store?structuredQuery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true&limit=2',
+            url: '/store?structuredQuery={"element": "foo", "equals": "bar"}&bulkDelete=true&limit=2',
             type: 'DELETE',
             success: function() {
                 ok(true, "Deleted documents (with limit)");
 
                 asyncTest("Deleting XML documents", function() {
                     $.ajax({
-                        url: '/store?structuredQuery={"equals": {"element": "foo", "value": "bar"}}&bulkDelete=true',
+                        url: '/store?structuredQuery={"element": "foo", "equals": "bar"}&bulkDelete=true',
                         type: 'DELETE',
                         success: function() {
                             ok(true, "Deleted documents");
