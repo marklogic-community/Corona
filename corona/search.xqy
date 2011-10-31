@@ -74,6 +74,9 @@ let $query := cts:and-query((
         else (),
         if($contentType = ("xml", "all"))
         then $const:XMLCollection
+        else (),
+        if($contentType = ("text", "all"))
+        then $const:TextCollection
         else ()
     )),
     for $collection in map:get($params, "collection")

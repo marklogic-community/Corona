@@ -56,17 +56,21 @@ declare function store:outputMultipleDocuments(
         for $doc in $docs
         let $uri := base-uri($doc)
         let $collections := xdmp:document-get-collections($uri)
-        let $documentType :=
+        let $contentType :=
             if($collections = $const:JSONCollection)
             then "json"
             else if($collections = $const:XMLCollection)
             then "xml"
+            else if($collections = $const:TextCollection)
+            then "text"
             else ()
 
         (: Perform the path extraction if one was provided :)
         let $content :=
-            if(exists($extractPath))
-            then store:wrapContentNodes(path:select($doc, $extractPath, $documentType), $documentType)
+            if($contentType = "text")
+            then $doc/text()
+            else if(exists($extractPath))
+            then store:wrapContentNodes(path:select($doc, $extractPath, $contentType), $contentType)
             else $doc
 
         (: Highlight the content body :)
@@ -83,7 +87,7 @@ declare function store:outputMultipleDocuments(
 
         (: If the wrapper element from wrapContentNodes is still sticking around, remove it :)
         let $content :=
-            if($documentType = "xml" and namespace-uri($content) = "http://marklogic.com/corona/store")
+            if($contentType = "xml" and namespace-uri($content) = "http://marklogic.com/corona/store")
             then $content/*
             else $content
 
@@ -92,12 +96,12 @@ declare function store:outputMultipleDocuments(
             then common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), $outputFormat)
             else ()
 
-        where exists($documentType)
+        where exists($contentType)
         return
             if($outputFormat = "json")
             then json:object((
                 "uri", $uri,
-                store:outputDocument($uri, $content, $include, $documentType, $outputFormat),
+                store:outputDocument($uri, $content, $include, $contentType, $outputFormat),
                 if($include = ("snippet", "all"))
                 then ("snippet", $snippet)
                 else (),
@@ -108,7 +112,7 @@ declare function store:outputMultipleDocuments(
             else if($outputFormat = "xml")
             then <corona:result>{(
                 <corona:uri>{ $uri }</corona:uri>,
-                store:outputDocument($uri, $content, $include, $documentType, $outputFormat),
+                store:outputDocument($uri, $content, $include, $contentType, $outputFormat),
                 if($include = ("snippet", "all"))
                 then <corona:snippet>{ $snippet }</corona:snippet>
                 else (),
@@ -151,7 +155,7 @@ declare function store:deleteDocument(
     $outputFormat as xs:string
 )
 {
-    if(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection))
+    if(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection))
     then (
         xdmp:document-delete($uri),
         if($outputFormat = "json")
@@ -191,8 +195,8 @@ declare function store:deleteDocumentsWithQuery(
 {
     let $docs :=
         if(exists($limit))
-        then cts:search(collection(($const:JSONCollection, $const:XMLCollection)), $query)[1 to $limit]
-        else cts:search(collection(($const:JSONCollection, $const:XMLCollection)), $query)
+        then cts:search(collection(($const:JSONCollection, $const:XMLCollection, $const:TextCollection)), $query)[1 to $limit]
+        else cts:search(collection(($const:JSONCollection, $const:XMLCollection, $const:TextCollection)), $query)
     let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
     let $numDeleted :=
         if(exists($limit))
@@ -253,7 +257,7 @@ declare function store:getDocument(
     $outputFormat as xs:string
 )
 {
-    if(not(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection)))
+    if(not(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection)))
     then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("Document at '", $uri, "' not found"))
     else
 
@@ -264,20 +268,24 @@ declare function store:getDocument(
     let $includeQuality := $include = ("quality", "all")
 
     let $collections := xdmp:document-get-collections($uri)
-    let $documentType :=
+    let $contentType :=
         if($collections = $const:JSONCollection)
         then "json"
         else if($collections = $const:XMLCollection)
         then "xml"
+        else if($collections = $const:TextCollection)
+        then "text"
         else ()
 
     let $content :=
-        if(exists($extractPath))
-        then store:wrapContentNodes(path:select(doc($uri)/*, $extractPath, $documentType), $documentType)
+        if($contentType = "text")
+        then doc($uri)/corona:text-document/text()
+        else if(exists($extractPath))
+        then store:wrapContentNodes(path:select(doc($uri)/*, $extractPath, $contentType), $contentType)
         else doc($uri)
     let $content :=
         if($include = ("highlighting") and exists($highlightQuery))
-        then store:highlightContent($content, $highlightQuery, $documentType)
+        then store:highlightContent($content, $highlightQuery, $contentType)
         else $content
     let $content :=
         if(exists($applyTransform))
@@ -290,7 +298,7 @@ declare function store:getDocument(
     return
         if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
         then
-            if($outputFormat = "xml")
+            if($contentType = ("xml", "text"))
             then $content
             else json:serialize($content)
         else
@@ -316,12 +324,16 @@ declare function store:insertDocument(
         then json:parse($content)
         else if($contentType = "xml")
         then xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
-        else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
+        else if($contentType = "text")
+        then <corona:text-document>{ $content }</corona:text-document>
+        else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml, json or text")
     let $collections := (
         if($contentType = "json")
         then $const:JSONCollection
         else if($contentType = "xml")
         then $const:XMLCollection
+        else if($contentType = "text")
+        then $const:TextCollection
         else (),
         $collections
     )
@@ -349,6 +361,8 @@ declare function store:updateDocumentContent(
         then json:parse($content)
         else if($contentType = "xml")
         then xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+        else if($contentType = "text")
+        then <corona:text-document>{ $content }</corona:text-document>
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
     where exists($existing)
     return xdmp:node-replace($existing, $body)
@@ -438,6 +452,8 @@ declare function store:setCollections(
     return
         if(exists($doc/json:json))
         then xdmp:document-set-collections($uri, ($const:JSONCollection, $collections))
+        else if(exists($doc/corona:text-document))
+        then xdmp:document-set-collections($uri, ($const:TextCollection, $collections))
         else xdmp:document-set-collections($uri, ($const:XMLCollection, $collections))
 };
 
@@ -476,10 +492,10 @@ declare private function store:getDocumentCollections(
 ) as element()*
 {
     if($outputFormat = "json")
-    then json:array(xdmp:document-get-collections($uri)[not(. = ($const:JSONCollection, $const:XMLCollection))])
+    then json:array(xdmp:document-get-collections($uri)[not(. = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection))])
     else
         for $collection in xdmp:document-get-collections($uri)
-        where not($collection = ($const:JSONCollection, $const:XMLCollection))
+        where not($collection = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection))
         return <corona:collection>{ $collection }</corona:collection>
 };
 
@@ -569,19 +585,19 @@ declare private function store:highlightContent(
 
 declare private function store:wrapContentNodes(
     $nodes as node()*,
-    $documentType as xs:string
+    $contentType as xs:string
 ) as node()
 {
     (: If there is more than one node, wrap it :)
     if(count($nodes, 2) = 1)
     then $nodes
     else
-        if($documentType = "json")
+        if($contentType = "json")
         then
             if(empty($nodes))
             then json:null()
             else json:array($nodes)
-        else if($documentType = "xml")
+        else if($contentType = "xml")
         then <store:content>{ $nodes }</store:content>
         else $nodes
 };
@@ -590,15 +606,15 @@ declare private function store:outputDocument(
     $uri as xs:string,
     $content as node()*,
     $include as xs:string*,
-    $documentType as xs:string,
+    $contentType as xs:string,
     $outputFormat as xs:string
 )
 {
     if($outputFormat = "json")
     then
         let $content :=
-            if($documentType = "json")
-            then store:wrapContentNodes($content, $documentType)
+            if($contentType = "json")
+            then store:wrapContentNodes($content, $contentType)
             else $content
         return (
             if($include = ("content", "all"))
@@ -621,8 +637,8 @@ declare private function store:outputDocument(
     then (
         if($include = ("content", "all"))
         then <corona:content>{
-            if($documentType = "json")
-            then json:serialize(store:wrapContentNodes($content, $documentType))
+            if($contentType = "json")
+            then json:serialize(store:wrapContentNodes($content, $contentType))
             else $content
         }</corona:content>
         else (),

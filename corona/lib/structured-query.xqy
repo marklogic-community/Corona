@@ -100,6 +100,7 @@ declare private function structquery:dispatch(
         $step/json:directory[@type = ("string", "array")],
         $step/json:stringQuery[@type = "string"],
         $step/json:wordAnywhere[@type = ("string", "array")],
+        $step/json:inTextDocument[@type = ("string", "array")],
 
         $step/json:geo[@type = "object"],
         $step/json:point[@type = "object"],
@@ -138,6 +139,7 @@ declare private function structquery:process(
     case element(json:directory) return structquery:handleDirectory($step)
     case element(json:stringQuery) return structquery:handleStringQuery($step, $ignoreRange)
     case element(json:wordAnywhere) return structquery:handleWordAnywhere($step)
+    case element(json:inTextDocument) return structquery:handleInTextDocument($step)
 
     case element(json:geo) return structquery:handleGeo($step)
     case element(json:region) return structquery:handleRegion($step)
@@ -388,12 +390,22 @@ declare private function structquery:handleStringQuery(
 
 declare private function structquery:handleWordAnywhere(
     $step as element(json:wordAnywhere)
-) as cts:word-query?
+) as cts:word-query
 {
     let $container := $step/..
     let $options := structquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
     return cts:word-query(structquery:valueToStrings($step), $options, $weight)
+};
+
+declare private function structquery:handleInTextDocument(
+    $step as element(json:inTextDocument)
+) as cts:element-word-query
+{
+    let $container := $step/..
+    let $options := structquery:extractOptions($container, "word")
+    let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
+    return cts:element-word-query(xs:QName("corona:text-document"), structquery:valueToStrings($step), $options, $weight)
 };
 
 declare private function structquery:handleGeo(

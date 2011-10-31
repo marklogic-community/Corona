@@ -4,6 +4,26 @@ if(typeof corona == "undefined" || !corona) {
 
 corona.queries = [
     {
+        "type": "text",
+        "prereqDoc": {
+            "uri": "/structquery/doc1.text",
+            "content": "bar 123.45-5"
+        },
+        "query": {
+            "structuredQuery": JSON.stringify({
+                "inTextDocument": "bar 123.45-5"
+            }),
+            "outputFormat": "json"
+         },
+        "shouldSucceed": true,
+        "assert": function(data) {
+            equals(data.results.length, 1, "Got one document");
+            equals(data.results[0].uri, "/structquery/doc1.text", "Correct document URI was found");
+            equals(data.results[0].content, "bar 123.45-5", "Correct document content was found");
+        },
+        "purpose": "Simple text structured query"
+    },
+    {
         "type": "json",
         "prereqDoc": {
             "uri": "/structquery/doc1.json",
@@ -21,7 +41,6 @@ corona.queries = [
         "shouldSucceed": true,
         "assert": function(data) {
             equals(data.results.length, 1, "Got one document");
-            console.log(data);
             equals(data.results[0].uri, "/structquery/doc1.json", "Correct document URI was found");
             equals(data.results[0].content.foo, "bar 123.45-6", "Correct document content was found");
         },
@@ -157,7 +176,7 @@ corona.runQueries = function() {
                             success: function(data) {
                                 ok(query.shouldSucceed, "Query succeded");
                                 if(query.assert !== undefined) {
-                                    if(query.type === "json") {
+                                    if(query.query.outputFormat === "json") {
                                         query.assert.call(this, JSON.parse(data), query);
                                     }
                                     else {

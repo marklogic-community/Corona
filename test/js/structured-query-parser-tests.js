@@ -140,6 +140,26 @@ corona.queries = [
         "purpose": "wordAnywhere query with weight"
     },
 
+    /* inTextDocument */
+    {
+        "query": { "inTextDocument": "foo" },
+        "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:text-document</cts:element> <cts:text xml:lang="en">foo</cts:text></cts:element-word-query>',
+        "purpose": "Simple inTextDocument query"
+    },
+    {
+        "query": { "inTextDocument": ["foo", "bar"] },
+        "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:text-document</cts:element> <cts:text xml:lang="en">foo</cts:text> <cts:text xml:lang="en">bar</cts:text></cts:element-word-query>',
+        "purpose": "inTextDocument query with array"
+    },
+    {
+        "query": {
+            "inTextDocument": "foo",
+            "weight": 2
+        },
+        "result": '<cts:element-word-query weight="2" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:text-document</cts:element> <cts:text xml:lang="en">foo</cts:text></cts:element-word-query>',
+        "purpose": "inTextDocument query with weight"
+    },
+
     /* And */
     {
         "query": { "and": [
