@@ -1,6 +1,6 @@
 # Corona - A REST interface to MarkLogic
 
-The Corona project is a set REST endpoints to enable usage of the [MarkLogic Server] without knowing XQuery.
+The Corona project is a community-sponsored set of REST endpoints to enable usage of the [MarkLogic Server] without knowing XQuery.
 
 There is a tutorial at http://developer.marklogic.com/try/corona/index
 
