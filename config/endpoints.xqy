@@ -117,7 +117,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 
     <request uri="^/manage(/)?$" endpoint="/corona/info.xqy" user-params="ignore"/>
 
-    <request uri="^/manage/(range|range/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/range.xqy">
+    <request uri="^/manage/(ranges|range/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/range.xqy">
         <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -129,7 +129,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/(bucketedrange|bucketedrange/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/bucketedrange.xqy">
+    <request uri="^/manage/(bucketedranges|bucketedrange/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/bucketedrange.xqy">
         <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -148,7 +148,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/(namespace|namespace/([^/]+))/?$" endpoint="/corona/manage/namespace.xqy">
+    <request uri="^/manage/(namespaces|namespace/([^/]+))/?$" endpoint="/corona/manage/namespace.xqy">
         <uri-param name="prefix" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -157,7 +157,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/(transformer|transformer/([^/]+))/?$" endpoint="/corona/manage/transformer.xqy">
+    <request uri="^/manage/(transformers|transformer/([^/]+))/?$" endpoint="/corona/manage/transformer.xqy">
         <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="PUT"/>

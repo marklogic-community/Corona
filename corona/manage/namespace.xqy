@@ -36,7 +36,7 @@ let $existing := manage:getNamespaceURI($prefix)
 return
     if($requestMethod = "GET")
     then
-        if(exists($prefix))
+        if(string-length($prefix))
         then
             if(exists($existing))
             then json:serialize($existing)
@@ -45,7 +45,7 @@ return
 
     else if($requestMethod = "POST")
     then
-        if(exists($prefix))
+        if(string-length($prefix))
         then
             if(not(matches($prefix, "^[A-Za-z_][A-Za-z0-9_\.]*$")))
             then common:error("corona:INVALID-PARAMETER", "Invalid namespace prefix", "json")
@@ -54,7 +54,7 @@ return
 
     else if($requestMethod = "DELETE")
     then
-        if(exists($prefix))
+        if(string-length($prefix))
         then
             if(exists($existing))
             then manage:deleteNamespace($prefix)

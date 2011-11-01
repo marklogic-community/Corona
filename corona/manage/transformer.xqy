@@ -36,7 +36,7 @@ let $existing := manage:getTransformer($name)
 return
     if($requestMethod = "GET")
     then
-        if(exists($name))
+        if(string-length($name))
         then
             if(exists($existing))
             then $existing
@@ -45,7 +45,7 @@ return
 
     else if($requestMethod = "PUT")
     then
-        if(exists($name))
+        if(string-length($name))
         then
             try {
                 manage:setTransformer($name, $bodyContent)
@@ -57,7 +57,7 @@ return
 
     else if($requestMethod = "DELETE")
     then
-        if(exists($name))
+        if(string-length($name))
         then
             if(exists($existing))
             then manage:deleteTransformer($name)

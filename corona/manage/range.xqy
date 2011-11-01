@@ -37,7 +37,7 @@ let $existing := manage:getRange($name)
 return
     if($requestMethod = "GET")
     then
-        if(exists($name))
+        if(string-length($name))
         then
             if(exists($existing))
             then json:serialize($existing)
@@ -46,7 +46,7 @@ return
 
     else if($requestMethod = "POST")
     then
-        if(exists($name))
+        if(string-length($name))
         then
             let $key := map:get($params, "key")
             let $element := map:get($params, "element")
@@ -75,7 +75,7 @@ return
 
     else if($requestMethod = "DELETE")
     then
-        if(exists($name))
+        if(string-length($name))
         then
             if(exists($existing))
             then manage:deleteRange($name, $config)
