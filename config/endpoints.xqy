@@ -104,6 +104,15 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="contentType" required="false" repeatable="true" values="all|json|xml|text|binary" default="all"/>
     </request>
 
+    <!-- Transaction management -->
+    <request uri="^/transaction/(status|create|commit|rollback)/?$" endpoint="/corona/transaction.xqy">
+        <uri-param name="action">$1</uri-param>
+        <param name="txid" required="false"/>
+        <param name="outputFormat" required="false" values="xml|json"/>
+        <http method="GET"/>
+        <http method="POST"/>
+    </request>
+
     <!-- Index management -->
 
     <request uri="^/manage(/)?$" endpoint="/corona/info.xqy" user-params="ignore"/>

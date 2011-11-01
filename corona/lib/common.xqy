@@ -255,3 +255,34 @@ declare function common:getOutputFormat(
     then $contentType
     else "json"
 };
+
+declare function common:processTXID(
+    $txid as xs:string,
+    $forceHostMatching as xs:boolean
+) as map:map
+{
+    let $map := map:map()
+    let $bits := tokenize($txid, ":")
+    let $hostID :=
+        if($bits[1] castable as xs:unsignedLong)
+        then xs:unsignedLong($bits[1])
+        else error(xs:QName("corona:INVALID-TRANSACTION"), "Invalid txid: the transaction id contains malformed data")
+    let $hostName := try {
+        xdmp:host-name($hostID)
+    }
+    catch ($e) {
+        error(xs:QName("corona:INVALID-TRANSACTION"), "Invalid txid: the transaction id contains malformed data")
+    }
+    let $test :=
+        if($forceHostMatching and $hostID != xdmp:host())
+        then error(xs:QName("corona:INVALID-TRANSACTION-HOST"), "Cannot process this transaction on this host, must be processed on the host that started the transaction")
+        else ()
+    let $id :=
+        if($bits[2] castable as xs:unsignedLong)
+        then xs:unsignedLong($bits[2])
+        else error(xs:QName("corona:INVALID-TRANSACTION"), "Invalid txid: the transaction id contains malformed data")
+    let $set := map:put($map, "id", $id)
+    let $set := map:put($map, "hostName", $hostName)
+    let $set := map:put($map, "hostID", $hostID)
+    return $map
+};
