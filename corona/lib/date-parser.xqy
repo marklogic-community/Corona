@@ -146,6 +146,25 @@ declare variable $dateparser:FORMATS as element(format)+ := (
         <timezone>\w\w\w</timezone>
     </format>,
 
+    (: 08/20/2007 5:58:20 AM:)
+    (: 08/20/07 5:58:20 AM:)
+    <format>
+        <month>\d\d?</month>
+        <string>/</string>
+        <day>\d\d?</day>
+        <string>/</string>
+        <year>\d\d\d\d|\d\d</year>
+        <whitespace/>
+        <hour>\d\d?</hour>
+        <string>:</string>
+        <minute>\d\d</minute>
+        <string>:</string>
+        <second>\d\d</second>
+        <whitespace/>
+        <meridiem/>
+    </format>,
+
+
     (: 08-20-2007 :)
     (: 08-20-07 :)
     <format>
@@ -223,6 +242,8 @@ declare private function dateparser:assembleFormat(
             then "\s+"
             else if(local-name($token) = "string")
             then string($token)
+            else if(local-name($token) = "meridiem")
+            then "(am|pm|a\.m\.|p\.m\.)"
             else concat("(", string($token), ")")
     return concat("^", string-join($groups, ""), "$")
 };
@@ -239,11 +260,15 @@ declare private function dateparser:analyzedStringToDate(
     let $minutePosition := dateparser:extractLocationFromAnalyzedString("minute", $format)
     let $secondPosition := dateparser:extractLocationFromAnalyzedString("second", $format)
     let $timezonePosition := dateparser:extractLocationFromAnalyzedString("timezone", $format)
-
+    let $meridiemPosition := dateparser:extractLocationFromAnalyzedString("meridiem", $format)
     let $year := dateparser:processYear(string($string//s:group[@nr = $yearPosition]))
     let $month := dateparser:processMonth(string($string//s:group[@nr = $monthPosition]))
     let $day := dateparser:processDay(string($string//s:group[@nr = $dayPosition]))
-    let $hour := dateparser:expandTwoDigits(string($string//s:group[@nr = $hourPosition]), "00")
+    let $hourString := 
+        if($meridiemPosition)
+        then dateparser:adjustHourForMeridiem(string($string//s:group[@nr = $hourPosition]), string($string//s:group[@nr = $meridiemPosition]))
+        else string($string//s:group[@nr = $hourPosition])
+    let $hour := dateparser:expandTwoDigits($hourString, "00")
     let $minute := dateparser:expandTwoDigits(string($string//s:group[@nr = $minutePosition]), "00")
     let $second := dateparser:expandTwoDigits(string($string//s:group[@nr = $secondPosition]), "00")
     let $timezone := dateparser:processZone(string($string//s:group[@nr = $timezonePosition]))
@@ -254,6 +279,22 @@ declare private function dateparser:analyzedStringToDate(
         if($timezone = "")
         then adjust-dateTime-to-timezone(xs:dateTime($possibleDate), implicit-timezone())
         else xs:dateTime($possibleDate)
+};
+
+declare private function dateparser:adjustHourForMeridiem(
+    $hourString as xs:string,
+    $meridiemString as xs:string
+) as xs:string
+{
+    if(starts-with($meridiemString, "a") or starts-with($meridiemString, "A"))
+    then 
+        if($hourString eq "12")
+        then "00"
+        else $hourString
+    else 
+        if($hourString eq "12")
+        then $hourString
+        else xs:string(xs:integer($hourString) + 12)
 };
 
 declare private function dateparser:extractLocationFromAnalyzedString(
