@@ -23,7 +23,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="outputFormat" required="false" values="json|xml"/>
         </http>
         <http method="POST">
-            <param name="contentType" required="true" values="json|xml|text|binary"/>
+            <param name="contentType" required="false" values="json|xml|text|binary"/>
             <param name="collection" alias="collection[]" repeatable="true" required="false"/>
             <param name="addCollection" alias="addCollection[]" repeatable="true" required="false"/>
             <param name="removeCollection" alias="removeCollection[]" repeatable="true" required="false"/>
@@ -36,7 +36,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="quality" required="false"/>
         </http>
         <http method="PUT">
-            <param name="contentType" required="true" values="json|xml|text|binary"/>
+            <param name="contentType" required="false" values="json|xml|text|binary"/>
             <param name="collection" alias="collection[]" repeatable="true" required="false"/>
             <param name="property" alias="property[]" repeatable="true" required="false"/>
             <param name="permission" alias="permission[]" repeatable="true" required="false"/>

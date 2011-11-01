@@ -186,7 +186,7 @@ return
         let $properties := local:propertiesFromRequest($params, "property")
         let $permissions := local:permissionsFromRequest($params, "permission")
         let $quality := local:qualityFromRequest($params)
-        let $contentType := map:get($params, "contentType")
+        let $contentType := common:getContentType($uri, map:get($params, "contentType"))
         let $set := xdmp:set-response-code(204, "Document inserted")
         return store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
     }
@@ -201,7 +201,7 @@ return
         let $properties := local:propertiesFromRequest($params, "property")
         let $permissions := local:permissionsFromRequest($params, "permission")
         let $quality := local:qualityFromRequest($params)
-        let $contentType := map:get($params, "contentType")
+        let $contentType := common:getContentType($uri, map:get($params, "contentType"))
         let $set := xdmp:set-response-code(204, "Document updated")
         return (
             if(empty(doc($uri)) and exists($bodyContent))

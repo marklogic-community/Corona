@@ -225,6 +225,25 @@ declare function common:dualStrftime(
     return string-join($bits, "")
 };
 
+declare function common:getContentType(
+    $uri as xs:string?,
+    $contentType as xs:string?
+) as xs:string?
+{
+    if(exists($contentType))
+    then $contentType
+    else if(exists($uri))
+    then
+        let $extension := tokenize($uri, "\.")[last()]
+        return
+            if($extension = ("json", "xml"))
+            then $extension
+            else if($extension = ("txt", "text"))
+            then "text"
+            else ()
+    else ()
+};
+
 declare function common:getOutputFormat(
     $contentType as xs:string*,
     $outputFormat as xs:string?
