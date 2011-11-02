@@ -13,6 +13,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <!-- Manage documents in the database -->
     <request uri="^/store(/.+)?$" endpoint="/corona/store.xqy">
         <uri-param name="uri" as="string">$1</uri-param>
+        <param name="txid" required="false"/>
 
         <http method="GET">
             <param name="stringQuery" required="false"/>

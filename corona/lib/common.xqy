@@ -20,6 +20,7 @@ module namespace common="http://marklogic.com/corona/common";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
+import module namespace store="http://marklogic.com/corona/store" at "store.xqy";
 
 declare namespace corona="http://marklogic.com/corona";
 declare namespace search="http://marklogic.com/appservices/search";
@@ -285,4 +286,172 @@ declare function common:processTXID(
     let $set := map:put($map, "hostName", $hostName)
     let $set := map:put($map, "hostID", $hostID)
     return $map
+};
+
+declare function common:execute(
+    $functionName as xs:string,
+    $txid as xs:string?
+) as item()*
+{
+    if(exists($txid))
+    then common:executeInTransaction($functionName, $txid, 0, (), (), (), (), (), (), ())
+    else xdmp:apply(xdmp:function(xs:QName($functionName)))
+};
+
+declare function common:execute(
+    $functionName as xs:string,
+    $txid as xs:string?,
+    $arg1 as item()*
+) as item()*
+{
+    if(exists($txid))
+    then common:executeInTransaction($functionName, $txid, 1, $arg1, (), (), (), (), (), ())
+    else xdmp:apply(xdmp:function(xs:QName($functionName)), $arg1)
+};
+
+declare function common:execute(
+    $functionName as xs:string,
+    $txid as xs:string?,
+    $arg1 as item()*,
+    $arg2 as item()*
+) as item()*
+{
+    if(exists($txid))
+    then common:executeInTransaction($functionName, $txid, 2, $arg1, $arg2, (), (), (), (), ())
+    else xdmp:apply(xdmp:function(xs:QName($functionName)), $arg1, $arg2)
+};
+
+declare function common:execute(
+    $functionName as xs:string,
+    $txid as xs:string?,
+    $arg1 as item()*,
+    $arg2 as item()*,
+    $arg3 as item()*
+) as item()*
+{
+    if(exists($txid))
+    then common:executeInTransaction($functionName, $txid, 3, $arg1, $arg2, $arg3, (), (), (), ())
+    else xdmp:apply(xdmp:function(xs:QName($functionName)), $arg1, $arg2, $arg3)
+};
+
+declare function common:execute(
+    $functionName as xs:string,
+    $txid as xs:string?,
+    $arg1 as item()*,
+    $arg2 as item()*,
+    $arg3 as item()*,
+    $arg4 as item()*
+) as item()*
+{
+    if(exists($txid))
+    then common:executeInTransaction($functionName, $txid, 4, $arg1, $arg2, $arg3, $arg4, (), (), ())
+    else xdmp:apply(xdmp:function(xs:QName($functionName)), $arg1, $arg2, $arg3, $arg4)
+};
+
+declare function common:execute(
+    $functionName as xs:string,
+    $txid as xs:string?,
+    $arg1 as item()*,
+    $arg2 as item()*,
+    $arg3 as item()*,
+    $arg4 as item()*,
+    $arg5 as item()*
+) as item()*
+{
+    if(exists($txid))
+    then common:executeInTransaction($functionName, $txid, 5, $arg1, $arg2, $arg3, $arg4, $arg5, (), ())
+    else xdmp:apply(xdmp:function(xs:QName($functionName)), $arg1, $arg2, $arg3, $arg4, $arg5)
+};
+
+declare function common:execute(
+    $functionName as xs:string,
+    $txid as xs:string?,
+    $arg1 as item()*,
+    $arg2 as item()*,
+    $arg3 as item()*,
+    $arg4 as item()*,
+    $arg5 as item()*,
+    $arg6 as item()*
+) as item()*
+{
+    if(exists($txid)) then
+    common:executeInTransaction($functionName, $txid, 6, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6, ())
+    else xdmp:apply(xdmp:function(xs:QName($functionName)), $arg1, $arg2, $arg3, $arg4, $arg5, $arg6)
+};
+
+declare function common:execute(
+    $functionName as xs:string,
+    $txid as xs:string?,
+    $arg1 as item()*,
+    $arg2 as item()*,
+    $arg3 as item()*,
+    $arg4 as item()*,
+    $arg5 as item()*,
+    $arg6 as item()*,
+    $arg7 as item()*
+) as item()*
+{
+    if(exists($txid)) then
+    common:executeInTransaction($functionName, $txid, 7, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6, $arg7)
+    else xdmp:apply(xdmp:function(xs:QName($functionName)), $arg1, $arg2, $arg3, $arg4, $arg5, $arg6, $arg7)
+};
+
+declare private function common:executeInTransaction(
+    $functionName as xs:string,
+    $txid as xs:string,
+    $numArgs as xs:integer,
+    $arg1 as item()*,
+    $arg2 as item()*,
+    $arg3 as item()*,
+    $arg4 as item()*,
+    $arg5 as item()*,
+    $arg6 as item()*,
+    $arg7 as item()*
+) as item()*
+{
+    let $id := map:get(common:processTXID($txid, true()), "id")
+
+    let $argMap := map:map()
+    let $set := (
+        map:put($argMap, "arg1", $arg1),
+        map:put($argMap, "arg2", $arg2),
+        map:put($argMap, "arg3", $arg3),
+        map:put($argMap, "arg4", $arg4),
+        map:put($argMap, "arg5", $arg5),
+        map:put($argMap, "arg6", $arg6),
+        map:put($argMap, "arg7", $arg7)
+    )
+
+    let $modulePrefix := tokenize($functionName, ":")[1]
+    let $modulePath :=
+        if($modulePrefix = "store")
+        then "corona/lib/store.xqy"
+        else ()
+    let $moduleNamespace :=
+        if($modulePrefix = "store")
+        then "http://marklogic.com/corona/store"
+        else ()
+
+    let $argumentString := string-join(
+            for $argNum in (1 to $numArgs)
+            return concat("map:get($argMap, 'arg", $argNum, "')")
+        , ", ")
+
+    let $query := concat('
+        xquery version "1.0-ml";
+        import module namespace ', $modulePrefix , '="', $moduleNamespace, '" at "', $modulePath, '";
+
+        declare variable $argMap as map:map external;
+
+        ', $functionName, '(', $argumentString, ')')
+
+    return
+        try {
+            xdmp:eval($query, (xs:QName("argMap"), $argMap), <options xmlns="xdmp:eval"><transaction-id>{ $id }</transaction-id></options>)
+        }
+        catch ($e) {
+            if($e/*:code = "XDMP-NOTXN")
+            then error(xs:QName("corona:UNKNOWN-TRANSACTION"), concat("The transaction with ID '", $txid, "' was not found on this server"))
+            else xdmp:rethrow()
+        }
 };
