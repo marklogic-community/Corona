@@ -23,8 +23,35 @@ import module namespace rest="http://marklogic.com/appservices/rest" at "lib/res
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
 
 declare namespace corona="http://marklogic.com/corona";
+declare namespace hs="http://marklogic.com/xdmp/status/host";
 
 declare option xdmp:mapping "false";
+
+declare function local:generateTransactionStatus(
+    $id as xs:unsignedLong,
+    $outputFormat as xs:string
+)
+{
+    let $txid := concat(xdmp:host(), ":", $id)
+    let $status := xdmp:host-status(xdmp:host())/hs:transactions/hs:transaction[hs:transaction-id = $id]
+    return
+        if($outputFormat = "json")
+        then json:serialize(json:document(json:object((
+            "txid", $txid,
+            "host", xdmp:host-name($status/hs:host-id),
+            "createdOn", string($status/hs:start-time),
+            "expiresOn", xs:dateTime($status/hs:start-time) + xs:dayTimeDuration(concat("PT", string($status/hs:time-limit), "S")),
+            "canBeExtendedTo", xs:dateTime($status/hs:start-time) + xs:dayTimeDuration(concat("PT", string($status/hs:max-time-limit), "S"))
+        ))))
+        else <corona:response>
+            <corona:txid>{ $txid }</corona:txid>
+            <corona:host>{ xdmp:host-name($status/hs:host-id) }</corona:host>
+            <corona:createdOn>{ string($status/hs:start-time) }</corona:createdOn>
+            <corona:expiresOn>{ xs:dateTime($status/hs:start-time) + xs:dayTimeDuration(concat("PT", string($status/hs:time-limit), "S")) }</corona:expiresOn>
+            <corona:canBeExtendedTo>{ xs:dateTime($status/hs:start-time) + xs:dayTimeDuration(concat("PT", string($status/hs:max-time-limit), "S")) }</corona:canBeExtendedTo>
+        </corona:response>
+};
+
 
 let $params := rest:process-request(endpoints:request("/corona/transaction.xqy"))
 
@@ -55,15 +82,7 @@ return
             )
             let $id := xdmp:apply($functions[1], <options xmlns="xdmp:eval"><transaction-mode>update</transaction-mode></options>)
             let $set := xdmp:apply($functions[2], "corona-transaction", xdmp:host(), $id)
-            let $txid := concat(xdmp:host(), ":", $id)
-            return
-                if($outputFormat = "json")
-                then json:serialize(json:document(json:object((
-                    "txid", $txid
-                ))))
-                else <corona:response>
-                    <corona:txid>{ $txid }</corona:txid>
-                </corona:response>
+            return local:generateTransactionStatus($id, $outputFormat)
         }
         catch ($e) {
             if($e/*:code = "XDMP-UNDFUN" and $e/*:data/*:datum = ("xdmp:transaction-create()", "xdmp:set-transaction-name()"))
@@ -106,17 +125,7 @@ return
             let $transactionFN := xdmp:function(xs:QName("xdmp:transaction"))
             let $idMap := common:processTXID($txid, false())
             let $currentTransactions := xdmp:apply($transactionFN, "corona-transaction", map:get($idMap, "hostID"))
-            let $exists := $currentTransactions = map:get($idMap, "id")
-            return
-                if($outputFormat = "json")
-                then json:serialize(json:document(json:object((
-                    "txid", $txid,
-                    "active", $exists
-                ))))
-                else <corona:response>
-                    <corona:txid>{ $txid }</corona:txid>
-                    <corona:active>{ $exists }</corona:active>
-                </corona:response>
+            return local:generateTransactionStatus(map:get($idMap, "id"), $outputFormat)
         }
         catch ($e) {
             if($e/*:code = "XDMP-UNDFUN" and $e/*:data/*:datum = "xdmp:transaction()")
