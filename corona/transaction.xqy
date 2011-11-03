@@ -48,9 +48,13 @@ return
     if($requestMethod = "POST")
     then
         if($action = "create")
-        then
-            let $id := xdmp:transaction-create()
-            let $set := xdmp:set-transaction-name("corona-transaction", xdmp:host(), $id)
+        then try {
+            let $functions := (
+                xdmp:function(xs:QName("xdmp:transaction-create")),
+                xdmp:function(xs:QName("xdmp:set-transaction-name"))
+            )
+            let $id := xdmp:apply($functions[1], <options xmlns="xdmp:eval"><transaction-mode>update</transaction-mode></options>)
+            let $set := xdmp:apply($functions[2], "corona-transaction", xdmp:host(), $id)
             let $txid := concat(xdmp:host(), ":", $id)
             return
                 if($outputFormat = "json")
@@ -60,25 +64,37 @@ return
                 else <corona:response>
                     <corona:txid>{ $txid }</corona:txid>
                 </corona:response>
+        }
+        catch ($e) {
+            if($e/*:code = "XDMP-UNDFUN" and $e/*:data/*:datum = ("xdmp:transaction-create()", "xdmp:set-transaction-name()"))
+            then common:error("corona:INVALID-REQUEST", "This version of MarkLogic Server does not support transactions.  Upgrade to 5.0 or greater.", $outputFormat)
+            else common:errorFromException($e, $outputFormat)
+        }
 
         else if($action = "rollback")
         then try {
+            let $rollbackFN := xdmp:function(xs:QName("xdmp:transaction-rollback"))
             let $idMap := common:processTXID($txid, false())
-            let $rollback := xdmp:transaction-rollback(map:get($idMap, "hostID"), map:get($idMap, "id"))
+            let $rollback := xdmp:apply($rollbackFN, map:get($idMap, "hostID"), map:get($idMap, "id"))
             return xdmp:set-response-code(204, "Transaction rolled back")
         }
         catch ($e) {
-            common:errorFromException($e, $outputFormat)
+            if($e/*:code = "XDMP-UNDFUN" and $e/*:data/*:datum = "xdmp:transaction-rollback()")
+            then common:error("corona:INVALID-REQUEST", "This version of MarkLogic Server does not support transactions.  Upgrade to 5.0 or greater.", $outputFormat)
+            else common:errorFromException($e, $outputFormat)
         }
 
         else if($action = "commit")
         then try {
+            let $commitFN := xdmp:function(xs:QName("xdmp:transaction-commit"))
             let $idMap := common:processTXID($txid, false())
-            let $commit := xdmp:transaction-commit(map:get($idMap, "hostID"), map:get($idMap, "id"))
+            let $commit := xdmp:apply($commitFN, map:get($idMap, "hostID"), map:get($idMap, "id"))
             return xdmp:set-response-code(204, "Transaction committed")
         }
         catch ($e) {
-            common:errorFromException($e, $outputFormat)
+            if($e/*:code = "XDMP-UNDFUN" and $e/*:data/*:datum = "xdmp:transaction-commit()")
+            then common:error("corona:INVALID-REQUEST", "This version of MarkLogic Server does not support transactions.  Upgrade to 5.0 or greater.", $outputFormat)
+            else common:errorFromException($e, $outputFormat)
         }
 
         else common:error("corona:INVALID-REQUEST", "Must spcify an action of create, rollback or commit", $outputFormat)
@@ -87,8 +103,9 @@ return
     then 
         if($action = "status")
         then try {
+            let $transactionFN := xdmp:function(xs:QName("xdmp:transaction"))
             let $idMap := common:processTXID($txid, false())
-            let $currentTransactions := xdmp:transaction("corona-transaction", map:get($idMap, "hostID"))
+            let $currentTransactions := xdmp:apply($transactionFN, "corona-transaction", map:get($idMap, "hostID"))
             let $exists := $currentTransactions = map:get($idMap, "id")
             return
                 if($outputFormat = "json")
@@ -102,7 +119,9 @@ return
                 </corona:response>
         }
         catch ($e) {
-            common:errorFromException($e, $outputFormat)
+            if($e/*:code = "XDMP-UNDFUN" and $e/*:data/*:datum = "xdmp:transaction()")
+            then common:error("corona:INVALID-REQUEST", "This version of MarkLogic Server does not support transactions.  Upgrade to 5.0 or greater.", $outputFormat)
+            else common:errorFromException($e, $outputFormat)
         }
         else common:error("corona:INVALID-PARAMETER", concat("Invalid action '", $action, "', GET requests only support returning transaction status."), $outputFormat)
 

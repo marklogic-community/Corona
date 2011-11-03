@@ -27,7 +27,6 @@ import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/c
 declare namespace corona="http://marklogic.com/corona";
 
 declare option xdmp:mapping "false";
-declare option xdmp:transaction-mode "update";
 
 declare function local:collectionsFromRequest(
     $params as map:map,
@@ -114,15 +113,19 @@ return
     then $errors
     else
 
+    if(not(common:transactionsMatch($txid)))
+    then xdmp:invoke("/corona/store.xqy", (), <options xmlns="xdmp:eval"><transaction-id>{ map:get(common:processTXID($txid, true()), "id") }</transaction-id></options>)
+    else
+
     if($requestMethod = "DELETE")
     then try {
         let $query := local:queryFromRequest($params)
         let $include := map:get($params, "include")
         return
             if(string-length($uri))
-            then common:execute("store:deleteDocument", $txid, $uri, map:get($params, "include") = ("uri", "uris"), $outputFormat)
+            then store:deleteDocument($uri, map:get($params, "include") = ("uri", "uris"), $outputFormat)
             else if(exists($query))
-            then common:execute("store:deleteDocumentsWithQuery", $txid, $query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"), $outputFormat)
+            then store:deleteDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"), $outputFormat)
             else error(xs:QName("corona:MISSING-PARAMETER"), "Missing parameters: Must supply a URI, a string query or a structured query with DELETE requests")
     }
     catch ($e) {
@@ -134,7 +137,7 @@ return
         let $include := map:get($params, "include")
         let $extractPath := map:get($params, "extractPath")
         let $transformer := map:get($params, "applyTransformer")
-        return common:execute("store:getDocument", $txid, $uri, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
+        return store:getDocument($uri, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
     }
     catch ($e) {
         common:errorFromException($e, $outputFormat)
@@ -149,7 +152,7 @@ return
         let $quality := local:qualityFromRequest($params)
         let $contentType := common:getContentType($uri, map:get($params, "contentType"))
         let $set := xdmp:set-response-code(204, "Document inserted")
-        return common:execute("store:insertDocument", $txid, $uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+        return store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
     }
     catch ($e) {
         common:errorFromException($e, $outputFormat)
@@ -175,29 +178,29 @@ return
         let $set := xdmp:set-response-code(204, "Document updated")
         return (
             if(empty(doc($uri)) and exists($bodyContent))
-            then common:execute("store:insertDocument", $txid, $uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+            then store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
             else if(exists($bodyContent))
-            then common:execute("store:updateDocumentContent", $txid, $uri, $bodyContent, $contentType)
+            then store:updateDocumentContent($uri, $bodyContent, $contentType)
             else (),
             if(exists($properties))
-            then common:execute("store:setProperties", $txid, $uri, $properties)
+            then store:setProperties($uri, $properties)
             else (
-                common:execute("store:addProperties", $txid, $uri, $addProperties),
-                common:execute("store:removeProperties", $txid, $uri, $removeProperties)
+                store:addProperties($uri, $addProperties),
+                store:removeProperties($uri, $removeProperties)
             ),
             if(exists($permissions))
-            then common:execute("store:setPermissions", $txid, $uri, $permissions)
+            then store:setPermissions($uri, $permissions)
             else (
-                common:execute("store:addPermissions", $txid, $uri, $addPermisssions),
-                common:execute("store:removePermissions", $txid, $uri, $removePermissions)
+                store:addPermissions($uri, $addPermisssions),
+                store:removePermissions($uri, $removePermissions)
             ),
             if(exists($collections))
-            then common:execute("store:setCollections", $txid, $uri, $collections)
+            then store:setCollections($uri, $collections)
             else (
-                common:execute("store:addCollections", $txid, $uri, $addCollections),
-                common:execute("store:removeCollections", $txid, $uri, $removeCollections)
+                store:addCollections($uri, $addCollections),
+                store:removeCollections($uri, $removeCollections)
             ),
-            common:execute("store:setQuality", $txid, $uri, $quality)
+            store:setQuality($uri, $quality)
         )
     }
     catch ($e) {

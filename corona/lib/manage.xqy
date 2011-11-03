@@ -1080,7 +1080,7 @@ declare private function manage:checkForFieldValueCapability(
 ) as empty-sequence()
 {
     try {
-        xdmp:function("cts:field-value-query")
+        xdmp:function(xs:QName("cts:field-value-query"))
     }
     catch ($e) {
         error(xs:QName("corona:INVALID-MODE"), "This version of MarkLogic Server does not support field value queries.  Upgrade to 5.0 or greater.")
