@@ -120,6 +120,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="action">$1</uri-param>
         <param name="txid" required="false"/>
         <param name="outputFormat" required="false" values="xml|json"/>
+        <param name="timeLimit" required="false" as="decimal"/>
         <http method="GET"/>
         <http method="POST"/>
     </request>

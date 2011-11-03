@@ -76,17 +76,23 @@ return
     then
         if($action = "create")
         then try {
-            let $functions := (
-                xdmp:function(xs:QName("xdmp:transaction-create")),
-                xdmp:function(xs:QName("xdmp:set-transaction-name"))
-            )
-            let $id := xdmp:apply($functions[1], <options xmlns="xdmp:eval"><transaction-mode>update</transaction-mode></options>)
-            let $set := xdmp:apply($functions[2], "corona-transaction", xdmp:host(), $id)
+            let $createFN := xdmp:function(xs:QName("xdmp:transaction-create"))
+            let $setNameFN := xdmp:function(xs:QName("xdmp:set-transaction-name"))
+            let $setTimeLimitFN := xdmp:function(xs:QName("xdmp:set-transaction-time-limit"))
+            let $id := xdmp:apply($createFN, <options xmlns="xdmp:eval"><transaction-mode>update</transaction-mode></options>)
+            let $set := xdmp:apply($setNameFN, "corona-transaction", xdmp:host(), $id)
+            let $timeLimit := map:get($params, "timeLimit")
+            let $set :=
+                if(exists($timeLimit))
+                then xdmp:apply($setTimeLimitFN, $timeLimit, xdmp:host(), $id)
+                else ()
             return local:generateTransactionStatus($id, $outputFormat)
         }
         catch ($e) {
             if($e/*:code = "XDMP-UNDFUN" and $e/*:data/*:datum = ("xdmp:transaction-create()", "xdmp:set-transaction-name()"))
             then common:error("corona:INVALID-REQUEST", "This version of MarkLogic Server does not support transactions.  Upgrade to 5.0 or greater.", $outputFormat)
+            else if($e/*:code = "XDMP-TIMELIMIT")
+            then common:error("corona:INVALID-TIME-LIMIT", "The time limit specified is too large.", $outputFormat)
             else common:errorFromException($e, $outputFormat)
         }
 
