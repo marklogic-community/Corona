@@ -107,7 +107,7 @@ let $query := cts:and-query((
 
 let $end := $start + $length - 1
 
-let $results := cts:search(/*, $query)[$start to $end]
+let $results := cts:search(doc(), $query)[$start to $end]
 
 let $total :=
     if(exists($results[1]))

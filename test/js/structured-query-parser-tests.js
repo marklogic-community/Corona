@@ -143,12 +143,12 @@ corona.queries = [
     /* inTextDocument */
     {
         "query": { "inTextDocument": "foo" },
-        "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:text-document</cts:element> <cts:text xml:lang="en">foo</cts:text></cts:element-word-query>',
+        "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:collection-query> <cts:uri>corona-text</cts:uri> </cts:collection-query> <cts:word-query> <cts:text xml:lang="en">foo</cts:text> </cts:word-query></cts:and-query>',
         "purpose": "Simple inTextDocument query"
     },
     {
         "query": { "inTextDocument": ["foo", "bar"] },
-        "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:text-document</cts:element> <cts:text xml:lang="en">foo</cts:text> <cts:text xml:lang="en">bar</cts:text></cts:element-word-query>',
+        "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:collection-query> <cts:uri>corona-text</cts:uri> </cts:collection-query> <cts:word-query> <cts:text xml:lang="en">foo</cts:text> <cts:text xml:lang="en">bar</cts:text> </cts:word-query></cts:and-query>',
         "purpose": "inTextDocument query with array"
     },
     {
@@ -156,7 +156,7 @@ corona.queries = [
             "inTextDocument": "foo",
             "weight": 2
         },
-        "result": '<cts:element-word-query weight="2" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:text-document</cts:element> <cts:text xml:lang="en">foo</cts:text></cts:element-word-query>',
+        "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:collection-query> <cts:uri>corona-text</cts:uri> </cts:collection-query> <cts:word-query weight="2"> <cts:text xml:lang="en">foo</cts:text> </cts:word-query></cts:and-query>',
         "purpose": "inTextDocument query with weight"
     },
 

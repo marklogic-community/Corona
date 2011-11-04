@@ -110,7 +110,6 @@ corona.queries = [
                 "equals": "bar 123.45-1"
             }),
             "applyTransform": "generic",
-            "extractPath": "/foo/..",
             "outputFormat": "xml"
         },
         "shouldSucceed": true,

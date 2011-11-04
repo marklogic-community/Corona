@@ -101,8 +101,9 @@ let $options :=
     else "unfiltered"
 
 let $end := $start + $length - 1
+let $l := xdmp:log(<a>{ $query }</a>)
 
-let $results := cts:search(/*, $query, $options)[$start to $end]
+let $results := cts:search(doc(), $query, $options)[$start to $end]
 
 let $total :=
     if(exists($results[1]))

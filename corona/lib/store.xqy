@@ -32,7 +32,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
 declare function store:outputMultipleDocuments(
-    $docs as element()*,
+    $docs as node()*,
     $start as xs:integer,
     $end as xs:integer?,
     $total as xs:integer,
@@ -70,7 +70,7 @@ declare function store:outputMultipleDocuments(
             if($contentType = "text")
             then $doc/text()
             else if(exists($extractPath))
-            then store:wrapContentNodes(path:select($doc, $extractPath, $contentType), $contentType)
+            then store:wrapContentNodes(path:select(if($contentType = "json") then $doc/json:json else $doc, $extractPath, $contentType), $contentType)
             else $doc
 
         (: Highlight the content body :)
@@ -279,7 +279,7 @@ declare function store:getDocument(
 
     let $content :=
         if($contentType = "text")
-        then doc($uri)/corona:text-document/text()
+        then doc($uri)/text()
         else if(exists($extractPath))
         then store:wrapContentNodes(path:select(doc($uri)/*, $extractPath, $contentType), $contentType)
         else doc($uri)
@@ -325,7 +325,7 @@ declare function store:insertDocument(
         else if($contentType = "xml")
         then xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
         else if($contentType = "text")
-        then <corona:text-document>{ $content }</corona:text-document>
+        then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml, json or text")
     let $collections := (
         if($contentType = "json")
@@ -362,7 +362,7 @@ declare function store:updateDocumentContent(
         else if($contentType = "xml")
         then xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
         else if($contentType = "text")
-        then <corona:text-document>{ $content }</corona:text-document>
+        then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
     where exists($existing)
     return xdmp:node-replace($existing, $body)
@@ -447,14 +447,27 @@ declare function store:setCollections(
     $collections as xs:string*
 ) as empty-sequence()
 {
+    if(empty($collections))
+    then ()
+    else
+
     let $doc := doc($uri)
-    where exists($doc) and exists($collections)
-    return
-        if(exists($doc/json:json))
-        then xdmp:document-set-collections($uri, ($const:JSONCollection, $collections))
-        else if(exists($doc/corona:text-document))
-        then xdmp:document-set-collections($uri, ($const:TextCollection, $collections))
-        else xdmp:document-set-collections($uri, ($const:XMLCollection, $collections))
+    let $test :=
+        if(empty(doc($uri)))
+        then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document at '", $uri, "'"))
+        else ()
+    let $existingCollectios := xdmp:document-get-collections($uri)
+    let $collections := (
+        if($existingCollectios = $const:JSONCollection)
+        then $const:JSONCollection
+        else if($existingCollectios = $const:XMLCollection)
+        then $const:XMLCollection
+        else if($existingCollectios = $const:TextCollection)
+        then $const:TextCollection
+        else (),
+        $collections
+    )
+    return xdmp:document-set-collections($uri, $collections)
 };
 
 declare function store:addCollections(

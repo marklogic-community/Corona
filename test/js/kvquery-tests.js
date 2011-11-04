@@ -214,7 +214,6 @@ corona.queries = [
             "element": "foo",
             "value": "bar 123.45-1",
             "applyTransform": "generic",
-            "extractPath": "/*/..",
             "outputFormat": "xml"
         },
         "shouldSucceed": true,

@@ -400,12 +400,16 @@ declare private function structquery:handleWordAnywhere(
 
 declare private function structquery:handleInTextDocument(
     $step as element(json:inTextDocument)
-) as cts:element-word-query
+) as cts:and-query
 {
     let $container := $step/..
     let $options := structquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
-    return cts:element-word-query(xs:QName("corona:text-document"), structquery:valueToStrings($step), $options, $weight)
+    return
+        cts:and-query((
+            cts:collection-query($const:TextCollection),
+            cts:word-query(structquery:valueToStrings($step), $options, $weight)
+        ))
 };
 
 declare private function structquery:handleGeo(
