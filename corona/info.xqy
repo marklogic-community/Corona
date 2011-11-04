@@ -28,6 +28,7 @@ let $database := xdmp:database()
 let $json :=
 json:document(
     json:object((
+        "isManaged", manage:isManaged(),
         "libraryVersion", $const:version,
         "serverVersion", xdmp:version(),
         "architecture", xdmp:architecture(),

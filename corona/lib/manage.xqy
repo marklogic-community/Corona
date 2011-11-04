@@ -22,10 +22,24 @@ import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
+import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
 
 declare namespace corona="http://marklogic.com/corona";
 declare namespace db="http://marklogic.com/xdmp/database";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
+
+declare function manage:setManaged(
+    $isManaged as xs:boolean
+) as empty-sequence()
+{
+    prop:set("isManaged", $isManaged, true())
+};
+
+declare function manage:isManaged(
+) as xs:boolean
+{
+    (prop:get("isManaged"), true())[1]
+};
 
 (: Ranges :)
 declare function manage:createJSONRange(
