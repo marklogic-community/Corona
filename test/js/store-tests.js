@@ -177,7 +177,8 @@ corona.constructURL = function(doc, prefix, processExtras, includeContentType, i
         extras.push("contentType=" + doc.type);
     }
 
-    return "/store" + prefix + doc.uri + "?" + extras.join("&");
+    extras.push("uri=" + encodeURIComponent(prefix + doc.uri));
+    return "/store?" + extras.join("&");
 };
 
 corona.compareJSONDocuments = function(model, actual, withExtras) {

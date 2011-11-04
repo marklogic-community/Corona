@@ -60,7 +60,8 @@ json:document(
         )),
         "statistics", json:object((
             "XMLDocumentCount", xdmp:estimate(collection($const:XMLCollection)),
-            "JSONDocumentCount", xdmp:estimate(collection($const:JSONCollection))
+            "JSONDocumentCount", xdmp:estimate(collection($const:JSONCollection)),
+            "TextDocumentCount", xdmp:estimate(collection($const:TextCollection))
         )),
         "xmlNamespaces", json:array(manage:getAllNamespaces())
     ))

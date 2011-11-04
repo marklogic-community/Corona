@@ -249,8 +249,9 @@ corona.queries = [
 
 corona.constructURL = function(query, purpose) {
     if(purpose === "prereq" || purpose === "delete") {
-        var base = "/store" + query.prereqDoc.uri;
-        var extras = []
+        var base = "/store";
+        var extras = [];
+        extras.push("uri=" + encodeURIComponent(query.prereqDoc.uri));
         if(purpose === "prereq") {
             if(query.prereqDoc.collection !== undefined) {
                 extras.push("collection=" + query.prereqDoc.collection);

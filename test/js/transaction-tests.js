@@ -58,9 +58,9 @@ corona.commitTransaction = function(txid, callback) {
 
 corona.loadDocument = function(doc, uri, txid, callback) {
     asyncTest("Loading document", function() {
-        var url = "/store" + uri;
+        var url = "/store?uri=" + encodeURIComponent(uri);
         if(txid) {
-            url += "?txid=" + txid;
+            url += "&txid=" + txid;
         }
         $.ajax({
             url: url,
@@ -97,9 +97,9 @@ corona.docExists = function(uri, txid, shouldExist, callback) {
         }
     }
     asyncTest(desc, function() {
-        var url = "/store" + uri;
+        var url = "/store?uri=" + encodeURIComponent(uri);
         if(txid) {
-            url += "?txid=" + txid;
+            url += "&txid=" + txid;
         }
         $.ajax({
             url: url,

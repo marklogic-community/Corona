@@ -57,7 +57,7 @@ corona.documents = [
 ];
 
 corona.constructURL = function(doc, prefix, processExtras) {
-    return "/store" + prefix + doc.uri + "?contentType=" + doc.type;
+    return "/store?uri=" + encodeURIComponent(prefix + doc.uri) + "&contentType=" + doc.type;
 };
 
 corona.insertDocuments = function(prefix, callback) {
