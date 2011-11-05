@@ -65,6 +65,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 
     <!-- Search endpoint -->
     <request uri="^/search(/)?$" endpoint="/corona/search.xqy">
+        <param name="txid" required="false"/>
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
@@ -81,6 +82,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 
     <!-- Key value queryies -->
     <request uri="^/kvquery$" endpoint="/corona/kvquery.xqy">
+        <param name="txid" required="false"/>
         <param name="key" required="false"/>
         <param name="element" required="false"/>
         <param name="attribute" required="false"/>
@@ -99,6 +101,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 
     <!-- Facets -->
     <request uri="^/facet/([A-Za-z0-9_\-,]+)/?$" endpoint="/corona/facet.xqy">
+        <param name="txid" required="false"/>
         <uri-param name="facets">$1</uri-param>
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>

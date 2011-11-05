@@ -111,9 +111,7 @@ let $errors :=
 return
     if(exists($errors))
     then $errors
-    else
-
-    if(not(common:transactionsMatch($txid)))
+    else if(not(common:transactionsMatch($txid)))
     then xdmp:invoke("/corona/store.xqy", (), <options xmlns="xdmp:eval"><transaction-id>{ map:get(common:processTXID($txid, true()), "id") }</transaction-id></options>)
     else
 

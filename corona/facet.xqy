@@ -43,8 +43,9 @@ let $limit := map:get($params, "limit")
 let $order := map:get($params, "order")
 let $frequency := map:get($params, "frequency")
 let $includeAllValues := map:get($params, "includeAllValues")
+let $txid := map:get($params, "txid")
 
-let $test := (
+let $errors := (
     if(empty($stringQuery) and empty($structuredQuery))
     then common:error("corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $outputFormat)
     else ()
@@ -58,7 +59,7 @@ let $query :=
         structquery:getCTS(structquery:getParseTree($structuredQuery), ())
     }
     catch ($e) {
-        xdmp:set($test, common:error("corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
+        xdmp:set($errors, common:error("corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
     }
     else ()
 
@@ -73,9 +74,11 @@ let $options := (
 )
 
 let $values :=
-    if(exists($test))
+    if(exists($errors))
     then ()
-    else 
+    else if(not(common:transactionsMatch($txid)))
+    then xdmp:invoke("/corona/facet.xqy", (), <options xmlns="xdmp:eval"><transaction-id>{ map:get(common:processTXID($txid, true()), "id") }</transaction-id></options>)
+    else
 
     for $facet in $facets
 
@@ -144,8 +147,8 @@ let $values :=
         then <corona:facet name="{ $facet }">{ $values }</corona:facet>
         else ()
 return
-    if(exists($test))
-    then $test
+    if(exists($errors))
+    then $errors
     else if($outputFormat = "json")
     then json:serialize(json:object($values))
     else if($outputFormat = "xml")

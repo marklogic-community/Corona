@@ -44,9 +44,10 @@ let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 
+let $txid := map:get($params, "txid")
 let $outputFormat := map:get($params, "outputFormat")
 
-let $test := (
+let $errors := (
     if(exists($attribute) and empty($element))
     then common:error("corona:MISSING-PARAMETER", "Must supply the parent element name when searching for an attribute value", $outputFormat)
     else if((exists($key) or exists($element) or exists($property)) and empty($value))
@@ -55,6 +56,13 @@ let $test := (
     then common:error("corona:MISSING-PARAMETER", "Must supply a key, element, element/attribute or property along with the value", $outputFormat)
     else ()
 )
+return
+    if(exists($errors))
+    then $errors
+    else if(not(common:transactionsMatch($txid)))
+    then xdmp:invoke("/corona/kvquery.xqy", (), <options xmlns="xdmp:eval"><transaction-id>{ map:get(common:processTXID($txid, true()), "id") }</transaction-id></options>)
+    else
+
 
 let $query :=
     if(exists($key))
@@ -115,6 +123,6 @@ let $end :=
     else $end
 
 return
-    if(exists($test))
-    then $test
+    if(exists($errors))
+    then $errors
     else store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)

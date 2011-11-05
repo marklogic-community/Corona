@@ -154,7 +154,7 @@ declare function store:getDocumentType(
 {
     let $doc := doc($uri)
     return
-        if(manage:isManaged() and exists($doc/json:json))
+        if(exists($doc/json:json))
         then "json"
         else if(exists($doc/*))
         then "xml"

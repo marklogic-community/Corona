@@ -39,10 +39,11 @@ let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 let $start := map:get($params, "start")
 let $length := map:get($params, "length")
+let $txid := map:get($params, "txid")
 
 let $outputFormat := common:getOutputFormat((), map:get($params, "outputFormat"))
 
-let $test := (
+let $errors := (
     if(empty(($stringQuery, $structuredQuery)) or (exists($structuredQuery) and string-length(normalize-space($structuredQuery)) = 0))
     then common:error("corona:MISSING-PARAMETER", "Must supply a string query or a structured query", $outputFormat)
     else ()
@@ -55,9 +56,15 @@ let $structuredQueryJSON :=
             structquery:getParseTree($structuredQuery)
         }
         catch ($e) {
-            xdmp:set($test, common:error("corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
+            xdmp:set($errors, common:error("corona:INVALID-PARAMETER", concat("The structured query JSON isn't valid: ", $e/*:message), $outputFormat))
         }
     else ()
+return
+    if(exists($errors))
+    then $errors
+    else if(not(common:transactionsMatch($txid)))
+    then xdmp:invoke("/corona/search.xqy", (), <options xmlns="xdmp:eval"><transaction-id>{ map:get(common:processTXID($txid, true()), "id") }</transaction-id></options>)
+    else
 
 let $query :=
     if(exists($stringQuery))
@@ -90,7 +97,6 @@ let $options :=
     else "unfiltered"
 
 let $end := $start + $length - 1
-let $l := xdmp:log(<a>{ $query }</a>)
 
 let $results := cts:search(doc(), $query, $options)[$start to $end]
 
@@ -105,6 +111,6 @@ let $end :=
     else $end
 
 return
-    if(exists($test))
-    then $test
+    if(exists($errors))
+    then $errors
     else store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)
