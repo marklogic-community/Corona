@@ -769,7 +769,7 @@ declare function manage:setTransformer(
         if(local-name($doc) = "stylesheet" and namespace-uri($doc) = "http://www.w3.org/1999/XSL/Transform")
         then ()
         else error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer, must be an XSLT")
-    return xdmp:document-insert(concat("_/transformers/", $name), $doc, xdmp:default-permissions(), $const:TransformersCollection)
+    return xdmp:document-insert(concat("_/transformers/", $name), $doc, (xdmp:default-permissions(), xdmp:permission($const:TransformerReadRole, "read")), $const:TransformersCollection)
 };
 
 declare function manage:deleteTransformer(
@@ -1094,7 +1094,7 @@ declare private function manage:checkForFieldValueCapability(
 ) as empty-sequence()
 {
     try {
-        xdmp:function(xs:QName("cts:field-value-query"))
+        xdmp:function(xs:QName("cts:field-value-query"))[2]
     }
     catch ($e) {
         error(xs:QName("corona:INVALID-MODE"), "This version of MarkLogic Server does not support field value queries.  Upgrade to 5.0 or greater.")

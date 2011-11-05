@@ -337,7 +337,7 @@ declare function store:insertDocument(
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml, json or text")
     return (
-        xdmp:document-insert($uri, $body, $permissions, $collections, $quality),
+        xdmp:document-insert($uri, $body, (xdmp:default-permissions(), $permissions), $collections, $quality),
         if(exists($properties))
         then xdmp:document-set-properties($uri, $properties)
         else xdmp:document-set-properties($uri, ())
@@ -421,7 +421,7 @@ declare function store:setPermissions(
 ) as empty-sequence()
 {
     if(exists($permissions))
-    then xdmp:document-set-permissions($uri, $permissions)
+    then xdmp:document-set-permissions($uri, (xdmp:default-permissions(), $permissions))
     else ()
 };
 
@@ -535,6 +535,7 @@ declare private function store:getDocumentPermissions(
                 ", (
                     xs:QName("roleId"), xs:unsignedLong($key)
                 ), <options xmlns="xdmp:eval"><database>{ xdmp:security-database() }</database></options>)
+            where $role != "corona-dev"
             return (
                 $role, json:array(map:get($permMap, $key))
             )
