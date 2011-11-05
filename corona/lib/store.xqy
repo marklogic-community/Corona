@@ -340,7 +340,7 @@ declare function store:insertDocument(
         xdmp:document-insert($uri, $body, $permissions, $collections, $quality),
         if(exists($properties))
         then xdmp:document-set-properties($uri, $properties)
-        else ()
+        else xdmp:document-set-properties($uri, ())
     )
 };
 
