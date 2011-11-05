@@ -77,7 +77,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
         <param name="outputFormat" required="false" values="json|xml"/>
-        <param name="contentType" required="false" repeatable="true" values="all|json|xml|text|binary" default="all"/>
+        <param name="contentType" required="false" repeatable="true" values="all|json|xml|text|binary"/>
     </request>
 
     <!-- Key value queryies -->
@@ -96,7 +96,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
         <param name="outputFormat" required="false" values="json|xml"/>
-        <param name="contentType" required="false" repeatable="true" values="all|json|xml|text|binary" default="all"/>
+        <param name="contentType" required="false" repeatable="true" values="all|json|xml|text|binary"/>
     </request>
 
     <!-- Facets -->
@@ -112,7 +112,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
         <param name="outputFormat" required="false"  values="xml|json"/>
-        <param name="contentType" required="false" repeatable="true" values="all|json|xml|text|binary" default="all"/>
+        <param name="contentType" required="false" repeatable="true" values="all|json|xml|text|binary"/>
     </request>
 
     <!-- Transaction management -->

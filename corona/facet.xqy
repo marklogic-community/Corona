@@ -19,6 +19,7 @@ xquery version "1.0-ml";
 import module namespace const="http://marklogic.com/corona/constants" at "lib/constants.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "lib/index-config.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
+import module namespace manage="http://marklogic.com/corona/manage" at "lib/manage.xqy";
 import module namespace search="http://marklogic.com/corona/search" at "lib/search.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
@@ -47,6 +48,8 @@ let $includeAllValues := map:get($params, "includeAllValues")
 let $test := (
     if(empty($stringQuery) and empty($structuredQuery))
     then common:error("corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $outputFormat)
+    else if(exists($contentType) and not(manage:isManaged()))
+    then common:error("corona:INVALID-PARAMETER", "The contentType parameter is only valid in managed mode", $outputFormat)
     else ()
 )
 
@@ -107,14 +110,11 @@ let $values :=
 
     let $query := cts:and-query((
         $query,
-        cts:collection-query((
-            if($contentType = ("json", "all"))
-            then $const:JSONCollection
-            else (),
-            if($contentType = ("xml", "all"))
-            then $const:XMLCollection
-            else ()
-        )),
+        if($contentType = "json")
+        then cts:collection-query($const:JSONCollection)
+        else if($contentType = "xml")
+        then cts:collection-query($const:XMLCollection)
+        else (),
         for $collection in map:get($params, "collection")
         return cts:collection-query($collection),
         for $directory in map:get($params, "underDirectory")

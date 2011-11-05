@@ -32,7 +32,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
 declare function store:outputMultipleDocuments(
-    $docs as node()*,
+    $docs as document-node()*,
     $start as xs:integer,
     $end as xs:integer?,
     $total as xs:integer,
@@ -56,14 +56,7 @@ declare function store:outputMultipleDocuments(
         for $doc in $docs
         let $uri := base-uri($doc)
         let $collections := xdmp:document-get-collections($uri)
-        let $contentType :=
-            if($collections = $const:JSONCollection)
-            then "json"
-            else if($collections = $const:XMLCollection)
-            then "xml"
-            else if($collections = $const:TextCollection)
-            then "text"
-            else ()
+        let $contentType := store:getDocumentType($uri)
 
         (: Perform the path extraction if one was provided :)
         let $content :=
@@ -149,13 +142,38 @@ declare function store:outputMultipleDocuments(
         else ()
 };
 
+declare function store:documentExists(
+    $uri as xs:string
+) as xs:boolean
+{
+    (manage:isManaged() and xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection)) or
+    (not(manage:isManaged()) and exists(doc($uri)))
+};
+
+declare function store:getDocumentType(
+    $uri as xs:string
+) as xs:string?
+{
+    let $doc := doc($uri)
+    return
+        if(manage:isManaged() and exists($doc/json:json))
+        then "json"
+        else if(exists($doc/*))
+        then "xml"
+        else if(exists($doc/text()))
+        then "text"
+        else if(exists($doc/binary()))
+        then "binary"
+        else ()
+};
+
 declare function store:deleteDocument(
     $uri as xs:string,
     $includeURIs as xs:boolean,
     $outputFormat as xs:string
 )
 {
-    if(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection))
+    if(store:documentExists($uri))
     then (
         xdmp:document-delete($uri),
         if($outputFormat = "json")
@@ -195,8 +213,8 @@ declare function store:deleteDocumentsWithQuery(
 {
     let $docs :=
         if(exists($limit))
-        then cts:search(collection(($const:JSONCollection, $const:XMLCollection, $const:TextCollection)), $query)[1 to $limit]
-        else cts:search(collection(($const:JSONCollection, $const:XMLCollection, $const:TextCollection)), $query)
+        then cts:search(doc(), $query)[1 to $limit]
+        else cts:search(doc(), $query)
     let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
     let $numDeleted :=
         if(exists($limit))
@@ -257,7 +275,7 @@ declare function store:getDocument(
     $outputFormat as xs:string
 )
 {
-    if(not(xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection)))
+    if(not(store:documentExists($uri)))
     then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("Document at '", $uri, "' not found"))
     else
 
@@ -268,14 +286,7 @@ declare function store:getDocument(
     let $includeQuality := $include = ("quality", "all")
 
     let $collections := xdmp:document-get-collections($uri)
-    let $contentType :=
-        if($collections = $const:JSONCollection)
-        then "json"
-        else if($collections = $const:XMLCollection)
-        then "xml"
-        else if($collections = $const:TextCollection)
-        then "text"
-        else ()
+    let $contentType := store:getDocumentType($uri)
 
     let $content :=
         if($contentType = "text")
@@ -328,12 +339,15 @@ declare function store:insertDocument(
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml, json or text")
     let $collections := (
-        if($contentType = "json")
-        then $const:JSONCollection
-        else if($contentType = "xml")
-        then $const:XMLCollection
-        else if($contentType = "text")
-        then $const:TextCollection
+        if(manage:isManaged())
+        then
+            if($contentType = "json")
+            then $const:JSONCollection
+            else if($contentType = "xml")
+            then $const:XMLCollection
+            else if($contentType = "text")
+            then $const:TextCollection
+            else ()
         else (),
         $collections
     )
@@ -458,12 +472,15 @@ declare function store:setCollections(
         else ()
     let $existingCollectios := xdmp:document-get-collections($uri)
     let $collections := (
-        if($existingCollectios = $const:JSONCollection)
-        then $const:JSONCollection
-        else if($existingCollectios = $const:XMLCollection)
-        then $const:XMLCollection
-        else if($existingCollectios = $const:TextCollection)
-        then $const:TextCollection
+        if(manage:isManaged())
+        then
+            if($existingCollectios = $const:JSONCollection)
+            then $const:JSONCollection
+            else if($existingCollectios = $const:XMLCollection)
+            then $const:XMLCollection
+            else if($existingCollectios = $const:TextCollection)
+            then $const:TextCollection
+            else ()
         else (),
         $collections
     )

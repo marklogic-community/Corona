@@ -19,6 +19,7 @@ xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
 import module namespace const="http://marklogic.com/corona/constants" at "lib/constants.xqy";
+import module namespace manage="http://marklogic.com/corona/manage" at "lib/manage.xqy";
 import module namespace store="http://marklogic.com/corona/store" at "lib/store.xqy";
 import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "lib/date-parser.xqy";
@@ -53,6 +54,8 @@ let $test := (
     then common:error("corona:MISSING-PARAMETER", "Must supply a value along with the key, element, element/attribute or property", $outputFormat)
     else if(exists($value) and empty($key) and empty($element) and empty($property))
     then common:error("corona:MISSING-PARAMETER", "Must supply a key, element, element/attribute or property along with the value", $outputFormat)
+    else if(exists($contentType) and not(manage:isManaged()))
+    then common:error("corona:INVALID-PARAMETER", "The contentType parameter is only valid in managed mode", $outputFormat)
     else ()
 )
 
@@ -88,6 +91,8 @@ let $query := cts:and-query((
     then cts:collection-query($const:JSONCollection)
     else if($contentType = "xml")
     then cts:collection-query($const:XMLCollection)
+    else if($contentType = "text")
+    then cts:collection-query($const:TextCollection)
     else (),
     for $collection in map:get($params, "collection")
     return cts:collection-query($collection),
