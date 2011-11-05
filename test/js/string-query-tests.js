@@ -112,7 +112,6 @@ corona.constructURL = function(query, purpose) {
             if(query.prereqDoc.property !== undefined) {
                 extras.push("property=" + query.prereqDoc.property);
             }
-            extras.push("contentType=" + query.type);
         }
         return base + "?" + extras.join("&");
     }

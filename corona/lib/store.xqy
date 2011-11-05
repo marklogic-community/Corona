@@ -21,7 +21,6 @@ module namespace store="http://marklogic.com/corona/store";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
-import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace manage="http://marklogic.com/corona/manage" at "manage.xqy";
 import module namespace search="http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
@@ -146,8 +145,7 @@ declare function store:documentExists(
     $uri as xs:string
 ) as xs:boolean
 {
-    (manage:isManaged() and xdmp:document-get-collections($uri) = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection)) or
-    (not(manage:isManaged()) and exists(doc($uri)))
+    exists(doc($uri))
 };
 
 declare function store:getDocumentType(
@@ -338,19 +336,6 @@ declare function store:insertDocument(
         else if($contentType = "text")
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml, json or text")
-    let $collections := (
-        if(manage:isManaged())
-        then
-            if($contentType = "json")
-            then $const:JSONCollection
-            else if($contentType = "xml")
-            then $const:XMLCollection
-            else if($contentType = "text")
-            then $const:TextCollection
-            else ()
-        else (),
-        $collections
-    )
     return (
         xdmp:document-insert($uri, $body, $permissions, $collections, $quality),
         if(exists($properties))
@@ -463,28 +448,9 @@ declare function store:setCollections(
 {
     if(empty($collections))
     then ()
-    else
-
-    let $doc := doc($uri)
-    let $test :=
-        if(empty(doc($uri)))
-        then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document at '", $uri, "'"))
-        else ()
-    let $existingCollectios := xdmp:document-get-collections($uri)
-    let $collections := (
-        if(manage:isManaged())
-        then
-            if($existingCollectios = $const:JSONCollection)
-            then $const:JSONCollection
-            else if($existingCollectios = $const:XMLCollection)
-            then $const:XMLCollection
-            else if($existingCollectios = $const:TextCollection)
-            then $const:TextCollection
-            else ()
-        else (),
-        $collections
-    )
-    return xdmp:document-set-collections($uri, $collections)
+    else if(empty(doc($uri)))
+    then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document at '", $uri, "'"))
+    else xdmp:document-set-collections($uri, $collections)
 };
 
 declare function store:addCollections(
@@ -522,10 +488,9 @@ declare private function store:getDocumentCollections(
 ) as element()*
 {
     if($outputFormat = "json")
-    then json:array(xdmp:document-get-collections($uri)[not(. = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection))])
+    then json:array(xdmp:document-get-collections($uri))
     else
         for $collection in xdmp:document-get-collections($uri)
-        where not($collection = ($const:JSONCollection, $const:XMLCollection, $const:TextCollection))
         return <corona:collection>{ $collection }</corona:collection>
 };
 

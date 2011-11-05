@@ -407,7 +407,7 @@ declare private function structquery:handleInTextDocument(
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
     return
         cts:and-query((
-            cts:collection-query($const:TextCollection),
+            cts:term-query(2328177500544466626),
             cts:word-query(structquery:valueToStrings($step), $options, $weight)
         ))
 };

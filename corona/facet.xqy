@@ -37,8 +37,7 @@ let $facets := tokenize(map:get($params, "facets"), ",")
 let $stringQuery := map:get($params, "stringQuery")
 let $structuredQuery := map:get($params, "structuredQuery")
 
-let $contentType := map:get($params, "contentType")
-let $outputFormat := common:getOutputFormat($contentType, map:get($params, "outputFormat"))
+let $outputFormat := common:getOutputFormat((), map:get($params, "outputFormat"))
 
 let $limit := map:get($params, "limit")
 let $order := map:get($params, "order")
@@ -48,8 +47,6 @@ let $includeAllValues := map:get($params, "includeAllValues")
 let $test := (
     if(empty($stringQuery) and empty($structuredQuery))
     then common:error("corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $outputFormat)
-    else if(exists($contentType) and not(manage:isManaged()))
-    then common:error("corona:INVALID-PARAMETER", "The contentType parameter is only valid in managed mode", $outputFormat)
     else ()
 )
 
@@ -110,11 +107,6 @@ let $values :=
 
     let $query := cts:and-query((
         $query,
-        if($contentType = "json")
-        then cts:collection-query($const:JSONCollection)
-        else if($contentType = "xml")
-        then cts:collection-query($const:XMLCollection)
-        else (),
         for $collection in map:get($params, "collection")
         return cts:collection-query($collection),
         for $directory in map:get($params, "underDirectory")

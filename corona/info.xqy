@@ -25,6 +25,12 @@ declare option xdmp:mapping "false";
 
 let $config := admin:get-configuration()
 let $database := xdmp:database()
+
+let $numJSONDocs := xdmp:estimate(/json:json)
+let $numTextDocs := xdmp:estimate(doc()/text())
+let $numBinaryDocs := xdmp:estimate(doc()/binary())
+let $numXMLDocs := xdmp:estimate(/*) - $numJSONDocs
+
 let $json :=
 json:document(
     json:object((
@@ -59,17 +65,12 @@ json:document(
         "settings", json:object((
             "directoryCreation", admin:database-get-directory-creation($config, $database)
         )),
-        "statistics", json:object(
-            if(manage:isManaged())
-            then (
-                "XMLDocumentCount", xdmp:estimate(collection($const:XMLCollection)),
-                "JSONDocumentCount", xdmp:estimate(collection($const:JSONCollection)),
-                "TextDocumentCount", xdmp:estimate(collection($const:TextCollection))
-            )
-            else (
-                "documentCount", xdmp:estimate(doc())
-            )
-        ),
+        "statistics", json:object((
+            "XMLDocumentCount", $numXMLDocs,
+            "JSONDocumentCount", $numJSONDocs,
+            "TextDocumentCount", $numTextDocs,
+            "BinaryDocumentCount", $numBinaryDocs
+        )),
         "xmlNamespaces", json:array(manage:getAllNamespaces())
     ))
 )

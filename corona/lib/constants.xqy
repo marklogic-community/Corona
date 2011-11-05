@@ -20,10 +20,4 @@ module namespace const="http://marklogic.com/corona/constants";
 
 
 declare variable $const:version as xs:string := "1.0";
-
-declare variable $const:JSONCollection as xs:string := "corona-json";
-declare variable $const:XMLCollection as xs:string := "corona-xml";
-declare variable $const:TextCollection as xs:string := "corona-text";
-declare variable $const:BinaryCollection as xs:string := "corona-binary";
-
 declare variable $const:TransformersCollection as xs:string := "corona-transformers";

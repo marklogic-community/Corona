@@ -44,7 +44,6 @@ let $include := map:get($params, "include")
 let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 
-let $contentType := map:get($params, "contentType")
 let $outputFormat := map:get($params, "outputFormat")
 
 let $test := (
@@ -54,8 +53,6 @@ let $test := (
     then common:error("corona:MISSING-PARAMETER", "Must supply a value along with the key, element, element/attribute or property", $outputFormat)
     else if(exists($value) and empty($key) and empty($element) and empty($property))
     then common:error("corona:MISSING-PARAMETER", "Must supply a key, element, element/attribute or property along with the value", $outputFormat)
-    else if(exists($contentType) and not(manage:isManaged()))
-    then common:error("corona:INVALID-PARAMETER", "The contentType parameter is only valid in managed mode", $outputFormat)
     else ()
 )
 
@@ -87,13 +84,6 @@ let $query :=
 
 let $query := cts:and-query((
     $query,
-    if($contentType = "json")
-    then cts:collection-query($const:JSONCollection)
-    else if($contentType = "xml")
-    then cts:collection-query($const:XMLCollection)
-    else if($contentType = "text")
-    then cts:collection-query($const:TextCollection)
-    else (),
     for $collection in map:get($params, "collection")
     return cts:collection-query($collection),
     for $directory in map:get($params, "underDirectory")
