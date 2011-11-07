@@ -182,6 +182,7 @@ corona.constructURL = function(doc, prefix, processExtras, includeContentType, i
 };
 
 corona.compareJSONDocuments = function(model, actual, withExtras) {
+    delete actual.permissions["corona-dev"];
     if(withExtras) {
         if(model.permissions !== undefined) {
             for(var role in model.permissions) {

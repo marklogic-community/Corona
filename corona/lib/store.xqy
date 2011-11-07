@@ -535,7 +535,6 @@ declare private function store:getDocumentPermissions(
                 ", (
                     xs:QName("roleId"), xs:unsignedLong($key)
                 ), <options xmlns="xdmp:eval"><database>{ xdmp:security-database() }</database></options>)
-            where $role != "corona-dev"
             return (
                 $role, json:array(map:get($permMap, $key))
             )
