@@ -1,30 +1,12 @@
 # Corona - A REST interface to MarkLogic
 
-The Corona project is a community-sponsored set of REST endpoints to enable usage of the [MarkLogic Server] without knowing XQuery.
+The Corona project is a community-sponsored set of REST endpoints to enable usage of the [MarkLogic Server](http://developer.marklogic.com) without knowing XQuery.
 
 There is a tutorial at http://developer.marklogic.com/try/corona/index
 
 Corona runs on MarkLogic 4.2 or later.
 
-## Installation
+## [Installation](https://github.com/marklogic/Corona/wiki/Installation)
 
-Installing Corona is fairly simple:
-
-1. If you don't have a HTTP server configured in MarkLogic, create one
-2. Set the URL rewriter for the HTTP server to: /corona/lib/rewriter.xqy
-3. Download the Corona source and unzip it underneath the document directory that you configured in the MarkLogic HTTP server
-
-Feel free to remove the README file along with the test directory.
-But keep the `config` and `corona` directories structured as they are. You can
-augment the functionality of Corona by writing your own XQuery and having it
-live alongside the Corona files.
-
-The URL rewriter is configured in the config/endpoints.xqy file. You can
-change the URL structure or add in more rules if need be there.
-
-## API Documentation
+## [API Documentation](http://github.com/marklogic/Corona/wiki)
 [Check the wiki for documentation on how to store, index and query the documents.](http://github.com/marklogic/Corona/wiki)
-
-  [MarkLogic Server]: http://developer.marklogic.com
-  [CRUD]: http://en.wikipedia.org/wiki/Create,_read,_update_and_delete
-  [JSON]: http://json.org
