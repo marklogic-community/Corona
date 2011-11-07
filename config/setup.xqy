@@ -16,6 +16,7 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace template="http://marklogic.com/corona/template" at "/corona/htools/template.xqy";
 import module namespace sec="http://marklogic.com/xdmp/security" at "/MarkLogic/security.xqy";
 
 declare variable $devPermisssions := <perms>
@@ -107,7 +108,6 @@ declare function local:setupRole(
             where $priv/@type = "uri" and not(sec:privilege-exists(string($priv), "uri"))
             return sec:create-privilege(string($priv/@name), string($priv), "uri", ())
         ', (xs:QName("privileges"), $privileges))
-
     return
         xdmp:eval('
             import module namespace sec="http://marklogic.com/xdmp/security" at "/MarkLogic/security.xqy";
@@ -133,7 +133,80 @@ declare function local:setupRole(
 
 if(xdmp:database() != xdmp:database("Security"))
 then xdmp:invoke("/config/setup.xqy", (), <options xmlns="xdmp:eval"><database>{ xdmp:database("Security") }</database></options>)
-else (
-    local:setupRole("corona-dev", "Corona Developer"),
-    local:setupRole("corona-admin", "Corona Administrator")
-)
+else
+
+let $createUsers := xs:boolean((xdmp:get-request-field("createUsers", "false"))[1])
+let $adminName := xdmp:get-request-field("adminName")
+let $adminPass := xdmp:get-request-field("adminPass")
+let $devName := xdmp:get-request-field("devName")
+let $devPass := xdmp:get-request-field("devPass")
+
+return
+    if(exists($adminName) and exists($adminPass) and exists($devName) and exists($devPass))
+    then
+        let $set := sec:create-user($adminName, "Corona Administrator", $adminPass, "corona-admin", (), ())
+        let $set := sec:create-user($devName, "Corona Developer", $devPass, "corona-dev", (), ())
+        return template:apply(
+            <div>
+                <p>The Corona users have been created.</p>
+            </div>,
+            "Create Users",
+            (
+                <li><a href="/config/setup.xqy"><h4>Setup Corona</h4></a></li>,
+                <li><a href="/config/setup.xqy?createUsers=true"><h4>Create Users (required)</h4></a></li>
+            ),
+            2,
+            ()
+        )
+    else if($createUsers)
+    then template:apply(
+        <div>
+            <p>Before you can use Corona, you must create a couple of users. An
+            administrative account (configures search behavior, output
+            transformations, etc) and a developer account (inserts documents,
+            performs searches, etc).</p>
+            <form class="createUsers" action="/config/setup.xqy" method="GET">
+                <div>
+                    <h2>Corona Administrator</h2>
+                    <table>
+                        <tr><td>Name</td><td><input type="text" class="an" name="adminName"/></td></tr>
+                        <tr><td>Password</td><td><input type="password" class="ap1" name="adminPass"/></td></tr>
+                        <tr><td>Confirm Password</td><td><input type="password" class="ap2"/></td></tr>
+                    </table>
+                </div>
+                <hr/>
+                <div>
+                    <h2>Corona Developer</h2>
+                    <table>
+                        <tr><td>Name</td><td><input type="text" class="dn" name="devName"/></td></tr>
+                        <tr><td>Password</td><td><input type="password" class="dp1" name="devPass"/></td></tr>
+                        <tr><td>Confirm Password</td><td><input type="password" class="dp2"/></td></tr>
+                    </table>
+                </div>
+                <input type="submit" value="Submit"/>
+            </form>
+        </div>,
+        "Create Users",
+        (
+            <li><a href="/config/setup.xqy"><h4>Setup Corona</h4></a></li>,
+            <li><a href="/config/setup.xqy?createUsers=true"><h4>Create Users (required)</h4></a></li>
+        ),
+        2,
+        <script src="/corona/htools/js/setup.js"><!-- --></script>
+    )
+    else
+        let $setup := local:setupRole("corona-dev", "Corona Developer")
+        let $setup := local:setupRole("corona-admin", "Corona Administrator")
+        return template:apply(
+            <div>
+                <p>Security and configuraiton for Corona is now fully setup.</p>
+                <p>Now just create a couple users and you're set.</p>
+            </div>,
+            "Setup",
+            (
+                <li><a href="/config/setup.xqy"><h4>Setup Corona</h4></a></li>,
+                <li><a href="/config/setup.xqy?createUsers=true"><h4>Create Users (required)</h4></a></li>
+            ),
+            1,
+            ()
+        )
