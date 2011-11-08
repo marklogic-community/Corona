@@ -213,17 +213,10 @@ declare function common:dualStrftime(
     $date2 as xs:dateTime
 ) as xs:string
 {
-	let $regex := "(%%)|(@@)|(%#.)|(%.)|(@#.)|(@.)"
-    let $bits :=
-        for $match in analyze-string($format, $regex)/*
-        return
-            if($match/self::*:non-match) then string($match)
-            else if($match/*:group/@nr = 1) then "%"
-            else if($match/*:group/@nr = 2) then "@"
-            else if($match/*:group/@nr = (3, 4)) then xdmp:strftime(string($match), $date1)
-            else if($match/*:group/@nr = (5, 6)) then xdmp:strftime(replace(string($match), "@", "%"), $date2)
-            else string($match)
-    return string-join($bits, "")
+    let $firstPass := xdmp:strftime($format, $date1)
+    let $changeAtToPercent := replace($firstPass, "([^@])@([^@])", "$1%$2")
+    let $secondPass := xdmp:strftime($changeAtToPercent, $date2)
+    return replace($secondPass, "@@", "@")
 };
 
 declare function common:getContentType(
