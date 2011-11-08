@@ -76,16 +76,19 @@ declare function local:setupRole(
         then $adminPrivileges
         else ()
 
-    let $roleID :=
-        if(sec:role-exists($role) = false())
-        then xdmp:eval('
+    let $roleID := xdmp:eval('
             import module namespace sec="http://marklogic.com/xdmp/security" at "/MarkLogic/security.xqy";
             declare variable $role as xs:string external;
             declare variable $description as xs:string external;
 
-            sec:create-role($role, $description, (), (), ())
+            try {
+                sec:get-role-ids($role)
+            }
+            catch ($e) {
+                sec:create-role($role, $description, (), (), ())
+            }
+
         ', (xs:QName("role"), $role, xs:QName("description"), $description))
-        else xs:unsignedLong(sec:get-role-ids($role))
 
     let $setPermissions :=
         xdmp:eval('
@@ -105,7 +108,13 @@ declare function local:setupRole(
             declare variable $privileges as element(privs) external;
 
             for $priv in $privileges/*
-            where $priv/@type = "uri" and not(sec:privilege-exists(string($priv), "uri"))
+            let $privExists := try {
+                    exists(sec:get-privilege(string($priv), "uri"))
+                }
+                catch ($e) {
+                    false()
+                }
+            where $priv/@type = "uri" and not($privExists)
             return sec:create-privilege(string($priv/@name), string($priv), "uri", ())
         ', (xs:QName("privileges"), $privileges))
     return
@@ -116,7 +125,7 @@ declare function local:setupRole(
 
             let $newPrivileges := for $i in $privileges/* return string($i)
             let $existingPrivileges := for $i in sec:role-privileges($role) return string($i/sec:action)
-            let $privilegesToRemove :=$existingPrivileges[not(. = $newPrivileges)]
+            let $privilegesToRemove := $existingPrivileges[not(. = $newPrivileges)]
 
             return (
                 for $priv in $privileges/*
