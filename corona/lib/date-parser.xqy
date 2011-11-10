@@ -21,6 +21,9 @@ module namespace dateparser="http://marklogic.com/dateparser";
 declare namespace s="http://www.w3.org/2009/xpath-functions/analyze-string";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare variable $analyzeString := try { xdmp:function(xs:QName("fn:analyze-string")) } catch ($e) {};
+declare variable $regexSupported := try { exists(xdmp:apply($analyzeString, " ", " ")) } catch ($e) { false() };
+
 declare variable $dateparser:FORMATS as element(format)+ := (
     (: Thu Jul 07 2011 11:05:42 GMT-0700 (PDT) :)
     <format>
@@ -214,6 +217,12 @@ declare variable $dateparser:FORMATS as element(format)+ := (
 );
 
 
+declare function dateparser:isSupported(
+) as xs:boolean
+{
+    $regexSupported
+};
+
 declare function dateparser:parse(
     $date as xs:string
 )
@@ -222,12 +231,14 @@ declare function dateparser:parse(
     then xs:dateTime($date)
     else if($date castable as xs:date)
     then adjust-dateTime-to-timezone(xs:dateTime(concat($date, "T00:00:00")), implicit-timezone())
-    else
+    else if($regexSupported)
+    then
         let $date := normalize-space($date)
         for $format in $dateparser:FORMATS
         let $regex := dateparser:assembleFormat($format)
         where matches($date, $regex, "i")
-        return dateparser:analyzedStringToDate(analyze-string($date, $regex, "i"), $format)
+        return dateparser:analyzedStringToDate(xdmp:apply($analyzeString, $date, $regex, "i"), $format)
+    else ()
 };
 
 

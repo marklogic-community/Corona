@@ -6,5 +6,6 @@ try {
     path:parse(xdmp:get-request-field("path"), xdmp:get-request-field("type"))
 }
 catch ($e) {
+    xdmp:log($e),
     string($e/*:message)
 }

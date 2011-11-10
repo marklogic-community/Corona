@@ -1,5 +1,6 @@
 if(typeof corona == "undefined" || !corona) {
     corona = {};
+    corona.stash = {};
 }
 
 corona.paths = [
@@ -152,9 +153,15 @@ corona.paths = [
 
 $(document).ready(function() {
     module("Paths");
-    for (var i = 0; i < corona.paths.length; i += 1) {
-        corona.pathFromServerTest(corona.paths[i]);
-    }
+    corona.fetchInfo(function(info) {
+        corona.stash.status = info;
+        for (var i = 0; i < corona.paths.length; i += 1) {
+            if(corona.paths[i].type === "json" && info.features.JSONPath === false) {
+                continue;
+            }
+            corona.pathFromServerTest(corona.paths[i]);
+        }
+    });
 });
 
 

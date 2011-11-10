@@ -1,5 +1,6 @@
 if(typeof corona == "undefined" || !corona) {
     corona = {};
+    corona.stash = {};
 }
 
 corona.documents = [
@@ -63,6 +64,10 @@ corona.constructURL = function(doc, prefix, processExtras) {
 corona.insertDocuments = function(prefix, callback) {
     var i = 0;
     for(i = 0; i < corona.documents.length; i += 1) {
+        if(corona.documents[i].type === "json" && corona.stash.status.features.JSONDocs === false) {
+            continue;
+        }
+
         var wrapper = function(index) {
             var doc = corona.documents[index];
             asyncTest("Inserting document: " + prefix + doc.uri, function() {
@@ -207,6 +212,9 @@ corona.deleteDocument = function(prefix, doc) {
 
 $(document).ready(function() {
     module("Bulk Store");
-    corona.insertDocuments("/bulk", function() {
+    corona.fetchInfo(function(info) {
+        corona.stash.status = info;
+        corona.insertDocuments("/bulk", function() {
+        });
     });
 });

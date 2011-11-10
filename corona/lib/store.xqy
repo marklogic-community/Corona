@@ -29,6 +29,8 @@ declare namespace corona="http://marklogic.com/corona";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare variable $xsltEval := try { xdmp:function(xs:QName("xdmp:xslt-eval")) } catch ($e) {};
+declare variable $xsltIsSupported := try { xdmp:apply($xsltEval, <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"/>, <foo/>)[3], true() } catch ($e) {xdmp:log($e), false() };
 
 declare function store:outputMultipleDocuments(
     $docs as document-node()*,
@@ -56,13 +58,14 @@ declare function store:outputMultipleDocuments(
         let $uri := base-uri($doc)
         let $collections := xdmp:document-get-collections($uri)
         let $contentType := store:getDocumentType($uri)
+        let $pathType := if($contentType = "xml") then "xpath" else "json"
 
         (: Perform the path extraction if one was provided :)
         let $content :=
             if($contentType = "text")
             then $doc/text()
             else if(exists($extractPath))
-            then store:wrapContentNodes(path:select(if($contentType = "json") then $doc/json:json else $doc, $extractPath, $contentType), $contentType)
+            then store:wrapContentNodes(path:select(if($contentType = "json") then $doc/json:json else $doc, $extractPath, $pathType), $contentType)
             else $doc
 
         (: Highlight the content body :)
@@ -73,8 +76,8 @@ declare function store:outputMultipleDocuments(
 
         (: Apply the transformation :)
         let $content :=
-            if(exists($applyTransform))
-            then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+            if(exists($applyTransform) and $xsltIsSupported)
+            then xdmp:apply($xsltEval, manage:getTransformer($applyTransform), $content)
             else $content
 
         (: If the wrapper element from wrapContentNodes is still sticking around, remove it :)
@@ -285,20 +288,21 @@ declare function store:getDocument(
 
     let $collections := xdmp:document-get-collections($uri)
     let $contentType := store:getDocumentType($uri)
+    let $pathType := if($contentType = "xml") then "xpath" else "json"
 
     let $content :=
         if($contentType = "text")
         then doc($uri)/text()
         else if(exists($extractPath))
-        then store:wrapContentNodes(path:select(doc($uri)/*, $extractPath, $contentType), $contentType)
+        then store:wrapContentNodes(path:select(doc($uri)/*, $extractPath, $pathType), $contentType)
         else doc($uri)
     let $content :=
         if($include = ("highlighting") and exists($highlightQuery))
         then store:highlightContent($content, $highlightQuery, $contentType)
         else $content
     let $content :=
-        if(exists($applyTransform))
-        then xdmp:xslt-eval(manage:getTransformer($applyTransform), $content)
+        if(exists($applyTransform) and $xsltIsSupported)
+        then xdmp:apply($xsltEval, manage:getTransformer($applyTransform), $content)
         else $content
     let $content :=
         if(namespace-uri($content) = "http://marklogic.com/corona/store")

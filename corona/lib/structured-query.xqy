@@ -17,6 +17,7 @@ limitations under the License.
 module namespace structquery="http://marklogic.com/corona/structured-query";
 
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
+import module namespace sqt="http://marklogic.com/corona/structured-query-translator" at "structured-query-translator.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "string-query.xqy";
 import module namespace search="http://marklogic.com/corona/search" at "search.xqy";
@@ -60,6 +61,8 @@ declare function structquery:getParseTree(
 {
     if(empty($query))
     then ()
+    else if(starts-with($query, "<"))
+    then sqt:translate(xdmp:unquote($query)/*)
     else json:parse($query)
 };
 

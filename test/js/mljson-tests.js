@@ -1,5 +1,6 @@
 if(typeof corona == "undefined" || !corona) {
     corona = {};
+    corona.stash = {};
 }
 
 
@@ -193,53 +194,61 @@ corona.validJSON = [
 ];
 
 $(document).ready(function() {
-    module("Bad JSON");
-    for (var i = 0; i < corona.badJSON.length; i += 1) {
-        corona.badFromServerTest(corona.badJSON[i]);
-    }
+    corona.fetchInfo(function(info) {
+        console.log(info);
+        if(info.features.JSONDocs === false) {
+            ok(true, "No support for JSON with this version of MarkLogic");
+            return;
+        }
 
-    module("Good JSON");
-    for (var i = 0; i < corona.validJSON.length; i += 1) {
-        corona.jsonFromServerTest(corona.validJSON[i]);
-    }
+        module("Bad JSON");
+        for (var i = 0; i < corona.badJSON.length; i += 1) {
+            corona.badFromServerTest(corona.badJSON[i]);
+        }
 
-    module("JSON Construction");
-    asyncTest("Array construction", function() {
-        $.ajax({
-            url: "/test/xq/array-construction.xqy",
-            success: function(data) {
-                ok(true, "Array construction success");
-                deepEqual(JSON.parse(data), [1,1.2,true,false,null,[],{"foo":"bar"}], "Constructed array comparison");
-            },
-            error: function() {
-                ok(false, "Array construction");
-            },
-            complete: function() { start(); }
+        module("Good JSON");
+        for (var i = 0; i < corona.validJSON.length; i += 1) {
+            corona.jsonFromServerTest(corona.validJSON[i]);
+        }
+
+        module("JSON Construction");
+        asyncTest("Array construction", function() {
+            $.ajax({
+                url: "/test/xq/array-construction.xqy",
+                success: function(data) {
+                    ok(true, "Array construction success");
+                    deepEqual(JSON.parse(data), [1,1.2,true,false,null,[],{"foo":"bar"}], "Constructed array comparison");
+                },
+                error: function() {
+                    ok(false, "Array construction");
+                },
+                complete: function() { start(); }
+            });
         });
-    });
-    asyncTest("Object construction", function() {
-        $.ajax({
-            url: "/test/xq/object-construction.xqy",
-            success: function(data) {
-                ok(true, "Object construction success");
-                deepEqual(JSON.parse(data), {"intvalue":1,"floatvalue":1.2,"boolvalue":true,"nullvalue":null,"arrayvalue":[1,2,3],"objectvalue":{"foo":"bar"},"datevalue::date":"July 8th, 2011","xmlvalue::xml":"<foo><bar/></foo>","notrailingvalue":null}, "Constructed object comparison");
-            },
-            error: function() {
-                ok(false, "Object construction");
-            },
-            complete: function() { start(); }
+        asyncTest("Object construction", function() {
+            $.ajax({
+                url: "/test/xq/object-construction.xqy",
+                success: function(data) {
+                    ok(true, "Object construction success");
+                    deepEqual(JSON.parse(data), {"intvalue":1,"floatvalue":1.2,"boolvalue":true,"nullvalue":null,"arrayvalue":[1,2,3],"objectvalue":{"foo":"bar"},"datevalue::date":"July 8th, 2011","xmlvalue::xml":"<foo><bar/></foo>","notrailingvalue":null}, "Constructed object comparison");
+                },
+                error: function() {
+                    ok(false, "Object construction");
+                },
+                complete: function() { start(); }
+            });
         });
-    });
-    asyncTest("Object construction duplicate key should fail", function() {
-        $.ajax({
-            url: "/test/xq/object-construction-dup-keys.xqy",
-            success: function() {
-                ok(false, "Object construction duplicate key should fail");
-            },
-            error: function() {
-                ok(true, "Object construction duplicate key should fail");
-            },
-            complete: function() { start(); }
+        asyncTest("Object construction duplicate key should fail", function() {
+            $.ajax({
+                url: "/test/xq/object-construction-dup-keys.xqy",
+                success: function() {
+                    ok(false, "Object construction duplicate key should fail");
+                },
+                error: function() {
+                    ok(true, "Object construction duplicate key should fail");
+                },
+                complete: function() { start(); }
+            });
         });
     });
 });

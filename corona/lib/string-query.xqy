@@ -19,6 +19,7 @@ xquery version "1.0-ml";
 module namespace stringquery = "http://marklogic.com/corona/string-query";
 
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
+import module namespace as="http://marklogic.com/corona/analyze-string" at "analyze-string.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
 import module namespace search="http://marklogic.com/corona/search" at "search.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
@@ -89,8 +90,8 @@ declare private function stringquery:tokenize(
 		$wordMatch, "\s+"
 	)
 
-	let $regex := string-join(for $t in $tokens return concat("(", $t, ")"), "|")
-	for $match in analyze-string($query, $regex)/*
+    let $tokens := for $token in $tokens return concat("(", $token, ")")
+	for $match in as:analyzeString($query, $tokens)/*
 	return
 		if($match/self::*:non-match) then <error>{ string($match) }</error>
 		else if($match/*:group/@nr = 1) then <startgroup/>
@@ -102,7 +103,7 @@ declare private function stringquery:tokenize(
 		else if($match/*:group/@nr = 4) then <not/>
 		else if($match/*:group/@nr = 5) then <and/>
 		else if($match/*:group/@nr = 6) then <or/>
-		else if($match/*:group/@nr = 7) then <near/>
+		else if($match/*:group/@nr = 7) then <near distance="10"/>
 		else if($match/*:group/@nr = 8) then <near distance="{ xs:double(tokenize(string($match), "/")[2]) }"/>
 		else if($match/*:group/@nr = 9) then <constraint>{
 				let $bits := tokenize($match, ":")

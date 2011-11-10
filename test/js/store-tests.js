@@ -1,6 +1,8 @@
 if(typeof corona == "undefined" || !corona) {
     corona = {};
+    corona.stash = {};
 }
+
 
 corona.documents = [
     {
@@ -114,7 +116,7 @@ corona.documents = [
     }
 ];
 
-corona.constructURL = function(doc, prefix, processExtras, includeContentType, includeOutputFormat, staticExtras) {
+corona.constructURL = function(doc, prefix, processExtras, includeOutputFormat, staticExtras) {
     var extras = [];
     if(staticExtras) {
         extras.push(staticExtras);
@@ -172,9 +174,6 @@ corona.constructURL = function(doc, prefix, processExtras, includeContentType, i
 
     if(includeOutputFormat && doc.outputFormat) {
         extras.push("outputFormat=" + doc.outputFormat);
-    }
-    if(includeContentType) {
-        extras.push("contentType=" + doc.type);
     }
 
     extras.push("uri=" + encodeURIComponent(prefix + doc.uri));
@@ -246,7 +245,7 @@ corona.compareXMLDocuments = function(model, xmlAsString, withExtras) {
 corona.insertDocuments = function(prefix, withExtras) {
     var i = 0;
     for(i = 0; i < corona.documents.length; i += 1) {
-        if(corona.documents[i].shouldSucceed === false) {
+        if((corona.documents[i].type === "json" && corona.stash.status.features.JSONDocs === false) || corona.documents[i].shouldSucceed === false) {
             continue;
         }
 
@@ -262,14 +261,14 @@ corona.insertDocuments = function(prefix, withExtras) {
                     processExtras = "set";
                 }
                 $.ajax({
-                    url: corona.constructURL(doc, prefix, processExtras, true, false),
+                    url: corona.constructURL(doc, prefix, processExtras, false),
                     type: 'PUT',
                     data: docContent,
                     context: doc,
                     success: function() {
                         ok(true, "Inserted document");
                         $.ajax({
-                            url: corona.constructURL(doc, prefix, "ignore", false, true, "include=all"),
+                            url: corona.constructURL(doc, prefix, "ignore", true, "include=all"),
                             type: 'GET',
                             context: this,
                             success: function(data) {
@@ -310,7 +309,7 @@ corona.insertDocuments = function(prefix, withExtras) {
 corona.runFailingTests = function(prefix) {
     var i = 0;
     for(i = 0; i < corona.documents.length; i += 1) {
-        if(corona.documents[i].shouldSucceed === undefined || corona.documents[i].shouldSucceed === true) {
+        if((corona.documents[i].type === "json" && corona.stash.status.features.JSONDocs === false) || corona.documents[i].shouldSucceed === undefined || corona.documents[i].shouldSucceed === true) {
             continue;
         }
 
@@ -326,7 +325,7 @@ corona.runFailingTests = function(prefix) {
                     docContent = JSON.stringify(docContent);
                 }
                 $.ajax({
-                    url: corona.constructURL(doc, uri, true, true, false),
+                    url: corona.constructURL(doc, uri, true, false),
                     type: 'PUT',
                     data: docContent,
                     context: doc,
@@ -348,13 +347,13 @@ corona.runFailingTests = function(prefix) {
 corona.setExtras = function(prefix, doc) {
     asyncTest("Setting document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: corona.constructURL(doc, prefix, "set", true, false),
+            url: corona.constructURL(doc, prefix, "set", false),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore", false, true, "include=all"),
+                    url:  corona.constructURL(doc, prefix, "ignore", true, "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -387,13 +386,13 @@ corona.setExtras = function(prefix, doc) {
 corona.removeExtras = function(prefix, doc) {
     asyncTest("Removing document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: corona.constructURL(doc, prefix, "remove", true, false),
+            url: corona.constructURL(doc, prefix, "remove", false),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore", false, true, "include=all"),
+                    url:  corona.constructURL(doc, prefix, "ignore", true, "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -426,13 +425,13 @@ corona.removeExtras = function(prefix, doc) {
 corona.addExtras = function(prefix, doc) {
     asyncTest("Adding document extras: " + prefix + doc.uri, function() {
         $.ajax({
-            url: corona.constructURL(doc, prefix, "add", true, false),
+            url: corona.constructURL(doc, prefix, "add", false),
             type: 'POST',
             context: doc,
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore", false, true, "include=all"),
+                    url:  corona.constructURL(doc, prefix, "ignore", true, "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -465,13 +464,13 @@ corona.addExtras = function(prefix, doc) {
 corona.deleteDocument = function(prefix, doc) {
     asyncTest("Deleting document: " + prefix + doc.uri, function() {
         $.ajax({
-            url: corona.constructURL(doc, prefix, "ignore", false, true),
+            url: corona.constructURL(doc, prefix, "ignore", true),
             type: 'DELETE',
             context: doc,
             success: function() {
                 ok(true, "Deleted document");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore", false, true, "include=all"),
+                    url:  corona.constructURL(doc, prefix, "ignore", true, "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -494,7 +493,10 @@ corona.deleteDocument = function(prefix, doc) {
 
 $(document).ready(function() {
     module("Store");
-    corona.insertDocuments("/no-extras", false);
-    corona.insertDocuments("/extras", true);
-    corona.runFailingTests("/failures");
+    corona.fetchInfo(function(info) {
+        corona.stash.status = info;
+        corona.insertDocuments("/no-extras", false);
+        corona.insertDocuments("/extras", true);
+        corona.runFailingTests("/failures");
+    });
 });

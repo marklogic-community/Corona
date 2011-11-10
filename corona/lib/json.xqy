@@ -14,20 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 :)
 
-(:
-    TODO:
-        Create cts wrappers for the following functions:
-        cts:element-child-geospatial-query
-        cts:element-geospatial-query
-        cts:element-pair-geospatial-query
-        cts:element-query
-        cts:element-range-query
-        cts:element-value-query
-        cts:element-word-query
-        cts:field-word-query
-        cts:word-query
-:)
-
 xquery version "1.0-ml";
 
 module namespace json="http://marklogic.com/json";
@@ -37,6 +23,8 @@ import module namespace dateparser="http://marklogic.com/dateparser" at "date-pa
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare variable $newLineRegex := concat("[", codepoints-to-string((13, 10)), "]+");
+declare variable $analyzeString := try { xdmp:function(xs:QName("fn:analyze-string")) } catch ($e) {};
+declare variable $isSupported := try { exists(xdmp:apply($analyzeString, " ", " ")) } catch ($e) { false() };
 
 (:
     Converts a JSON string into an XML document that is highly indexable by
@@ -60,6 +48,7 @@ declare function json:parse(
     $enableExtensions as xs:boolean
 ) as element(json:json)
 {
+    let $test := if($isSupported) then () else error(xs:QName("json:UNSUPPORTED"), "The JSON library isn't supported under this version of MarkLogic, upgrade to 4.2 or later")
     let $tokens := json:tokenize($json)
     let $value := json:parseValue($tokens, 1, (), $enableExtensions)
     let $test :=
@@ -297,6 +286,83 @@ declare function json:null(
     <json:item type="null"/>
 };
 
+declare function json:escapeNCName(
+    $val as xs:string
+) as xs:string
+{
+    if($val = "")
+    then "_"
+    else if($isSupported)
+    then
+        string-join(
+            let $regex := ':|_|(\i)|(\c)|.'
+            for $match at $pos in xdmp:apply($analyzeString, $val, $regex)/*
+            return
+                if($match/*:group/@nr = 1 or ($match/*:group/@nr = 2 and $pos != 1))
+                then string($match)
+                else ("_", json:encodeHexStringHelper(string-to-codepoints($match), 4))
+        , "")
+    else
+        string-join(
+            for $char at $pos in string-to-codepoints($val)
+            let $char := codepoints-to-string($char)
+            return
+                if($char = (":", "_"))
+                then ("_", json:encodeHexStringHelper(string-to-codepoints($char), 4))
+                else if(matches($char, "\i") or (matches($char, "\c") and $pos != 1))
+                then $char
+                else ("_", json:encodeHexStringHelper(string-to-codepoints($char), 4))
+        , "")
+};
+
+declare function json:unescapeNCName(
+    $val as xs:string
+) as xs:string
+{
+    if($val = "_")
+    then ""
+    else if($isSupported)
+    then
+        string-join(
+            let $regex := '(_[A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9])|[^_]+'
+            for $match at $pos in xdmp:apply($analyzeString, $val, $regex)/*
+            return
+                if($match/*:group/@nr = 1)
+                then codepoints-to-string(xdmp:hex-to-integer(substring($match, 2)))
+                else string($match)
+      , "")
+   else
+        if(contains($val, "_"))
+        then json:unescapeNCName(
+            string-join((
+                substring-before($val, "_"),
+                codepoints-to-string(xdmp:hex-to-integer(substring(substring-after($val, "_"), 1, 4))),
+                substring(substring-after($val, "_"), 5)
+            ), ""))
+        else $val
+};
+
+declare function json:castAs(
+    $key as xs:string,
+    $enableExtensions as xs:boolean
+) as xs:string?
+{
+    let $keyBits :=
+        if($enableExtensions)
+        then tokenize($key, "::")
+        else $key
+    return
+        if(count($keyBits) > 1)
+        then $keyBits[last()][. = ("xml", "date")]
+        else ()
+};
+
+declare function json:isSupported(
+) as xs:boolean
+{
+    $isSupported
+};
+
 
 (: Search functions :)
 
@@ -532,7 +598,7 @@ declare private function json:unescapeJSONString($val as xs:string)
 {
     string-join(
         let $regex := '[^\\]+|(\\")|(\\\\)|(\\/)|(\\b)|(\\f)|(\\n)|(\\r)|(\\t)|(\\u[A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9])'
-        for $match in analyze-string($val, $regex)/*
+        for $match in xdmp:apply($analyzeString, $val, $regex)/*
         return 
             if($match/*:group/@nr = 1) then """"
             else if($match/*:group/@nr = 2) then "\"
@@ -555,7 +621,7 @@ declare private function json:tokenize(
         '"([^"\\]|\\"|\\\\|\\/|\\b|\\f|\\n|\\r|\\t|\\u[A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9])*"',
         "-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?")
     let $regex := string-join(for $t in $tokens return concat("(",$t,")"),"|")
-    for $match in analyze-string($json, $regex)/*
+    for $match in xdmp:apply($analyzeString, $json, $regex)/*
     return
         if($match/self::*:non-match) then json:createToken("error", string($match))
         else if($match/*:group/@nr = 1) then json:createToken("lbrace", string($match))
@@ -652,53 +718,4 @@ declare private function json:encodeHexStringHelper(
     then json:encodeHexStringHelper($num idiv 16, $digits - 1)
     else (),
     ("0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F")[$num mod 16 + 1]
-};
-
-declare function json:escapeNCName(
-    $val as xs:string
-) as xs:string
-{
-    if($val = "")
-    then "_"
-    else
-        string-join(
-            let $regex := ':|_|(\i)|(\c)|.'
-            for $match at $pos in analyze-string($val, $regex)/*
-            return
-                if($match/*:group/@nr = 1 or ($match/*:group/@nr = 2 and $pos != 1))
-                then string($match)
-                else ("_", json:encodeHexStringHelper(string-to-codepoints($match), 4))
-        , "")
-};
-
-declare function json:unescapeNCName(
-    $val as xs:string
-) as xs:string
-{
-    if($val = "_")
-    then ""
-    else
-        string-join(
-            let $regex := '(_[A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9][A-Fa-f0-9])|[^_]+'
-            for $match at $pos in analyze-string($val, $regex)/*
-            return
-                if($match/*:group/@nr = 1)
-                then codepoints-to-string(xdmp:hex-to-integer(substring($match, 2)))
-                else string($match)
-      , "")
-};
-
-declare function json:castAs(
-    $key as xs:string,
-    $enableExtensions as xs:boolean
-) as xs:string?
-{
-    let $keyBits :=
-        if($enableExtensions)
-        then tokenize($key, "::")
-        else $key
-    return
-        if(count($keyBits) > 1)
-        then $keyBits[last()][. = ("xml", "date")]
-        else ()
 };

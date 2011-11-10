@@ -88,7 +88,7 @@ declare function common:errorFromException(
 {
     if($exception/*:code = "SEC-ROLEDNE")
     then common:error("corona:INVALID-PERMISSION", concat("The role '", $exception/*:data/*:datum[. != "sec:role-name"], "' does not exist."), $outputFormat)
-    else if(starts-with($exception/*:name, "corona:") or starts-with($exception/*:name, "json:"))
+    else if(starts-with($exception/*:name, "corona:") or starts-with($exception/*:name, "json:") or starts-with($exception/*:name, "path:"))
     then common:error($exception/*:name, $exception/*:message, $outputFormat)
     else (
         xdmp:log($exception),
@@ -247,7 +247,9 @@ declare function common:getOutputFormat(
     then $outputFormat
     else if($contentType = ("json", "xml"))
     then $contentType
-    else "json"
+    else if(json:isSupported())
+    then "json"
+    else "xml"
 };
 
 declare function common:processTXID(

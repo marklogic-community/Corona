@@ -1,5 +1,6 @@
 if(typeof corona == "undefined" || !corona) {
     corona = {};
+    corona.stash = {};
 }
 
 corona.queries = [

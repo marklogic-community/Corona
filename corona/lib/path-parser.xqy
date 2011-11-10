@@ -19,9 +19,21 @@ xquery version "1.0-ml";
 module namespace path="http://marklogic.com/mljson/path-parser";
 
 import module namespace json="http://marklogic.com/json" at "json.xqy";
+import module namespace as="http://marklogic.com/corona/analyze-string" at "analyze-string.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare variable $analyzeString := try { xdmp:function(xs:QName("fn:analyze-string")) } catch ($e) {};
+declare variable $regexSupported := try { exists(xdmp:apply($analyzeString, " ", " ")) } catch ($e) { false() };
+
+declare function path:supportedFormats(
+) as xs:string*
+{
+    if($regexSupported)
+    then "json"
+    else (),
+    "xpath"
+};
 
 declare function path:select(
     $doc as node(),
@@ -29,7 +41,9 @@ declare function path:select(
     $type as xs:string
 ) as node()*
 {
-    if(string-length($path) = 0)
+    if(not($type = path:supportedFormats()))
+    then error(xs:QName("path:INVALID-TYPE"), concat("Invalid type: '", $type, "'."))
+    else if(string-length($path) = 0)
     then $doc
     else
         let $tokens := path:tokenize($path, $type)
@@ -59,20 +73,20 @@ declare private function path:tokenize(
         let $tokens := (
                 '\[("[^"]*)"\]',
                 '\[(\d+)\]',
-                "([a-zA-Z_$][0-9a-zA-Z_$]*)", 
+                '([a-zA-Z_$][0-9a-zA-Z_$]*)',
 
                 '(root\(\))',
                 '(parent\(\))',
                 'ancestor\("([^"]*)"\)',
                 'xpath\("([^"]*)"\)',
-                "(\.)",
-                "(\*)",
+                '(\.)',
+                '(\*)',
 
-                "(\s+)"
+                '(\s+)'
             )
 
         let $regex := string-join(for $token in $tokens return $token, "|")
-        for $match in analyze-string($path, $regex)/*
+        for $match in xdmp:apply($analyzeString, $path, $regex)/*
         return
             if($match/self::*:non-match) then <error>{ string($match) }</error>
             else if($match/*:group/@nr = 1) then <step origin="bracketed" type="key">{ replace(string($match/*:group), '"', "") }</step>
@@ -109,12 +123,12 @@ declare private function path:tokenize(
             '(self::\i\c*)',
             '(\i\c*)',
             '(/)',
-            "(\*)",
-            '(\[(\d+)\])'
+            '(\*)',
+            '\[(\d+)\]'
         )
 
-        let $regex := string-join(for $token in $tokens return $token, "|")
-        for $match in analyze-string($path, $regex)/*
+        let $log := xdmp:log(as:analyzeString($path, $tokens))
+        for $match in as:analyzeString($path, $tokens)/*
         return
             if($match/self::*:non-match) then <error>{ string($match) }</error>
             else if($match/*:group/@nr = 1) then <axis type="ancestor" axis="true">{ string($match/*:group) }</axis>
@@ -137,7 +151,7 @@ declare private function path:tokenize(
             else if($match/*:group/@nr = 17) then <element>{ string($match) }</element>
             else if($match/*:group/@nr = 18) then <slash>{ string($match) }</slash>
             else if($match/*:group/@nr = 19) then <wildstep>{ string($match) }</wildstep>
-            else if($match/*:group/@nr = 20) then <predicate>{ string($match) }</predicate>
+            else if($match/*:group/@nr = 20) then <predicate>[{ string($match/*:group) }]</predicate>
 
             else xdmp:log(concat("Unknown group in xpath parsing: ", xdmp:quote($match)))
 };

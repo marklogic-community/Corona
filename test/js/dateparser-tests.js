@@ -1,5 +1,6 @@
 if(typeof corona == "undefined" || !corona) {
     corona = {};
+    corona.stash = {};
 }
 
 corona.dates = [
@@ -95,9 +96,15 @@ corona.dates = [
 
 $(document).ready(function() {
     module("Dates");
-    for (var i = 0; i < corona.dates.length; i += 1) {
-        corona.jsonFromServerTest(corona.dates[i]);
-    }
+    corona.fetchInfo(function(info) {
+        if(info.features.dateParsing === false) {
+            return;
+        }
+
+        for (var i = 0; i < corona.dates.length; i += 1) {
+            corona.jsonFromServerTest(corona.dates[i]);
+        }
+    });
 });
 
 
