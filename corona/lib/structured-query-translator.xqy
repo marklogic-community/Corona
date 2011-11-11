@@ -35,22 +35,25 @@ declare private function sqt:process(
 ) as item()*
 {
     typeswitch($step)
-    case element(constraint) return sqt:handleConstraint($step)
-    case element(and) return json:object(("and", sqt:handleArrayValue($step)))
-    case element(or) return json:object(("or", sqt:handleArrayValue($step)))
-    case element(near) return json:array(for $item in $step/constraint return sqt:handleConstraint($item))
+    case element(constraint) return sqt:createObjectOutputKeyProcessValue($step)
+    case element(and) return json:object(("and", sqt:outputChildrenAsArray($step)))
+    case element(or) return json:object(("or", sqt:outputChildrenAsArray($step)))
+    case element(near) return json:array(for $item in $step/constraint return sqt:createObjectOutputKeyProcessValue($item))
     case element(not) return json:object(("not", sqt:process(($step/*)[1])))
     case element(andNot) return sqt:handleObjectValue($step)
-    case element(query) return sqt:handleValue($step)
+    case element(query) return
+        if(exists($step/*))
+        then sqt:process(($step/*)[1])
+        else sqt:handleValue($step)
 
-    case element(positive) return sqt:handleValue($step)
-    case element(negative) return sqt:handleValue($step)
+    case element(positive) return sqt:process(($step/*)[1])
+    case element(negative) return sqt:process(($step/*)[1])
 
-    case element(boolean) return json:object(("boolean", xs:boolean($step)))
-    case element(isNULL) return sqt:handleSimpleKeyValue($step)
-    case element(keyExists) return sqt:handleSimpleKeyValue($step)
-    case element(elementExists) return sqt:handleSimpleKeyValue($step)
-    case element(collection) return sqt:handleSimpleKeyValue($step)
+    case element(boolean) return sqt:handleSimpleKeyValue($step, "boolean")
+    case element(isNULL) return sqt:handleSimpleKeyValue($step, ())
+    case element(keyExists) return sqt:handleSimpleKeyValue($step, ())
+    case element(elementExists) return sqt:handleSimpleKeyValue($step, ())
+    case element(collection) return sqt:handleSimpleKeyValue($step, ())
 
     case element(equals) return sqt:handleMixedValue($step)
     case element(contains) return sqt:handleMixedValue($step)
@@ -77,7 +80,7 @@ declare private function sqt:process(
     case element(point) return sqt:handleValue($step)
     case element(circle) return sqt:handleValue($step)
     case element(box) return sqt:handleValue($step)
-    case element(polygon) return sqt:handleArrayValue($step)
+    case element(polygon) return sqt:outputChildrenAsArray($step)
     case element(latitude) return xs:decimal($step)
     case element(longitude) return xs:decimal($step)
     case element(radius) return xs:decimal($step)
@@ -89,7 +92,7 @@ declare private function sqt:process(
     default return string($step)
 };
 
-declare private function sqt:handleConstraint(
+declare private function sqt:createObjectOutputKeyProcessValue(
     $step as element()
 ) as element(json:item)
 {
@@ -99,7 +102,7 @@ declare private function sqt:handleConstraint(
     )
 };
 
-declare private function sqt:handleArrayValue(
+declare private function sqt:outputChildrenAsArray(
     $step as element()
 ) as element(json:item)
 {
@@ -110,7 +113,7 @@ declare private function sqt:handleObjectValue(
     $step as element()
 ) as element(json:item)
 {
-    json:object((local-name($step), sqt:handleConstraint($step)))
+    json:object((local-name($step), sqt:createObjectOutputKeyProcessValue($step)))
 };
 
 declare private function sqt:handleMixedValue(
@@ -123,10 +126,17 @@ declare private function sqt:handleMixedValue(
 };
 
 declare private function sqt:handleSimpleKeyValue(
-    $step as element()
+    $step as element(),
+    $castAs as xs:string?
 ) as element()
 {
-    json:object((local-name($step), sqt:handleMixedValue($step)))
+    if($castAs = "boolean")
+    then json:object((local-name($step), xs:boolean($step)))
+    else if($castAs = "number")
+    then json:object((local-name($step), xs:decimal($step)))
+    else if($castAs = "string")
+    then json:object((local-name($step), xs:string($step)))
+    else json:object((local-name($step), sqt:handleMixedValue($step)))
 };
 
 declare private function sqt:handleValue(
@@ -134,7 +144,7 @@ declare private function sqt:handleValue(
 )
 {
     if(exists($value/*))
-    then sqt:handleConstraint($value)
+    then sqt:createObjectOutputKeyProcessValue($value)
     else if(empty($value/@type) or $value/@type = "string")
     then string($value)
     else if($value/@type = "boolean")
