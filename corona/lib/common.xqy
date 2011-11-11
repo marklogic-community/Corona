@@ -235,7 +235,7 @@ declare function common:getContentType(
             else if($extension = ("txt", "text"))
             then "text"
             else ()
-    else ()
+    else error(xs:QName("corona:MISSING-PARAMETER"), "Need to specify a contentType whenever the URI doesn't end in 'json', 'xml', 'txt' or 'text'")
 };
 
 declare function common:getOutputFormat(
