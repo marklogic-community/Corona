@@ -52,8 +52,6 @@ declare function manage:createJSONRange(
 {
     let $test := manage:validateIndexName($name)
     let $test := manage:validateJSONType($type)
-
-    let $key := json:escapeNCName($key)
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
         config:setJSONRange($name, $key, $type)
@@ -130,7 +128,7 @@ declare function manage:getRange(
         then
             json:object((
                 "name", $name,
-                "key", json:unescapeNCName($index/key),
+                "key", string($index/key),
                 "type", string($index/type)
             ))
         else if($index/structure = "xmlelement")
@@ -171,8 +169,6 @@ declare function manage:createJSONBucketedRange(
     let $test := manage:validateIndexName($name)
     let $test := manage:validateJSONType($type)
     let $test := manage:validateBuckets($buckets, manage:jsonTypeToSchemaType($type))
-
-    let $key := json:escapeNCName($key)
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
         config:setJSONBucketedRange($name, $key, $type, $buckets)
@@ -197,8 +193,6 @@ declare function manage:createJSONAutoBucketedRange(
     let $test := manage:validateBucketInterval($bucketInterval)
     let $test := manage:validateStartAndStop($startingAt)
     let $test := manage:validateStartAndStop($stoppingAt)
-
-    let $key := json:escapeNCName($key)
     return (
         manage:createJSONRangeIndex($name, $key, $type, $config),
         config:setJSONAutoBucketedRange($name, $key, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
@@ -364,7 +358,7 @@ declare function manage:getBucketedRange(
         then
             json:object((
                 "name", $name,
-                "key", json:unescapeNCName($index/key),
+                "key", string($index/key),
                 $common
             ))
         else if($index/structure = "xmlelement")
@@ -1127,22 +1121,22 @@ declare private function manage:createJSONRangeIndex(
     then ()
     else if($type = "string")
     then
-        let $index := admin:database-range-element-index("string", "http://marklogic.com/json", $key, "http://marklogic.com/collation/", false())
+        let $index := admin:database-range-element-index("string", "http://marklogic.com/json", json:escapeNCName($key), "http://marklogic.com/collation/", false())
         let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
         return admin:save-configuration($config)
     else if($type = "date")
     then
-        let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", $key, "", "normalized-date", "", false())
+        let $index := admin:database-range-element-attribute-index("dateTime", "http://marklogic.com/json", json:escapeNCName($key), "", "normalized-date", "", false())
         let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
         return admin:save-configuration($config)
     else if($type = "number")
     then
-        let $index := admin:database-range-element-index("decimal", "http://marklogic.com/json", $key, "", false())
+        let $index := admin:database-range-element-index("decimal", "http://marklogic.com/json", json:escapeNCName($key), "", false())
         let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
         return admin:save-configuration($config)
     else if($type = "boolean")
     then
-        let $index := admin:database-range-element-attribute-index("string", "http://marklogic.com/json", $key, "", "boolean", "", false())
+        let $index := admin:database-range-element-attribute-index("string", "http://marklogic.com/json", json:escapeNCName($key), "", "boolean", "", false())
         let $config := admin:database-add-range-element-attribute-index($config, xdmp:database(), $index)
         return admin:save-configuration($config)
     else ()
@@ -1216,12 +1210,12 @@ declare private function manage:getRangeDefinition(
     then (
         let $xsType := manage:jsonTypeToSchemaType($index/type)
         for $ri in admin:database-get-range-element-indexes($config, xdmp:database())
-        where $ri/*:scalar-type = $xsType and $ri/*:namespace-uri = "http://marklogic.com/json" and $ri/*:localname = string($index/key)
+        where $ri/*:scalar-type = $xsType and $ri/*:namespace-uri = "http://marklogic.com/json" and $ri/*:localname = json:escapeNCName($index/key)
         return $ri
         ,
         let $xsType := manage:jsonTypeToSchemaType($index/type)
         for $ri in admin:database-get-range-element-attribute-indexes($config, xdmp:database())
-        where $ri/*:scalar-type = $xsType and $ri/*:parent-namespace-uri = "http://marklogic.com/json" and $ri/*:parent-localname = string($index/key)
+        where $ri/*:scalar-type = $xsType and $ri/*:parent-namespace-uri = "http://marklogic.com/json" and $ri/*:parent-localname = json:escapeNCName($index/key)
         return $ri
     )[1]
     else if($index/structure = "xmlelement")

@@ -1018,9 +1018,9 @@ corona.addGeoIndexes = function(callback) {
         {
             "type": "geo",
             "name": "geochildpairkey",
-            "element": "parentElement",
-            "latElement": "latElement",
-            "longElement": "longElement",
+            "key": "parentKey",
+            "latKey": "latKey",
+            "longKey": "longKey",
             "shouldSucceed": true,
             "purpose": "Geo key pair"
         },

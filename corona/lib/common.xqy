@@ -322,3 +322,10 @@ declare function common:nameFromQName(
     then local-name-from-QName($item)
     else ()
 };
+
+declare function common:keyToQName(
+    $key as xs:string
+) as xs:QName
+{
+    xs:QName(concat("json:", json:escapeNCName($key)))
+};

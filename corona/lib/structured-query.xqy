@@ -105,7 +105,7 @@ declare private function structquery:dispatch(
         $step/json:wordAnywhere[@type = ("string", "array")],
         $step/json:inTextDocument[@type = ("string", "array")],
 
-        $step/json:geo[@type = "object"],
+        $step/json:geo[@type = "string"],
         $step/json:point[@type = "object"],
         $step/json:circle[@type = "object"],
         $step/json:box[@type = "object"],
@@ -186,18 +186,15 @@ declare private function structquery:handleIsNULL(
     $step as element(json:isNULL)
 ) as cts:element-attribute-value-query
 {
-    let $QName := xs:QName(concat("json:", json:escapeNCName($step)))
     let $weight := xs:double(($step/../json:weight[@type = "number"], 1.0)[1])
-    return cts:element-attribute-value-query($QName, xs:QName("type"), "null", (), $weight)
+    return cts:element-attribute-value-query(common:keyToQName(string($step)), xs:QName("type"), "null", (), $weight)
 };
 
 declare private function structquery:handleKeyExists(
     $step as element(json:keyExists)
 ) as cts:element-query?
 {
-    let $QNames :=
-        for $i in structquery:valueToStrings($step)
-        return xs:QName(concat("json:", json:escapeNCName($i)))
+    let $QNames := for $i in structquery:valueToStrings($step) return common:keyToQName($i)
     return cts:element-query($QNames, cts:and-query(()))
 };
 
@@ -234,7 +231,7 @@ declare private function structquery:handleUnderKey(
         if($container/json:query/@type = "string")
         then string($container/json:query)
         else structquery:dispatch($container/json:query, $ignoreRange)
-    return cts:element-query(xs:QName(concat("json:", json:escapeNCName($step))), $query)
+    return cts:element-query(common:keyToQName($step), $query)
 };
 
 declare private function structquery:handleBoolean(
@@ -253,7 +250,7 @@ declare private function structquery:handleKey(
     let $container := $step/..
     let $values := structquery:valueToStrings(($container/json:equals, $container/json:contains)[1])
     let $key := $container/json:key
-    let $QName := xs:QName(concat("json:", json:escapeNCName($key)))
+    let $QName := common:keyToQName($key)
     let $options := structquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
     where exists($values)
@@ -419,50 +416,11 @@ declare private function structquery:handleGeo(
     $step as element(json:geo)
 ) as cts:query?
 {
-    let $weight := xs:double(($step/json:weight[@type = "number"], 1.0)[1])
-    let $parent :=
-        if(exists($step/json:parentKey[@type = "string"]))
-        then xs:QName(concat("json:", json:escapeNCName($step/json:parentKey)))
-        else if(exists($step/json:parentElement[@type = "string"]))
-        then xs:QName($step/json:parentElement)
-        else ()
-    let $latLongPair :=
-        if(exists($step/json:key[@type = "string"]))
-        then xs:QName(concat("json:", json:escapeNCName($step/json:key)))
-        else if(exists($step/json:element[@type = "string"]))
-        then xs:QName($step/json:element)
-        else ()
-    let $latKey :=
-        if(exists($step/json:latKey[@type = "string"]))
-        then xs:QName(concat("json:", json:escapeNCName($step/json:latKey)))
-        else if(exists($step/json:latElement[@type = "string"]))
-        then xs:QName($step/json:latElement)
-        else ()
-    let $longKey :=
-        if(exists($step/json:longKey[@type = "string"]))
-        then xs:QName(concat("json:", json:escapeNCName($step/json:longKey)))
-        else if(exists($step/json:longElement[@type = "string"]))
-        then xs:QName($step/json:longElement)
-        else ()
-    let $latAttribute :=
-        if(exists($step/json:latAttribute[@type = "string"]))
-        then xs:QName($step/json:latAttribute)
-        else ()
-    let $longAttribute :=
-        if(exists($step/json:longAttribute[@type = "string"]))
-        then xs:QName($step/json:longAttribute)
-        else ()
-
-    return
-        if(exists($parent) and exists($latKey) and exists($longKey))
-        then cts:element-pair-geospatial-query($parent, $latKey, $longKey, structquery:process($step/json:region, ()), structquery:extractOptions($step, "geo"), $weight)
-        else if(exists($parent) and exists($latLongPair))
-        then cts:element-child-geospatial-query($parent, $latLongPair, structquery:process($step/json:region, ()), structquery:extractOptions($step, "geo"), $weight)
-        else if(exists($parent) and exists($latAttribute) and exists($longAttribute))
-        then cts:element-attribute-pair-geospatial-query($parent, $latAttribute, $longAttribute, structquery:process($step/json:region, ()), structquery:extractOptions($step, "geo"), $weight)
-        else if(exists($latLongPair))
-        then cts:element-geospatial-query($latLongPair, structquery:process($step/json:region, ()), structquery:extractOptions($step, "geo"), $weight)
-        else ()
+    let $index := config:get(string($step))
+    let $region := structquery:process($step/../json:region, ())
+    let $options := structquery:extractOptions($step/.., "geo")
+    let $weight := xs:double(($step/../json:weight[@type = "number"], 1.0)[1])
+    return search:geoQuery($index, $region, $options, $weight)
 };
 
 declare private function structquery:handleRegion(

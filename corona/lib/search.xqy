@@ -89,18 +89,18 @@ declare function search:bucketLabelToQuery(
             if($index/type = "date")
             then cts:and-query((
                 if(exists($lowerBound))
-                then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), ">=", common:castFromJSONType($lowerBound, "date"), $options)
+                then cts:element-attribute-range-query(common:keyToQName($index/key), xs:QName("normalized-date"), ">=", common:castFromJSONType($lowerBound, "date"), $options)
                 else (),
                 if(exists($upperBound))
-                then cts:element-attribute-range-query(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), "<", common:castFromJSONType($upperBound, "date"), $options)
+                then cts:element-attribute-range-query(common:keyToQName($index/key), xs:QName("normalized-date"), "<", common:castFromJSONType($upperBound, "date"), $options)
                 else ()
             ))
             else cts:and-query((
                 if(exists($lowerBound))
-                then cts:element-range-query(xs:QName(concat("json:", $index/key)), ">=", common:castFromJSONType($lowerBound, $index/type), $options)
+                then cts:element-range-query(common:keyToQName($index/key), ">=", common:castFromJSONType($lowerBound, $index/type), $options)
                 else (),
                 if(exists($upperBound))
-                then cts:element-range-query(xs:QName(concat("json:", $index/key)), "<", common:castFromJSONType($upperBound, $index/type), $options)
+                then cts:element-range-query(common:keyToQName($index/key), "<", common:castFromJSONType($upperBound, $index/type), $options)
                 else ()
             ))
         else if($index/structure = "xmlelement")
@@ -157,7 +157,7 @@ declare function search:rangeValueToQuery(
         if($index/type = "string")
         then ($options, "collation=http://marklogic.com/collation/")
         else $options
-    let $JSONQName := if(exists($index/key)) then xs:QName(concat("json:", $index/key)) else ()
+    let $JSONQName := if(exists($index/key)) then common:keyToQName($index/key) else ()
     where $index/@type = ("range", "bucketedrange", "autobucketedrange")
     return
         if($index/structure = "json")
@@ -202,7 +202,7 @@ declare function search:placeValueToQuery(
             else if(local-name($item) = "element")
             then cts:element-word-query(xs:QName($item/@element), $value, $options, $item/@weight)
             else if(local-name($item) = "key")
-            then cts:element-word-query(xs:QName(concat("json:", json:escapeNCName($item/@key))), $value, $options, $item/@weight)
+            then cts:element-word-query(common:keyToQName($item/@key), $value, $options, $item/@weight)
             else if(local-name($item) = "place")
             then search:placeValueToQuery($index, $value, $options, $weight)
             else ()
@@ -242,9 +242,9 @@ declare function search:rangeIndexValues(
         if($index/structure = "json")
         then
             if($index/type = "date")
-            then cts:element-attribute-values(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), (), $options, $query)
+            then cts:element-attribute-values(common:keyToQName($index/key), xs:QName("normalized-date"), (), $options, $query)
             else if($index/type = ("string", "number"))
-            then cts:element-values(xs:QName(concat("json:", $index/key)), (), $options, $query)
+            then cts:element-values(common:keyToQName($index/key), (), $options, $query)
             else ()
         else if($index/structure = "xmlelement")
         then cts:element-values(xs:QName($index/element), (), $options, $query)
@@ -303,9 +303,9 @@ declare function search:bucketIndexValues(
         if($index/structure = "json")
         then
             if($index/type = "date")
-            then cts:element-attribute-value-ranges(xs:QName(concat("json:", $index/key)), xs:QName("normalized-date"), $buckets, $options, $query)
+            then cts:element-attribute-value-ranges(common:keyToQName($index/key), xs:QName("normalized-date"), $buckets, $options, $query)
             else if($index/type = ("string", "number"))
-            then cts:element-value-ranges(xs:QName(concat("json:", $index/key)), $buckets, $options, $query)
+            then cts:element-value-ranges(common:keyToQName($index/key), $buckets, $options, $query)
             else ()
         else if($index/structure = "xmlelement")
         then cts:element-value-ranges(xs:QName($index/element), $buckets, $options, $query)
@@ -402,6 +402,31 @@ declare function search:getBucketsForIndex(
         return search:generateDatesWithInterval($startDate, $duration, $stopDate)
     else ()
 };
+
+declare function search:geoQuery(
+    $index as element(index),
+    $region as item()?,
+    $options as xs:string*,
+    $weight as xs:double?
+) as cts:query?
+{
+    if($index/structure = "elementWithAttributes")
+    then cts:element-attribute-pair-geospatial-query(xs:QName($index/element), xs:QName($index/latAttribute), xs:QName($index/longAttribute), $region, $options, $weight)
+    else if($index/structure = "elementWithChildren")
+    then cts:element-pair-geospatial-query(xs:QName($index/element), xs:QName($index/latElement), xs:QName($index/longElement), $region, $options, $weight)
+    else if($index/structure = "keyWithChildren")
+    then cts:element-pair-geospatial-query(common:keyToQName($index/key), common:keyToQName($index/latKey), common:keyToQName($index/longKey), $region, $options, $weight)
+    else if($index/structure = "elementWithChild")
+    then cts:element-child-geospatial-query(xs:QName($index/element), xs:QName($index/childElement), $region, $options, $weight)
+    else if($index/structure = "keyWithChild")
+    then cts:element-child-geospatial-query(common:keyToQName($index/key), common:keyToQName($index/childKey), $region, $options, $weight)
+    else if($index/structure = "element")
+    then cts:element-geospatial-query(xs:QName($index/element), $region, $options, $weight)
+    else if($index/structure = "key")
+    then cts:element-geospatial-query(common:keyToQName($index/key), $region, $options, $weight)
+    else ()
+};
+
 
 declare private function search:generateDatesWithInterval(
     $startDate as xs:dateTime,

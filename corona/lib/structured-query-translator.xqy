@@ -75,7 +75,7 @@ declare private function sqt:process(
     case element(ordered) return xs:boolean($step)
 
     (: Geo :)
-    case element(geo) return sqt:handleObjectValue($step)
+    case element(geo) return sqt:handleValue($step)
     case element(region) return sqt:handleValue($step)
     case element(point) return sqt:handleValue($step)
     case element(circle) return sqt:handleValue($step)

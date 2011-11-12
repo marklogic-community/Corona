@@ -503,115 +503,92 @@ corona.queries = [
 
     /* Geo */
     {
-        "query": { "geo": {
-            "key": "latLongPair",
+        "query": { 
+            "geo": "geokey",
             "region": {
                 "point": {
                     "latitude": 10,
                     "longitude": -10
                 }
             }
-        }},
-        "xmlQuery": '<geo><key>latLongPair</key><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></geo>',
-        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongPair</cts:element> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geokey</geo><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></constraint>',
+        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongKey</cts:element> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
         "purpose": "Geo query with JSON key"
     },
     {
-        "query": { "geo": {
-            "element": "latLongPair",
+        "query": {
+            "geo": "geoelement",
             "region": {
                 "point": {
                     "latitude": 10,
                     "longitude": -10
                 }
             }
-        }},
-        "xmlQuery": '<geo><element>latLongPair</element><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></geo>',
-        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element>latLongPair</cts:element> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geoelement</geo><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></constraint>',
+        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element>latLongElement</cts:element> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
         "purpose": "Geo query with XML element"
     },
     {
-        "query": { "geo": {
-            "parentKey": "foo",
-            "key": "latLongPair",
+        "query": {
+            "geo": "geochildkey",
             "region": {
                 "point": {
                     "latitude": 10,
                     "longitude": -10
                 }
             }
-        }},
-        "xmlQuery": '<geo><parentKey>foo</parentKey><key>latLongPair</key><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></geo>',
-        "result": '<cts:element-child-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:child xmlns:json="http://marklogic.com/json">json:latLongPair</cts:child> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-child-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geochildkey</geo><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></constraint>',
+        "result": '<cts:element-child-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:parentKey</cts:element> <cts:child xmlns:json="http://marklogic.com/json">json:latLongKey</cts:child> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-child-geospatial-query>',
         "purpose": "Geo query with parent and child JSON keys"
     },
     {
-        "query": { "geo": {
-            "parentElement": "foo",
-            "element": "latLongPair",
+        "query": {
+            "geo": "geochildelement",
             "region": {
                 "point": {
                     "latitude": 10,
                     "longitude": -10
                 }
             }
-        }},
-        "xmlQuery": '<geo><parentElement>foo</parentElement><element>latLongPair</element><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></geo>',
-        "result": '<cts:element-child-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:child>latLongPair</cts:child> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-child-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geochildelement</geo><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></constraint>',
+        "result": '<cts:element-child-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element>parentElement</cts:element> <cts:child>latLongElement</cts:child> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-child-geospatial-query>',
         "purpose": "Geo query with parent and child XML elements"
     },
     {
-        "query": { "geo": {
-            "parentKey": "foo",
-            "latKey": "lat",
-            "longKey": "long",
+        "query": {
+            "geo": "geochildpairkey",
             "region": {
                 "point": {
                     "latitude": 10,
                     "longitude": -10
                 }
             }
-        }},
-        "xmlQuery": '<geo><parentKey>foo</parentKey><latKey>lat</latKey><longKey>long</longKey><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></geo>',
-        "result": '<cts:element-pair-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:foo</cts:element> <cts:latitude xmlns:json="http://marklogic.com/json">json:lat</cts:latitude> <cts:longitude xmlns:json="http://marklogic.com/json">json:long</cts:longitude> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-pair-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geochildpairkey</geo><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></constraint>',
+        "result": '<cts:element-pair-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:parentKey</cts:element> <cts:latitude xmlns:json="http://marklogic.com/json">json:latKey</cts:latitude> <cts:longitude xmlns:json="http://marklogic.com/json">json:longKey</cts:longitude> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-pair-geospatial-query>',
         "purpose": "Geo query with parent, lat and long JSON keys"
     },
     {
-        "query": { "geo": {
-            "parentElement": "foo",
-            "latElement": "lat",
-            "longElement": "long",
+        "query": {
+            "geo": "geochildpairelement",
             "region": {
                 "point": {
                     "latitude": 10,
                     "longitude": -10
                 }
             }
-        }},
-        "xmlQuery": '<geo><parentElement>foo</parentElement><latElement>lat</latElement><longElement>long</longElement><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></geo>',
-        "result": '<cts:element-pair-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:latitude>lat</cts:latitude> <cts:longitude>long</cts:longitude> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-pair-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geochildpairelement</geo><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></constraint>',
+        "result": '<cts:element-pair-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element>parentElement</cts:element> <cts:latitude>latElement</cts:latitude> <cts:longitude>longElement</cts:longitude> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-pair-geospatial-query>',
         "purpose": "Geo query with parent, lat and long XML elements"
     },
     {
-        "query": { "geo": {
-            "parentElement": "foo",
-            "latAttribute": "lat",
-            "longAttribute": "long",
-            "region": {
-                "point": {
-                    "latitude": 10,
-                    "longitude": -10
-                }
-            }
-        }},
-        "xmlQuery": '<geo><parentElement>foo</parentElement><latAttribute>lat</latAttribute><longAttribute>long</longAttribute><region><point><latitude>10</latitude><longitude>-10</longitude></point></region></geo>',
-        "result": '<cts:element-attribute-pair-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element>foo</cts:element> <cts:latitude>lat</cts:latitude> <cts:longitude>long</cts:longitude> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-attribute-pair-geospatial-query>',
-        "purpose": "Geo query with parent, lat and long XML elements"
-    },
-
-    {
-        "query": { "geo": {
-            "key": "latLongPair",
+        "query": {
+            "geo": "geokey",
             "region": {
                 "circle": {
                     "radius": 15,
@@ -619,14 +596,14 @@ corona.queries = [
                     "longitude": -10
                 }
             }
-        }},
-        "xmlQuery": '<geo><key>latLongPair</key><region><circle><radius>15</radius><latitude>10</latitude><longitude>-10</longitude></circle></region></geo>',
-        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongPair</cts:element> <cts:region xsi:type="cts:circle" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">@15 10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geokey</geo><region><circle><radius>15</radius><latitude>10</latitude><longitude>-10</longitude></circle></region></constraint>',
+        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongKey</cts:element> <cts:region xsi:type="cts:circle" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">@15 10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
         "purpose": "Geo circle construction"
     },
     {
-        "query": { "geo": {
-            "key": "latLongPair",
+        "query": {
+            "geo": "geokey",
             "region": {
                 "box": {
                     "north": 1,
@@ -635,14 +612,14 @@ corona.queries = [
                     "west": -2 
                 }
             }
-        }},
-        "xmlQuery": '<geo><key>latLongPair</key><region><box><radius>15</radius><north>1</north><south>-1</south><east>2</east><west>-2</west></box></region></geo>',
-        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongPair</cts:element> <cts:region xsi:type="cts:box" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">[-1, -2, 1, 2]</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geokey</geo><region><box><radius>15</radius><north>1</north><south>-1</south><east>2</east><west>-2</west></box></region></constraint>',
+        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongKey</cts:element> <cts:region xsi:type="cts:box" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">[-1, -2, 1, 2]</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
         "purpose": "Geo box construction"
     },
     {
-        "query": { "geo": {
-            "key": "latLongPair",
+        "query": {
+            "geo": "geokey",
             "region": {
                 "polygon": [
                     {
@@ -659,9 +636,9 @@ corona.queries = [
                     }
                 ]
             }
-        }},
-        "xmlQuery": '<geo><key>latLongPair</key><region><polygon><point><latitude>10</latitude><longitude>-10</longitude></point><point><latitude>11</latitude><longitude>-9</longitude></point><point><latitude>12</latitude><longitude>-8</longitude></point></polygon></region></geo>',
-        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongPair</cts:element> <cts:region xsi:type="cts:polygon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10 11,-9 12,-8 10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
+        },
+        "xmlQuery": '<constraint><geo>geokey</geo><region><polygon><point><latitude>10</latitude><longitude>-10</longitude></point><point><latitude>11</latitude><longitude>-9</longitude></point><point><latitude>12</latitude><longitude>-8</longitude></point></polygon></region></constraint>',
+        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongKey</cts:element> <cts:region xsi:type="cts:polygon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">10,-10 11,-9 12,-8 10,-10</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
         "purpose": "Geo polygon construction"
     },
 ];
@@ -670,7 +647,7 @@ $(document).ready(function() {
     module("Structured Queries");
     corona.fetchInfo(function(info) {
         if(info.features.JSONDocs) {
-            // corona.runTest("json");
+            corona.runTest("json");
         }
         corona.runTest("xml");
     });

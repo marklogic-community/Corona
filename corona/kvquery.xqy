@@ -72,16 +72,16 @@ let $query :=
             let $date := dateparser:parse($value)
             return
                 if(empty($date))
-                then cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), $value, "exact")
-                else cts:element-attribute-value-query(xs:QName(concat("json:", json:escapeNCName($key))), xs:QName("normalized-date"), $date, "exact")
+                then cts:element-value-query(common:keyToQName($key), $value, "exact")
+                else cts:element-attribute-value-query(common:keyToQName($key), xs:QName("normalized-date"), $date, "exact")
 
         else if($value = ("true", "false"))
         then cts:or-query((
-            cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), $value, "exact"),
-            cts:element-attribute-value-query(xs:QName(concat("json:", json:escapeNCName($key))), xs:QName("boolean"), $value, "exact")
+            cts:element-value-query(common:keyToQName($key), $value, "exact"),
+            cts:element-attribute-value-query(common:keyToQName($key), xs:QName("boolean"), $value, "exact")
         ))
 
-        else cts:element-value-query(xs:QName(concat("json:", json:escapeNCName($key))), $value, "exact")
+        else cts:element-value-query(common:keyToQName($key), $value, "exact")
     else if(exists($element) and exists($attribute))
     then cts:element-attribute-value-query(xs:QName($element), xs:QName($attribute), $value, "exact")
     else if(exists($element))
