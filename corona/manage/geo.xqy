@@ -50,48 +50,37 @@ return
         then
             let $key := map:get($params, "key")
             let $element := map:get($params, "element")
-            let $attribute := map:get($params, "attribute")
-            let $type := map:get($params, "type")
+            let $childKey := map:get($params, "childKey")
+            let $childElement := map:get($params, "childElement")
+            let $latKey := map:get($params, "latKey")
+            let $longKey := map:get($params, "longKey")
+            let $latElement := map:get($params, "latElement")
+            let $longElement := map:get($params, "longElement")
+            let $latAttribute := map:get($params, "latAttribute")
+            let $longAttribute := map:get($params, "longAttribute")
+            let $coordinateSystem := map:get($params, "coordinateSystem")
+            let $comesFirst := map:get($params, "comesFirst")
             return
-
-            if((empty($key) and empty($element)) or (exists($key) and exists($element)))
-            then common:error("corona:MISSING-PARAMETER", "Must supply either a JSON key, an XML element name or XML element and attribute names", "json")
-            else if(exists($attribute) and empty($element))
-            then common:error("corona:MISSING-PARAMETER", "Must supply an XML element along with an XML attribute", "json")
-            else
-                let $key := map:map($params, "key")
-                let $element := map:map($params, "element")
-                let $childKey := map:map($params, "childKey")
-                let $childElement := map:map($params, "childElement")
-                let $latKey := map:map($params, "latKey")
-                let $longKey := map:map($params, "longKey")
-                let $latElement := map:map($params, "latElement")
-                let $longElement := map:map($params, "longElement")
-                let $latAttribute := map:map($params, "latAttribute")
-                let $longAttribute := map:map($params, "longAttribute")
-                let $coordinateSystem := map:map($params, "coordinateSystem")
-                let $comesFirst := map:map($params, "comesFirst")
-                return
-                    try {
-                        if(exists($element) and exists($latAttribute) and exists($longAttribute))
-                        then manage:createGeoWithAttributes($name, $element, $latAttribute, $longAttribute, $coordinateSystem)
-                        else if(exists($element) and exists($latElement) and exists($longElement))
-                        then manage:createGeoWithElementChildren($name, $element, $latElement, $longElement, $coordinateSystem)
-                        else if(exists($key) and exists($latKey) and exists($longKey))
-                        then manage:createGeoWithKeyChildren($name, $key, $latKey, $longKey, $coordinateSystem)
-                        else if(exists($element) and exists($childElement))
-                        then manage:createGeoWithElementChild($name, $element, $childElement, $coordinateSystem, $comesFirst)
-                        else if(exists($key) and exists($childKey))
-                        then manage:createGeoWithKeyChild($name, $key, $childKey, $coordinateSystem, $comesFirst)
-                        else if(exists($element))
-                        then manage:createGeoWithElement($name, $element, $coordinateSystem, $comesFirst)
-                        else if(exists($key))
-                        then manage:createGeoWithKey($name, $key, $coordinateSystem, $comesFirst)
-                        else common:error("corona:INVALID-REQUEST", "Invalid geospatial index creation")
-                    }
-                    catch ($e) {
-                        common:errorFromException($e, "json")
-                    }
+                try {
+                    if(exists($element) and exists($latAttribute) and exists($longAttribute))
+                    then manage:createGeoWithAttributes($name, $element, $latAttribute, $longAttribute, $coordinateSystem)
+                    else if(exists($element) and exists($latElement) and exists($longElement))
+                    then manage:createGeoWithElementChildren($name, $element, $latElement, $longElement, $coordinateSystem)
+                    else if(exists($key) and exists($latKey) and exists($longKey))
+                    then manage:createGeoWithKeyChildren($name, $key, $latKey, $longKey, $coordinateSystem)
+                    else if(exists($element) and exists($childElement))
+                    then manage:createGeoWithElementChild($name, $element, $childElement, $coordinateSystem, $comesFirst)
+                    else if(exists($key) and exists($childKey))
+                    then manage:createGeoWithKeyChild($name, $key, $childKey, $coordinateSystem, $comesFirst)
+                    else if(exists($element))
+                    then manage:createGeoWithElement($name, $element, $coordinateSystem, $comesFirst)
+                    else if(exists($key))
+                    then manage:createGeoWithKey($name, $key, $coordinateSystem, $comesFirst)
+                    else common:error("corona:INVALID-REQUEST", "Invalid geospatial index creation. Check documentaion for proper configuration.", "json")
+                }
+                catch ($e) {
+                    common:errorFromException($e, "json")
+                }
         else common:error("corona:INVALID-PARAMETER", "Must specify a name for the geospatial index", "json")
 
     else if($requestMethod = "DELETE")

@@ -225,6 +225,122 @@ declare function config:getPlace(
         else $config
 };
 
+
+declare function config:setGeoWithAttributes(
+    $name as xs:string,
+    $element as xs:string,
+    $latAttribute as xs:string,
+    $longAttribute as xs:string,
+    $coordinateSystem as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
+        <structure>elementWithAttributes</structure>
+        <element>{ $element }</element>
+        <latAttribute>{ $latAttribute }</latAttribute>
+        <longAttribute>{ $longAttribute }</longAttribute>
+        <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
+    </index>)
+};
+
+declare function config:setGeoWithElementChildren(
+    $name as xs:string,
+    $element as xs:string,
+    $latElement as xs:string,
+    $longElement as xs:string,
+    $coordinateSystem as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
+        <structure>elementWithChildren</structure>
+        <element>{ $element }</element>
+        <latElement>{ $latElement }</latElement>
+        <longElement>{ $longElement }</longElement>
+        <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
+    </index>)
+};
+
+declare function config:setGeoWithKeyChildren(
+    $name as xs:string,
+    $key as xs:string,
+    $latKey as xs:string,
+    $longKey as xs:string,
+    $coordinateSystem as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
+        <structure>keyWithChildren</structure>
+        <key>{ $key }</key>
+        <latKey>{ $latKey }</latKey>
+        <longKey>{ $longKey }</longKey>
+        <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
+    </index>)
+};
+
+declare function config:setGeoWithElementChild(
+    $name as xs:string,
+    $element as xs:string,
+    $childElement as xs:string,
+    $coordinateSystem as xs:string,
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
+        <structure>elementWithChild</structure>
+        <element>{ $element }</element>
+        <childElement>{ $childElement }</childElement>
+        <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
+        <comesFirst>{ $comesFirst }</comesFirst>
+    </index>)
+};
+
+declare function config:setGeoWithKeyChild(
+    $name as xs:string,
+    $key as xs:string,
+    $childKey as xs:string,
+    $coordinateSystem as xs:string,
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
+        <structure>keyWithChild</structure>
+        <key>{ $key }</key>
+        <childKey>{ $childKey }</childKey>
+        <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
+        <comesFirst>{ $comesFirst }</comesFirst>
+    </index>)
+};
+
+declare function config:setGeoWithElement(
+    $name as xs:string,
+    $element as xs:string,
+    $coordinateSystem as xs:string,
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
+        <structure>element</structure>
+        <element>{ $element }</element>
+        <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
+        <comesFirst>{ $comesFirst }</comesFirst>
+    </index>)
+};
+
+declare function config:setGeoWithKey(
+    $name as xs:string,
+    $key as xs:string,
+    $coordinateSystem as xs:string,
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
+        <structure>key</structure>
+        <key>{ $key }</key>
+        <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
+        <comesFirst>{ $comesFirst }</comesFirst>
+    </index>)
+};
+
 declare function config:get(
     $name as xs:string
 ) as element(index)?
@@ -282,6 +398,15 @@ declare function config:placeNames(
     for $key in prop:all()
     let $value := prop:get($key)
     where starts-with($key, "corona-index-") and $value/@type = "place" and exists($value/@name)
+    return string($value/@name)
+};
+
+declare function config:geoNames(
+) as xs:string*
+{
+    for $key in prop:all()
+    let $value := prop:get($key)
+    where starts-with($key, "corona-index-") and $value/@type = "geo" and exists($value/@name)
     return string($value/@name)
 };
 

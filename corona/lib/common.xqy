@@ -301,3 +301,24 @@ declare function common:transactionsMatch(
         then map:get(common:processTXID($txid, true()), "id") = xdmp:apply($txFunc)
         else true()
 };
+
+declare function common:nsFromQName(
+    $item as xs:string
+) as xs:string?
+{
+    if(contains($item, ":"))
+    then
+        let $ns := namespace-uri-from-QName($item)
+        where string-length($ns)
+        return $ns
+    else ()
+};
+
+declare function common:nameFromQName(
+    $item as xs:string
+) as xs:string?
+{
+    if(contains($item, ":"))
+    then local-name-from-QName($item)
+    else ()
+};

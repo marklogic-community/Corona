@@ -20,6 +20,7 @@ module namespace manage="http://marklogic.com/corona/manage";
 
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
+import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
@@ -751,19 +752,60 @@ declare function manage:getAllPlaces(
     return manage:getPlace($placeName)
 };
 
+
 (: Geospatial :)
+
 declare function manage:getGeo(
     $name as xs:string
 ) as element(json:item)?
 {
-    ()
+    let $config := config:get($name)
+    where exists($config)
+    return
+        json:object((
+            "name", $config/@name,
+            if(exists($config/key))
+            then ("key", string($config/key))
+            else (),
+            if(exists($config/element))
+            then ("element", string($config/element))
+            else (),
+            if(exists($config/childKey))
+            then ("childKey", string($config/childKey))
+            else (),
+            if(exists($config/childElement))
+            then ("childElement", string($config/childElement))
+            else (),
+            if(exists($config/latKey))
+            then ("latKey", string($config/latKey))
+            else (),
+            if(exists($config/longKey))
+            then ("longKey", string($config/longKey))
+            else (),
+            if(exists($config/latElement))
+            then ("latElement", string($config/latElement))
+            else (),
+            if(exists($config/longElement))
+            then ("longElement", string($config/longElement))
+            else (),
+            if(exists($config/latAttribute))
+            then ("latAttribute", string($config/latAttribute))
+            else (),
+            if(exists($config/longAttribute))
+            then ("longAttribute", string($config/longAttribute))
+            else (),
+            "coordinateSystem", string($config/coordinateSystem),
+            if(exists($config/comesFirst))
+            then ("comesFirst", string($config/comesFirst))
+            else ()
+        ))
 };
 
 declare function manage:getAllGeos(
-    $name as xs:string
 ) as element(json:item)*
 {
-    ()
+    for $geoName in config:geoNames()
+    return manage:getGeo($geoName)
 };
 
 declare function manage:createGeoWithAttributes(
@@ -774,7 +816,21 @@ declare function manage:createGeoWithAttributes(
     $coordinateSystem as xs:string
 ) as empty-sequence()
 {
-    ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateCoordinateSystem($coordinateSystem)
+    let $config := admin:get-configuration()
+    let $def := admin:database-geospatial-element-attribute-pair-index(
+        common:nsFromQName($element), common:nameFromQName($element),
+        common:nsFromQName($latAttribute), common:nameFromQName($latAttribute),
+        common:nsFromQName($longAttribute), common:nameFromQName($longAttribute),
+        $coordinateSystem, false()
+    )
+    return (
+        if(count(manage:geoUsingElementAttribute($def, $config)) = 0)
+        then admin:save-configuration(admin:database-add-geospatial-element-attribute-pair-index($config, xdmp:database(), $def))
+        else (),
+        config:setGeoWithAttributes($name, $element, $latAttribute, $longAttribute, $coordinateSystem)
+    )
 };
 
 declare function manage:createGeoWithElementChildren(
@@ -785,7 +841,21 @@ declare function manage:createGeoWithElementChildren(
     $coordinateSystem as xs:string
 ) as empty-sequence()
 {
-    ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateCoordinateSystem($coordinateSystem)
+    let $config := admin:get-configuration()
+    let $def := admin:database-geospatial-element-pair-index(
+        common:nsFromQName($element), common:nameFromQName($element),
+        common:nsFromQName($latElement), common:nameFromQName($latElement),
+        common:nsFromQName($longElement), common:nameFromQName($longElement),
+        $coordinateSystem, false()
+    )
+    return (
+        if(count(manage:geoUsingElementPair($def, $config)) = 0)
+        then admin:save-configuration(admin:database-add-geospatial-element-pair-index($config, xdmp:database(), $def))
+        else (),
+        config:setGeoWithElementChildren($name, $element, $latElement, $longElement, $coordinateSystem)
+    )
 };
 
 declare function manage:createGeoWithKeyChildren(
@@ -796,7 +866,21 @@ declare function manage:createGeoWithKeyChildren(
     $coordinateSystem as xs:string
 ) as empty-sequence()
 {
-    ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateCoordinateSystem($coordinateSystem)
+    let $config := admin:get-configuration()
+    let $def := admin:database-geospatial-element-pair-index(
+        "http://marklogic.com/json", json:escapeNCName($key),
+        "http://marklogic.com/json", json:escapeNCName($latKey),
+        "http://marklogic.com/json", json:escapeNCName($longKey),
+        $coordinateSystem, false()
+    )
+    return (
+        if(count(manage:geoUsingElementPair($def, $config)) = 0)
+        then admin:save-configuration(admin:database-add-geospatial-element-pair-index($config, xdmp:database(), $def))
+        else (),
+        config:setGeoWithKeyChildren($name, $key, $latKey, $longKey, $coordinateSystem)
+    )
 };
 
 declare function manage:createGeoWithElementChild(
@@ -807,7 +891,21 @@ declare function manage:createGeoWithElementChild(
     $comesFirst as xs:string
 ) as empty-sequence()
 {
-    ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateCoordinateSystem($coordinateSystem)
+    let $test := manage:validateGeoPointOrdering($comesFirst)
+    let $config := admin:get-configuration()
+    let $def := admin:database-geospatial-element-child-index(
+        common:nsFromQName($element), common:nameFromQName($element),
+        common:nsFromQName($childElement), common:nameFromQName($childElement),
+        $coordinateSystem, false(), if($comesFirst = "longitude") then "point" else "long-lat-point"
+    )
+    return (
+        if(count(manage:geoUsingElementChild($def, $config)) = 0)
+        then admin:save-configuration(admin:database-add-geospatial-element-child-index($config, xdmp:database(), $def))
+        else (),
+        config:setGeoWithElementChild($name, $element, $childElement, $coordinateSystem, $comesFirst)
+    )
 };
 
 declare function manage:createGeoWithKeyChild(
@@ -818,7 +916,21 @@ declare function manage:createGeoWithKeyChild(
     $comesFirst as xs:string
 ) as empty-sequence()
 {
-    ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateCoordinateSystem($coordinateSystem)
+    let $test := manage:validateGeoPointOrdering($comesFirst)
+    let $config := admin:get-configuration()
+    let $def := admin:database-geospatial-element-child-index(
+        "http://marklogic.com/json", json:escapeNCName($key),
+        "http://marklogic.com/json", json:escapeNCName($childKey),
+        $coordinateSystem, false(), if($comesFirst = "longitude") then "point" else "long-lat-point"
+    )
+    return (
+        if(count(manage:geoUsingElementChild($def, $config)) = 0)
+        then admin:save-configuration(admin:database-add-geospatial-element-child-index($config, xdmp:database(), $def))
+        else (),
+        config:setGeoWithKeyChild($name, $key, $childKey, $coordinateSystem, $comesFirst)
+    )
 };
 
 declare function manage:createGeoWithElement(
@@ -828,7 +940,20 @@ declare function manage:createGeoWithElement(
     $comesFirst as xs:string
 ) as empty-sequence()
 {
-    ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateCoordinateSystem($coordinateSystem)
+    let $test := manage:validateGeoPointOrdering($comesFirst)
+    let $config := admin:get-configuration()
+    let $def := admin:database-geospatial-element-index(
+        common:nsFromQName($element), common:nameFromQName($element),
+        $coordinateSystem, false(), if($comesFirst = "longitude") then "point" else "long-lat-point"
+    )
+    return (
+        if(count(manage:geoUsingElement($def, $config)) = 0)
+        then admin:save-configuration(admin:database-add-geospatial-element-index($config, xdmp:database(), $def))
+        else (),
+        config:setGeoWithElement($name, $element, $coordinateSystem, $comesFirst)
+    )
 };
 
 declare function manage:createGeoWithKey(
@@ -838,7 +963,20 @@ declare function manage:createGeoWithKey(
     $comesFirst as xs:string
 ) as empty-sequence()
 {
-    ()
+    let $test := manage:validateIndexName($name)
+    let $test := manage:validateCoordinateSystem($coordinateSystem)
+    let $test := manage:validateGeoPointOrdering($comesFirst)
+    let $config := admin:get-configuration()
+    let $def := admin:database-geospatial-element-index(
+        "http://marklogic.com/json", json:escapeNCName($key),
+        $coordinateSystem, false(), if($comesFirst = "longitude") then "point" else "long-lat-point"
+    )
+    return (
+        if(count(manage:geoUsingElement($def, $config)) = 0)
+        then admin:save-configuration(admin:database-add-geospatial-element-index($config, xdmp:database(), $def))
+        else (),
+        config:setGeoWithKey($name, $key, $coordinateSystem, $comesFirst)
+    )
 };
 
 declare function manage:deleteGeo(
@@ -846,7 +984,78 @@ declare function manage:deleteGeo(
     $config as element()
 ) as empty-sequence()
 {
-    ()
+    let $index := config:get($name)
+    let $def :=
+        if($index/structure = "elementWithAttributes")
+        then admin:database-geospatial-element-attribute-pair-index(
+            common:nsFromQName($index/element), common:nameFromQName($index/element),
+            common:nsFromQName($index/latAttribute), common:nameFromQName($index/latAttribute),
+            common:nsFromQName($index/longAttribute), common:nameFromQName($index/longAttribute),
+            $index/coordinateSystem, false()
+        )
+        else if($index/structure = "elementWithChildren")
+        then admin:database-geospatial-element-pair-index(
+            common:nsFromQName($index/element), common:nameFromQName($index/element),
+            common:nsFromQName($index/latElement), common:nameFromQName($index/latElement),
+            common:nsFromQName($index/longElement), common:nameFromQName($index/longElement),
+            $index/coordinateSystem, false()
+        )
+        else if($index/structure = "keyWithChildren")
+        then admin:database-geospatial-element-pair-index(
+            "http://marklogic.com/json", json:escapeNCName($index/key),
+            "http://marklogic.com/json", json:escapeNCName($index/latKey),
+            "http://marklogic.com/json", json:escapeNCName($index/longKey),
+            $index/coordinateSystem, false()
+        )
+        else if($index/structure = "elementWithChild")
+        then admin:database-geospatial-element-child-index(
+            common:nsFromQName($index/element), common:nameFromQName($index/element),
+            common:nsFromQName($index/childElement), common:nameFromQName($index/childElement),
+            $index/coordinateSystem, false(), if($index/comesFirst = "longitude") then "point" else "long-lat-point"
+        )
+        else if($index/structure = "keyWithChild")
+        then admin:database-geospatial-element-child-index(
+            "http://marklogic.com/json", json:escapeNCName($index/key),
+            "http://marklogic.com/json", json:escapeNCName($index/childKey),
+            $index/coordinateSystem, false(), if($index/comesFirst = "longitude") then "point" else "long-lat-point"
+        )
+        else if($index/structure = "element")
+        then admin:database-geospatial-element-index(
+            common:nsFromQName($index/element), common:nameFromQName($index/element),
+            $index/coordinateSystem, false(), if($index/comesFirst = "longitude") then "point" else "long-lat-point"
+        )
+        else if($index/structure = "key")
+        then admin:database-geospatial-element-index(
+            "http://marklogic.com/json", json:escapeNCName($index/key),
+            $index/coordinateSystem, false(), if($index/comesFirst = "longitude") then "point" else "long-lat-point"
+        )
+        else ()
+    let $numUsing :=
+        if($index/structure = "elementWithAttributes")
+        then manage:geoUsingElementAttribute($def, $config)
+        else if($index/structure = ("elementWithChildren", "keyWithChildren"))
+        then manage:geoUsingElementPair($def, $config)
+        else if($index/structure = ("elementWithChild", "keyWithChild"))
+        then manage:geoUsingElementChild($def, $config)
+        else if($index/structure = ("element", "key"))
+        then manage:geoUsingElement($def, $config)
+        else ()
+    where $index/@type = "geo"
+    return (
+        if($numUsing > 1)
+        then
+            if($index/structure = "elementWithAttributes")
+            then admin:save-configuration(admin:database-delete-geospatial-element-attribute-pair-index($config, xdmp:database(), $def))
+            else if($index/structure = ("elementWithChildren", "keyWithChildren"))
+            then admin:save-configuration(admin:database-delete-geospatial-element-pair-index($config, xdmp:database(), $def))
+            else if($index/structure = ("elementWithChild", "keyWithChild"))
+            then admin:save-configuration(admin:database-delete-geospatial-element-child-index($config, xdmp:database(), $def))
+            else if($index/structure = ("element", "key"))
+            then admin:save-configuration(admin:database-delete-geospatial-element-index($config, xdmp:database(), $def))
+            else ()
+        else (),
+        config:delete($name)
+    )
 };
 
 
@@ -1126,6 +1335,50 @@ declare private function manage:rangeDefinitionUsedBy(
     )
 };
 
+declare private function manage:geoUsingElementAttribute(
+    $def as element(db:geospatial-element-attribute-pair-index),
+    $config as element()
+) as xs:integer
+{
+    count(
+        for $index in admin:database-get-geospatial-element-attribute-pair-indexes($config, xdmp:database())
+        return 1
+    )
+};
+
+declare private function manage:geoUsingElementChild(
+    $def as element(db:geospatial-element-child-index),
+    $config as element()
+) as xs:integer
+{
+    count(
+        for $index in admin:database-get-geospatial-element-child-indexes($config, xdmp:database())
+        return 1
+    )
+};
+
+declare private function manage:geoUsingElement(
+    $def as element(db:geospatial-element-index),
+    $config as element()
+) as xs:integer
+{
+    count(
+        for $index in admin:database-get-geospatial-element-indexes($config, xdmp:database())
+        return 1
+    )
+};
+
+declare private function manage:geoUsingElementPair(
+    $def as element(db:geospatial-element-pair-index),
+    $config as element()
+) as xs:integer
+{
+    count(
+        for $index in admin:database-get-geospatial-element-pair-indexes($config, xdmp:database())
+        return 1
+    )
+};
+
 declare private function manage:jsonTypeToSchemaType(
     $type as xs:string?
 ) as xs:string?
@@ -1196,6 +1449,24 @@ declare private function manage:validatePlaceType(
 {
     if(not($type = ("include", "exclude")))
     then error(xs:QName("corona:INVALID-TYPE"), concat("Place types must be either 'include' or 'exclude'. Supplied type was: '", $type, "'"))
+    else ()
+};
+
+declare private function manage:validateCoordinateSystem(
+    $coordinateSystem as xs:string
+) as empty-sequence()
+{
+    if(not($coordinateSystem = ("wgs84", "raw")))
+    then error(xs:QName("corona:INVALID-COORDINATE-SYSTEM"), concat("Valid coordinate systems are either 'wgs84' or 'raw'. Supplied system was: '", $coordinateSystem, "'"))
+    else ()
+};
+
+declare private function manage:validateGeoPointOrdering(
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    if(not($comesFirst = ("latitude", "longitude")))
+    then error(xs:QName("corona:INVALID-POINT-ORDERING"), concat("Valid point ordering are either 'latitude' or 'longitude'. Supplied ordering was: '", $comesFirst, "'"))
     else ()
 };
 

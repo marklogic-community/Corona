@@ -166,7 +166,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/(geo|geos/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/geo.xqy">
+    <request uri="^/manage/(geos|geo/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/geo.xqy">
         <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST">
@@ -180,8 +180,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="longElement" required="false"/>
             <param name="latAttribute" required="false"/>
             <param name="longAttribute" required="false"/>
-            <param name="coordinateSystem" required="false"/>
-            <param name="comesFirst" required="false"/>
+            <param name="coordinateSystem" required="false" default="wgs84"/>
+            <param name="comesFirst" required="false" default="latitude"/>
         </http>
         <http method="DELETE"/>
     </request>

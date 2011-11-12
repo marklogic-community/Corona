@@ -67,6 +67,7 @@ json:document(
             "ranges", json:array(manage:getAllRanges()),
             "bucketedRanges", json:array(manage:getAllBucketedRanges()),
             "places", json:array(manage:getAllPlaces()),
+            "geo", json:array(manage:getAllGeos()),
             "anonymousPlace", manage:getPlace(())
         )),
         "transformers", json:array(manage:getAllTransformerNames()),

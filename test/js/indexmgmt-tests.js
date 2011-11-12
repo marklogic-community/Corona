@@ -3,6 +3,57 @@ if(typeof corona == "undefined" || !corona) {
     corona.stash = {};
 }
 
+corona.removeGeoIndexes = function(info, callback) {
+    var i = 0;
+    var namespaces = [];
+    for(i = 0; i < info.indexes.geo.length; i += 1) {
+        namespaces.push(info.indexes.geo[i]);
+    }
+
+    var processingPosition = 0;
+    var removeNextItem = function() {
+        removeItem(namespaces[processingPosition]);
+    };
+
+    var removeItem = function(geo) {
+        if(geo === undefined) {
+            callback.call();
+            return;
+        }
+
+        asyncTest("Remove the " + geo.name + " geo index", function() {
+            var url = "/manage/geo/" + geo.name;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function() {
+                    ok(true, "Removed geo: " + geo.name);
+                    asyncTest("Check to make sure the geo index is gone", function() {
+                        $.ajax({
+                            url: url,
+                            success: function(data) {
+                                ok(false, "Namespace still exists");
+                            },
+                            error: function() {
+                                ok(true, "Namespace is gone");
+                            },
+                            complete: function() { start(); }
+                        });
+                    });
+                    processingPosition++;
+                    removeNextItem();
+                },
+                error: function(j, t, error) {
+                    ok(false, "Could not delete geo index: " + geo.name + ": " + error);
+                },
+                complete: function() { start(); }
+            });
+        });
+    }
+
+    removeNextItem();
+};
+
 corona.removeNamespaces = function(info, callback) {
     var i = 0;
     var namespaces = [];
@@ -923,6 +974,159 @@ corona.addPlaces = function(callback) {
     addNextItem();
 };
 
+corona.addGeoIndexes = function(callback) {
+    var geoIndexes = [
+        // Key
+        {
+            "type": "geo",
+            "name": "geokey",
+            "key": "latLongKey",
+            "shouldSucceed": true,
+            "purpose": "Geo key"
+        },
+
+        // Element
+        {
+            "type": "geo",
+            "name": "geoelement",
+            "element": "latLongElement",
+            "shouldSucceed": true,
+            "purpose": "Geo element"
+        },
+
+        // Child key
+        {
+            "type": "geo",
+            "name": "geochildkey",
+            "key": "parentKey",
+            "childKey": "latLongKey",
+            "shouldSucceed": true,
+            "purpose": "Geo child key"
+        },
+
+        // Child element
+        {
+            "type": "geo",
+            "name": "geochildelement",
+            "element": "parentElement",
+            "childElement": "latLongElement",
+            "shouldSucceed": true,
+            "purpose": "Geo child element"
+        },
+
+        // Child key pair
+        {
+            "type": "geo",
+            "name": "geochildpairkey",
+            "element": "parentElement",
+            "latElement": "latElement",
+            "longElement": "longElement",
+            "shouldSucceed": true,
+            "purpose": "Geo key pair"
+        },
+
+        // Child element pair
+        {
+            "type": "geo",
+            "name": "geochildpairelement",
+            "element": "parentElement",
+            "latElement": "latElement",
+            "longElement": "longElement",
+            "shouldSucceed": true,
+            "purpose": "Geo element pair"
+        },
+
+        // Attribute pair
+        {
+            "type": "geo",
+            "name": "geoattribute",
+            "element": "parentElement",
+            "latAttribute": "latAttribute",
+            "longAttribute": "longAttribute",
+            "shouldSucceed": true,
+            "purpose": "Geo element attribute pair"
+        }
+    ];
+
+    var processingPosition = 0;
+    var addNextItem = function() {
+        addItem(geoIndexes[processingPosition]);
+        processingPosition++;
+    };
+
+    var addItem = function(geoIndex) {
+        if(geoIndex === undefined) {
+            callback.call();
+            return;
+        }
+
+        asyncTest(geoIndex.purpose, function() {
+            var url = "/manage/geo/" + geoIndex.name;
+            var data = {};
+
+            data.key = geoIndex.key;
+            data.element = geoIndex.element;
+            data.childKey = geoIndex.childKey;
+            data.childElement = geoIndex.childElement;
+            data.latKey = geoIndex.latKey;
+            data.longKey = geoIndex.longKey;
+            data.latElement = geoIndex.latElement;
+            data.longElement = geoIndex.longElement;
+            data.latAttribute = geoIndex.latAttribute;
+            data.longAttribute = geoIndex.longAttribute;
+            data.coordinateSystem = geoIndex.coordinateSystem;
+            data.comesFirst = geoIndex.comesFirst;
+
+            $.ajax({
+                url: url,
+                data: data,
+                type: "POST",
+                success: function() {
+                    if(geoIndex.shouldSucceed) {
+                        ok(true, "Geo index " + geoIndex.name + " was created");
+
+                        asyncTest("Checking to make sure the geo index was created correctly", function() {
+                            $.ajax({
+                                url: url,
+                                success: function(data) {
+                                    var info = JSON.parse(data);
+                                    if(geoIndex.key) { equals(geoIndex.key, info.key, "Key matches"); }
+                                    if(geoIndex.element) { equals(geoIndex.element, info.element, "Element matches"); }
+                                    if(geoIndex.childKey) { equals(geoIndex.childKey, info.childKey, "Child key matches"); }
+                                    if(geoIndex.childElement) { equals(geoIndex.childElement, info.childElement, "Child element matches"); }
+                                    if(geoIndex.latKey) { equals(geoIndex.latKey, info.latKey, "Latitude key matches"); }
+                                    if(geoIndex.longKey) { equals(geoIndex.longKey, info.longKey, "Longitude key matches"); }
+                                    if(geoIndex.latElement) { equals(geoIndex.latElement, info.latElement, "Latitude element matches"); }
+                                    if(geoIndex.longElement) { equals(geoIndex.longElement, info.longElement, "Longitude element matches"); }
+                                    if(geoIndex.latAttribute) { equals(geoIndex.latAttribute, info.latAttribute, "Latitude attribute matches"); }
+                                    if(geoIndex.longAttribute) { equals(geoIndex.longAttribute, info.longAttribute, "Longitude attribute matches"); }
+                                    if(geoIndex.coordinateSystem) { equals(geoIndex.coordinateSystem, info.coordinateSystem, "Coordinate system matches"); }
+                                    if(geoIndex.comesFirst) { equals(geoIndex.comesFirst, info.comesFirst, "Comes first matches"); }
+                                },
+                                error: function(j, t, error) {
+                                    ok(false, "Could not check if the item was added to the place: " + error);
+                                },
+                                complete: function() { start(); }
+                            });
+                        });
+                    }
+                    else {
+                        ok(false, "Geo index was created when it should have errored");
+                    }
+                    addNextItem();
+                },
+                error: function(j, t, error) {
+                    ok(!geoIndex.shouldSucceed, "Could not add geo index: " + error);
+                    addNextItem();
+                },
+                complete: function() { start(); }
+            });
+        });
+    };
+
+    addNextItem();
+};
+
 $(document).ready(function() {
     module("Database setup");
     asyncTest("Database index setup", function() {
@@ -933,12 +1137,16 @@ $(document).ready(function() {
                 corona.removeTransformers(info, function() {
                     corona.removeRangeIndexes(info, function() {
                         corona.removeAnonymousPlaces(info, function() {
-                            corona.removePlaces(info, function() {
-                                corona.removeNamespaces(info, function() {
-                                    corona.addNamespaces(function() {
-                                        corona.addTransformers(function() {
-                                            corona.addRangeIndexes(function() {
-                                                corona.addPlaces(function() {
+                            corona.removeGeoIndexes(info, function() {
+                                corona.removePlaces(info, function() {
+                                    corona.removeNamespaces(info, function() {
+                                        corona.addNamespaces(function() {
+                                            corona.addTransformers(function() {
+                                                corona.addRangeIndexes(function() {
+                                                    corona.addPlaces(function() {
+                                                        corona.addGeoIndexes(function() {
+                                                        });
+                                                    });
                                                 });
                                             });
                                         });
