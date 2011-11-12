@@ -166,6 +166,26 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
+    <request uri="^/manage/(geo|geos/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/geo.xqy">
+        <uri-param name="name" as="string">$2</uri-param>
+        <http method="GET"/>
+        <http method="POST">
+            <param name="key" required="false"/>
+            <param name="element" required="false"/>
+            <param name="childKey" required="false"/>
+            <param name="childElement" required="false"/>
+            <param name="latKey" required="false"/>
+            <param name="longKey" required="false"/>
+            <param name="latElement" required="false"/>
+            <param name="longElement" required="false"/>
+            <param name="latAttribute" required="false"/>
+            <param name="longAttribute" required="false"/>
+            <param name="coordinateSystem" required="false"/>
+            <param name="comesFirst" required="false"/>
+        </http>
+        <http method="DELETE"/>
+    </request>
+
     <request uri="^/manage/(namespaces|namespace/([^/]+))/?$" endpoint="/corona/manage/namespace.xqy">
         <uri-param name="prefix" as="string">$2</uri-param>
         <http method="GET"/>

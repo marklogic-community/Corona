@@ -751,6 +751,104 @@ declare function manage:getAllPlaces(
     return manage:getPlace($placeName)
 };
 
+(: Geospatial :)
+declare function manage:getGeo(
+    $name as xs:string
+) as element(json:item)?
+{
+    ()
+};
+
+declare function manage:getAllGeos(
+    $name as xs:string
+) as element(json:item)*
+{
+    ()
+};
+
+declare function manage:createGeoWithAttributes(
+    $name as xs:string,
+    $element as xs:string,
+    $latAttribute as xs:string,
+    $longAttribute as xs:string,
+    $coordinateSystem as xs:string
+) as empty-sequence()
+{
+    ()
+};
+
+declare function manage:createGeoWithElementChildren(
+    $name as xs:string,
+    $element as xs:string,
+    $latElement as xs:string,
+    $longElement as xs:string,
+    $coordinateSystem as xs:string
+) as empty-sequence()
+{
+    ()
+};
+
+declare function manage:createGeoWithKeyChildren(
+    $name as xs:string,
+    $key as xs:string,
+    $latKey as xs:string,
+    $longKey as xs:string,
+    $coordinateSystem as xs:string
+) as empty-sequence()
+{
+    ()
+};
+
+declare function manage:createGeoWithElementChild(
+    $name as xs:string,
+    $element as xs:string,
+    $childElement as xs:string,
+    $coordinateSystem as xs:string,
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    ()
+};
+
+declare function manage:createGeoWithKeyChild(
+    $name as xs:string,
+    $key as xs:string,
+    $childKey as xs:string,
+    $coordinateSystem as xs:string,
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    ()
+};
+
+declare function manage:createGeoWithElement(
+    $name as xs:string,
+    $element as xs:string,
+    $coordinateSystem as xs:string,
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    ()
+};
+
+declare function manage:createGeoWithKey(
+    $name as xs:string,
+    $key as xs:string,
+    $coordinateSystem as xs:string,
+    $comesFirst as xs:string
+) as empty-sequence()
+{
+    ()
+};
+
+declare function manage:deleteGeo(
+    $name as xs:string,
+    $config as element()
+) as empty-sequence()
+{
+    ()
+};
+
 
 (: Transformers :)
 declare function manage:setTransformer(
