@@ -76,8 +76,8 @@ declare function store:outputMultipleDocuments(
 
         (: Apply the transformation :)
         let $content :=
-            if(exists($applyTransform) and $xsltIsSupported)
-            then xdmp:apply($xsltEval, manage:getTransformer($applyTransform), $content)
+            if(exists($applyTransform))
+            then store:applyTransformer($applyTransform, $content)
             else $content
 
         (: If the wrapper element from wrapContentNodes is still sticking around, remove it :)
@@ -301,8 +301,8 @@ declare function store:getDocument(
         then store:highlightContent($content, $highlightQuery, $contentType)
         else $content
     let $content :=
-        if(exists($applyTransform) and $xsltIsSupported)
-        then xdmp:apply($xsltEval, manage:getTransformer($applyTransform), $content)
+        if(exists($applyTransform))
+        then store:applyTransformer($applyTransform, $content)
         else $content
     let $content :=
         if(namespace-uri($content) = "http://marklogic.com/corona/store")
@@ -655,4 +655,19 @@ declare private function store:outputDocument(
         else ()
     )
     else ()
+};
+
+declare private function store:applyTransformer(
+    $name as xs:string,
+    $content as node()
+) as item()*
+{
+    let $transformer := manage:getTransformer($name)
+    let $log := xdmp:log($transformer/*)
+    return
+        if(exists($transformer/*) and $xsltIsSupported)
+        then xdmp:apply($xsltEval, $transformer/*, $content)
+        else if(exists($transformer/text()))
+        then xdmp:eval(string($transformer), (xs:QName("content"), $content), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
+        else error(xs:QName("corona:INVALID-TRANSFORMER"), "XSLT transformations are not supported in this version of MarkLogic, upgrade to 5.0 or later")
 };

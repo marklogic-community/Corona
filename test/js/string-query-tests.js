@@ -77,7 +77,6 @@ corona.queries = [
         "query": {
             "stringQuery": "bar00004",
             "applyTransform": "generic",
-            "extractPath": "/*/..",
             "outputFormat": "xml"
         },
         "shouldSucceed": true,
@@ -87,7 +86,27 @@ corona.queries = [
             equals(result.getElementsByTagName("uri")[0].childNodes[0].nodeValue, "/stringquery/doc1.xml", "Correct document URI was found");
             equals(result.getElementsByTagName("content")[0].childNodes[0].childNodes[0].nodeValue, "XSLT'd!", "Correct document content was found");
         },
-        "purpose": "Applying transform"
+        "purpose": "Applying XSLT transform"
+    },
+    {
+        "type": "xml",
+        "prereqDoc": {
+            "uri": "/stringquery/doc1.xml",
+            "content": "<testns:subject xmlns:testns='http://test.ns/uri'>bar00004</testns:subject>"
+        },
+        "query": {
+            "stringQuery": "bar00004",
+            "applyTransform": "xqtrans",
+            "outputFormat": "xml"
+        },
+        "shouldSucceed": true,
+        "assert": function(data) {
+            equals(data.getElementsByTagName("results")[0].childNodes.length, 1, "Got one document");
+            var result = data.getElementsByTagName("results")[0].childNodes[0];
+            equals(result.getElementsByTagName("uri")[0].childNodes[0].nodeValue, "/stringquery/doc1.xml", "Correct document URI was found");
+            equals(result.getElementsByTagName("content")[0].childNodes[0].childNodes[0].nodeValue, "XQuery'd!", "Correct document content was found");
+        },
+        "purpose": "Applying XQuery transform"
     },
     {
         "type": "json",

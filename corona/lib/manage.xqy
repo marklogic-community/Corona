@@ -758,18 +758,29 @@ declare function manage:setTransformer(
     $transformer as xs:string
 ) as empty-sequence()
 {
-    let $doc :=
-        try {
-            xdmp:unquote($transformer, (), ("repair-none", "format-xml"))[1]/*
-        }
-        catch ($e) {
-            error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer XSLT: parse error")
-        }
-    let $test :=
-        if(local-name($doc) = "stylesheet" and namespace-uri($doc) = "http://www.w3.org/1999/XSL/Transform")
-        then ()
-        else error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer, must be an XSLT")
-    return xdmp:document-insert(concat("_/transformers/", $name), $doc, (xdmp:default-permissions(), xdmp:permission($const:TransformerReadRole, "read")), $const:TransformersCollection)
+    if(starts-with($transformer, "<"))
+    then
+        let $doc :=
+            try {
+                xdmp:unquote($transformer, (), ("repair-none", "format-xml"))[1]/*
+            }
+            catch ($e) {
+                error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer: XSLT parse error")
+            }
+        let $test :=
+            if(local-name($doc) = "stylesheet" and namespace-uri($doc) = "http://www.w3.org/1999/XSL/Transform")
+            then ()
+            else error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer, must be an XSLT or XQuery")
+        return xdmp:document-insert(concat("_/transformers/", $name), $doc, (xdmp:default-permissions(), xdmp:permission($const:TransformerReadRole, "read")), $const:TransformersCollection)
+    else
+        let $test :=
+            try {
+                xdmp:eval($transformer, (xs:QName("content"), <foo/>), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
+            }
+            catch ($e) {
+                error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer: XQuery evaluation error")
+            }
+        return xdmp:document-insert(concat("_/transformers/", $name), text { $transformer }, (xdmp:default-permissions(), xdmp:permission($const:TransformerReadRole, "read")), $const:TransformersCollection)
 };
 
 declare function manage:deleteTransformer(
@@ -783,9 +794,9 @@ declare function manage:deleteTransformer(
 
 declare function manage:getTransformer(
     $name as xs:string
-) as element()?
+) as item()?
 {
-    doc(concat("_/transformers/", $name))/*
+    doc(concat("_/transformers/", $name))
 };
 
 declare function manage:getAllTransformerNames(

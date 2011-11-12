@@ -71,7 +71,7 @@ return
     then try {
         let $include := map:get($params, "include")
         let $extractPath := map:get($params, "extractPath")
-        let $transformer := map:get($params, "applyTransformer")
+        let $transformer := map:get($params, "applyTransform")
         return store:getDocument($uri, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
     }
     catch ($e) {

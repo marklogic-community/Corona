@@ -606,9 +606,16 @@ corona.addTransformers = function(callback) {
         {
             "type": "transformer",
             "name": "generic",
-            "xslt": '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><div>XSLT\'d!</div></xsl:template></xsl:stylesheet>',
+            "transformer": '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><div>XSLT\'d!</div></xsl:template></xsl:stylesheet>',
             "shouldSucceed": true,
             "purpose": "Storing a XSLT transformer"
+        },
+        {
+            "type": "transformer",
+            "name": "xqtrans",
+            "transformer": 'xquery version "1.0-ml"; declare variable $content as element()? external; <div>XQuery\'d!</div>',
+            "shouldSucceed": true,
+            "purpose": "Storing a XQuery transformer"
         }
     ];
 
@@ -626,7 +633,7 @@ corona.addTransformers = function(callback) {
 
         asyncTest(transformer.purpose, function() {
             var url = "/manage/transformer/" + transformer.name;
-            var data = transformer.xslt;
+            var data = transformer.transformer;
             $.ajax({
                 url: url,
                 data: data,
