@@ -998,8 +998,8 @@ corona.addGeoIndexes = function(callback) {
         {
             "type": "geo",
             "name": "geochildkey",
-            "key": "parentKey",
-            "childKey": "latLongKey",
+            "parentKey": "parentKey",
+            "key": "latLongKey",
             "shouldSucceed": true,
             "purpose": "Geo child key"
         },
@@ -1008,8 +1008,8 @@ corona.addGeoIndexes = function(callback) {
         {
             "type": "geo",
             "name": "geochildelement",
-            "element": "parentElement",
-            "childElement": "latLongElement",
+            "parentElement": "parentElement",
+            "element": "latLongElement",
             "shouldSucceed": true,
             "purpose": "Geo child element"
         },
@@ -1018,7 +1018,7 @@ corona.addGeoIndexes = function(callback) {
         {
             "type": "geo",
             "name": "geochildpairkey",
-            "key": "parentKey",
+            "parentKey": "parentKey",
             "latKey": "latKey",
             "longKey": "longKey",
             "shouldSucceed": true,
@@ -1029,7 +1029,7 @@ corona.addGeoIndexes = function(callback) {
         {
             "type": "geo",
             "name": "geochildpairelement",
-            "element": "parentElement",
+            "parentElement": "parentElement",
             "latElement": "latElement",
             "longElement": "longElement",
             "shouldSucceed": true,
@@ -1040,7 +1040,7 @@ corona.addGeoIndexes = function(callback) {
         {
             "type": "geo",
             "name": "geoattribute",
-            "element": "parentElement",
+            "parentElement": "parentElement",
             "latAttribute": "latAttribute",
             "longAttribute": "longAttribute",
             "shouldSucceed": true,
@@ -1066,8 +1066,8 @@ corona.addGeoIndexes = function(callback) {
 
             data.key = geoIndex.key;
             data.element = geoIndex.element;
-            data.childKey = geoIndex.childKey;
-            data.childElement = geoIndex.childElement;
+            data.parentKey = geoIndex.parentKey;
+            data.parentElement = geoIndex.parentElement;
             data.latKey = geoIndex.latKey;
             data.longKey = geoIndex.longKey;
             data.latElement = geoIndex.latElement;
@@ -1092,8 +1092,8 @@ corona.addGeoIndexes = function(callback) {
                                     var info = JSON.parse(data);
                                     if(geoIndex.key) { equals(geoIndex.key, info.key, "Key matches"); }
                                     if(geoIndex.element) { equals(geoIndex.element, info.element, "Element matches"); }
-                                    if(geoIndex.childKey) { equals(geoIndex.childKey, info.childKey, "Child key matches"); }
-                                    if(geoIndex.childElement) { equals(geoIndex.childElement, info.childElement, "Child element matches"); }
+                                    if(geoIndex.parentKey) { equals(geoIndex.parentKey, info.parentKey, "Parent key matches"); }
+                                    if(geoIndex.parentElement) { equals(geoIndex.parentElement, info.parentElement, "Parent element matches"); }
                                     if(geoIndex.latKey) { equals(geoIndex.latKey, info.latKey, "Latitude key matches"); }
                                     if(geoIndex.longKey) { equals(geoIndex.longKey, info.longKey, "Longitude key matches"); }
                                     if(geoIndex.latElement) { equals(geoIndex.latElement, info.latElement, "Latitude element matches"); }

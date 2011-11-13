@@ -228,7 +228,7 @@ declare function config:getPlace(
 
 declare function config:setGeoWithAttributes(
     $name as xs:string,
-    $element as xs:string,
+    $parentElement as xs:string,
     $latAttribute as xs:string,
     $longAttribute as xs:string,
     $coordinateSystem as xs:string
@@ -236,7 +236,7 @@ declare function config:setGeoWithAttributes(
 {
     prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
         <structure>elementWithAttributes</structure>
-        <element>{ $element }</element>
+        <parentElement>{ $parentElement }</parentElement>
         <latAttribute>{ $latAttribute }</latAttribute>
         <longAttribute>{ $longAttribute }</longAttribute>
         <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
@@ -245,7 +245,7 @@ declare function config:setGeoWithAttributes(
 
 declare function config:setGeoWithElementChildren(
     $name as xs:string,
-    $element as xs:string,
+    $parentElement as xs:string,
     $latElement as xs:string,
     $longElement as xs:string,
     $coordinateSystem as xs:string
@@ -253,7 +253,7 @@ declare function config:setGeoWithElementChildren(
 {
     prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
         <structure>elementWithChildren</structure>
-        <element>{ $element }</element>
+        <parentElement>{ $parentElement }</parentElement>
         <latElement>{ $latElement }</latElement>
         <longElement>{ $longElement }</longElement>
         <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
@@ -262,7 +262,7 @@ declare function config:setGeoWithElementChildren(
 
 declare function config:setGeoWithKeyChildren(
     $name as xs:string,
-    $key as xs:string,
+    $parentKey as xs:string,
     $latKey as xs:string,
     $longKey as xs:string,
     $coordinateSystem as xs:string
@@ -270,7 +270,7 @@ declare function config:setGeoWithKeyChildren(
 {
     prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
         <structure>keyWithChildren</structure>
-        <key>{ $key }</key>
+        <parentKey>{ $parentKey }</parentKey>
         <latKey>{ $latKey }</latKey>
         <longKey>{ $longKey }</longKey>
         <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
@@ -279,16 +279,16 @@ declare function config:setGeoWithKeyChildren(
 
 declare function config:setGeoWithElementChild(
     $name as xs:string,
+    $parentElement as xs:string,
     $element as xs:string,
-    $childElement as xs:string,
     $coordinateSystem as xs:string,
     $comesFirst as xs:string
 ) as empty-sequence()
 {
     prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
         <structure>elementWithChild</structure>
+        <parentElement>{ $parentElement }</parentElement>
         <element>{ $element }</element>
-        <childElement>{ $childElement }</childElement>
         <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
         <comesFirst>{ $comesFirst }</comesFirst>
     </index>)
@@ -296,16 +296,16 @@ declare function config:setGeoWithElementChild(
 
 declare function config:setGeoWithKeyChild(
     $name as xs:string,
+    $parentKey as xs:string,
     $key as xs:string,
-    $childKey as xs:string,
     $coordinateSystem as xs:string,
     $comesFirst as xs:string
 ) as empty-sequence()
 {
     prop:set(concat("corona-index-", $name), <index type="geo" name="{ $name }">
         <structure>keyWithChild</structure>
+        <parentKey>{ $parentKey }</parentKey>
         <key>{ $key }</key>
-        <childKey>{ $childKey }</childKey>
         <coordinateSystem>{ $coordinateSystem }</coordinateSystem>
         <comesFirst>{ $comesFirst }</comesFirst>
     </index>)
