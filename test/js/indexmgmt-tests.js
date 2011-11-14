@@ -22,7 +22,7 @@ corona.removeGeoIndexes = function(info, callback) {
         }
 
         asyncTest("Remove the " + geo.name + " geo index", function() {
-            var url = "/manage/geo/" + geo.name;
+            var url = "/manage/geospatial/" + geo.name;
             $.ajax({
                 url: url,
                 type: 'DELETE',
@@ -1061,7 +1061,7 @@ corona.addGeoIndexes = function(callback) {
         }
 
         asyncTest(geoIndex.purpose, function() {
-            var url = "/manage/geo/" + geoIndex.name;
+            var url = "/manage/geospatial/" + geoIndex.name;
             var data = {};
 
             data.key = geoIndex.key;
