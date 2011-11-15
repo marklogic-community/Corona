@@ -179,6 +179,32 @@ corona.queries = [
         "purpose": "inTextDocument query with weight"
     },
 
+    /* contentType */
+    {
+        "query": {
+            "contentType": "json"
+        },
+        "xmlQuery": '<constraint><contentType>json</contentType></constraint>',
+        "result": '<cts:term-query xmlns:cts="http://marklogic.com/cts"> <cts:key>13332737702526692693</cts:key></cts:term-query>',
+        "purpose": "contentType json"
+    },
+    {
+        "query": {
+            "contentType": "text"
+        },
+        "xmlQuery": '<constraint><contentType>text</contentType></constraint>',
+        "result": '<cts:term-query xmlns:cts="http://marklogic.com/cts"> <cts:key>2328177500544466626</cts:key></cts:term-query>',
+        "purpose": "contentType text"
+    },
+    {
+        "query": {
+            "contentType": "binary"
+        },
+        "xmlQuery": '<constraint><contentType>binary</contentType></constraint>',
+        "result": '<cts:term-query xmlns:cts="http://marklogic.com/cts"> <cts:key>7908746777995149422</cts:key></cts:term-query>',
+        "purpose": "contentType binary"
+    },
+
     /* And */
     {
         "query": { "and": [

@@ -104,6 +104,7 @@ declare private function structquery:dispatch(
         $step/json:stringQuery[@type = "string"],
         $step/json:wordAnywhere[@type = ("string", "array")],
         $step/json:inTextDocument[@type = ("string", "array")],
+        $step/json:contentType[@type = "string"],
 
         $step/json:geo[@type = "string"],
         $step/json:point[@type = "object"],
@@ -143,6 +144,7 @@ declare private function structquery:process(
     case element(json:stringQuery) return structquery:handleStringQuery($step, $ignoreRange)
     case element(json:wordAnywhere) return structquery:handleWordAnywhere($step)
     case element(json:inTextDocument) return structquery:handleInTextDocument($step)
+    case element(json:contentType) return structquery:handleContentType($step)
 
     case element(json:geo) return structquery:handleGeo($step)
     case element(json:region) return structquery:handleRegion($step)
@@ -410,6 +412,21 @@ declare private function structquery:handleInTextDocument(
             cts:term-query(2328177500544466626),
             cts:word-query(structquery:valueToStrings($step), $options, $weight)
         ))
+};
+
+declare private function structquery:handleContentType(
+    $step as element(json:contentType)
+) as cts:query?
+{
+    if($step = "json")
+    then cts:term-query(13332737702526692693)
+    else if($step = "xml")
+    then cts:and-not-query(cts:term-query(15041569596143136458), cts:term-query(13332737702526692693))
+    else if($step = "text")
+    then cts:term-query(2328177500544466626)
+    else if($step = "binary")
+    then cts:term-query(7908746777995149422)
+    else ()
 };
 
 declare private function structquery:handleGeo(
