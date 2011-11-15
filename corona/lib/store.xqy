@@ -18,6 +18,7 @@ xquery version "1.0-ml";
 
 module namespace store="http://marklogic.com/corona/store";
 
+import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace path="http://marklogic.com/mljson/path-parser" at "path-parser.xqy";
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
@@ -235,12 +236,15 @@ declare function store:deleteDocumentsWithQuery(
                     "uris",
                     json:array(
                         for $doc in $docs
-                        let $delete := xdmp:document-delete(base-uri($doc))
-                        return base-uri($doc)
+                        let $uri := base-uri($doc)
+                        where not(xdmp:document-get-collections($uri) = $const:TransformersCollection)
+                        return (xdmp:document-delete($uri), $uri)
                     )
                 )
                 else
                     for $doc in $docs
+                    let $uri := base-uri($doc)
+                    where not(xdmp:document-get-collections($uri) = $const:TransformersCollection)
                     return xdmp:document-delete(base-uri($doc))
             )))
             else if($outputFormat = "xml")
@@ -253,11 +257,14 @@ declare function store:deleteDocumentsWithQuery(
                     if($includeURIs)
                     then <corona:uris>{
                         for $doc in $docs
-                        let $delete := xdmp:document-delete(base-uri($doc))
-                        return <corona:uri>{ base-uri($doc) }</corona:uri>
+                        let $uri := base-uri($doc)
+                        where not(xdmp:document-get-collections($uri) = $const:TransformersCollection)
+                        return (xdmp:document-delete($uri), $uri)
                     }</corona:uris>
                     else 
                         for $doc in $docs
+                        let $uri := base-uri($doc)
+                        where not(xdmp:document-get-collections($uri) = $const:TransformersCollection)
                         return xdmp:document-delete(base-uri($doc))
                 }
             </corona:results>
