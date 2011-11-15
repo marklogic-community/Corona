@@ -127,7 +127,6 @@ declare private function path:tokenize(
             '\[(\d+)\]'
         )
 
-        let $log := xdmp:log(as:analyzeString($path, $tokens))
         for $match in as:analyzeString($path, $tokens)/*
         return
             if($match/self::*:non-match) then <error>{ string($match) }</error>

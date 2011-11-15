@@ -26,8 +26,7 @@ declare function sqt:translate(
     $query as element()
 ) as element(json:json)
 {
-    json:document(sqt:process($query)),
-    xdmp:log(json:document(sqt:process($query)))
+    json:document(sqt:process($query))
 };
 
 declare private function sqt:process(

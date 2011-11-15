@@ -670,7 +670,6 @@ declare private function store:applyTransformer(
 ) as item()*
 {
     let $transformer := manage:getTransformer($name)
-    let $log := xdmp:log($transformer/*)
     return
         if(exists($transformer/*) and $xsltIsSupported)
         then xdmp:apply($xsltEval, $transformer/*, $content)
