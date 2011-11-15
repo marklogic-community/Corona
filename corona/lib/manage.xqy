@@ -156,6 +156,14 @@ declare function manage:getAllRanges(
     return manage:getRange($rangeName)
 };
 
+declare function manage:deleteAllRanges(
+) as empty-sequence()
+{
+    let $config := admin:get-configuration()
+    for $rangeName in config:rangeNames()
+    return (manage:deleteRange($rangeName, $config), xdmp:set($config, admin:get-configuration()))
+};
+
 
 (: Bucketed ranges :)
 declare function manage:createJSONBucketedRange(
@@ -386,6 +394,14 @@ declare function manage:getAllBucketedRanges(
     return manage:getBucketedRange($name)
 };
 
+declare function manage:deleteAllBucketedRanges(
+) as empty-sequence()
+{
+    let $config := admin:get-configuration()
+    for $name in config:bucketedRangeNames()
+    return (manage:deleteBucketedRange($name, $config), xdmp:set($config, admin:get-configuration()))
+};
+
 
 (: Namespaces :)
 declare function manage:setNamespaceURI(
@@ -448,6 +464,19 @@ declare function manage:getAllNamespaces(
     ))
 };
 
+declare function manage:deleteAllNamespaces(
+) as empty-sequence()
+{
+    let $config := admin:get-configuration()
+    let $delete :=
+        let $group := xdmp:group()
+        for $namespace in admin:group-get-namespaces($config, $group)
+        where not(starts-with(string($namespace/*:namespace-uri), "http://xqdev.com/prop/"))
+        return xdmp:set($config, admin:group-delete-namespace($config, $group, $namespace))
+    return admin:save-configuration($config)
+};
+
+
 (: Places :)
 declare function manage:createPlace(
     $placeName as xs:string,
@@ -467,12 +496,20 @@ declare function manage:createPlace(
 };
 
 declare function manage:deletePlace(
-    $placeName as xs:string
+    $placeName as xs:string?
 ) as empty-sequence()
 {
-    config:delete($placeName),
-    (: Using a fake stub of an index here just to wipe out the database field if one exists :)
-    manage:createFieldForPlace(<index type="place" name="{ $placeName }"><field name="{ manage:generateFieldName($placeName) }"/></index>)
+    if(empty($placeName))
+    then (
+        config:delete("-anonymous-place"),
+        (: Using a fake stub of an index here just to wipe out the database field if one exists :)
+        manage:createFieldForPlace(<index type="place" anonymous="true"><field name="{ manage:generateFieldName(()) }"/></index>)
+    )
+    else (
+        config:delete($placeName),
+        (: Using a fake stub of an index here just to wipe out the database field if one exists :)
+        manage:createFieldForPlace(<index type="place" name="{ $placeName }"><field name="{ manage:generateFieldName($placeName) }"/></index>)
+    )
 };
 
 declare function manage:addKeyToPlace(
@@ -746,6 +783,16 @@ declare function manage:getAllPlaces(
     return manage:getPlace($placeName)
 };
 
+declare function manage:deleteAllPlaces(
+) as empty-sequence()
+{
+    (
+        for $placeName in config:placeNames()
+        return manage:deletePlace($placeName),
+        manage:deletePlace(())
+    )
+};
+
 
 (: Geospatial :)
 
@@ -800,6 +847,14 @@ declare function manage:getAllGeos(
 {
     for $geoName in config:geoNames()
     return manage:getGeo($geoName)
+};
+
+declare function manage:deleteAllGeos(
+) as empty-sequence()
+{
+    let $config := admin:get-configuration()
+    for $geoName in config:geoNames()
+    return (manage:deleteGeo($geoName, $config), xdmp:set($config, admin:get-configuration()))
 };
 
 declare function manage:createGeoWithAttributes(
@@ -1105,6 +1160,13 @@ declare function manage:getAllTransformerNames(
 {
     for $transformer in collection($const:TransformersCollection)
     return tokenize(base-uri($transformer), "/")[last()]
+};
+
+declare function manage:deleteAllTransformers(
+) as empty-sequence()
+{
+    for $transformer in collection($const:TransformersCollection)
+    return xdmp:document-delete(base-uri($transformer))
 };
 
 

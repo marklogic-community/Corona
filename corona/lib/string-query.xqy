@@ -351,14 +351,8 @@ declare private function stringquery:constraintQuery(
         else if($index/@type = "geo")
         then
             let $bits := for $i in tokenize(normalize-space($value), "[^\d\-\+\.]") where string-length($i) return $i
-            let $latitude :=
-                if($index/comesFirst = "latitude")
-                then xs:float($bits[1])
-                else xs:float($bits[2])
-            let $longitude :=
-                if($index/comesFirst = "longitude")
-                then xs:float($bits[1])
-                else xs:float($bits[2])
+            let $latitude := xs:float($bits[1])
+            let $longitude := xs:float($bits[2])
             return search:geoQuery($index, cts:circle(10, cts:point($latitude, $longitude)), (), ())
         else stringquery:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)
 };

@@ -62,5 +62,5 @@ return
             if(exists($existing))
             then manage:deleteTransformer($name)
             else common:error("corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
-        else common:error("corona:INVALID-PARAMETER", "Must specify the name of the transformer to delete", "json")
+        else manage:deleteAllTransformers()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

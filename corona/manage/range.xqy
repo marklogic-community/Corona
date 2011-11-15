@@ -80,5 +80,5 @@ return
             if(exists($existing))
             then manage:deleteRange($name, $config)
             else common:error("corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
-        else common:error("corona:INVALID-PARAMETER", "Must specify the name of for the range to delete", "json")
+        else manage:deleteAllRanges()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

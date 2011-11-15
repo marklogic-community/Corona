@@ -90,5 +90,5 @@ return
             if(exists($existing))
             then manage:deleteGeo($name, $config)
             else common:error("corona:GEO-INDEX-NOT-FOUND", "Geospatial index not found", "json")
-        else common:error("corona:INVALID-PARAMETER", "Must specify the name of for the geospatial to delete", "json")
+        else manage:deleteAllGeos()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

@@ -127,7 +127,10 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 
     <!-- Index management -->
 
-    <request uri="^/manage(/)?$" endpoint="/corona/info.xqy" user-params="ignore"/>
+    <request uri="^/manage(/)?$" endpoint="/corona/manage/summary.xqy" user-params="ignore">
+        <http method="GET"/>
+        <http method="DELETE"/>
+    </request>
 
     <request uri="^/manage(/)?$" endpoint="/corona/manage/state.xqy">
         <http method="POST">

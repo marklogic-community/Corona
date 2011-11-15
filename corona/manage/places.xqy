@@ -88,6 +88,8 @@ let $output :=
             then manage:removePlaceFromPlace($name, $subPlace)
             else if(empty(($key, $element, $attribute, $subPlace)) and $scope = "place" and exists($name))
             then manage:deletePlace($name)
+            else if(empty(($key, $element, $attribute, $subPlace, $name)) and $scope = "places")
+            then manage:deleteAllPlaces()
             else common:error("corona:INVALID-REQUEST", "Must specify a key, element, element/attribute pair or a sub-place to remove from the place. Or simply specify the place to delete it's entire configuration.", "json")
         else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
     }

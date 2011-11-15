@@ -121,5 +121,5 @@ return
             if(exists($existing))
             then manage:deleteBucketedRange($name, $config)
             else common:error("corona:RANGE-INDEX-NOT-FOUND", "Bucketed range index not found", "json")
-        else common:error("corona:MISSING-PARAMETER", "Must supply the name of the bucketed range to delete", "json")
+        else manage:deleteAllBucketedRanges()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")

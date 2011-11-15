@@ -59,5 +59,5 @@ return
             if(exists($existing))
             then manage:deleteNamespace($prefix)
             else common:error("common:NAMESPACE-NOT-FOUND", "Namespace not found", "json")
-        else common:error("corona:INVALID-PARAMETER", "Must specify a namespace prefix to delete", "json")
+        else manage:deleteAllNamespaces()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
