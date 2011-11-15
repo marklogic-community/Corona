@@ -86,7 +86,7 @@ declare private function stringquery:tokenize(
 	let $tokens := (
 		"\(", "\)", $phraseMatch,
 		"\-", " AND ", " OR ", " NEAR ", " NEAR/\d+ ",
-		concat($constraintMatch, $phraseMatch, "|", $constraintMatch, $wordMatch),
+		concat($constraintMatch, $phraseMatch, "|", $constraintMatch, "\-?", $wordMatch),
 		$wordMatch, "\s+"
 	)
 
@@ -139,31 +139,50 @@ declare private function stringquery:groupTokens(
 			else ()
         else if(local-name($token) = "constraint")
         then
-            if(exists(config:get($token/field)[type = ("date", "dateTime")]))
-            then 
-                <constraint>{ $token/field }<value>{(
-                    let $parsedDate := ()
-                    for $dateToken at $dateIndex in $tokens[$index to count($tokens)]
-                    where local-name($dateToken) = ("term", "constraint") and empty($parsedDate)
-                    return
-                        let $possibleTokens :=
-                            for $i in $tokens[$index + 1 to $dateIndex + $index]
-                            return
-                                if(local-name($i) = "term")
-                                then string($i)
-                                else if(local-name($i) = "constraint")
-                                then concat($i/field, ":", $i/value)
-                                else ()
-                        let $dateString := string-join(($token/value, $possibleTokens), " ")
-                        let $date := common:castFromJSONType($dateString, "date")
+            let $indexConfig := config:get($token/field)
+            return
+                if(exists($indexConfig[type = ("date", "dateTime")]))
+                then 
+                    <constraint>{ $token/field }<value>{(
+                        let $parsedDate := ()
+                        for $dateToken at $dateIndex in $tokens[$index to count($tokens)]
+                        where local-name($dateToken) = ("term", "constraint") and empty($parsedDate)
                         return
-                            if(exists($date))
-                            then ($date, xdmp:set($parsedDate, $date), xdmp:set($GROUPING-INDEX, $index + $dateIndex - 1))
-                            else ()
-                    ,
-                    string($token/value)
-                )[1]}</value></constraint>
-            else $token
+                            let $possibleTokens :=
+                                for $i in $tokens[$index + 1 to $dateIndex + $index]
+                                return
+                                    if(local-name($i) = "term")
+                                    then string($i)
+                                    else if(local-name($i) = "constraint")
+                                    then concat($i/field, ":", $i/value)
+                                    else ()
+                            let $dateString := string-join(($token/value, $possibleTokens), " ")
+                            let $date := common:castFromJSONType($dateString, "date")
+                            return
+                                if(exists($date))
+                                then ($date, xdmp:set($parsedDate, $date), xdmp:set($GROUPING-INDEX, $index + $dateIndex - 1))
+                                else ()
+                        ,
+                        string($token/value)
+                    )[1]}</value></constraint>
+                else if(exists($indexConfig[@type = "geo"]))
+                then 
+                    <constraint>{ $token/field }<value>{
+                        if(count(tokenize($token/value, "\.")) > 2)
+                        then string($token/value)
+                        else if(local-name($tokens[$index + 1]) = "whitespace" and local-name($tokens[$index + 2]) = "term")
+                        then (
+                            concat($token/value, " ", $tokens[$index + 2]),
+                            xdmp:set($GROUPING-INDEX, $index + 2)
+                        )
+                        else if(local-name($tokens[$index + 1]) = "whitespace" and local-name($tokens[$index + 2]) = "not" and local-name($tokens[$index + 3]) = "term")
+                        then (
+                            concat($token/value, " -", $tokens[$index + 3]),
+                            xdmp:set($GROUPING-INDEX, $index + 3)
+                        )
+                        else string($token/value)
+                    }</value></constraint>
+                else $token
 		else $token
 	)
 };
@@ -329,6 +348,18 @@ declare private function stringquery:constraintQuery(
         else if($index/@type = ("bucketedrange", "autobucketedrange"))
         then search:bucketLabelToQuery($index, $value)
 
+        else if($index/@type = "geo")
+        then
+            let $bits := for $i in tokenize(normalize-space($value), "[^\d\-\+\.]") where string-length($i) return $i
+            let $latitude :=
+                if($index/comesFirst = "latitude")
+                then xs:float($bits[1])
+                else xs:float($bits[2])
+            let $longitude :=
+                if($index/comesFirst = "longitude")
+                then xs:float($bits[1])
+                else xs:float($bits[2])
+            return search:geoQuery($index, cts:circle(10, cts:point($latitude, $longitude)), (), ())
         else stringquery:wordQuery(<term>{ concat($term/field, ":", $value) }</term>)
 };
 
