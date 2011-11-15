@@ -18,4 +18,4 @@ xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "../lib/common.xqy";
 
-common:error("corona:ENDPOINT-NOT-FOUND", "Invalid endpoint. Check path and parameters for errors.", "json")
+common:error("corona:ENDPOINT-NOT-FOUND", "Invalid endpoint. Check path and parameters for errors.", xdmp:get-request-field("outputFormat", "json"))

@@ -30,4 +30,4 @@ return
     then $result
     else if(starts-with($url, "/test"))
     then $url
-    else "/corona/misc/404.xqy"
+    else concat("/corona/misc/404.xqy?", substring-after(xdmp:get-request-url(), "?"))
