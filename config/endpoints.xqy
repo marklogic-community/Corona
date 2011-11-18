@@ -78,6 +78,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="underDirectory" required="false"/>
         <param name="inDirectory" required="false"/>
         <param name="outputFormat" required="false" values="json|xml"/>
+        <http method="POST"/>
+        <http method="GET"/>
     </request>
 
     <!-- Key value queryies -->
