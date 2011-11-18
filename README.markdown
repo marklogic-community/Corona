@@ -4,7 +4,7 @@ The Corona project is a community-sponsored set of REST endpoints to enable usag
 
 There is a tutorial at http://developer.marklogic.com/try/corona/index
 
-Corona runs on MarkLogic 4.2 or later.
+Corona runs on MarkLogic 4.1 or later.  Some features require 4.2 and/or 5.0.
 
 ## [Installation](https://github.com/marklogic/Corona/wiki/Installation)
 
