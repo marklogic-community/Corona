@@ -6,6 +6,12 @@ if(typeof corona == "undefined" || !corona) {
 
 corona.documents = [
     {
+        "type": "binary",
+        "uri": "/doc-store-test-1.jpg",
+        "content": "Mary had a little binary document.",
+        "outputFormat": "json"
+    },
+    {
         "type": "text",
         "uri": "/doc-store-test-1.text",
         "content": "Mary had a little text document.",
@@ -268,7 +274,7 @@ corona.insertDocuments = function(prefix, withExtras) {
                     success: function() {
                         ok(true, "Inserted document");
                         $.ajax({
-                            url: corona.constructURL(doc, prefix, "ignore", true, "include=all"),
+                            url: corona.constructURL(doc, prefix, "ignore", true, doc.type === "binary" ? undefined : "include=all"),
                             type: 'GET',
                             context: this,
                             success: function(data) {
@@ -353,7 +359,7 @@ corona.setExtras = function(prefix, doc) {
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore", true, "include=all"),
+                    url:  corona.constructURL(doc, prefix, "ignore", true, doc.type === "binary" ? undefined : "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -392,7 +398,7 @@ corona.removeExtras = function(prefix, doc) {
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore", true, "include=all"),
+                    url:  corona.constructURL(doc, prefix, "ignore", true, doc.type === "binary" ? undefined : "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -431,7 +437,7 @@ corona.addExtras = function(prefix, doc) {
             success: function() {
                 ok(true, "Updated document extras");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore", true, "include=all"),
+                    url:  corona.constructURL(doc, prefix, "ignore", true, doc.type === "binary" ? undefined : "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {
@@ -470,7 +476,7 @@ corona.deleteDocument = function(prefix, doc) {
             success: function() {
                 ok(true, "Deleted document");
                 $.ajax({
-                    url:  corona.constructURL(doc, prefix, "ignore", true, "include=all"),
+                    url:  corona.constructURL(doc, prefix, "ignore", true, doc.type === "binary" ? undefined : "include=all"),
                     type: 'GET',
                     context: this,
                     success: function(data) {

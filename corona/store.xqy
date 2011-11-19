@@ -143,14 +143,20 @@ return
 
     else if($requestMethod = "PUT" and string-length($uri))
     then try {
-        let $bodyContent := xdmp:get-request-body("text")/text()
+        let $contentType := common:getContentType($uri, map:get($params, "contentType"))
+        let $bodyContent :=
+            if($contentType = "binary")
+            then xdmp:get-request-body("binary")/binary()
+            else xdmp:get-request-body("text")/text()
         let $collections := local:collectionsFromRequest($params, "collection")
         let $properties := local:propertiesFromRequest($params, "property")
         let $permissions := local:permissionsFromRequest($params, "permission")
         let $quality := local:qualityFromRequest($params)
-        let $contentType := common:getContentType($uri, map:get($params, "contentType"))
         let $set := xdmp:set-response-code(204, "Document inserted")
-        return store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+        return
+            if($contentType = "binary")
+            then store:insertBinaryDocument($uri, $bodyContent, (), $collections, $properties, $permissions, $quality)
+            else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
     }
     catch ($e) {
         common:errorFromException($e, $outputFormat)
@@ -158,12 +164,15 @@ return
 
     else if($requestMethod = "POST" and string-length($uri))
     then try {
-        let $bodyContent := xdmp:get-request-body("text")/text()
+        let $contentType := common:getContentType($uri, map:get($params, "contentType"))
+        let $bodyContent :=
+            if($contentType = "binary")
+            then xdmp:get-request-body("binary")/binary()
+            else xdmp:get-request-body("text")/text()
         let $collections := local:collectionsFromRequest($params, "collection")
         let $properties := local:propertiesFromRequest($params, "property")
         let $permissions := local:permissionsFromRequest($params, "permission")
         let $quality := local:qualityFromRequest($params)
-        let $contentType := common:getContentType($uri, map:get($params, "contentType"))
 
         let $addCollections := local:collectionsFromRequest($params, "addCollection")
         let $addProperties := local:propertiesFromRequest($params, "addProperty")
@@ -176,9 +185,15 @@ return
         let $set := xdmp:set-response-code(204, "Document updated")
         return (
             if(empty(doc($uri)) and exists($bodyContent))
-            then store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+            then
+                if($contentType = "binary")
+                then store:insertDocument($uri, $bodyContent, (), $collections, $properties, $permissions, $quality)
+                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
             else if(exists($bodyContent))
-            then store:updateDocumentContent($uri, $bodyContent, $contentType)
+            then
+                if($contentType = "binary")
+                then store:updateBinaryDocumentContent($uri, $bodyContent, ())
+                else store:updateDocumentContent($uri, $bodyContent, $contentType)
             else (),
             if(exists($properties))
             then store:setProperties($uri, $properties)

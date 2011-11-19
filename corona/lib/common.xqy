@@ -234,6 +234,8 @@ declare function common:getContentType(
             then $extension
             else if($extension = ("txt", "text"))
             then "text"
+            else if($extension = ("jpg", "gif", "png", "doc", "ppt", "xls"))
+            then "binary"
             else ()
     else error(xs:QName("corona:MISSING-PARAMETER"), "Need to specify a contentType whenever the URI doesn't end in 'json', 'xml', 'txt' or 'text'")
 };
