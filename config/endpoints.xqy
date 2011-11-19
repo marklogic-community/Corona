@@ -234,6 +234,12 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="type" required="false" default="include"/>
         </http>
     </request>
+
+    <request uri="^/config/setup" endpoint="/config/setup.xqy" user-params="allow">
+        <http method="GET"/>
+        <http method="POST"/>
+    </request>
+
 </options>;
 
 declare function endpoints:options(

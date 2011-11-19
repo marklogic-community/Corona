@@ -28,6 +28,6 @@ let $result := rest:rewrite(endpoints:options())
 return
     if(exists($result))
     then $result
-    else if(starts-with($url, "/test"))
+    else if(starts-with($url, "/test") or starts-with($url, "/corona/htools/"))
     then $url
     else concat("/corona/misc/404.xqy?", substring-after(xdmp:get-request-url(), "?"))
