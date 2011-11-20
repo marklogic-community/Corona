@@ -155,7 +155,7 @@ return
         let $set := xdmp:set-response-code(204, "Document inserted")
         return
             if($contentType = "binary")
-            then store:insertBinaryDocument($uri, $bodyContent, (), $collections, $properties, $permissions, $quality)
+            then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality)
             else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
     }
     catch ($e) {
@@ -192,7 +192,7 @@ return
             else if(exists($bodyContent))
             then
                 if($contentType = "binary")
-                then store:updateBinaryDocumentContent($uri, $bodyContent, ())
+                then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"))
                 else store:updateDocumentContent($uri, $bodyContent, $contentType)
             else (),
             if(exists($properties))

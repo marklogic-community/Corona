@@ -331,3 +331,12 @@ declare function common:keyToQName(
 {
     xs:QName(concat("json:", json:escapeNCName($key)))
 };
+
+declare function common:xmlOrJSON(
+    $string as xs:string
+) as xs:string
+{
+    if(starts-with($string, "<"))
+    then "xml"
+    else "json"
+};

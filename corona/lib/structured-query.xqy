@@ -61,7 +61,7 @@ declare function structquery:getParseTree(
 {
     if(empty($query))
     then ()
-    else if(starts-with($query, "<"))
+    else if(common:xmlOrJSON($query) = "xml")
     then sqt:translate(xdmp:unquote($query)/*)
     else json:parse($query)
 };

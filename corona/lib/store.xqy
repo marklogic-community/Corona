@@ -365,13 +365,20 @@ declare function store:insertDocument(
 declare function store:insertBinaryDocument(
     $uri as xs:string,
     $content as binary(),
-    $suppliedContent as element()?,
+    $suppliedContent as xs:string?,
     $collections as xs:string*,
     $properties as element()*,
     $permissions as element()*,
     $quality as xs:integer?
 ) as empty-sequence()
 {
+    let $suppliedContent :=
+        if(exists($suppliedContent))
+        then
+            if(common:xmlOrJSON($suppliedContent) = "json")
+            then json:parse($suppliedContent)
+            else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
+        else ()
     let $sidecarURI := store:getSidecarURI($uri)
     let $sidecar := <corona:sidecar type="binary">{ $suppliedContent }</corona:sidecar>
     let $insertSidecar := xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), $permissions), $collections, $quality)
@@ -410,9 +417,16 @@ declare function store:updateDocumentContent(
 declare function store:updateBinaryDocumentContent(
     $uri as xs:string,
     $content as binary(),
-    $suppliedContent as element()?
+    $suppliedContent as xs:string?
 ) as empty-sequence()
 {
+    let $suppliedContent :=
+        if(exists($suppliedContent))
+        then
+            if(common:xmlOrJSON($suppliedContent) = "json")
+            then json:parse($suppliedContent)
+            else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
+        else ()
     let $existing := doc($uri)
     let $test :=
         if(empty($existing))
