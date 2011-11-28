@@ -150,23 +150,21 @@ let $adminPass := xdmp:get-request-field("adminPass")
 let $devName := xdmp:get-request-field("devName")
 let $devPass := xdmp:get-request-field("devPass")
 
+let $hasUsers :=
+    try {
+        exists(/sec:user[sec:role-ids/sec:role-id = xdmp:role("corona-admin")]) and
+        exists(/sec:user[sec:role-ids/sec:role-id = xdmp:role("corona-dev")])
+    }
+    catch ($e) {
+        false()
+    }
+
 return
     if(exists($adminName) and exists($adminPass) and exists($devName) and exists($devPass))
     then
         let $set := sec:create-user($adminName, "Corona Administrator", $adminPass, "corona-admin", (), ())
         let $set := sec:create-user($devName, "Corona Developer", $devPass, "corona-dev", (), ())
-        return template:apply(
-            <div>
-                <p>The Corona users have been created.</p>
-            </div>,
-            "Create Users",
-            (
-                <li><a href="/config/setup.xqy"><h4>Setup Corona</h4></a></li>,
-                <li><a href="/config/setup.xqy?createUsers=true"><h4>Create Users (required)</h4></a></li>
-            ),
-            2,
-            ()
-        )
+        return template:apply(<div><p>Corona has been fully setup and both a developer and administrative account exist.</p></div>, "Corona Setup", (), 0, ())
     else if($createUsers)
     then template:apply(
         <div>
@@ -174,7 +172,7 @@ return
             administrative account (configures search behavior, output
             transformations, etc) and a developer account (inserts documents,
             performs searches, etc).</p>
-            <form class="createUsers" action="/config/setup.xqy" method="GET">
+            <form class="createUsers" action="/config/setup" method="GET">
                 <div>
                     <h2>Corona Administrator</h2>
                     <table>
@@ -195,27 +193,11 @@ return
                 <input type="submit" value="Submit"/>
             </form>
         </div>,
-        "Create Users",
-        (
-            <li><a href="/config/setup.xqy"><h4>Setup Corona</h4></a></li>,
-            <li><a href="/config/setup.xqy?createUsers=true"><h4>Create Users (required)</h4></a></li>
-        ),
-        2,
-        <script src="/corona/htools/js/setup.js"><!-- --></script>
-    )
+        "Create Users", (), 0, <script src="/corona/htools/js/setup.js"><!-- --></script>)
     else
         let $setup := local:setupRole("corona-dev", "Corona Developer")
         let $setup := local:setupRole("corona-admin", "Corona Administrator")
-        return template:apply(
-            <div>
-                <p>Security and configuraiton for Corona is now fully setup.</p>
-                <p>Now just create a couple users and you're set.</p>
-            </div>,
-            "Setup",
-            (
-                <li><a href="/config/setup.xqy"><h4>Setup Corona</h4></a></li>,
-                <li><a href="/config/setup.xqy?createUsers=true"><h4>Create Users (required)</h4></a></li>
-            ),
-            1,
-            ()
-        )
+        return
+            if($hasUsers)
+            then template:apply(<div><p>Corona has been fully setup and both a developer and administrative account exist.</p></div>, "Corona Setup", (), 0, ())
+            else xdmp:redirect-response("/config/setup?createUsers=true")

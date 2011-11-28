@@ -23,7 +23,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare function template:apply(
 		$content as element()*,
         $title as xs:string,
-        $nav as element(li)+,
+        $nav as element(li)*,
         $page as xs:integer,
         $scripts as element(script)*
 ) as item()+
@@ -73,17 +73,22 @@ declare function template:apply(
 
         <div class="main">
             <div class="container">
-                <div class="aside">
-                    <ul class="subnav">{
-                        for $navItem at $pos in $nav
-                        return <li>{(
-                            if($pos = $page)
-                            then attribute class {"subnav_item_active"}
-                            else (),
-                            $navItem/*
-                        )}</li>
-                    }</ul>
-                </div>
+                {
+                if(exists($nav))
+                then
+                    <div class="aside">
+                        <ul class="subnav">{
+                            for $navItem at $pos in $nav
+                            return <li>{(
+                                if($pos = $page)
+                                then attribute class {"subnav_item_active"}
+                                else (),
+                                $navItem/*
+                            )}</li>
+                        }</ul>
+                    </div>
+                else ()
+                }
                 <div class="content">{ $content }</div>
             </div>
         </div>
