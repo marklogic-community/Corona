@@ -148,6 +148,10 @@ return
             if($contentType = "binary")
             then xdmp:get-request-body("binary")/binary()
             else xdmp:get-request-body("text")/text()
+        let $test :=
+            if(empty($bodyContent))
+            then error(xs:QName("corona:INVALID-REQUEST"), "Missing document body")
+            else ()
         let $collections := local:collectionsFromRequest($params, "collection")
         let $properties := local:propertiesFromRequest($params, "property")
         let $permissions := local:permissionsFromRequest($params, "permission")
