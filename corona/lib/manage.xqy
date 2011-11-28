@@ -47,14 +47,15 @@ declare function manage:createJSONRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $config as element()
 ) as empty-sequence()
 {
     let $test := manage:validateIndexName($name)
     let $test := manage:validateJSONType($type)
     return (
-        manage:createJSONRangeIndex($name, $key, $type, $config),
-        config:setJSONRange($name, $key, $type)
+        manage:createJSONRangeIndex($name, $key, $type, $collation, $config),
+        config:setJSONRange($name, $key, $type, $collation)
     )
 };
 
@@ -62,6 +63,7 @@ declare function manage:createXMLElementRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $config as element()
 ) as empty-sequence()
 {
@@ -70,8 +72,8 @@ declare function manage:createXMLElementRange(
     let $test := manage:validateXMLType($type)
 
     return (
-        manage:createXMLElementRangeIndex($name, $element, $type, $config),
-        config:setXMLElementRange($name, $element, $type)
+        manage:createXMLElementRangeIndex($name, $element, $type, $collation, $config),
+        config:setXMLElementRange($name, $element, $type, $collation)
     )
 };
 
@@ -80,6 +82,7 @@ declare function manage:createXMLAttributeRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $config as element()
 ) as empty-sequence()
 {
@@ -89,8 +92,8 @@ declare function manage:createXMLAttributeRange(
     let $test := manage:validateXMLType($type)
 
     return (
-        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config),
-        config:setXMLAttributeRange($name, $element, $attribute, $type)
+        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $collation, $config),
+        config:setXMLAttributeRange($name, $element, $attribute, $type, $collation)
     )
 };
 
@@ -129,14 +132,16 @@ declare function manage:getRange(
             json:object((
                 "name", $name,
                 "key", string($index/key),
-                "type", string($index/type)
+                "type", string($index/type),
+                if(exists($index/collation)) then ("collation", string($index/collation)) else ()
             ))
         else if($index/structure = "xmlelement")
         then
             json:object((
                 "name", $name,
                 "element", string($index/element),
-                "type", string($index/type)
+                "type", string($index/type),
+                if(exists($index/collation)) then ("collation", string($index/collation)) else ()
             ))
         else if($index/structure = "xmlattribute")
         then
@@ -144,7 +149,8 @@ declare function manage:getRange(
                 "name", $name,
                 "element", string($index/element),
                 "attribute", string($index/attribute),
-                "type", string($index/type)
+                "type", string($index/type),
+                if(exists($index/collation)) then ("collation", string($index/collation)) else ()
             ))
         else ()
 };
@@ -170,6 +176,7 @@ declare function manage:createJSONBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $buckets as element()+,
     $config as element()
 ) as empty-sequence()
@@ -178,8 +185,8 @@ declare function manage:createJSONBucketedRange(
     let $test := manage:validateJSONType($type)
     let $test := manage:validateBuckets($buckets, manage:jsonTypeToSchemaType($type))
     return (
-        manage:createJSONRangeIndex($name, $key, $type, $config),
-        config:setJSONBucketedRange($name, $key, $type, $buckets)
+        manage:createJSONRangeIndex($name, $key, $type, $collation, $config),
+        config:setJSONBucketedRange($name, $key, $type, $collation, $buckets)
     )
 };
 
@@ -187,6 +194,7 @@ declare function manage:createJSONAutoBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
@@ -202,8 +210,8 @@ declare function manage:createJSONAutoBucketedRange(
     let $test := manage:validateStartAndStop($startingAt)
     let $test := manage:validateStartAndStop($stoppingAt)
     return (
-        manage:createJSONRangeIndex($name, $key, $type, $config),
-        config:setJSONAutoBucketedRange($name, $key, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
+        manage:createJSONRangeIndex($name, $key, $type, $collation, $config),
+        config:setJSONAutoBucketedRange($name, $key, $type, $collation, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
     )
 };
 
@@ -211,6 +219,7 @@ declare function manage:createXMLElementBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $buckets as element()+,
     $config as element()
 ) as empty-sequence()
@@ -221,8 +230,8 @@ declare function manage:createXMLElementBucketedRange(
     let $test := manage:validateBuckets($buckets, $type)
 
     return (
-        manage:createXMLElementRangeIndex($name, $element, $type, $config),
-        config:setXMLElementBucketedRange($name, $element, $type, $buckets)
+        manage:createXMLElementRangeIndex($name, $element, $type, $collation, $config),
+        config:setXMLElementBucketedRange($name, $element, $type, $collation, $buckets)
     )
 };
 
@@ -230,6 +239,7 @@ declare function manage:createXMLElementAutoBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
@@ -247,8 +257,8 @@ declare function manage:createXMLElementAutoBucketedRange(
     let $test := manage:validateStartAndStop($stoppingAt)
 
     return (
-        manage:createXMLElementRangeIndex($name, $element, $type, $config),
-        config:setXMLElementAutoBucketedRange($name, $element, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
+        manage:createXMLElementRangeIndex($name, $element, $type, $collation, $config),
+        config:setXMLElementAutoBucketedRange($name, $element, $type, $collation, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
     )
 };
 
@@ -257,6 +267,7 @@ declare function manage:createXMLAttributeBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $buckets as element()+,
     $config as element()
 ) as empty-sequence()
@@ -268,8 +279,8 @@ declare function manage:createXMLAttributeBucketedRange(
     let $test := manage:validateBuckets($buckets, $type)
 
     return (
-        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config),
-        config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $buckets)
+        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $collation, $config),
+        config:setXMLAttributeBucketedRange($name, $element, $attribute, $type, $collation, $buckets)
     )
 };
 
@@ -278,6 +289,7 @@ declare function manage:createXMLAttributeAutoBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
@@ -296,8 +308,8 @@ declare function manage:createXMLAttributeAutoBucketedRange(
     let $test := manage:validateStartAndStop($stoppingAt)
 
     return (
-        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $config),
-        config:setXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
+        manage:createXMLAttributeRangeIndex($name, $element, $attribute, $type, $collation, $config),
+        config:setXMLAttributeAutoBucketedRange($name, $element, $attribute, $type, $collation, $bucketInterval, $startingAt, $stoppingAt, $firstFormat, $format, $lastFormat)
     )
 };
 
@@ -1176,6 +1188,7 @@ declare private function manage:createJSONRangeIndex(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $config as element()
 ) as empty-sequence()
 {
@@ -1183,7 +1196,7 @@ declare private function manage:createJSONRangeIndex(
     then ()
     else if($type = "string")
     then
-        let $index := admin:database-range-element-index("string", "http://marklogic.com/json", json:escapeNCName($key), "http://marklogic.com/collation/", false())
+        let $index := admin:database-range-element-index("string", "http://marklogic.com/json", json:escapeNCName($key), concat("http://marklogic.com/collation/", $collation), false())
         let $config := admin:database-add-range-element-index($config, xdmp:database(), $index)
         return admin:save-configuration($config)
     else if($type = "date")
@@ -1208,10 +1221,11 @@ declare private function manage:createXMLElementRangeIndex(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $config as element()
 ) as empty-sequence()
 {
-    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
+    let $collation := if($type = "string") then concat("http://marklogic.com/collation/", $collation) else ""
     let $nsLnBits := manage:getNSAndLN($element)
     let $index := admin:database-range-element-index($type, $nsLnBits[1], $nsLnBits[2], $collation, false())
     where empty(manage:getXMLElementRangeDefinition($element, $type, $config))
@@ -1223,10 +1237,11 @@ declare private function manage:createXMLAttributeRangeIndex(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $config as element()
 ) as empty-sequence()
 {
-    let $collation := if($type = "string") then "http://marklogic.com/collation/" else ""
+    let $collation := if($type = "string") then concat("http://marklogic.com/collation/", $collation) else ""
     let $elementNsLnBits := manage:getNSAndLN($element)
     let $attributeNsLnBits := manage:getNSAndLN($attribute)
     let $index := admin:database-range-element-attribute-index($type, $elementNsLnBits[1], $elementNsLnBits[2], $attributeNsLnBits[1], $attributeNsLnBits[2], $collation, false())

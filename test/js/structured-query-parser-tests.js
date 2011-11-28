@@ -430,6 +430,14 @@ corona.queries = [
     /* Range */
     {
         "query": {
+            "range": "list",
+            "value": "foo"
+        },
+        "result": '<cts:element-range-query operator="=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:list</cts:element> <cts:value xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">foo</cts:value> <cts:option>collation=http://marklogic.com/collation/codepoint</cts:option></cts:element-range-query>',
+        "purpose": "Range index with collation"
+    },
+    {
+        "query": {
             "range": "range1",
             "value": "November 17th 1980"
         },

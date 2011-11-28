@@ -404,6 +404,7 @@ corona.addRangeIndexes = function(callback) {
             "name": "list",
             "key": "list",
             "datatype": "string",
+            "collation": "codepoint",
             "shouldSucceed": true,
             "purpose": "Range index for MarkMail JSON message list"
         },
@@ -543,9 +544,15 @@ corona.addRangeIndexes = function(callback) {
                 equals(config.attribute, server.attribute, "Index attribute matches");
             }
             equals(config.datatype, server.type, "Index datatype matches");
+            if(config.collation !== undefined) {
+                equals(config.collation, server.collation, "Index collation matches");
+            }
         }
         else if(config.type === "bucketedrange") {
             equals(config.datatype, server.type, "Index datatype matches");
+            if(config.collation !== undefined) {
+                equals(config.collation, server.collation, "Index collation matches");
+            }
             if(config.key !== undefined) {
                 equals(config.key, server.key, "Index key matches");
             }
@@ -599,9 +606,11 @@ corona.addRangeIndexes = function(callback) {
                 data.element = index.element;
                 data.attribute = index.attribute;
                 data.type = index.datatype;
+                data.collation = index.collation;
             }
             else if(index.type === "bucketedrange") {
                 data.type = index.datatype;
+                data.collation = index.collation;
                 data.key = index.key;
                 data.element = index.element;
                 data.attribute = index.attribute;

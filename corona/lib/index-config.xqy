@@ -36,26 +36,30 @@ declare function config:delete(
 declare function config:setJSONRange(
     $name as xs:string,
     $key as xs:string,
-    $type as xs:string
+    $type as xs:string,
+    $collation as xs:string?
 ) as empty-sequence()
 {
     prop:set(concat("corona-index-", $name), <index type="range" name="{ $name }">
         <structure>json</structure>
         <key>{ $key }</key>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
     </index>)
 };
 
 declare function config:setXMLElementRange(
     $name as xs:string,
     $element as xs:string,
-    $type as xs:string
+    $type as xs:string,
+    $collation as xs:string?
 ) as empty-sequence()
 {
     prop:set(concat("corona-index-", $name), <index type="range" name="{ $name }">
         <structure>xmlelement</structure>
         <element>{ $element }</element>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
     </index>)
 };
 
@@ -63,7 +67,8 @@ declare function config:setXMLAttributeRange(
     $name as xs:string,
     $element as xs:string,
     $attribute as xs:string,
-    $type as xs:string
+    $type as xs:string,
+    $collation as xs:string?
 ) as empty-sequence()
 {
     prop:set(concat("corona-index-", $name), <index type="range" name="{ $name }">
@@ -71,6 +76,7 @@ declare function config:setXMLAttributeRange(
         <element>{ $element }</element>
         <attribute>{ $attribute }</attribute>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
     </index>)
 };
 
@@ -78,6 +84,7 @@ declare function config:setJSONBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $buckets as element()+
 ) as empty-sequence()
 {
@@ -85,6 +92,7 @@ declare function config:setJSONBucketedRange(
         <structure>json</structure>
         <key>{ $key }</key>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
         { config:generateBucketStructure($buckets, $type, "json") }
     </index>)
 };
@@ -93,6 +101,7 @@ declare function config:setJSONAutoBucketedRange(
     $name as xs:string,
     $key as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
@@ -105,6 +114,7 @@ declare function config:setJSONAutoBucketedRange(
         <structure>json</structure>
         <key>{ $key }</key>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
         <bucketInterval>{ $bucketInterval }</bucketInterval>
         <startingAt>{ $startingAt }</startingAt>
         { if(exists($stoppingAt)) then <stoppingAt>{ $stoppingAt }</stoppingAt> else () }
@@ -118,6 +128,7 @@ declare function config:setXMLElementBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $buckets as element()+
 ) as empty-sequence()
 {
@@ -125,6 +136,7 @@ declare function config:setXMLElementBucketedRange(
         <structure>xmlelement</structure>
         <element>{ $element }</element>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
         { config:generateBucketStructure($buckets, $type, "xml") }
     </index>)
 };
@@ -133,6 +145,7 @@ declare function config:setXMLElementAutoBucketedRange(
     $name as xs:string,
     $element as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
@@ -145,6 +158,7 @@ declare function config:setXMLElementAutoBucketedRange(
         <structure>xmlelement</structure>
         <element>{ $element }</element>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
         <bucketInterval>{ $bucketInterval }</bucketInterval>
         <startingAt>{ $startingAt }</startingAt>
         { if(exists($stoppingAt)) then <stoppingAt>{ $stoppingAt }</stoppingAt> else () }
@@ -159,6 +173,7 @@ declare function config:setXMLAttributeBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $buckets as element()+
 ) as empty-sequence()
 {
@@ -167,6 +182,7 @@ declare function config:setXMLAttributeBucketedRange(
         <element>{ $element }</element>
         <attribute>{ $attribute }</attribute>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
         { config:generateBucketStructure($buckets, $type, "xml") }
     </index>)
 };
@@ -176,6 +192,7 @@ declare function config:setXMLAttributeAutoBucketedRange(
     $element as xs:string,
     $attribute as xs:string,
     $type as xs:string,
+    $collation as xs:string?,
     $bucketInterval as xs:string,
     $startingAt as xs:anySimpleType,
     $stoppingAt as xs:anySimpleType?,
@@ -189,6 +206,7 @@ declare function config:setXMLAttributeAutoBucketedRange(
         <element>{ $element }</element>
         <attribute>{ $attribute }</attribute>
         <type>{ $type }</type>
+        { if($type = "string") then <collation>{ $collation }</collation> else () }
         <bucketInterval>{ $bucketInterval }</bucketInterval>
         <startingAt>{ $startingAt }</startingAt>
         { if(exists($stoppingAt)) then <stoppingAt>{ $stoppingAt }</stoppingAt> else () }

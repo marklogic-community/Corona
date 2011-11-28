@@ -61,11 +61,11 @@ return
             else
                 try {
                     if(exists($key))
-                    then manage:createJSONRange($name, $key, $type, $config)
+                    then manage:createJSONRange($name, $key, $type, map:get($params, "collation"), $config)
                     else if(exists($element) and exists($attribute))
-                    then manage:createXMLAttributeRange($name, $element, $attribute, $type, $config)
+                    then manage:createXMLAttributeRange($name, $element, $attribute, $type, map:get($params, "collation"), $config)
                     else if(exists($element) and empty($attribute))
-                    then manage:createXMLElementRange($name, $element, $type, $config)
+                    then manage:createXMLElementRange($name, $element, $type, map:get($params, "collation"), $config)
                     else ()
                 }
                 catch ($e) {

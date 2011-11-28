@@ -154,6 +154,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="element" required="false"/>
             <param name="attribute" required="false"/>
             <param name="type" required="true"/>
+            <param name="collation" required="false"/>
         </http>
         <http method="DELETE"/>
     </request>
@@ -173,6 +174,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="format" required="false"/>
             <param name="firstFormat" required="false"/>
             <param name="lastFormat" required="false"/>
+            <param name="collation" required="false"/>
         </http>
         <http method="DELETE"/>
     </request>

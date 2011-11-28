@@ -80,7 +80,7 @@ declare function search:bucketLabelToQuery(
 
     let $options :=
         if($index/type = "string")
-        then ($options, "collation=http://marklogic.com/collation/")
+        then ($options, concat("collation=http://marklogic.com/collation/", $index/collation))
         else $options
 
     return
@@ -155,7 +155,7 @@ declare function search:rangeValueToQuery(
         return common:castAs($value, $type)
     let $options :=
         if($index/type = "string")
-        then ($options, "collation=http://marklogic.com/collation/")
+        then ($options, concat("collation=http://marklogic.com/collation/", $index/collation))
         else $options
     let $JSONQName := if(exists($index/key)) then common:keyToQName($index/key) else ()
     where $index/@type = ("range", "bucketedrange", "autobucketedrange")
