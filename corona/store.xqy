@@ -187,38 +187,41 @@ return
         let $removePermissions := local:permissionsFromRequest($params, "removePermission")
 
         let $set := xdmp:set-response-code(204, "Document updated")
-        return (
-            if(empty(doc($uri)) and exists($bodyContent))
-            then
-                if($contentType = "binary")
-                then store:insertDocument($uri, $bodyContent, (), $collections, $properties, $permissions, $quality)
-                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
-            else if(exists($bodyContent))
-            then
-                if($contentType = "binary")
-                then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"))
-                else store:updateDocumentContent($uri, $bodyContent, $contentType)
-            else (),
-            if(exists($properties))
-            then store:setProperties($uri, $properties)
+        return
+            if(exists($uri) and exists(map:get($params, "moveTo")))
+            then store:moveDocument($uri, map:get($params, "moveTo"))
             else (
-                store:addProperties($uri, $addProperties),
-                store:removeProperties($uri, $removeProperties)
-            ),
-            if(exists($permissions))
-            then store:setPermissions($uri, $permissions)
-            else (
-                store:addPermissions($uri, $addPermisssions),
-                store:removePermissions($uri, $removePermissions)
-            ),
-            if(exists($collections))
-            then store:setCollections($uri, $collections)
-            else (
-                store:addCollections($uri, $addCollections),
-                store:removeCollections($uri, $removeCollections)
-            ),
-            store:setQuality($uri, $quality)
-        )
+                if(empty(doc($uri)) and exists($bodyContent))
+                then
+                    if($contentType = "binary")
+                    then store:insertDocument($uri, $bodyContent, (), $collections, $properties, $permissions, $quality)
+                    else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+                else if(exists($bodyContent))
+                then
+                    if($contentType = "binary")
+                    then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"))
+                    else store:updateDocumentContent($uri, $bodyContent, $contentType)
+                else (),
+                if(exists($properties))
+                then store:setProperties($uri, $properties)
+                else (
+                    store:addProperties($uri, $addProperties),
+                    store:removeProperties($uri, $removeProperties)
+                ),
+                if(exists($permissions))
+                then store:setPermissions($uri, $permissions)
+                else (
+                    store:addPermissions($uri, $addPermisssions),
+                    store:removePermissions($uri, $removePermissions)
+                ),
+                if(exists($collections))
+                then store:setCollections($uri, $collections)
+                else (
+                    store:addCollections($uri, $addCollections),
+                    store:removeCollections($uri, $removeCollections)
+                ),
+                store:setQuality($uri, $quality)
+            )
     }
     catch ($e) {
         common:errorFromException($e, $outputFormat)

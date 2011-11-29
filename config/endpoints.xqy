@@ -46,6 +46,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="removePermission" alias="removePermission[]" repeatable="true" required="false"/>
             <param name="quality" required="false"/>
             <param name="contentForBinary" required="false"/>
+            <param name="moveTo" required="false"/>
         </http>
         <http method="PUT">
             <param name="contentType" required="false" values="json|xml|text|binary"/>

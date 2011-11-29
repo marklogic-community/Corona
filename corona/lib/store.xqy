@@ -145,6 +145,26 @@ declare function store:outputMultipleDocuments(
         else ()
 };
 
+declare function store:moveDocument(
+    $existingURI as xs:string,
+    $newURI as xs:string
+) as empty-sequence()
+{
+    let $test :=
+        if(empty(doc($existingURI)))
+        then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document to move at '", $existingURI, "'"))
+        else ()
+    let $test :=
+        if(exists(doc($newURI)))
+        then error(xs:QName("corona:DOCUMENT-EXISTS"), concat("There is already a document at '", $newURI, "'"))
+        else ()
+    return (
+        xdmp:document-insert($newURI, doc($existingURI), xdmp:document-get-permissions($existingURI), xdmp:document-get-collections($existingURI), xdmp:document-get-quality($existingURI)),
+        xdmp:document-set-properties($newURI, xdmp:document-properties($existingURI)/prop:properties/*),
+        xdmp:document-delete($existingURI)
+    )
+};
+
 declare function store:documentExists(
     $uri as xs:string
 ) as xs:boolean

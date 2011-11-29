@@ -253,7 +253,7 @@ corona.compareXMLDocuments = function(model, xmlAsString, withExtras) {
 };
 
 
-corona.insertDocuments = function(prefix, withExtras) {
+corona.insertDocuments = function(prefix, withExtras, callback) {
     var i = 0;
     for(i = 0; i < corona.documents.length; i += 1) {
         if((corona.documents[i].type === "json" && corona.stash.status.features.JSONDocs === false) || corona.documents[i].shouldSucceed === false) {
@@ -302,6 +302,81 @@ corona.insertDocuments = function(prefix, withExtras) {
                             },
                             error: function(j, t, error) {
                                 ok(false, "Could not fetch inserted document");
+                            },
+                            complete: function() {
+                                start();
+                            }
+                        });
+                    },
+                    error: function(j, t, error) {
+                        ok(false, "Could not insert document");
+                    }
+                });
+            });
+        }.call(this, i);
+    }
+};
+
+corona.insertAndMoveDocuments = function(prefix) {
+    var i = 0;
+    for(i = 0; i < corona.documents.length; i += 1) {
+        if((corona.documents[i].type === "json" && corona.stash.status.features.JSONDocs === false) || corona.documents[i].shouldSucceed === false) {
+            continue;
+        }
+
+        var wrapper = function(index) {
+            var doc = corona.documents[index];
+            asyncTest("Inserting document: " + prefix + doc.uri, function() {
+                var docContent = doc.content;
+                if(doc.type === "json") {
+                    docContent = JSON.stringify(docContent);
+                }
+                processExtras = "set";
+                $.ajax({
+                    url: corona.constructURL("PUT", doc, prefix, processExtras, false),
+                    type: 'PUT',
+                    data: docContent,
+                    context: doc,
+                    success: function() {
+                        ok(true, "Inserted document");
+                        $.ajax({
+                            url: "/store",
+                            data: {
+                                "uri": prefix + doc.uri,
+                                "moveTo": "/moved" + doc.uri
+                            },
+                            type: 'POST',
+                            context: this,
+                            success: function(data) {
+                                $.ajax({
+                                    url: corona.constructURL("GET", doc, "/moved", "ignore", true, doc.type === "binary" ? undefined : "include=all"),
+                                    type: 'GET',
+                                    context: this,
+                                    success: function(data) {
+                                        if(this.type === "json") {
+                                            corona.compareJSONDocuments(this, JSON.parse(data), true);
+                                        }
+                                        else if(this.type === "text") {
+                                            corona.compareTextDocuments(this, JSON.parse(data), true);
+                                        }
+                                        else {
+                                            corona.compareXMLDocuments(this, data, true);
+                                        }
+
+                                        corona.deleteDocument("/moved", this);
+                                    },
+                                    error: function(j, t, error) {
+                                        ok(false, "Could not fetch moved document");
+                                    },
+                                    complete: function() {
+                                        start();
+                                    }
+                                });
+                            },
+                            error: function(j, t, error) {
+                                corona.deleteDocument("/moved", this);
+                                corona.deleteDocument(prefix, this);
+                                ok(false, "Could not move document");
                             },
                             complete: function() {
                                 start();
@@ -508,6 +583,7 @@ $(document).ready(function() {
         corona.stash.status = info;
         corona.insertDocuments("/no-extras", false);
         corona.insertDocuments("/extras", true);
+        corona.insertAndMoveDocuments("/moveme");
         corona.runFailingTests("/failures");
     });
 });
