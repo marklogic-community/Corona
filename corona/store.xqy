@@ -142,7 +142,10 @@ return
         let $transformer := map:get($params, "applyTransform")
         let $content :=
             if($include = "content" and count($include) = 1)
-            then doc($uri)
+            then (
+                xdmp:set-response-content-type(store:getDocumentContentType($uri)),
+                doc($uri)
+            )
             else store:outputDocument(doc($uri), $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
         return
             if($outputFormat = "json")

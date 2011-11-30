@@ -46,6 +46,8 @@ declare function store:outputDocument(
     $outputFormat as xs:string
 ) as element()
 {
+	let $set := xdmp:set-response-content-type("text/html")
+
     let $documentType := store:getDocumentTypeFromDoc($doc)
     (:
        contentURI: holds the searchable content
@@ -463,41 +465,24 @@ declare function store:updateBinaryDocumentContent(
     return xdmp:node-replace($existing/node(), $content)
 };
 
-declare private function store:createSidecarDocument(
-    $documentURI as xs:string,
-    $content as binary(),
-    $suppliedContent as xs:string?
-) as element(corona:sidecar)
+declare function store:getDocumentContentType(
+    $uri as xs:string
+) as xs:string
 {
-    let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
-    let $suppliedContent :=
-        if(exists($suppliedContent))
-        then
-            if($suppliedContentFormat = "json")
-            then json:parse($suppliedContent)
-            else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
-        else ()
-    return <corona:sidecar type="binary" original="{ $documentURI }">
-        <corona:suppliedContent format="{ $suppliedContentFormat }">{ $suppliedContent }</corona:suppliedContent>
-        {
-            let $meta := try {
-                xdmp:apply(xdmp:function(xs:QName("xdmp:document-filter")), $content)
-            }
-            catch ($e) {
-                ()
-            }
-            where exists($meta)
-            return <corona:meta>{
-                for $item in $meta/*:html/*:head/*:meta
-                let $name := string($item/@name)
-                where $name != "filter-capabilities"
-                return
-                    if($name = "Dimensions")
-                    then (<width>{ substring-before($item/@content, " x ") }</width>, <height>{ substring-after($item/@content, " x ") }</height>)
-                    else element { string($name) } { string($item/@content) }
-            }</corona:meta>
-        }
-    </corona:sidecar>
+    let $doc := doc($uri)
+    let $documentType := store:getDocumentTypeFromDoc($doc)
+    return
+        if($documentType = "json")
+        then "application/json"
+        else if($documentType = "xml")
+        then "text/xml"
+        else if($documentType = "text")
+        then "text/plain"
+        else if($documentType = "binary")
+        then (doc(store:getSidecarURI($uri))/corona:sidecar/corona:meta/corona:contentType, "application/octet-stream")[1]
+        else if($documentType = "binary-sidecar")
+        then ($doc/corona:sidecar/corona:meta/corona:contentType, "application/octet-stream")[1]
+        else "application/octet-stream"
 };
 
 declare function store:createProperty(
@@ -779,4 +764,51 @@ declare private function store:getDocumentURIFromSidecar(
 ) as xs:string
 {
     replace($sidecarURI, "-sidecar$", "")
+};
+
+declare private function store:createSidecarDocument(
+    $documentURI as xs:string,
+    $content as binary(),
+    $suppliedContent as xs:string?
+) as element(corona:sidecar)
+{
+    let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
+    let $suppliedContent :=
+        if(exists($suppliedContent))
+        then
+            if($suppliedContentFormat = "json")
+            then json:parse($suppliedContent)
+            else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
+        else ()
+    return <corona:sidecar type="binary" original="{ $documentURI }">
+        <corona:suppliedContent format="{ $suppliedContentFormat }">{ $suppliedContent }</corona:suppliedContent>
+        {
+            let $meta := try {
+                xdmp:apply(xdmp:function(xs:QName("xdmp:document-filter")), $content)
+            }
+            catch ($e) {
+                ()
+            }
+            where exists($meta)
+            return <corona:meta>{
+                for $item in $meta/*:html/*:head/*:meta
+                let $name := string-join(
+                    for $bit at $pos in tokenize($item/@name, "\-| |_")
+                    return 
+                        if($pos > 1)
+                        then concat(upper-case(substring($bit, 1, 1)), substring($bit, 2))
+                        else
+                            if(lower-case(substring($bit, 2, 1)) = substring($bit, 2, 1))
+                            then concat(lower-case(substring($bit, 1, 1)), substring($bit, 2))
+                            else $bit
+                , "")
+                let $element := element { xs:QName(concat("corona:", json:escapeNCName(string($name)))) } { string($item/@content) }
+                where $name != "filterCapabilities"
+                return
+                    if($name = "dimensions" and count(tokenize($item/@content, " x ")) = 2)
+                    then ($element, <corona:width>{ substring-before($item/@content, " x ") }</corona:width>, <corona:height>{ substring-after($item/@content, " x ") }</corona:height>)
+                    else $element
+            }</corona:meta>
+        }
+    </corona:sidecar>
 };
