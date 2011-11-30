@@ -17,6 +17,7 @@ limitations under the License.
 xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
+import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
 import module namespace store="http://marklogic.com/corona/store" at "lib/store.xqy";
@@ -62,20 +63,25 @@ let $errors :=
     then common:error("corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
     else ()
 
-return
-    if(exists($errors))
-    then $errors
-    else
-
+let $content :=
     if($requestMethod = "GET" and string-length($uri))
     then try {
         let $include := map:get($params, "include")
         let $extractPath := map:get($params, "extractPath")
         let $transformer := map:get($params, "applyTransform")
-        return store:getDocument($uri, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
+        return
+            if($include = "content" and count($include) = 1)
+            then doc($uri)
+            else store:outputDocument(doc($uri), $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
     }
     catch ($e) {
-        common:errorFromException($e, $outputFormat)
+        xdmp:set($errors, common:errorFromException($e, $outputFormat))
     }
+    else xdmp:set($errors, common:error("corona:INVALID-PARAMETER", "Unknown request", $outputFormat))
 
-    else common:error("corona:INVALID-PARAMETER", "Unknown request", $outputFormat)
+return
+    if(exists($errors))
+    then $errors
+    else if($outputFormat = "json")
+    then json:serialize($content)
+    else <corona:response>{ $content/* }</corona:response>

@@ -17,6 +17,7 @@ limitations under the License.
 xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
+import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
 import module namespace store="http://marklogic.com/corona/store" at "lib/store.xqy";
@@ -119,12 +120,16 @@ return
     then try {
         let $query := local:queryFromRequest($params)
         let $include := map:get($params, "include")
-        return
+        let $content :=
             if(string-length($uri))
             then store:deleteDocument($uri, map:get($params, "include") = ("uri", "uris"), $outputFormat)
             else if(exists($query))
             then store:deleteDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"), $outputFormat)
             else error(xs:QName("corona:MISSING-PARAMETER"), "Missing parameters: Must supply a URI, a string query or a structured query with DELETE requests")
+        return
+            if($outputFormat = "json")
+            then json:serialize($content)
+            else $content
     }
     catch ($e) {
         common:errorFromException($e, $outputFormat)
@@ -135,7 +140,14 @@ return
         let $include := map:get($params, "include")
         let $extractPath := map:get($params, "extractPath")
         let $transformer := map:get($params, "applyTransform")
-        return store:getDocument($uri, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
+        let $content :=
+            if($include = "content" and count($include) = 1)
+            then doc($uri)
+            else store:outputDocument(doc($uri), $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
+        return
+            if($outputFormat = "json")
+            then json:serialize($content)
+            else $content
     }
     catch ($e) {
         common:errorFromException($e, $outputFormat)

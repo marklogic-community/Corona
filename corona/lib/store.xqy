@@ -33,6 +33,142 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare variable $xsltEval := try { xdmp:function(xs:QName("xdmp:xslt-eval")) } catch ($e) {};
 declare variable $xsltIsSupported := try { xdmp:apply($xsltEval, <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"/>, <foo/>)[3], true() } catch ($e) {xdmp:log($e), false() };
 
+(:
+    Can take in a JSON document, XML document, text document, binary node or binary sidecar.
+    Will *not* output just the raw document if include equals and only equals "content", use doc() for that instead.
+:)
+declare function store:outputDocument(
+    $doc as document-node(),
+    $include as xs:string+,
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?,
+    $highlightQuery as cts:query?,
+    $outputFormat as xs:string
+) as element()
+{
+    let $documentType := store:getDocumentTypeFromDoc($doc)
+    (:
+       contentURI: holds the searchable content
+       documentURI: holds the document that the user inserted
+    :)
+    let $contentURI :=
+        if($documentType = "binary")
+        then store:getSidecarURI(base-uri($doc))
+        else base-uri($doc)
+    let $documentURI :=
+        if($documentType = "binary-sidecar")
+        then store:getDocumentURIFromSidecar($contentURI)
+        else $contentURI
+
+    let $contentType :=
+        if($documentType = "binary-sidecar")
+        then string($doc/corona:sidecar/@format)
+        else if($documentType = "binary")
+        then string(doc($contentURI)/corona:sidecar/@format)
+        else $documentType
+
+    let $collections := xdmp:document-get-collections($contentURI)
+
+    let $searchableContent :=
+        if($documentType = "text")
+        then $doc/text()
+        else if($documentType = "binary-sidecar")
+        then $doc/corona:sidecar/*
+        else if($documentType = "binary")
+        then doc($contentURI)/corona:sidecar/*
+        else if($documentType = "json")
+        then $doc/json:json
+        else $doc
+
+    (: Perform the path extraction if one was provided :)
+    let $content :=
+        if(exists($extractPath) and $contentType = "xml")
+        then store:wrapContentNodes(path:select($searchableContent, $extractPath, "xpath"), $contentType)
+        else if(exists($extractPath) and $contentType = "json")
+        then store:wrapContentNodes(path:select($searchableContent, $extractPath, "json"), $contentType)
+        else $searchableContent
+
+    (: Highlight the content body :)
+    let $content :=
+        if($include = ("highlighting") and exists($highlightQuery))
+        then store:highlightContent($content, $highlightQuery, $outputFormat)
+        else $content
+
+    (: Apply the transformation :)
+    let $content :=
+        if(exists($applyTransform))
+        then store:applyTransformer($applyTransform, $content)
+        else $content
+
+    (: If the wrapper element from wrapContentNodes is still sticking around, remove it :)
+    let $content :=
+        if($contentType = "xml" and namespace-uri($content) = "http://marklogic.com/corona/store")
+        then $content/*
+        else $content
+
+    let $snippet :=
+        if($include = ("snippet", "all") and exists($highlightQuery))
+        then common:translateSnippet(search:snippet($doc, <cast>{ $highlightQuery }</cast>/*), $outputFormat)
+        else ()
+
+    return
+        if($outputFormat = "json")
+        then json:object((
+            "uri", $documentURI,
+            if($include = ("content", "all"))
+            then ("content", store:wrapContentNodes($content, $contentType))
+            else (),
+            if($include = ("collections", "all"))
+            then ("collections", store:getDocumentCollections($contentURI, "json"))
+            else (),
+            if($include = ("properties", "all"))
+            then ("properties", store:getDocumentProperties($contentURI, "json"))
+            else (),
+            if($include = ("permissions", "all"))
+            then ("permissions", store:getDocumentPermissions($contentURI, "json"))
+            else (),
+            if($include = ("quality", "all"))
+            then ("quality", store:getDocumentQuality($contentURI))
+            else (),
+            if($include = ("snippet", "all") and exists($highlightQuery))
+            then ("snippet", $snippet)
+            else (),
+            if($include = ("confidence", "all") and exists($highlightQuery))
+            then ("confidence", cts:confidence($doc))
+            else ()
+        ))
+        else if($outputFormat = "xml")
+        then <corona:result>{(
+            <corona:uri>{ $documentURI }</corona:uri>,
+            if($include = ("content", "all"))
+            then <corona:content>{
+                if($contentType = "json")
+                then json:serialize(store:wrapContentNodes($content, $contentType))
+                else $content
+            }</corona:content>
+            else (),
+            if($include = ("collections", "all"))
+            then <corona:collections>{ store:getDocumentCollections($contentURI, "xml") }</corona:collections>
+            else (),
+            if($include = ("properties", "all"))
+            then <corona:properties>{ store:getDocumentProperties($contentURI, "xml") }</corona:properties>
+            else (),
+            if($include = ("permissions", "all"))
+            then <corona:permissions>{ store:getDocumentPermissions($contentURI, "xml") }</corona:permissions>
+            else (),
+            if($include = ("quality", "all"))
+            then <corona:quality>{ store:getDocumentQuality($contentURI) }</corona:quality>
+            else (),
+            if($include = ("snippet", "all"))
+            then <corona:snippet>{ $snippet }</corona:snippet>
+            else (),
+            if($include = ("confidence", "all"))
+            then <corona:confidence>{ cts:confidence($doc) }</corona:confidence>
+            else ()
+        )}</corona:result>
+        else ()
+};
+
 declare function store:outputMultipleDocuments(
     $docs as document-node()*,
     $start as xs:integer,
@@ -43,7 +179,7 @@ declare function store:outputMultipleDocuments(
     $extractPath as xs:string?,
     $applyTransform as xs:string?,
     $outputFormat as xs:string
-)
+) as element()
 {
     let $start :=
         if($total = 0)
@@ -56,82 +192,19 @@ declare function store:outputMultipleDocuments(
 
     let $results :=
         for $doc in $docs
-        let $uri := base-uri($doc)
-        let $collections := xdmp:document-get-collections($uri)
-        let $contentType := store:getDocumentType($uri)
-        let $pathType := if($contentType = "xml") then "xpath" else "json"
-
-        (: Perform the path extraction if one was provided :)
-        let $content :=
-            if($contentType = "text")
-            then $doc/text()
-            else if(exists($extractPath))
-            then store:wrapContentNodes(path:select(if($contentType = "json") then $doc/json:json else $doc, $extractPath, $pathType), $contentType)
-            else $doc
-
-        (: Highlight the content body :)
-        let $content :=
-            if($include = ("highlighting") and exists($query))
-            then store:highlightContent($content, $query, $outputFormat)
-            else $content
-
-        (: Apply the transformation :)
-        let $content :=
-            if(exists($applyTransform))
-            then store:applyTransformer($applyTransform, $content)
-            else $content
-
-        (: If the wrapper element from wrapContentNodes is still sticking around, remove it :)
-        let $content :=
-            if($contentType = "xml" and namespace-uri($content) = "http://marklogic.com/corona/store")
-            then $content/*
-            else $content
-
-        let $snippet :=
-            if($include = ("snippet", "all"))
-            then common:translateSnippet(search:snippet($doc, <cast>{ $query }</cast>/*), $outputFormat)
-            else ()
-
-        where exists($contentType)
-        return
-            if($outputFormat = "json")
-            then json:object((
-                "uri", $uri,
-                store:outputDocument($uri, $content, $include, $contentType, $outputFormat),
-                if($include = ("snippet", "all"))
-                then ("snippet", $snippet)
-                else (),
-                if($include = ("confidence", "all"))
-                then ("confidence", cts:confidence($doc))
-                else ()
-            ))
-            else if($outputFormat = "xml")
-            then <corona:result>{(
-                <corona:uri>{ $uri }</corona:uri>,
-                store:outputDocument($uri, $content, $include, $contentType, $outputFormat),
-                if($include = ("snippet", "all"))
-                then <corona:snippet>{ $snippet }</corona:snippet>
-                else (),
-                if($include = ("confidence", "all"))
-                then <corona:confidence>{ cts:confidence($doc) }</corona:confidence>
-                else ()
-            )}</corona:result>
-            else ()
-
+        return store:outputDocument($doc, $include, $extractPath, $applyTransform, $query, $outputFormat)
     let $executionTime := substring(string(xdmp:query-meters()/*:elapsed-time), 3, 4)
     return
         if($outputFormat = "json")
-        then json:serialize(
-            json:object((
-                "meta", json:object((
-                    "start", $start,
-                    "end", $end,
-                    "total", $total,
-                    "executionTime", $executionTime
-                )),
-                if($include = "none") then () else ("results", json:array($results))
-            ))
-        )
+        then json:object((
+            "meta", json:object((
+                "start", $start,
+                "end", $end,
+                "total", $total,
+                "executionTime", $executionTime
+            )),
+            if($include = "none") then () else ("results", json:array($results))
+        ))
         else if($outputFormat = "xml")
         then <corona:response>
                 <corona:meta>
@@ -176,24 +249,31 @@ declare function store:getDocumentType(
     $uri as xs:string
 ) as xs:string?
 {
-    let $doc := doc($uri)
-    return
-        if(exists($doc/json:json))
-        then "json"
-        else if(exists($doc/*))
-        then "xml"
-        else if(exists($doc/text()))
-        then "text"
-        else if(exists($doc/binary()))
-        then "binary"
-        else ()
+    store:getDocumentTypeFromDoc(doc($uri))
+};
+
+declare function store:getDocumentTypeFromDoc(
+    $doc as item()
+) as xs:string?
+{
+    if(exists($doc/json:json))
+    then "json"
+    else if(exists($doc/corona:sidecar))
+    then "binary-sidecar"
+    else if(exists($doc/*))
+    then "xml"
+    else if(exists($doc/text()))
+    then "text"
+    else if(exists($doc/binary()))
+    then "binary"
+    else ()
 };
 
 declare function store:deleteDocument(
     $uri as xs:string,
     $includeURIs as xs:boolean,
     $outputFormat as xs:string
-)
+) as element()
 {
     if(store:documentExists($uri))
     then (
@@ -202,7 +282,7 @@ declare function store:deleteDocument(
         else (),
         xdmp:document-delete($uri),
         if($outputFormat = "json")
-        then json:serialize(json:object((
+        then json:object((
             "meta", json:object((
                 "deleted", 1,
                 "numRemaining", 0
@@ -210,7 +290,7 @@ declare function store:deleteDocument(
             if($includeURIs)
             then ("uris", json:array($uri))
             else ()
-        )))
+        ))
         else if($outputFormat = "xml")
         then <corona:results>
             <corona:meta>
@@ -234,7 +314,7 @@ declare function store:deleteDocumentsWithQuery(
     $includeURIs as xs:boolean,
     $limit as xs:integer?,
     $outputFormat as xs:string
-)
+) as element()
 {
     let $docs :=
         if(exists($limit))
@@ -260,7 +340,7 @@ declare function store:deleteDocumentsWithQuery(
         if($bulkDelete or $count = 1)
         then
             if($outputFormat = "json")
-            then json:serialize(json:object((
+            then json:object((
                 "meta", json:object((
                     "deleted", $numDeleted,
                     "numRemaining", $count - $numDeleted
@@ -268,7 +348,7 @@ declare function store:deleteDocumentsWithQuery(
                 if($includeURIs)
                 then ("uris", json:array($deletedURIs))
                 else ()
-            )))
+            ))
             else if($outputFormat = "xml")
             then <corona:results>
                 <corona:meta>
@@ -288,72 +368,6 @@ declare function store:deleteDocumentsWithQuery(
         else if($count = 0)
         then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), "DELETE query doesn't match any documents")
         else error(xs:QName("corona:REQUIRES-BULK-DELETE"), "DELETE query matches more than one document without enabling bulk deletes")
-};
-
-declare function store:getDocument(
-    $uri as xs:string,
-    $include as xs:string*,
-    $extractPath as xs:string?,
-    $applyTransform as xs:string?,
-    $highlightQuery as cts:query?,
-    $outputFormat as xs:string
-)
-{
-    if(not(store:documentExists($uri)))
-    then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("Document at '", $uri, "' not found"))
-    else
-
-    let $includeContent := $include = ("content", "all")
-    let $includeCollections := $include = ("collections", "all")
-    let $includeProperties := $include = ("properties", "all")
-    let $includePermissions := $include = ("permissions", "all")
-    let $includeQuality := $include = ("quality", "all")
-
-    let $collections := xdmp:document-get-collections($uri)
-    let $contentType := store:getDocumentType($uri)
-    let $pathType := if($contentType = "xml") then "xpath" else "json"
-
-    let $test :=
-        if($contentType = "binary" and (($include = "content" and count($include) > 1) or $include = "all"))
-        then error(xs:QName("corona:INVALID-PARAMETER"), "Can not include binary content along with it's metadata")
-        else ()
-
-    let $content :=
-        if($contentType = "text")
-        then doc($uri)/text()
-        else if($contentType = "binary")
-        then doc($uri)/binary()
-        else if(exists($extractPath))
-        then store:wrapContentNodes(path:select(doc($uri)/*, $extractPath, $pathType), $contentType)
-        else doc($uri)
-    let $content :=
-        if($include = ("highlighting") and exists($highlightQuery))
-        then store:highlightContent($content, $highlightQuery, $contentType)
-        else $content
-    let $content :=
-        if(exists($applyTransform))
-        then store:applyTransformer($applyTransform, $content)
-        else $content
-    let $content :=
-        if(namespace-uri($content) = "http://marklogic.com/corona/store")
-        then $content/*
-        else $content
-    let $uri :=
-        if($contentType = "binary")
-        then store:getSidecarURI($uri)
-        else $uri
-    return
-        if($includeContent and not($includeCollections) and not($includeProperties) and not($includePermissions) and not($includeQuality))
-        then
-            if($contentType = ("xml", "text", "binary"))
-            then $content
-            else json:serialize($content)
-        else
-            if($outputFormat = "xml")
-            then <corona:response>{ store:outputDocument($uri, $content, $include, "xml", "xml") }</corona:response>
-            else json:serialize(json:document(
-                json:object(store:outputDocument($uri, $content, $include, "json", "json"))
-            ))
 };
 
 declare function store:insertDocument(
@@ -392,15 +406,16 @@ declare function store:insertBinaryDocument(
     $quality as xs:integer?
 ) as empty-sequence()
 {
+    let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
     let $suppliedContent :=
         if(exists($suppliedContent))
         then
-            if(common:xmlOrJSON($suppliedContent) = "json")
+            if($suppliedContentFormat = "json")
             then json:parse($suppliedContent)
             else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
         else ()
     let $sidecarURI := store:getSidecarURI($uri)
-    let $sidecar := <corona:sidecar type="binary">{ $suppliedContent }</corona:sidecar>
+    let $sidecar := <corona:sidecar type="binary" format="{ $suppliedContentFormat }" original="{ $uri }">{ $suppliedContent }</corona:sidecar>
     let $insertSidecar := xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), $permissions), $collections, $quality)
     let $setPropertis :=
         if(exists($properties))
@@ -601,22 +616,16 @@ declare function store:setQuality(
 
 
 
-
 declare private function store:getDocumentCollections(
     $uri as xs:string,
     $outputFormat as xs:string
 ) as element()*
 {
-    let $uri :=
-        if(store:getDocumentType($uri) = "binary")
-        then store:getSidecarURI($uri)
-        else $uri
-    return
-        if($outputFormat = "json")
-        then json:array(xdmp:document-get-collections($uri))
-        else
-            for $collection in xdmp:document-get-collections($uri)
-            return <corona:collection>{ $collection }</corona:collection>
+    if($outputFormat = "json")
+    then json:array(xdmp:document-get-collections($uri))
+    else
+        for $collection in xdmp:document-get-collections($uri)
+        return <corona:collection>{ $collection }</corona:collection>
 };
 
 declare private function store:getDocumentProperties(
@@ -624,22 +633,17 @@ declare private function store:getDocumentProperties(
     $outputFormat as xs:string
 ) as element()*
 {
-    let $uri :=
-        if(store:getDocumentType($uri) = "binary")
-        then store:getSidecarURI($uri)
-        else $uri
-    return
-        if($outputFormat = "json")
-        then
-            json:object(
-                for $property in xdmp:document-properties($uri)/prop:properties/*
-                where namespace-uri($property) = "http://marklogic.com/corona"
-                return (local-name($property), string($property))
-            )
-        else
+    if($outputFormat = "json")
+    then
+        json:object(
             for $property in xdmp:document-properties($uri)/prop:properties/*
             where namespace-uri($property) = "http://marklogic.com/corona"
-            return element { xs:QName(concat("corona:", local-name($property))) } { string($property) }
+            return (local-name($property), string($property))
+        )
+    else
+        for $property in xdmp:document-properties($uri)/prop:properties/*
+        where namespace-uri($property) = "http://marklogic.com/corona"
+        return element { xs:QName(concat("corona:", local-name($property))) } { string($property) }
 };
 
 declare private function store:getDocumentPermissions(
@@ -650,10 +654,6 @@ declare private function store:getDocumentPermissions(
     if($outputFormat = "json")
     then
         json:object(
-            let $uri :=
-                if(store:getDocumentType($uri) = "binary")
-                then store:getSidecarURI($uri)
-                else $uri
             let $permMap := map:map()
             let $populate :=
                 for $permission in xdmp:document-get-permissions($uri)
@@ -674,10 +674,6 @@ declare private function store:getDocumentPermissions(
             )
         )
     else
-        let $uri :=
-            if(store:getDocumentType($uri) = "binary")
-            then store:getSidecarURI($uri)
-            else $uri
         let $permMap := map:map()
         let $populate :=
             for $permission in xdmp:document-get-permissions($uri)
@@ -700,9 +696,7 @@ declare private function store:getDocumentQuality(
     $uri as xs:string
 ) as xs:decimal
 {
-    if(store:getDocumentType($uri) = "binary")
-    then xdmp:document-get-quality(store:getSidecarURI($uri))
-    else xdmp:document-get-quality($uri)
+    xdmp:document-get-quality($uri)
 };
 
 declare private function store:highlightContent(
@@ -737,62 +731,6 @@ declare private function store:wrapContentNodes(
         else $nodes
 };
 
-declare private function store:outputDocument(
-    $uri as xs:string,
-    $content as node()*,
-    $include as xs:string*,
-    $contentType as xs:string,
-    $outputFormat as xs:string
-)
-{
-    if($outputFormat = "json")
-    then
-        let $content :=
-            if($contentType = "json")
-            then store:wrapContentNodes($content, $contentType)
-            else $content
-        return (
-            if($include = ("content", "all"))
-            then ("content", $content)
-            else (),
-            if($include = ("collections", "all"))
-            then ("collections", store:getDocumentCollections($uri, "json"))
-            else (),
-            if($include = ("properties", "all"))
-            then ("properties", store:getDocumentProperties($uri, "json"))
-            else (),
-            if($include = ("permissions", "all"))
-            then ("permissions", store:getDocumentPermissions($uri, "json"))
-            else (),
-            if($include = ("quality", "all"))
-            then ("quality", store:getDocumentQuality($uri))
-            else ()
-        )
-    else if($outputFormat = "xml")
-    then (
-        if($include = ("content", "all"))
-        then <corona:content>{
-            if($contentType = "json")
-            then json:serialize(store:wrapContentNodes($content, $contentType))
-            else $content
-        }</corona:content>
-        else (),
-        if($include = ("collections", "all"))
-        then <corona:collections>{ store:getDocumentCollections($uri, "xml") }</corona:collections>
-        else (),
-        if($include = ("properties", "all"))
-        then <corona:properties>{ store:getDocumentProperties($uri, "xml") }</corona:properties>
-        else (),
-        if($include = ("permissions", "all"))
-        then <corona:permissions>{ store:getDocumentPermissions($uri, "xml") }</corona:permissions>
-        else (),
-        if($include = ("quality", "all"))
-        then <corona:quality>{ store:getDocumentQuality($uri) }</corona:quality>
-        else ()
-    )
-    else ()
-};
-
 declare private function store:applyTransformer(
     $name as xs:string,
     $content as node()
@@ -812,4 +750,11 @@ declare private function store:getSidecarURI(
 ) as xs:string
 {
     concat($uri, "-sidecar")
+};
+
+declare private function store:getDocumentURIFromSidecar(
+    $sidecarURI as xs:string
+) as xs:string
+{
+    replace($sidecarURI, "-sidecar$", "")
 };

@@ -17,11 +17,11 @@ limitations under the License.
 xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
+import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace manage="http://marklogic.com/corona/manage" at "lib/manage.xqy";
 import module namespace const="http://marklogic.com/corona/constants" at "lib/constants.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
-import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace store="http://marklogic.com/corona/store" at "lib/store.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
@@ -110,7 +110,17 @@ let $end :=
     then $total
     else $end
 
+let $results :=
+    try {
+        store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)
+    }
+    catch ($e) {
+        xdmp:set($errors, common:errorFromException($e, $outputFormat))
+    }
+
 return
     if(exists($errors))
     then $errors
-    else store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)
+    else if($outputFormat = "json")
+    then json:serialize($results)
+    else $results
