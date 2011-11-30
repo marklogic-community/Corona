@@ -62,9 +62,9 @@ declare function store:outputDocument(
 
     let $contentType :=
         if($documentType = "binary-sidecar")
-        then string($doc/corona:sidecar/@format)
+        then string($doc/corona:sidecar/corona:suppliedContent/@format)
         else if($documentType = "binary")
-        then string(doc($contentURI)/corona:sidecar/@format)
+        then string(doc($contentURI)/corona:sidecar/corona:suppliedContent/@format)
         else $documentType
 
     let $collections := xdmp:document-get-collections($contentURI)
@@ -406,16 +406,8 @@ declare function store:insertBinaryDocument(
     $quality as xs:integer?
 ) as empty-sequence()
 {
-    let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
-    let $suppliedContent :=
-        if(exists($suppliedContent))
-        then
-            if($suppliedContentFormat = "json")
-            then json:parse($suppliedContent)
-            else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
-        else ()
     let $sidecarURI := store:getSidecarURI($uri)
-    let $sidecar := <corona:sidecar type="binary" format="{ $suppliedContentFormat }" original="{ $uri }"><corona:suppliedContent>{ $suppliedContent }</corona:suppliedContent></corona:sidecar>
+    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent)
     let $insertSidecar := xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), $permissions), $collections, $quality)
     let $setPropertis :=
         if(exists($properties))
@@ -455,6 +447,28 @@ declare function store:updateBinaryDocumentContent(
     $suppliedContent as xs:string?
 ) as empty-sequence()
 {
+    let $existing := doc($uri)
+    let $test :=
+        if(empty($existing))
+        then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document to update at '", $uri, "'"))
+        else ()
+
+    let $sidecarURI := store:getSidecarURI($uri)
+    let $existingSidecar := doc($sidecarURI)
+    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent)
+    let $updateSidecar :=
+        if(exists($existingSidecar))
+        then xdmp:node-replace($existingSidecar/*, $sidecar)
+        else xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions())) (: XXX - Should grab permissions, collections and quality from binary :)
+    return xdmp:node-replace($existing/node(), $content)
+};
+
+declare private function store:createSidecarDocument(
+    $documentURI as xs:string,
+    $content as binary(),
+    $suppliedContent as xs:string?
+) as element(corona:sidecar)
+{
     let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
     let $suppliedContent :=
         if(exists($suppliedContent))
@@ -463,20 +477,27 @@ declare function store:updateBinaryDocumentContent(
             then json:parse($suppliedContent)
             else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
         else ()
-    let $existing := doc($uri)
-    let $test :=
-        if(empty($existing))
-        then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document to update at '", $uri, "'"))
-        else ()
-
-    let $sidecarURI := store:getSidecarURI($uri)
-    let $existingSidecar := doc($uri)
-    let $sidecar := <corona:sidecar type="binary" format="{ $suppliedContentFormat }" original="{ $uri }"><corona:suppliedContent>{ $suppliedContent }</corona:suppliedContent></corona:sidecar>
-    let $updateSidecar :=
-        if(exists($existingSidecar))
-        then xdmp:node-replace($existingSidecar/*, $sidecar)
-        else xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions())) (: XXX - Should grab permissions, collections and quality from binary :)
-    return xdmp:node-replace($existing/node(), $content)
+    return <corona:sidecar type="binary" original="{ $documentURI }">
+        <corona:suppliedContent format="{ $suppliedContentFormat }">{ $suppliedContent }</corona:suppliedContent>
+        {
+            let $meta := try {
+                xdmp:apply(xdmp:function(xs:QName("xdmp:document-filter")), $content)
+            }
+            catch ($e) {
+                ()
+            }
+            where exists($meta)
+            return <corona:meta>{
+                for $item in $meta/*:html/*:head/*:meta
+                let $name := string($item/@name)
+                where $name != "filter-capabilities"
+                return
+                    if($name = "Dimensions")
+                    then (<width>{ substring-before($item/@content, " x ") }</width>, <height>{ substring-after($item/@content, " x ") }</height>)
+                    else element { string($name) } { string($item/@content) }
+            }</corona:meta>
+        }
+    </corona:sidecar>
 };
 
 declare function store:createProperty(
