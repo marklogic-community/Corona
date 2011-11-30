@@ -73,9 +73,9 @@ declare function store:outputDocument(
         if($documentType = "text")
         then $doc/text()
         else if($documentType = "binary-sidecar")
-        then $doc/corona:sidecar/*
+        then $doc/corona:sidecar/corona:suppliedContent/*
         else if($documentType = "binary")
-        then doc($contentURI)/corona:sidecar/*
+        then doc($contentURI)/corona:sidecar/corona:suppliedContent/*
         else if($documentType = "json")
         then $doc/json:json
         else $doc
@@ -415,7 +415,7 @@ declare function store:insertBinaryDocument(
             else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
         else ()
     let $sidecarURI := store:getSidecarURI($uri)
-    let $sidecar := <corona:sidecar type="binary" format="{ $suppliedContentFormat }" original="{ $uri }">{ $suppliedContent }</corona:sidecar>
+    let $sidecar := <corona:sidecar type="binary" format="{ $suppliedContentFormat }" original="{ $uri }"><corona:suppliedContent>{ $suppliedContent }</corona:suppliedContent></corona:sidecar>
     let $insertSidecar := xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), $permissions), $collections, $quality)
     let $setPropertis :=
         if(exists($properties))
@@ -455,10 +455,11 @@ declare function store:updateBinaryDocumentContent(
     $suppliedContent as xs:string?
 ) as empty-sequence()
 {
+    let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
     let $suppliedContent :=
         if(exists($suppliedContent))
         then
-            if(common:xmlOrJSON($suppliedContent) = "json")
+            if($suppliedContentFormat = "json")
             then json:parse($suppliedContent)
             else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
         else ()
@@ -470,7 +471,7 @@ declare function store:updateBinaryDocumentContent(
 
     let $sidecarURI := store:getSidecarURI($uri)
     let $existingSidecar := doc($uri)
-    let $sidecar := <corona:sidecar type="binary">{ $suppliedContent }</corona:sidecar>
+    let $sidecar := <corona:sidecar type="binary" format="{ $suppliedContentFormat }" original="{ $uri }"><corona:suppliedContent>{ $suppliedContent }</corona:suppliedContent></corona:sidecar>
     let $updateSidecar :=
         if(exists($existingSidecar))
         then xdmp:node-replace($existingSidecar/*, $sidecar)

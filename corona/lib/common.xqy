@@ -333,10 +333,12 @@ declare function common:keyToQName(
 };
 
 declare function common:xmlOrJSON(
-    $string as xs:string
-) as xs:string
+    $string as xs:string?
+) as xs:string?
 {
-    if(starts-with($string, "<"))
+    if(empty($string))
+    then ()
+    else if(starts-with($string, "<"))
     then "xml"
     else "json"
 };
