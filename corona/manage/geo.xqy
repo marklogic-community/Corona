@@ -34,15 +34,15 @@ let $requestMethod := xdmp:get-request-method()
 let $config := admin:get-configuration()
 let $existing := manage:getGeo($name)
 
-return
+return common:output(
     if($requestMethod = "GET")
     then
         if(string-length($name))
         then
             if(exists($existing))
-            then json:serialize($existing)
+            then $existing
             else common:error("corona:GEO-INDEX-NOT-FOUND", "Geospatial index not found", "json")
-        else json:serialize(json:array(manage:getAllGeos()))
+        else json:array(manage:getAllGeos())
 
     else if($requestMethod = "POST")
     then
@@ -92,3 +92,4 @@ return
             else common:error("corona:GEO-INDEX-NOT-FOUND", "Geospatial index not found", "json")
         else manage:deleteAllGeos()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+)

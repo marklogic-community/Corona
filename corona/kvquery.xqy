@@ -130,9 +130,4 @@ let $results :=
         xdmp:set($errors, common:errorFromException($e, $outputFormat))
     }
 
-return
-    if(exists($errors))
-    then $errors
-    else if($outputFormat = "json")
-    then json:serialize($results)
-    else $results
+return common:output(($errors, $results)[1])

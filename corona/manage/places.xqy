@@ -49,11 +49,11 @@ let $output :=
         if($requestMethod = "GET")
         then
             if($scope = "place" and empty($name))
-            then json:serialize(manage:getPlace(()))
+            then manage:getPlace(())
             else if($scope = "places" and empty($name))
-            then json:serialize(json:array(manage:getAllPlaces()))
+            then json:array(manage:getAllPlaces())
             else if(exists($name))
-            then json:serialize(manage:getPlace($name))
+            then manage:getPlace($name)
             else common:error("corona:INVALID-REQUEST", "Must supply a place name, request all the places or the anonymous place", "json")
 
         else if($requestMethod = "PUT")
@@ -99,4 +99,4 @@ let $output :=
 return
     if(empty($output))
     then xdmp:set-response-code(204, "Request successful")
-    else $output
+    else common:output($output)

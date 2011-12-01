@@ -17,7 +17,6 @@ limitations under the License.
 xquery version "1.0-ml";
 
 import module namespace common="http://marklogic.com/corona/common" at "lib/common.xqy";
-import module namespace json="http://marklogic.com/json" at "lib/json.xqy";
 import module namespace manage="http://marklogic.com/corona/manage" at "lib/manage.xqy";
 import module namespace const="http://marklogic.com/corona/constants" at "lib/constants.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
@@ -118,9 +117,4 @@ let $results :=
         xdmp:set($errors, common:errorFromException($e, $outputFormat))
     }
 
-return
-    if(exists($errors))
-    then $errors
-    else if($outputFormat = "json")
-    then json:serialize($results)
-    else $results
+return common:output(($errors, $results)[1])

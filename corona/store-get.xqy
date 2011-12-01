@@ -56,35 +56,37 @@ let $params := rest:process-request(endpoints:request("/corona/store-get.xqy"))
 let $uri := map:get($params, "uri")
 let $outputFormat := common:getOutputFormat((), map:get($params, "outputFormat"))
 
+let $doc := doc($uri)
 let $errors :=
     if($requestMethod = ("GET") and string-length($uri) = 0)
     then common:error("corona:INVALID-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $outputFormat)
+    else if(empty($doc))
+    then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no document at '", $uri, "'"), $outputFormat)
     else if(not(common:validateOutputFormat($outputFormat)))
     then common:error("corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
     else ()
 
+let $include := map:get($params, "include")
 let $content :=
     if($requestMethod = "GET" and string-length($uri))
     then try {
-        let $include := map:get($params, "include")
         let $extractPath := map:get($params, "extractPath")
         let $transformer := map:get($params, "applyTransform")
+        where empty($errors)
         return
             if($include = "content" and count($include) = 1)
-            then (
-                xdmp:set-response-content-type(store:getDocumentContentType($uri)),
-                doc($uri)
-            )
-            else store:outputDocument(doc($uri), $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
+            then $doc
+            else if($outputFormat = "json")
+            then store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
+            else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
     }
     catch ($e) {
         xdmp:set($errors, common:errorFromException($e, $outputFormat))
     }
     else xdmp:set($errors, common:error("corona:INVALID-PARAMETER", "Unknown request", $outputFormat))
 
+let $output := ($errors, $content)[1]
 return
-    if(exists($errors))
-    then $errors
-    else if($outputFormat = "json")
-    then json:serialize($content)
-    else <corona:response>{ $content/* }</corona:response>
+    if($output instance of binary())
+    then common:output($output, store:getBinaryContentType($output))
+    else common:output($output)

@@ -70,7 +70,7 @@ declare function common:error(
                 <corona:message>{ $message }</corona:message>
             </corona:error>
         else
-            json:serialize(json:document(
+            json:document(
                 json:object((
                     "error", json:object((
                         "status", $statusCode,
@@ -78,7 +78,7 @@ declare function common:error(
                         "message", $message
                     ))
                 ))
-            ))
+            )
 };
 
 declare function common:errorFromException(
@@ -94,6 +94,39 @@ declare function common:errorFromException(
         xdmp:log($exception),
         common:error("corona:INTERNAL-ERROR", concat($exception/*:message, " (", $exception/*:format-string, ")"), $outputFormat)
     )
+};
+
+declare function common:output(
+    $item as item()?
+) as item()?
+{
+    common:output($item, ())
+};
+
+declare function common:output(
+    $item as item()?,
+    $binaryHint as xs:string?
+) as item()?
+{
+    let $item :=
+        if($item instance of document-node())
+        then $item/node()
+        else $item
+    let $contentType :=
+        if($item instance of binary())
+        then ($binaryHint, "application/octet-stream")[1]
+        else if($item instance of text())
+        then "text/plain"
+        else if(namespace-uri($item) = "http://marklogic.com/json")
+        then "application/json"
+        else if($item instance of element())
+        then "text/xml"
+        else "application/octet-stream"
+    let $set := xdmp:set-response-content-type($contentType)
+    return
+        if(namespace-uri($item) = "http://marklogic.com/json")
+        then json:serialize($item)
+        else $item
 };
 
 declare function common:castFromJSONType(

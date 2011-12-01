@@ -289,12 +289,7 @@ corona.runQueries = function() {
                             success: function(data) {
                                 ok(query.shouldSucceed, "Query succeded");
                                 if(query.assert !== undefined) {
-                                    if(query.type === "json") {
-                                        query.assert.call(this, JSON.parse(data));
-                                    }
-                                    else {
-                                        query.assert.call(this, data);
-                                    }
+                                    query.assert.call(this, data);
                                 }
                                 $.ajax({
                                     url: corona.constructURL(query, "delete"),

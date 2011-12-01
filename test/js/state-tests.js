@@ -8,7 +8,7 @@ corona.getState = function(startTests, callback) {
         url: '/manage',
         type: 'GET',
         success: function(data) {
-            callback.call(this, JSON.parse(data));
+            callback.call(this, data);
         },
         complete: function() { if(startTests) { start(); } }
     });

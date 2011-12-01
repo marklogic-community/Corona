@@ -33,15 +33,15 @@ let $requestMethod := xdmp:get-request-method()
 
 let $existing := manage:getNamespaceURI($prefix)
 
-return
+return common:output(
     if($requestMethod = "GET")
     then
         if(string-length($prefix))
         then
             if(exists($existing))
-            then json:serialize($existing)
+            then $existing
             else common:error("corona:NAMESPACE-NOT-FOUND", "Namespace not found", "json")
-        else json:serialize(json:array(manage:getAllNamespaces()))
+        else json:array(manage:getAllNamespaces())
 
     else if($requestMethod = "POST")
     then
@@ -61,3 +61,4 @@ return
             else common:error("common:NAMESPACE-NOT-FOUND", "Namespace not found", "json")
         else manage:deleteAllNamespaces()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+)

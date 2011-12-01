@@ -30,7 +30,8 @@ let $requestMethod := xdmp:get-request-method()
 let $isManaged := map:get($params, "isManaged")
 
 let $set := xdmp:set-response-code(204, "State saved")
-return try {
+return common:output(
+    try {
         if(exists($isManaged))
         then manage:setManaged($isManaged)
         else common:error("corona:INVALID-PARAMETER", "Must specify an action to perform", "json")
@@ -38,3 +39,4 @@ return try {
     catch ($e) {
         common:errorFromException($e, "json")
     }
+)

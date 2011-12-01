@@ -115,130 +115,129 @@ return
     else if(not(common:transactionsMatch($txid)))
     then xdmp:invoke("/corona/store.xqy", (), <options xmlns="xdmp:eval"><transaction-id>{ map:get(common:processTXID($txid, true()), "id") }</transaction-id></options>)
     else
+        let $output :=
+        if($requestMethod = "DELETE")
+        then try {
+            let $query := local:queryFromRequest($params)
+            let $include := map:get($params, "include")
+            return
+                if(string-length($uri))
+                then store:deleteDocument($uri, map:get($params, "include") = ("uri", "uris"), $outputFormat)
+                else if(exists($query))
+                then store:deleteDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"), $outputFormat)
+                else error(xs:QName("corona:MISSING-PARAMETER"), "Missing parameters: Must supply a URI, a string query or a structured query with DELETE requests")
+        }
+        catch ($e) {
+            common:errorFromException($e, $outputFormat)
+        }
 
-    if($requestMethod = "DELETE")
-    then try {
-        let $query := local:queryFromRequest($params)
-        let $include := map:get($params, "include")
-        let $content :=
-            if(string-length($uri))
-            then store:deleteDocument($uri, map:get($params, "include") = ("uri", "uris"), $outputFormat)
-            else if(exists($query))
-            then store:deleteDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"), $outputFormat)
-            else error(xs:QName("corona:MISSING-PARAMETER"), "Missing parameters: Must supply a URI, a string query or a structured query with DELETE requests")
-        return
-            if($outputFormat = "json")
-            then json:serialize($content)
-            else $content
-    }
-    catch ($e) {
-        common:errorFromException($e, $outputFormat)
-    }
+        else if($requestMethod = "GET" and string-length($uri))
+        then try {
+            let $documentType := store:getDocumentType($uri)
+            let $include := map:get($params, "include")
+            let $extractPath := map:get($params, "extractPath")
+            let $transformer := map:get($params, "applyTransform")
+            let $doc := doc($uri)
+            return
+                if(empty($doc))
+                then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no document at '", $uri, "'"), $outputFormat)
+                else if($include = "content" and count($include) = 1)
+                then $doc
+                else if($outputFormat = "json")
+                then store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
+                else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
+        }
+        catch ($e) {
+            common:errorFromException($e, $outputFormat)
+        }
 
-    else if($requestMethod = "GET" and string-length($uri))
-    then try {
-        let $include := map:get($params, "include")
-        let $extractPath := map:get($params, "extractPath")
-        let $transformer := map:get($params, "applyTransform")
-        let $content :=
-            if($include = "content" and count($include) = 1)
-            then (
-                xdmp:set-response-content-type(store:getDocumentContentType($uri)),
-                doc($uri)
-            )
-            else store:outputDocument(doc($uri), $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
-        return
-            if($outputFormat = "json")
-            then json:serialize($content)
-            else $content
-    }
-    catch ($e) {
-        common:errorFromException($e, $outputFormat)
-    }
+        else if($requestMethod = "PUT" and string-length($uri))
+        then try {
+            let $contentType := common:getContentType($uri, map:get($params, "contentType"))
+            let $bodyContent :=
+                if($contentType = "binary")
+                then xdmp:get-request-body("binary")/binary()
+                else xdmp:get-request-body("text")/text()
+            let $test :=
+                if(empty($bodyContent))
+                then error(xs:QName("corona:INVALID-REQUEST"), "Missing document body")
+                else ()
+            let $collections := local:collectionsFromRequest($params, "collection")
+            let $properties := local:propertiesFromRequest($params, "property")
+            let $permissions := local:permissionsFromRequest($params, "permission")
+            let $quality := local:qualityFromRequest($params)
+            let $set := xdmp:set-response-code(204, "Document inserted")
+            return
+                if($contentType = "binary")
+                then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality)
+                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+        }
+        catch ($e) {
+            common:errorFromException($e, $outputFormat)
+        }
 
-    else if($requestMethod = "PUT" and string-length($uri))
-    then try {
-        let $contentType := common:getContentType($uri, map:get($params, "contentType"))
-        let $bodyContent :=
-            if($contentType = "binary")
-            then xdmp:get-request-body("binary")/binary()
-            else xdmp:get-request-body("text")/text()
-        let $test :=
-            if(empty($bodyContent))
-            then error(xs:QName("corona:INVALID-REQUEST"), "Missing document body")
-            else ()
-        let $collections := local:collectionsFromRequest($params, "collection")
-        let $properties := local:propertiesFromRequest($params, "property")
-        let $permissions := local:permissionsFromRequest($params, "permission")
-        let $quality := local:qualityFromRequest($params)
-        let $set := xdmp:set-response-code(204, "Document inserted")
-        return
-            if($contentType = "binary")
-            then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality)
-            else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
-    }
-    catch ($e) {
-        common:errorFromException($e, $outputFormat)
-    }
+        else if($requestMethod = "POST" and string-length($uri))
+        then try {
+            let $contentType := common:getContentType($uri, map:get($params, "contentType"))
+            let $bodyContent :=
+                if($contentType = "binary")
+                then xdmp:get-request-body("binary")/binary()
+                else xdmp:get-request-body("text")/text()
+            let $collections := local:collectionsFromRequest($params, "collection")
+            let $properties := local:propertiesFromRequest($params, "property")
+            let $permissions := local:permissionsFromRequest($params, "permission")
+            let $quality := local:qualityFromRequest($params)
 
-    else if($requestMethod = "POST" and string-length($uri))
-    then try {
-        let $contentType := common:getContentType($uri, map:get($params, "contentType"))
-        let $bodyContent :=
-            if($contentType = "binary")
-            then xdmp:get-request-body("binary")/binary()
-            else xdmp:get-request-body("text")/text()
-        let $collections := local:collectionsFromRequest($params, "collection")
-        let $properties := local:propertiesFromRequest($params, "property")
-        let $permissions := local:permissionsFromRequest($params, "permission")
-        let $quality := local:qualityFromRequest($params)
+            let $addCollections := local:collectionsFromRequest($params, "addCollection")
+            let $addProperties := local:propertiesFromRequest($params, "addProperty")
+            let $addPermisssions := local:permissionsFromRequest($params, "addPermission")
 
-        let $addCollections := local:collectionsFromRequest($params, "addCollection")
-        let $addProperties := local:propertiesFromRequest($params, "addProperty")
-        let $addPermisssions := local:permissionsFromRequest($params, "addPermission")
+            let $removeCollections := local:collectionsFromRequest($params, "removeCollection")
+            let $removeProperties := map:get($params, "removeProperty")
+            let $removePermissions := local:permissionsFromRequest($params, "removePermission")
 
-        let $removeCollections := local:collectionsFromRequest($params, "removeCollection")
-        let $removeProperties := map:get($params, "removeProperty")
-        let $removePermissions := local:permissionsFromRequest($params, "removePermission")
-
-        let $set := xdmp:set-response-code(204, "Document updated")
-        return
-            if(exists($uri) and exists(map:get($params, "moveTo")))
-            then store:moveDocument($uri, map:get($params, "moveTo"))
-            else (
-                if(empty(doc($uri)) and exists($bodyContent))
-                then
-                    if($contentType = "binary")
-                    then store:insertDocument($uri, $bodyContent, (), $collections, $properties, $permissions, $quality)
-                    else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
-                else if(exists($bodyContent))
-                then
-                    if($contentType = "binary")
-                    then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"))
-                    else store:updateDocumentContent($uri, $bodyContent, $contentType)
-                else (),
-                if(exists($properties))
-                then store:setProperties($uri, $properties)
+            let $set := xdmp:set-response-code(204, "Document updated")
+            return
+                if(exists($uri) and exists(map:get($params, "moveTo")))
+                then store:moveDocument($uri, map:get($params, "moveTo"))
                 else (
-                    store:addProperties($uri, $addProperties),
-                    store:removeProperties($uri, $removeProperties)
-                ),
-                if(exists($permissions))
-                then store:setPermissions($uri, $permissions)
-                else (
-                    store:addPermissions($uri, $addPermisssions),
-                    store:removePermissions($uri, $removePermissions)
-                ),
-                if(exists($collections))
-                then store:setCollections($uri, $collections)
-                else (
-                    store:addCollections($uri, $addCollections),
-                    store:removeCollections($uri, $removeCollections)
-                ),
-                store:setQuality($uri, $quality)
-            )
-    }
-    catch ($e) {
-        common:errorFromException($e, $outputFormat)
-    }
-    else common:error("corona:INVALID-PARAMETER", "Unknown request", $outputFormat)
+                    if(empty(doc($uri)) and exists($bodyContent))
+                    then
+                        if($contentType = "binary")
+                        then store:insertDocument($uri, $bodyContent, (), $collections, $properties, $permissions, $quality)
+                        else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+                    else if(exists($bodyContent))
+                    then
+                        if($contentType = "binary")
+                        then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"))
+                        else store:updateDocumentContent($uri, $bodyContent, $contentType)
+                    else (),
+                    if(exists($properties))
+                    then store:setProperties($uri, $properties)
+                    else (
+                        store:addProperties($uri, $addProperties),
+                        store:removeProperties($uri, $removeProperties)
+                    ),
+                    if(exists($permissions))
+                    then store:setPermissions($uri, $permissions)
+                    else (
+                        store:addPermissions($uri, $addPermisssions),
+                        store:removePermissions($uri, $removePermissions)
+                    ),
+                    if(exists($collections))
+                    then store:setCollections($uri, $collections)
+                    else (
+                        store:addCollections($uri, $addCollections),
+                        store:removeCollections($uri, $removeCollections)
+                    ),
+                    store:setQuality($uri, $quality)
+                )
+        }
+        catch ($e) {
+            common:errorFromException($e, $outputFormat)
+        }
+        else common:error("corona:INVALID-PARAMETER", "Unknown request", $outputFormat)
+    return
+        if($requestMethod = "GET" and $output instance of binary())
+        then common:output($output, store:getBinaryContentType($output))
+        else common:output($output)

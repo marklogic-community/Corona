@@ -33,7 +33,7 @@ let $bodyContent := xdmp:get-request-body("text")/text()
 
 let $existing := manage:getTransformer($name)
 
-return
+return common:output(
     if($requestMethod = "GET")
     then
         if(string-length($name))
@@ -41,7 +41,7 @@ return
             if(exists($existing))
             then $existing
             else common:error("corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
-        else json:serialize(json:array(manage:getAllTransformerNames()))
+        else json:array(manage:getAllTransformerNames())
 
     else if($requestMethod = "PUT")
     then
@@ -64,3 +64,4 @@ return
             else common:error("corona:TRANSFORMER-NOT-FOUND", "Transformer not found", "json")
         else manage:deleteAllTransformers()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+)

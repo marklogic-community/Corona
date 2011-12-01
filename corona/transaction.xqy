@@ -36,13 +36,13 @@ declare function local:generateTransactionStatus(
     let $status := xdmp:host-status(xdmp:host())/hs:transactions/hs:transaction[hs:transaction-id = $id]
     return
         if($outputFormat = "json")
-        then json:serialize(json:document(json:object((
+        then json:document(json:object((
             "txid", $txid,
             "host", xdmp:host-name($status/hs:host-id),
             "createdOn", string($status/hs:start-time),
             "expiresOn", xs:dateTime($status/hs:start-time) + xs:dayTimeDuration(concat("PT", string($status/hs:time-limit), "S")),
             "canBeExtendedTo", xs:dateTime($status/hs:start-time) + xs:dayTimeDuration(concat("PT", string($status/hs:max-time-limit), "S"))
-        ))))
+        )))
         else <corona:response>
             <corona:txid>{ $txid }</corona:txid>
             <corona:host>{ xdmp:host-name($status/hs:host-id) }</corona:host>
@@ -67,7 +67,7 @@ let $errors :=
     then common:error("corona:INVALID-PARAMETER", "Must supply a transaction ID when getting the status, committing or rolling backing a transaction", $outputFormat)
     else ()
 
-return
+return common:output(
     if(exists($errors))
     then $errors
     else 
@@ -141,3 +141,4 @@ return
         else common:error("corona:INVALID-PARAMETER", concat("Invalid action '", $action, "', GET requests only support returning transaction status."), $outputFormat)
 
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), $outputFormat)
+)

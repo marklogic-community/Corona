@@ -46,8 +46,6 @@ declare function store:outputDocument(
     $outputFormat as xs:string
 ) as element()
 {
-	let $set := xdmp:set-response-content-type("text/html")
-
     let $documentType := store:getDocumentTypeFromDoc($doc)
     (:
        contentURI: holds the searchable content
@@ -137,6 +135,12 @@ declare function store:outputDocument(
             else (),
             if($include = ("confidence", "all") and exists($highlightQuery))
             then ("confidence", cts:confidence($doc))
+            else (),
+            if($documentType = ("binary", "binary-sidecar") and $include = ("binaryMetadata", "all"))
+            then ("binaryMetadata", json:object((
+                for $meta in doc($contentURI)/corona:sidecar/corona:meta/*
+                return (local-name($meta), string($meta))
+            )))
             else ()
         ))
         else if($outputFormat = "xml")
@@ -161,11 +165,14 @@ declare function store:outputDocument(
             if($include = ("quality", "all"))
             then <corona:quality>{ store:getDocumentQuality($contentURI) }</corona:quality>
             else (),
-            if($include = ("snippet", "all"))
+            if($include = ("snippet", "all") and exists($highlightQuery))
             then <corona:snippet>{ $snippet }</corona:snippet>
             else (),
-            if($include = ("confidence", "all"))
+            if($include = ("confidence", "all") and exists($highlightQuery))
             then <corona:confidence>{ cts:confidence($doc) }</corona:confidence>
+            else (),
+            if($documentType = ("binary", "binary-sidecar") and $include = ("binaryMetadata", "all"))
+            then <corona:binaryMetadata>{ doc($contentURI)/corona:sidecar/corona:meta/* }</corona:binaryMetadata>
             else ()
         )}</corona:result>
         else ()
@@ -465,24 +472,11 @@ declare function store:updateBinaryDocumentContent(
     return xdmp:node-replace($existing/node(), $content)
 };
 
-declare function store:getDocumentContentType(
-    $uri as xs:string
+declare function store:getBinaryContentType(
+    $doc as binary()
 ) as xs:string
 {
-    let $doc := doc($uri)
-    let $documentType := store:getDocumentTypeFromDoc($doc)
-    return
-        if($documentType = "json")
-        then "application/json"
-        else if($documentType = "xml")
-        then "text/xml"
-        else if($documentType = "text")
-        then "text/plain"
-        else if($documentType = "binary")
-        then (doc(store:getSidecarURI($uri))/corona:sidecar/corona:meta/corona:contentType, "application/octet-stream")[1]
-        else if($documentType = "binary-sidecar")
-        then ($doc/corona:sidecar/corona:meta/corona:contentType, "application/octet-stream")[1]
-        else "application/octet-stream"
+    (doc(store:getSidecarURI(base-uri($doc)))/corona:sidecar/corona:meta/corona:contentType, "application/octet-stream")[1]
 };
 
 declare function store:createProperty(

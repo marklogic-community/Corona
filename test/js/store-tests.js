@@ -284,10 +284,10 @@ corona.insertDocuments = function(prefix, withExtras, callback) {
                             context: this,
                             success: function(data) {
                                 if(this.type === "json") {
-                                    corona.compareJSONDocuments(this, JSON.parse(data), withExtras);
+                                    corona.compareJSONDocuments(this, data, withExtras);
                                 }
                                 else if(this.type === "text") {
-                                    corona.compareTextDocuments(this, JSON.parse(data), withExtras);
+                                    corona.compareTextDocuments(this, data, withExtras);
                                 }
                                 else {
                                     corona.compareXMLDocuments(this, data, true);
@@ -354,10 +354,10 @@ corona.insertAndMoveDocuments = function(prefix) {
                                     context: this,
                                     success: function(data) {
                                         if(this.type === "json") {
-                                            corona.compareJSONDocuments(this, JSON.parse(data), true);
+                                            corona.compareJSONDocuments(this, data, true);
                                         }
                                         else if(this.type === "text") {
-                                            corona.compareTextDocuments(this, JSON.parse(data), true);
+                                            corona.compareTextDocuments(this, data, true);
                                         }
                                         else {
                                             corona.compareXMLDocuments(this, data, true);
@@ -444,10 +444,10 @@ corona.setExtras = function(prefix, doc) {
                     context: this,
                     success: function(data) {
                         if(this.type === "json") {
-                            corona.compareJSONDocuments(this, JSON.parse(data), true);
+                            corona.compareJSONDocuments(this, data, true);
                         }
                         else if(this.type === "text") {
-                            corona.compareTextDocuments(this, JSON.parse(data), true);
+                            corona.compareTextDocuments(this, data, true);
                         }
                         else {
                             corona.compareXMLDocuments(this, data, true);
@@ -483,10 +483,10 @@ corona.removeExtras = function(prefix, doc) {
                     context: this,
                     success: function(data) {
                         if(this.type === "json") {
-                            corona.compareJSONDocuments(this, JSON.parse(data), false);
+                            corona.compareJSONDocuments(this, data, false);
                         }
                         else if(this.type === "text") {
-                            corona.compareTextDocuments(this, JSON.parse(data), false);
+                            corona.compareTextDocuments(this, data, false);
                         }
                         else {
                             corona.compareXMLDocuments(this, data, false);
@@ -522,10 +522,10 @@ corona.addExtras = function(prefix, doc) {
                     context: this,
                     success: function(data) {
                         if(this.type === "json") {
-                            corona.compareJSONDocuments(this, JSON.parse(data), true);
+                            corona.compareJSONDocuments(this, data, true);
                         }
                         else if(this.type === "text") {
-                            corona.compareTextDocuments(this, JSON.parse(data), true);
+                            corona.compareTextDocuments(this, data, true);
                         }
                         else {
                             corona.compareXMLDocuments(this, data, true);

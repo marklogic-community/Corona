@@ -11,7 +11,7 @@ corona.startTransaction = function(supportsTransactions, callback) {
             data: {outputFormat: "json"},
             success: function(data) {
                 ok(supportsTransactions === true, "Created transaction");
-                callback.call(this, JSON.parse(data).txid);
+                callback.call(this, data.txid);
             },
             error: function(j, t, error) {
                 ok(supportsTransactions === false, "Could not create transaction");
@@ -123,7 +123,7 @@ corona.supportsTransactions = function(callback) {
         url: "/manage",
         type: 'GET',
         success: function(data) {
-            var serverVersion = JSON.parse(data).serverVersion;
+            var serverVersion = data.serverVersion;
             callback.call(this, serverVersion.substring(0, 1) === "5");
         }
     });

@@ -146,11 +146,12 @@ let $values :=
         else if($outputFormat = "xml")
         then <corona:facet name="{ $facet }">{ $values }</corona:facet>
         else ()
-return
+return common:output(
     if(exists($errors))
     then $errors
     else if($outputFormat = "json")
-    then json:serialize(json:object($values))
+    then json:object($values)
     else if($outputFormat = "xml")
     then <corona:results>{ $values }</corona:results>
     else ()
+)

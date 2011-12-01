@@ -222,8 +222,7 @@ corona.removeAnonymousPlaces = function(info, callback) {
             asyncTest("Check to make sure the anonymous places are gone", function() {
                 $.ajax({
                     url: "/manage/place",
-                    success: function(data) {
-                        var config = JSON.parse(data);
+                    success: function(config) {
                         equals(0, config.places.length, "Number of anonymous places remaining");
                         callback.call();
                     },
@@ -368,8 +367,7 @@ corona.addNamespaces = function(callback) {
                         asyncTest("Checking to make sure the namespace was created correctly", function() {
                             $.ajax({
                                 url: url,
-                                success: function(data) {
-                                    var info = JSON.parse(data);
+                                success: function(info) {
                                     equal(namespace.prefix, info.prefix, "Namespace prefixes matches");
                                     equal(namespace.uri, info.uri, "Namespace uris matches");
                                 },
@@ -633,8 +631,7 @@ corona.addRangeIndexes = function(callback) {
                         asyncTest("Checking to make sure the range index was created correctly", function() {
                             $.ajax({
                                 url: url,
-                                success: function(data) {
-                                    var info = JSON.parse(data);
+                                success: function(info) {
                                     compareIndexes(index, info);
                                 },
                                 error: function() {
@@ -919,9 +916,7 @@ corona.addPlaces = function(callback) {
                                             asyncTest("Checking to make sure the place items were created correctly", function() {
                                                 $.ajax({
                                                     url: url,
-                                                    success: function(data) {
-                                                        var info = JSON.parse(data);
-
+                                                    success: function(info) {
                                                         $(place.places).each(function(index, configItem) {
                                                             if(configItem.shouldSucceed === false) {
                                                                 return;
@@ -1097,8 +1092,7 @@ corona.addGeoIndexes = function(callback) {
                         asyncTest("Checking to make sure the geo index was created correctly", function() {
                             $.ajax({
                                 url: url,
-                                success: function(data) {
-                                    var info = JSON.parse(data);
+                                success: function(info) {
                                     if(geoIndex.key) { equals(geoIndex.key, info.key, "Key matches"); }
                                     if(geoIndex.element) { equals(geoIndex.element, info.element, "Element matches"); }
                                     if(geoIndex.parentKey) { equals(geoIndex.parentKey, info.parentKey, "Parent key matches"); }
@@ -1141,8 +1135,7 @@ $(document).ready(function() {
     asyncTest("Database index setup", function() {
         $.ajax({
             url: '/manage',
-            success: function(data) {
-                var info = JSON.parse(data);
+            success: function(info) {
                 corona.removeTransformers(info, function() {
                     corona.removeRangeIndexes(info, function() {
                         corona.removeAnonymousPlaces(info, function() {

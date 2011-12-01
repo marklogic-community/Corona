@@ -34,15 +34,15 @@ let $requestMethod := xdmp:get-request-method()
 let $config := admin:get-configuration()
 let $existing := manage:getBucketedRange($name)
 
-return
+return common:output(
     if($requestMethod = "GET")
     then
         if(string-length($name))
         then
             if(exists($existing))
-            then json:serialize($existing)
+            then $existing
             else common:error("corona:RANGE-INDEX-NOT-FOUND", "Bucketed range index not found", "json")
-    else json:serialize(json:array(manage:getAllBucketedRanges()))
+    else json:array(manage:getAllBucketedRanges())
 
     else if($requestMethod = "POST")
     then
@@ -123,3 +123,4 @@ return
             else common:error("corona:RANGE-INDEX-NOT-FOUND", "Bucketed range index not found", "json")
         else manage:deleteAllBucketedRanges()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+)

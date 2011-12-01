@@ -9,7 +9,7 @@ corona.fetchInfo = function(callback) {
             url: "/manage",
             success: function(data) {
                 ok(true, "Fetched Corona state");
-                callback.call(this, JSON.parse(data));
+                callback.call(this, data);
             },
             error: function(j, t, error) {
                 ok(false, "Fetched Corona state");

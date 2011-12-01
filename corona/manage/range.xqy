@@ -34,15 +34,15 @@ let $requestMethod := xdmp:get-request-method()
 let $config := admin:get-configuration()
 let $existing := manage:getRange($name)
 
-return
+return common:output(
     if($requestMethod = "GET")
     then
         if(string-length($name))
         then
             if(exists($existing))
-            then json:serialize($existing)
+            then $existing
             else common:error("corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
-        else json:serialize(json:array(manage:getAllRanges()))
+        else json:array(manage:getAllRanges())
 
     else if($requestMethod = "POST")
     then
@@ -82,3 +82,4 @@ return
             else common:error("corona:RANGE-INDEX-NOT-FOUND", "Range index not found", "json")
         else manage:deleteAllRanges()
     else common:error("corona:UNSUPPORTED-METHOD", concat("Unsupported method: ", $requestMethod), "json")
+)
