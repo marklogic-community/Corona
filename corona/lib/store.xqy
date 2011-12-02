@@ -412,11 +412,13 @@ declare function store:insertBinaryDocument(
     $collections as xs:string*,
     $properties as element()*,
     $permissions as element()*,
-    $quality as xs:integer?
+    $quality as xs:integer?,
+    $extractMetadata as xs:boolean,
+    $extractContent as xs:boolean
 ) as empty-sequence()
 {
     let $sidecarURI := store:getSidecarURI($uri)
-    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent)
+    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent)
     let $insertSidecar := xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), $permissions), $collections, $quality)
     let $setPropertis :=
         if(exists($properties))
@@ -453,7 +455,9 @@ declare function store:updateDocumentContent(
 declare function store:updateBinaryDocumentContent(
     $uri as xs:string,
     $content as binary(),
-    $suppliedContent as xs:string?
+    $suppliedContent as xs:string?,
+    $extractMetadata as xs:boolean,
+    $extractContent as xs:boolean
 ) as empty-sequence()
 {
     let $existing := doc($uri)
@@ -464,7 +468,7 @@ declare function store:updateBinaryDocumentContent(
 
     let $sidecarURI := store:getSidecarURI($uri)
     let $existingSidecar := doc($sidecarURI)
-    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent)
+    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent)
     let $updateSidecar :=
         if(exists($existingSidecar))
         then xdmp:node-replace($existingSidecar/*, $sidecar)
@@ -763,7 +767,9 @@ declare private function store:getDocumentURIFromSidecar(
 declare private function store:createSidecarDocument(
     $documentURI as xs:string,
     $content as binary(),
-    $suppliedContent as xs:string?
+    $suppliedContent as xs:string?,
+    $extractMetadata as xs:boolean,
+    $extractContent as xs:boolean
 ) as element(corona:sidecar)
 {
     let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
@@ -777,32 +783,55 @@ declare private function store:createSidecarDocument(
     return <corona:sidecar type="binary" original="{ $documentURI }">
         <corona:suppliedContent format="{ $suppliedContentFormat }">{ $suppliedContent }</corona:suppliedContent>
         {
-            let $meta := try {
+            if($extractMetadata = false() and $extractContent = false())
+            then ()
+            else
+
+            let $extratedInfo := try {
                 xdmp:apply(xdmp:function(xs:QName("xdmp:document-filter")), $content)
             }
             catch ($e) {
                 ()
             }
-            where exists($meta)
-            return <corona:meta>{
-                for $item in $meta/*:html/*:head/*:meta
-                let $name := string-join(
-                    for $bit at $pos in tokenize($item/@name, "\-| |_")
-                    return 
-                        if($pos > 1)
-                        then concat(upper-case(substring($bit, 1, 1)), substring($bit, 2))
-                        else
-                            if(lower-case(substring($bit, 2, 1)) = substring($bit, 2, 1))
-                            then concat(lower-case(substring($bit, 1, 1)), substring($bit, 2))
-                            else $bit
-                , "")
-                let $element := element { xs:QName(concat("corona:", json:escapeNCName(string($name)))) } { string($item/@content) }
-                where $name != "filterCapabilities"
-                return
-                    if($name = "dimensions" and count(tokenize($item/@content, " x ")) = 2)
-                    then ($element, <corona:width>{ substring-before($item/@content, " x ") }</corona:width>, <corona:height>{ substring-after($item/@content, " x ") }</corona:height>)
-                    else $element
-            }</corona:meta>
+            where exists($extratedInfo)
+            return (
+                if($extractMetadata)
+                then
+                <corona:meta>{(
+                    if(exists($extratedInfo/*:html/*:head/*:title))
+                    then <corona:title>{ string($extratedInfo/*:html/*:head/*:title) }</corona:title>
+                    else (),
+
+                    for $item in $extratedInfo/*:html/*:head/*:meta
+                    let $name := string-join(
+                        for $bit at $pos in tokenize($item/@name, "\-| |_")
+                        return 
+                            if($pos > 1)
+                            then concat(upper-case(substring($bit, 1, 1)), substring($bit, 2))
+                            else
+                                if(lower-case(substring($bit, 2, 1)) = substring($bit, 2, 1))
+                                then concat(lower-case(substring($bit, 1, 1)), substring($bit, 2))
+                                else $bit
+                    , "")
+                    let $element := element { xs:QName(concat("corona:", json:escapeNCName(string($name)))) } { string($item/@content) }
+                    where $name != "filterCapabilities"
+                    return
+                        if($name = "dimensions" and count(tokenize($item/@content, " x ")) = 2)
+                        then ($element, <corona:width>{ substring-before($item/@content, " x ") }</corona:width>, <corona:height>{ substring-after($item/@content, " x ") }</corona:height>)
+                        else $element
+                )}</corona:meta>
+                else (),
+
+                if(exists($extratedInfo/*:html/*:body) and $extractContent)
+                then
+                <corona:extractedContent>{
+                    for $para in $extratedInfo/*:html/*:body/*:p
+                    let $string := normalize-space($para)
+                    where string-length($string)
+                    return <corona:extractedPara>{ $string }</corona:extractedPara>
+                }</corona:extractedContent>
+                else ()
+            )
         }
     </corona:sidecar>
 };

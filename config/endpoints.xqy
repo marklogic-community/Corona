@@ -47,6 +47,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="quality" required="false"/>
             <param name="contentForBinary" required="false"/>
             <param name="moveTo" required="false"/>
+            <param name="extractMetadata" required="false" as="boolean" default="true"/>
+            <param name="extractContent" required="false" as="boolean" default="true"/>
         </http>
         <http method="PUT">
             <param name="contentType" required="false" values="json|xml|text|binary"/>
@@ -55,6 +57,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="permission" alias="permission[]" repeatable="true" required="false"/>
             <param name="quality" required="false"/>
             <param name="contentForBinary" required="false"/>
+            <param name="extractMetadata" required="false" as="boolean" default="true"/>
+            <param name="extractContent" required="false" as="boolean" default="true"/>
         </http>
         <http method="DELETE">
             <param name="stringQuery" required="false"/>
