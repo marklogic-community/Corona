@@ -262,15 +262,12 @@ declare function common:getContentType(
     else if(exists($uri))
     then
         let $extension := tokenize($uri, "\.")[last()]
+        let $detectedType := xdmp:uri-format($uri)
         return
-            if($extension = ("json", "xml"))
+            if($extension = "json")
             then $extension
-            else if($extension = ("txt", "text"))
-            then "text"
-            else if($extension = ("jpg", "gif", "png", "doc", "ppt", "xls"))
-            then "binary"
-            else ()
-    else error(xs:QName("corona:MISSING-PARAMETER"), "Need to specify a contentType whenever the URI doesn't end in 'json', 'xml', 'txt' or 'text'")
+            else $detectedType
+    else error(xs:QName("corona:MISSING-PARAMETER"), "Need to explicitly specify a contentType and/or a URI to auto-detect the content type")
 };
 
 declare function common:getOutputFormat(
