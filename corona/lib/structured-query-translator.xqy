@@ -58,6 +58,7 @@ declare private function sqt:process(
     case element(contains) return sqt:handleMixedValue($step)
     case element(value) return sqt:handleMixedValue($step)
     case element(wordAnywhere) return sqt:handleMixedValue($step)
+    case element(wordInBinary) return sqt:handleMixedValue($step)
     case element(inTextDocument) return sqt:handleMixedValue($step)
 
     case element(weight) return xs:decimal($step)

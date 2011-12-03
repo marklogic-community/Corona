@@ -103,6 +103,7 @@ declare private function structquery:dispatch(
         $step/json:directory[@type = ("string", "array")],
         $step/json:stringQuery[@type = "string"],
         $step/json:wordAnywhere[@type = ("string", "array")],
+        $step/json:wordInBinary[@type = ("string", "array")],
         $step/json:inTextDocument[@type = ("string", "array")],
         $step/json:contentType[@type = "string"],
 
@@ -143,6 +144,7 @@ declare private function structquery:process(
     case element(json:directory) return structquery:handleDirectory($step)
     case element(json:stringQuery) return structquery:handleStringQuery($step, $ignoreRange)
     case element(json:wordAnywhere) return structquery:handleWordAnywhere($step)
+    case element(json:wordInBinary) return structquery:handleWordInBinary($step)
     case element(json:inTextDocument) return structquery:handleInTextDocument($step)
     case element(json:contentType) return structquery:handleContentType($step)
 
@@ -398,6 +400,16 @@ declare private function structquery:handleWordAnywhere(
     let $options := structquery:extractOptions($container, "word")
     let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
     return cts:word-query(structquery:valueToStrings($step), $options, $weight)
+};
+
+declare private function structquery:handleWordInBinary(
+    $step as element(json:wordInBinary)
+) as cts:element-word-query
+{
+    let $container := $step/..
+    let $options := structquery:extractOptions($container, "word")
+    let $weight := xs:double(($container/json:weight[@type = "number"], 1.0)[1])
+    return cts:element-word-query(xs:QName("corona:extractedPara"), structquery:valueToStrings($step), $options, $weight)
 };
 
 declare private function structquery:handleInTextDocument(

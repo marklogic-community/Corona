@@ -156,6 +156,29 @@ corona.queries = [
         "purpose": "wordAnywhere query with weight"
     },
 
+    /* wordInBinary */
+    {
+        "query": { "wordInBinary": "foo" },
+        "xmlQuery": '<constraint><wordInBinary>foo</wordInBinary></constraint>',
+        "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:extractedPara</cts:element> <cts:text xml:lang="en">foo</cts:text></cts:element-word-query>',
+        "purpose": "Simple wordInBinary query"
+    },
+    {
+        "query": { "wordInBinary": ["foo", "bar"] },
+        "xmlQuery": '<constraint><wordInBinary><value>foo</value><value>bar</value></wordInBinary></constraint>',
+        "result": '<cts:element-word-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:extractedPara</cts:element> <cts:text xml:lang="en">foo</cts:text> <cts:text xml:lang="en">bar</cts:text></cts:element-word-query>',
+        "purpose": "wordInBinary query with array"
+    },
+    {
+        "query": {
+            "wordInBinary": "foo",
+            "weight": 2
+        },
+        "xmlQuery": '<constraint><wordInBinary>foo</wordInBinary><weight>2</weight></constraint>',
+        "result": '<cts:element-word-query weight="2" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:corona="http://marklogic.com/corona">corona:extractedPara</cts:element> <cts:text xml:lang="en">foo</cts:text></cts:element-word-query>',
+        "purpose": "wordInBinary query with weight"
+    },
+
     /* inTextDocument */
     {
         "query": { "inTextDocument": "foo" },
