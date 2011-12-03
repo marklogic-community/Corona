@@ -232,6 +232,7 @@ declare function store:moveDocument(
     $newURI as xs:string
 ) as empty-sequence()
 {
+    let $test := store:validateURI($newURI)
     let $test :=
         if(empty(doc($existingURI)))
         then error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document to move at '", $existingURI, "'"))
@@ -389,6 +390,7 @@ declare function store:insertDocument(
     $contentType as xs:string
 ) as empty-sequence()
 {
+    let $test := store:validateURI($uri)
     let $body :=
         if($contentType = "json")
         then json:parse($content)
@@ -417,6 +419,7 @@ declare function store:insertBinaryDocument(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
+    let $test := store:validateURI($uri)
     let $sidecarURI := store:getSidecarURI($uri)
     let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent)
     let $insertSidecar := xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), $permissions), $collections, $quality)
@@ -460,6 +463,7 @@ declare function store:updateBinaryDocumentContent(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
+    let $test := store:validateURI($uri)
     let $existing := doc($uri)
     let $test :=
         if(empty($existing))
@@ -834,4 +838,13 @@ declare private function store:createSidecarDocument(
             )
         }
     </corona:sidecar>
+};
+
+declare private function store:validateURI(
+    $uri as xs:string
+) as empty-sequence()
+{
+    if(starts-with($uri, "_/") or ends-with($uri, "-sidecar"))
+    then error(xs:QName("INVALID-URI"), "Document URI's starting with '_/' or ending with '-sidecar' are reserved")
+    else ()
 };
