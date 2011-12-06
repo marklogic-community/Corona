@@ -514,6 +514,15 @@ corona.queries = [
     },
     {
         "query": {
+            "range": "range7",
+            "value": "2011-11-22T17:30:00"
+        },
+        "xmlQuery": '<constraint><range>range7</range><value>2011-11-22T17:30:00</value></constraint>',
+        "result": '<cts:element-range-query operator="=" xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:testns="http://test.ns/uri">testns:rangeEl</cts:element> <cts:value xsi:type="xs:dateTime" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">2011-11-22T17:30:00</cts:value></cts:element-range-query>',
+        "purpose": "XML namespaced element dateTime range query"
+    },
+    {
+        "query": {
             "range": "range1",
             "value": "November 17th 1980",
             "operator": "ne"

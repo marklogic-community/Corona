@@ -458,6 +458,14 @@ corona.addRangeIndexes = function(callback) {
         {
             "type": "range",
             "name": "range7",
+            "element": "testns:rangeEl",
+            "datatype": "dateTime",
+            "shouldSucceed": true,
+            "purpose": "Namespaced XML element range creation on a dateTime"
+        },
+        {
+            "type": "range",
+            "name": "range8",
             "element": "invalidns:rangeEl",
             "attribute": "rangeAttrib",
             "datatype": "string",
@@ -466,7 +474,7 @@ corona.addRangeIndexes = function(callback) {
         },
         {
             "type": "range",
-            "name": "range8",
+            "name": "range9",
             "element": "rangeEl",
             "attribute": "invalidns:rangeAttrib",
             "datatype": "string",
