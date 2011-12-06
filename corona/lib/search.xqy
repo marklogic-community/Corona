@@ -143,7 +143,7 @@ declare function search:rangeValueToQuery(
     let $values :=
         for $value in $values
         let $type :=
-            if($index/structure = "xml")
+            if($index/structure = ("xmlelement", "xmlattribute"))
             then string($index/type)
             else if($index/type = "date")
             then "dateTime"

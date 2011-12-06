@@ -151,6 +151,6 @@ declare private function sqt:handleValue(
     then xs:boolean($value)
     else if($value/@type = "number")
     then xs:decimal($value)
-    else ()
+    else string($value)
 };
 
