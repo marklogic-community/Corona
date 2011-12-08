@@ -29,39 +29,6 @@ declare namespace corona="http://marklogic.com/corona";
 
 declare option xdmp:mapping "false";
 
-declare function local:collectionsFromRequest(
-    $params as map:map,
-    $type as xs:string
-) as xs:string*
-{
-    map:get($params, $type)
-};
-
-declare function local:propertiesFromRequest(
-    $params as map:map,
-    $type as xs:string
-) as element()*
-{
-    for $property in map:get($params, $type)
-    let $bits := tokenize($property, ":")
-    let $name := $bits[1]
-    let $value := string-join($bits[2 to last()], ":")
-    where exists($name)
-    return store:createProperty($name, $value)
-};
-
-declare function local:permissionsFromRequest(
-    $params as map:map,
-    $type as xs:string
-) as element()*
-{
-    for $permission in map:get($params, $type)
-    let $bits := tokenize($permission, ":")
-    let $user := string-join($bits[1 to last() - 1], ":")
-    let $access := $bits[last()]
-    where exists($user) and $access = ("update", "read", "execute")
-    return xdmp:permission($user, $access)
-};
 
 declare function local:qualityFromRequest(
     $params as map:map
@@ -162,9 +129,9 @@ return
                 if(empty($bodyContent))
                 then error(xs:QName("corona:INVALID-REQUEST"), "Missing document body")
                 else ()
-            let $collections := local:collectionsFromRequest($params, "collection")
-            let $properties := local:propertiesFromRequest($params, "property")
-            let $permissions := local:permissionsFromRequest($params, "permission")
+            let $collections := map:get($params, "collection")
+            let $properties := common:processPropertiesParameter(map:get($params, "property"))
+            let $permissions := common:processPermissionParameter(map:get($params, "permission"))
             let $quality := local:qualityFromRequest($params)
             let $set := xdmp:set-response-code(204, "Document inserted")
             return
@@ -183,18 +150,18 @@ return
                 if($contentType = "binary")
                 then xdmp:get-request-body("binary")/binary()
                 else xdmp:get-request-body("text")/text()
-            let $collections := local:collectionsFromRequest($params, "collection")
-            let $properties := local:propertiesFromRequest($params, "property")
-            let $permissions := local:permissionsFromRequest($params, "permission")
+            let $collections := map:get($params, "collection")
+            let $properties := common:processPropertiesParameter(map:get($params, "property"))
+            let $permissions := common:processPermissionParameter(map:get($params, "permission"))
             let $quality := local:qualityFromRequest($params)
 
-            let $addCollections := local:collectionsFromRequest($params, "addCollection")
-            let $addProperties := local:propertiesFromRequest($params, "addProperty")
-            let $addPermisssions := local:permissionsFromRequest($params, "addPermission")
+            let $addCollections := map:get($params, "addCollection")
+            let $addProperties := common:processPropertiesParameter(map:get($params, "addProperty"))
+            let $addPermisssions := common:processPermissionParameter(map:get($params, "addPermission"))
 
-            let $removeCollections := local:collectionsFromRequest($params, "removeCollection")
+            let $removeCollections := map:get($params, "removeCollection")
             let $removeProperties := map:get($params, "removeProperty")
-            let $removePermissions := local:permissionsFromRequest($params, "removePermission")
+            let $removePermissions := common:processPermissionParameter(map:get($params, "removePermission"))
 
             let $set := xdmp:set-response-code(204, "Document updated")
             return

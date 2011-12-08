@@ -20,8 +20,13 @@ module namespace search="http://marklogic.com/corona/search";
 
 import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
 import module namespace json="http://marklogic.com/json" at "json.xqy";
+import module namespace stringquery="http://marklogic.com/corona/string-query" at "string-query.xqy";
+import module namespace structquery="http://marklogic.com/corona/structured-query" at "structured-query.xqy";
+
+import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 
 declare namespace corona="http://marklogic.com/corona";
+declare namespace sec="http://marklogic.com/xdmp/security";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
@@ -425,6 +430,106 @@ declare function search:geoQuery(
     else if($index/structure = "key")
     then cts:element-geospatial-query(common:keyToQName($index/key), $region, $options, $weight)
     else ()
+};
+
+declare function search:saveStructuredQuery(
+    $name as xs:string,
+    $description as xs:string?,
+    $query as xs:string,
+    $collections as xs:string*,
+    $properties as element()*,
+    $permissions as element(sec:permission)*
+) as empty-sequence()
+{
+    let $uri := search:generateURIForStoredQuery($name)
+    let $test := search:validateNamedSearchName($name, "duplicate")
+    let $tree := structquery:getParseTree($query)
+    let $doc :=
+        <corona:storedQuery type="structured" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+            <corona:original>{
+                if(common:xmlOrJSON($query) = "json")
+                then $query
+                else xdmp:unquote($query, (), ("repair-none", "format-xml"))[1]
+            }</corona:original>
+            <corona:seralized>{ structquery:getCTS($tree) }</corona:seralized>
+        </corona:storedQuery>
+    return (
+        xdmp:document-insert($uri, $doc, (xdmp:default-permissions(), $permissions), ($const:StoredQueriesCollection, $collections)),
+        if(exists($properties))
+        then xdmp:document-set-properties($uri, $properties)
+        else xdmp:document-set-properties($uri, ())
+    )
+};
+
+declare function search:saveStringQuery(
+    $name as xs:string,
+    $description as xs:string?,
+    $query as xs:string,
+    $collections as xs:string*,
+    $properties as element()*,
+    $permissions as element(sec:permission)*
+) as empty-sequence()
+{
+    let $uri := search:generateURIForStoredQuery($name)
+    let $test := search:validateNamedSearchName($name, "duplicate")
+    let $doc :=
+        <corona:storedQuery type="string" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+            <corona:original>{ $query }</corona:original>
+            <corona:seralized>{ stringquery:parse($query) }</corona:seralized>
+        </corona:storedQuery>
+    return (
+        xdmp:document-insert($uri, $doc, (xdmp:default-permissions(), $permissions), ($const:StoredQueriesCollection, $collections)),
+        if(exists($properties))
+        then xdmp:document-set-properties($uri, $properties)
+        else xdmp:document-set-properties($uri, ())
+    )
+};
+
+declare function search:getStoredQuery(
+    $name as xs:string
+) as element(corona:storedQuery)
+{
+    let $test := search:validateNamedSearchName($name, "exists")
+    return doc(search:generateURIForStoredQuery($name))/corona:storedQuery
+};
+
+declare function search:getAllStoredQueries(
+    $outputFormat as xs:string
+) as element()?
+{
+    ()
+};
+
+declare function search:deleteStoredQuery(
+    $name as xs:string
+) as empty-sequence()
+{
+    let $test := search:validateNamedSearchName($name, "exists")
+    return xdmp:document-delete(search:generateURIForStoredQuery($name))
+};
+
+declare private function search:generateURIForStoredQuery(
+    $name as xs:string
+) as xs:string
+{
+    concat("_/storedQueries/", $name)
+};
+
+declare private function search:validateNamedSearchName(
+    $name as xs:string,
+    $mode as xs:string+
+) as empty-sequence()
+{
+    let $uri := search:generateURIForStoredQuery($name)
+    let $test :=
+        if($mode = "exists" and empty(doc($uri)))
+        then error(xs:QName("corona:NAMED-QUERY-NOT-FOUND"), concat("The named query '", $name, "' does not exist"))
+        else ()
+    let $test :=
+        if($mode = "duplicate" and exists(doc($uri)))
+        then error(xs:QName("corona:NAMED-QUERY-EXISTS"), concat("A named query with the name '", $name, "' already exists"))
+        else ()
+    return ()
 };
 
 

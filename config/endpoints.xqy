@@ -138,6 +138,32 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="POST"/>
     </request>
 
+    <!-- Named query management -->
+    <request uri="^/namedquery/?$" endpoint="/corona/named-query.xqy">
+        <param name="outputFormat" required="false"  values="xml|json"/>
+        <http method="GET">
+            <param name="name" required="false"/>
+            <param name="property" required="false"/>
+            <param name="value" required="false"/>
+            <param name="collection" alias="collection[]" required="false" repeatable="true"/>
+            <param name="start" required="false" as="positiveInteger" default="1"/>
+            <param name="length" required="false" as="positiveInteger" default="1"/>
+        </http>
+        <http method="POST">
+            <param name="name" required="true"/>
+            <param name="description" required="false"/>
+            <param name="stringQuery" required="false"/>
+            <param name="structuredQuery" required="false"/>
+            <param name="collection" alias="collection[]" repeatable="true" required="false"/>
+            <param name="property" alias="property[]" repeatable="true" required="false"/>
+            <param name="permission" alias="permission[]" repeatable="true" required="false"/>
+        </http>
+        <http method="DELETE">
+            <param name="name" required="true"/>
+        </http>
+    </request>
+
+
     <!-- Index management -->
 
     <request uri="^/manage(/)?$" endpoint="/corona/manage/summary.xqy" user-params="ignore">
