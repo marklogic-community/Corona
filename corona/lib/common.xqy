@@ -24,6 +24,7 @@ import module namespace store="http://marklogic.com/corona/store" at "store.xqy"
 
 declare namespace corona="http://marklogic.com/corona";
 declare namespace search="http://marklogic.com/appservices/search";
+declare namespace sec="http://marklogic.com/xdmp/security";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
@@ -264,7 +265,7 @@ declare function common:getContentType(
         let $extension := tokenize($uri, "\.")[last()]
         let $detectedType := xdmp:uri-format($uri)
         return
-            if($extension = "json")
+            if($extension = ("json", "text"))
             then $extension
             else $detectedType
     else error(xs:QName("corona:MISSING-PARAMETER"), "Need to explicitly specify a contentType and/or a URI to auto-detect the content type")
@@ -371,4 +372,28 @@ declare function common:xmlOrJSON(
     else if(starts-with($string, "<"))
     then "xml"
     else "json"
+};
+
+declare function common:processPermissionParameter(
+    $permissionParams as xs:string*
+) as element(sec:permission)*
+{
+    for $permission in $permissionParams
+    let $bits := tokenize($permission, ":")
+    let $user := string-join($bits[1 to last() - 1], ":")
+    let $access := $bits[last()]
+    where exists($user) and $access = ("update", "read", "execute")
+    return xdmp:permission($user, $access)
+};
+
+declare function common:processPropertiesParameter(
+    $propertiesParams as xs:string*
+) as element()*
+{
+    for $property in $propertiesParams
+    let $bits := tokenize($property, ":")
+    let $name := $bits[1]
+    let $value := string-join($bits[2 to last()], ":")
+    where exists($name)
+    return store:createProperty($name, $value)
 };
