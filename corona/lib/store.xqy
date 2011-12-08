@@ -476,7 +476,7 @@ declare function store:updateBinaryDocumentContent(
     let $updateSidecar :=
         if(exists($existingSidecar))
         then xdmp:node-replace($existingSidecar/*, $sidecar)
-        else xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions())) (: XXX - Should grab permissions, collections and quality from binary :)
+        else xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), xdmp:document-get-permissions($uri)), xdmp:document-get-collections($uri), xdmp:document-get-quality($uri))
     return xdmp:node-replace($existing/node(), $content)
 };
 
