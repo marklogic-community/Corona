@@ -146,6 +146,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="property" required="false"/>
             <param name="value" required="false"/>
             <param name="collection" alias="collection[]" required="false" repeatable="true"/>
+            <param name="matchingDoc" alias="matchingDoc[]" required="false" repeatable="true"/>
             <param name="start" required="false" as="positiveInteger" default="1"/>
             <param name="length" required="false" as="positiveInteger" default="1"/>
         </http>
