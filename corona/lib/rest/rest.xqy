@@ -26,9 +26,9 @@ declare function rest:rewrite(
   $options as element(rest:options)
 ) as xs:string?
 {
-  let $reqenv := rest:request-environment()
+  let $reqenv := rest-impl:request-environment()
   return
-    rest-impl:rewrite($options/rest:request, rest:request-environment())
+    rest-impl:rewrite($options/rest:request, rest-impl:request-environment())
 };
 
 declare function rest:rewrite(
@@ -36,7 +36,7 @@ declare function rest:rewrite(
   $uri as xs:string)
 as xs:string?
 {
-  let $reqenv := rest:request-environment()
+  let $reqenv := rest-impl:request-environment()
   let $_ := map:put($reqenv, "uri", $uri)
   return
     rest-impl:rewrite($options/rest:request, $reqenv)
@@ -50,7 +50,7 @@ declare function rest:rewrite(
   $user-params as map:map)
 as xs:string?
 {
-  let $reqenv := rest:request-environment()
+  let $reqenv := rest-impl:request-environment()
   let $_ := map:put($reqenv, "uri", $uri)
   let $_ := map:put($reqenv, "method", $method)
   let $_ := map:put($reqenv, "accept", $accept-headers)
@@ -59,35 +59,13 @@ as xs:string?
    rest-impl:rewrite($requests, $reqenv)
 };
 
-declare function rest:request-environment()
-as map:map
-{
-  let $params := map:map()
-  let $_ := for $name in xdmp:get-request-field-names()
-            let $values
-              := for $value in xdmp:get-request-field($name)
-                 return
-                   xdmp:url-decode($value)
-            return
-              map:put($params, xdmp:url-decode($name), $values)
-
-  let $reqenv := map:map()
-  let $_       := map:put($reqenv, "uri", xdmp:get-request-url())
-  let $_       := map:put($reqenv, "method", xdmp:get-request-method())
-  let $_       := map:put($reqenv, "accept", xdmp:get-request-header("Accept"))
-  let $_       := map:put($reqenv, "user-agent", xdmp:get-request-header("User-Agent"))
-  let $_       := map:put($reqenv, "params", $params)
-  return
-    $reqenv
-};
-
 (: ====================================================================== :)
 
 declare function rest:matching-request(
   $options as element(rest:options))
 as element(rest:request)?
 {
-  let $reqenv := rest:request-environment()
+  let $reqenv := rest-impl:request-environment()
   return
     rest-impl:matching-request($options/rest:request, $reqenv)
 };
@@ -100,7 +78,7 @@ declare function rest:matching-request(
   $user-params as map:map)
 as element(rest:request)?
 {
-  let $reqenv := rest:request-environment()
+  let $reqenv := rest-impl:request-environment()
   let $_ := map:put($reqenv, "uri", $uri)
   let $_ := map:put($reqenv, "method", $method)
   let $_ := map:put($reqenv, "accept", $accept-headers)
@@ -113,7 +91,7 @@ declare function rest:process-request(
   $request as element(rest:request))
 as map:map
 {
-  let $reqenv := rest:request-environment()
+  let $reqenv := rest-impl:request-environment()
   return
     rest-impl:process-request($request, $reqenv)
 };
@@ -146,7 +124,7 @@ declare function rest:test-conditions(
   $request as element(rest:request))
 as empty-sequence()
 {
-  let $reqenv := rest:request-environment()
+  let $reqenv := rest-impl:request-environment()
   let $test := rest-impl:conditions-match($request, $reqenv, true())
   return
     ()
