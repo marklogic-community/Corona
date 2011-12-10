@@ -28,12 +28,18 @@ declare option xdmp:mapping "false";
 let $params := rest:process-request(endpoints:request("/corona/manage/state.xqy"))
 let $requestMethod := xdmp:get-request-method()
 let $isManaged := map:get($params, "isManaged")
+let $insertTransforms := map:get($params, "insertTransforms")
+let $fetchTransforms := map:get($params, "fetchTransforms")
 
 let $set := xdmp:set-response-code(204, "State saved")
 return common:output(
     try {
         if(exists($isManaged))
         then manage:setManaged($isManaged)
+        else if(exists($insertTransforms))
+        then manage:enableInsertTransforms($insertTransforms)
+        else if(exists($fetchTransforms))
+        then manage:enableFetchTransforms($fetchTransforms)
         else common:error("corona:INVALID-PARAMETER", "Must specify an action to perform", "json")
     }
     catch ($e) {

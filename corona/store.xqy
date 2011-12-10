@@ -103,7 +103,7 @@ return
             let $documentType := store:getDocumentType($uri)
             let $include := map:get($params, "include")
             let $extractPath := map:get($params, "extractPath")
-            let $transformer := map:get($params, "applyTransform")
+            let $applyTransform := map:get($params, "applyTransform")
             let $doc := doc($uri)
             return
                 if(empty($doc))
@@ -111,8 +111,8 @@ return
                 else if($include = "content" and count($include) = 1)
                 then $doc
                 else if($outputFormat = "json")
-                then store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
-                else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
+                then store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)
+                else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
         }
         catch ($e) {
             common:errorFromException($e, $outputFormat)
@@ -125,6 +125,7 @@ return
                 if($contentType = "binary")
                 then xdmp:get-request-body("binary")/binary()
                 else xdmp:get-request-body("text")/text()
+            let $applyTransform := map:get($params, "applyTransform")
             let $test :=
                 if(empty($bodyContent))
                 then error(xs:QName("corona:INVALID-REQUEST"), "Missing document body")
@@ -136,8 +137,8 @@ return
             let $set := xdmp:set-response-code(204, "Document inserted")
             return
                 if($contentType = "binary")
-                then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"))
-                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+                then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform)
+                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, $applyTransform)
         }
         catch ($e) {
             common:errorFromException($e, $outputFormat)
@@ -150,6 +151,7 @@ return
                 if($contentType = "binary")
                 then xdmp:get-request-body("binary")/binary()
                 else xdmp:get-request-body("text")/text()
+            let $applyTransform := map:get($params, "applyTransform")
             let $collections := map:get($params, "collection")
             let $properties := common:processPropertiesParameter(map:get($params, "property"))
             let $permissions := common:processPermissionParameter(map:get($params, "permission"))
@@ -171,13 +173,13 @@ return
                     if(empty(doc($uri)) and exists($bodyContent))
                     then
                         if($contentType = "binary")
-                        then store:insertDocument($uri, $bodyContent, (), $collections, $properties, $permissions, $quality)
-                        else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType)
+                        then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform)
+                        else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, $applyTransform)
                     else if(exists($bodyContent))
                     then
                         if($contentType = "binary")
-                        then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"), map:get($params, "extractMetadata"), map:get($params, "extractContent"))
-                        else store:updateDocumentContent($uri, $bodyContent, $contentType)
+                        then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"), map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform)
+                        else store:updateDocumentContent($uri, $bodyContent, $contentType, $applyTransform)
                     else (),
                     if(exists($properties))
                     then store:setProperties($uri, $properties)

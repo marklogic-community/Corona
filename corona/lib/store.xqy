@@ -96,7 +96,7 @@ declare function store:outputDocument(
 
     (: Apply the transformation :)
     let $content :=
-        if(exists($applyTransform))
+        if(exists($applyTransform) and manage:fetchTransformsEnabled())
         then store:applyTransformer($applyTransform, $content)
         else $content
 
@@ -390,6 +390,20 @@ declare function store:insertDocument(
     $contentType as xs:string
 ) as empty-sequence()
 {
+    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, ())
+};
+
+declare function store:insertDocument(
+    $uri as xs:string,
+    $content as xs:string,
+    $collections as xs:string*,
+    $properties as element()*,
+    $permissions as element()*,
+    $quality as xs:integer?,
+    $contentType as xs:string,
+    $applyTransform as xs:string?
+) as empty-sequence()
+{
     let $test := store:validateURI($uri)
     let $body :=
         if($contentType = "json")
@@ -399,6 +413,13 @@ declare function store:insertDocument(
         else if($contentType = "text")
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml, json or text")
+
+    (: Apply the transformation :)
+    let $body :=
+        if(exists($applyTransform) and manage:insertTransformsEnabled())
+        then store:applyTransformer($applyTransform, $body)
+        else $body
+
     return (
         xdmp:document-insert($uri, $body, (xdmp:default-permissions(), $permissions), $collections, $quality),
         if(exists($properties))
@@ -419,9 +440,25 @@ declare function store:insertBinaryDocument(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
+    store:insertBinaryDocument($uri, $content, $suppliedContent, $collections, $properties, $permissions, $quality, $extractMetadata, $extractContent, ())
+};
+
+declare function store:insertBinaryDocument(
+    $uri as xs:string,
+    $content as binary(),
+    $suppliedContent as xs:string?,
+    $collections as xs:string*,
+    $properties as element()*,
+    $permissions as element()*,
+    $quality as xs:integer?,
+    $extractMetadata as xs:boolean,
+    $extractContent as xs:boolean,
+    $applyTransform as xs:string?
+) as empty-sequence()
+{
     let $test := store:validateURI($uri)
     let $sidecarURI := store:getSidecarURI($uri)
-    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent)
+    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent, $applyTransform)
     let $insertSidecar := xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), $permissions), $collections, $quality)
     let $setPropertis :=
         if(exists($properties))
@@ -434,6 +471,16 @@ declare function store:updateDocumentContent(
     $uri as xs:string,
     $content as xs:string,
     $contentType as xs:string
+) as empty-sequence()
+{
+    store:updateDocumentContent($uri, $content, $contentType, ())
+};
+
+declare function store:updateDocumentContent(
+    $uri as xs:string,
+    $content as xs:string,
+    $contentType as xs:string,
+    $applyTransform as xs:string?
 ) as empty-sequence()
 {
     let $existing := doc($uri)
@@ -449,6 +496,13 @@ declare function store:updateDocumentContent(
         else if($contentType = "text")
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
+
+    (: Apply the transformation :)
+    let $body :=
+        if(exists($applyTransform) and manage:insertTransformsEnabled())
+        then store:applyTransformer($applyTransform, $body)
+        else $body
+
     return
         if($contentType = "text")
         then xdmp:node-replace($existing, $body)
@@ -463,6 +517,18 @@ declare function store:updateBinaryDocumentContent(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
+    store:updateBinaryDocumentContent($uri, $content, $suppliedContent, $extractMetadata, $extractContent, ())
+};
+
+declare function store:updateBinaryDocumentContent(
+    $uri as xs:string,
+    $content as binary(),
+    $suppliedContent as xs:string?,
+    $extractMetadata as xs:boolean,
+    $extractContent as xs:boolean,
+    $applyTransform as xs:string?
+) as empty-sequence()
+{
     let $test := store:validateURI($uri)
     let $existing := doc($uri)
     let $test :=
@@ -472,7 +538,7 @@ declare function store:updateBinaryDocumentContent(
 
     let $sidecarURI := store:getSidecarURI($uri)
     let $existingSidecar := doc($sidecarURI)
-    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent)
+    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent, $applyTransform)
     let $updateSidecar :=
         if(exists($existingSidecar))
         then xdmp:node-replace($existingSidecar/*, $sidecar)
@@ -773,7 +839,8 @@ declare private function store:createSidecarDocument(
     $content as binary(),
     $suppliedContent as xs:string?,
     $extractMetadata as xs:boolean,
-    $extractContent as xs:boolean
+    $extractContent as xs:boolean,
+    $applyTransform as xs:string?
 ) as element(corona:sidecar)
 {
     let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
@@ -828,12 +895,18 @@ declare private function store:createSidecarDocument(
 
                 if(exists($extratedInfo/*:html/*:body) and $extractContent)
                 then
-                <corona:extractedContent>{
-                    for $para in $extratedInfo/*:html/*:body/*:p
-                    let $string := normalize-space($para)
-                    where string-length($string)
-                    return <corona:extractedPara>{ $string }</corona:extractedPara>
-                }</corona:extractedContent>
+                    let $content :=
+                        <corona:extractedContent>{
+                            for $para in $extratedInfo/*:html/*:body/*:p
+                            let $string := normalize-space($para)
+                            where string-length($string)
+                            return <corona:extractedPara>{ $string }</corona:extractedPara>
+                        }</corona:extractedContent>
+
+                    return
+                        if(exists($applyTransform) and manage:insertTransformsEnabled())
+                        then store:applyTransformer($applyTransform, $content)
+                        else $content
                 else ()
             )
         }

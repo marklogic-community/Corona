@@ -42,6 +42,32 @@ declare function manage:isManaged(
     (prop:get("isManaged"), true())[1]
 };
 
+declare function manage:enableInsertTransforms(
+    $insertTransforms as xs:boolean
+) as empty-sequence()
+{
+    prop:set("insertTransforms", $insertTransforms, true())
+};
+
+declare function manage:insertTransformsEnabled(
+) as xs:boolean
+{
+    (prop:get("insertTransforms"), true())[1]
+};
+
+declare function manage:enableFetchTransforms(
+    $fetchTransforms as xs:boolean
+) as empty-sequence()
+{
+    prop:set("fetchTransforms", $fetchTransforms, true())
+};
+
+declare function manage:fetchTransformsEnabled(
+) as xs:boolean
+{
+    (prop:get("fetchTransforms"), true())[1]
+};
+
 (: Ranges :)
 declare function manage:createJSONRange(
     $name as xs:string,
