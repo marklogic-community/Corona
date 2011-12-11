@@ -108,6 +108,12 @@ corona.documents = [
     },
     {
         "type": "xml",
+        "uri": "/doc-with-date.xml",
+        "content": "<foo>bar</foo>",
+        "applyTransform": "adddate"
+    },
+    {
+        "type": "xml",
         "uri": "/doc-store-test-6.xml",
         "permissions": {
             "nonexistant": ["read"]
@@ -185,6 +191,10 @@ corona.constructURL = function(verb, doc, prefix, processExtras, includeOutputFo
 
     if((verb === "PUT" || verb === "POST") && doc.contentForBinary) {
         extras.push("contentForBinary=" + doc.contentForBinary);
+    }
+
+    if((verb === "PUT" || verb === "POST") && doc.applyTransform) {
+        extras.push("applyTransform=" + doc.applyTransform);
     }
 
     extras.push("uri=" + encodeURIComponent(prefix + doc.uri));

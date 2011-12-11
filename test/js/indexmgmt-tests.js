@@ -678,9 +678,16 @@ corona.addTransformers = function(callback) {
         {
             "type": "transformer",
             "name": "xqtrans",
-            "transformer": 'xquery version "1.0-ml"; declare variable $content as element()? external; <div>XQuery\'d!</div>',
+            "transformer": 'xquery version "1.0-ml"; declare variable $content as node()? external; <div>XQuery\'d!</div>',
             "shouldSucceed": true,
             "purpose": "Storing a XQuery transformer"
+        },
+        {
+            "type": "transformer",
+            "name": "adddate",
+            "transformer": 'xquery version "1.0-ml"; declare variable $content as node()? external; <wrapper date="{ current-dateTime() }">{ $content }</wrapper>',
+            "shouldSucceed": true,
+            "purpose": "Storing another XQuery transformer"
         }
     ];
 
