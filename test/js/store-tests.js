@@ -195,6 +195,7 @@ corona.constructURL = function(verb, doc, prefix, processExtras, includeOutputFo
 
     if((verb === "PUT" || verb === "POST") && doc.applyTransform) {
         extras.push("applyTransform=" + doc.applyTransform);
+        extras.push("respondWithContent=true");
     }
 
     extras.push("uri=" + encodeURIComponent(prefix + doc.uri));

@@ -390,7 +390,7 @@ declare function store:insertDocument(
     $contentType as xs:string
 ) as empty-sequence()
 {
-    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, ())
+    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, (), false())
 };
 
 declare function store:insertDocument(
@@ -401,8 +401,9 @@ declare function store:insertDocument(
     $permissions as element()*,
     $quality as xs:integer?,
     $contentType as xs:string,
-    $applyTransform as xs:string?
-) as empty-sequence()
+    $applyTransform as xs:string?,
+    $respondWithContent as xs:boolean
+) as node()?
 {
     let $test := store:validateURI($uri)
     let $body :=
@@ -420,12 +421,15 @@ declare function store:insertDocument(
         then store:applyTransformer($applyTransform, $body)
         else $body
 
-    return (
-        xdmp:document-insert($uri, $body, (xdmp:default-permissions(), $permissions), $collections, $quality),
+    let $insert := xdmp:document-insert($uri, $body, (xdmp:default-permissions(), $permissions), $collections, $quality)
+    let $set :=
         if(exists($properties))
         then xdmp:document-set-properties($uri, $properties)
         else xdmp:document-set-properties($uri, ())
-    )
+    return
+        if($respondWithContent)
+        then $body
+        else ()
 };
 
 declare function store:insertBinaryDocument(
@@ -440,7 +444,7 @@ declare function store:insertBinaryDocument(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
-    store:insertBinaryDocument($uri, $content, $suppliedContent, $collections, $properties, $permissions, $quality, $extractMetadata, $extractContent, ())
+    store:insertBinaryDocument($uri, $content, $suppliedContent, $collections, $properties, $permissions, $quality, $extractMetadata, $extractContent, (), false())
 };
 
 declare function store:insertBinaryDocument(
@@ -453,8 +457,9 @@ declare function store:insertBinaryDocument(
     $quality as xs:integer?,
     $extractMetadata as xs:boolean,
     $extractContent as xs:boolean,
-    $applyTransform as xs:string?
-) as empty-sequence()
+    $applyTransform as xs:string?,
+    $respondWithContent as xs:boolean
+) as node()?
 {
     let $test := store:validateURI($uri)
     let $sidecarURI := store:getSidecarURI($uri)
@@ -464,7 +469,11 @@ declare function store:insertBinaryDocument(
         if(exists($properties))
         then xdmp:document-set-properties($sidecarURI, $properties)
         else xdmp:document-set-properties($sidecarURI, ())
-    return xdmp:document-insert($uri, $content, (xdmp:default-permissions(), $permissions), $collections, $quality)
+    let $insert := xdmp:document-insert($uri, $content, (xdmp:default-permissions(), $permissions), $collections, $quality)
+    return
+        if($respondWithContent)
+        then $content
+        else ()
 };
 
 declare function store:updateDocumentContent(
@@ -473,15 +482,16 @@ declare function store:updateDocumentContent(
     $contentType as xs:string
 ) as empty-sequence()
 {
-    store:updateDocumentContent($uri, $content, $contentType, ())
+    store:updateDocumentContent($uri, $content, $contentType, (), false())
 };
 
 declare function store:updateDocumentContent(
     $uri as xs:string,
     $content as xs:string,
     $contentType as xs:string,
-    $applyTransform as xs:string?
-) as empty-sequence()
+    $applyTransform as xs:string?,
+    $respondWithContent as xs:boolean
+) as node()?
 {
     let $existing := doc($uri)
     let $test :=
@@ -503,10 +513,14 @@ declare function store:updateDocumentContent(
         then store:applyTransformer($applyTransform, $body)
         else $body
 
-    return
+    let $update :=
         if($contentType = "text")
         then xdmp:node-replace($existing, $body)
         else xdmp:node-replace($existing/*, $body)
+    return
+        if($respondWithContent)
+        then $body
+        else ()
 };
 
 declare function store:updateBinaryDocumentContent(
@@ -517,7 +531,7 @@ declare function store:updateBinaryDocumentContent(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
-    store:updateBinaryDocumentContent($uri, $content, $suppliedContent, $extractMetadata, $extractContent, ())
+    store:updateBinaryDocumentContent($uri, $content, $suppliedContent, $extractMetadata, $extractContent, (), false())
 };
 
 declare function store:updateBinaryDocumentContent(
@@ -526,8 +540,9 @@ declare function store:updateBinaryDocumentContent(
     $suppliedContent as xs:string?,
     $extractMetadata as xs:boolean,
     $extractContent as xs:boolean,
-    $applyTransform as xs:string?
-) as empty-sequence()
+    $applyTransform as xs:string?,
+    $respondWithContent as xs:boolean
+) as node()?
 {
     let $test := store:validateURI($uri)
     let $existing := doc($uri)
@@ -543,7 +558,11 @@ declare function store:updateBinaryDocumentContent(
         if(exists($existingSidecar))
         then xdmp:node-replace($existingSidecar/*, $sidecar)
         else xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), xdmp:document-get-permissions($uri)), xdmp:document-get-collections($uri), xdmp:document-get-quality($uri))
-    return xdmp:node-replace($existing/node(), $content)
+    let $update := xdmp:node-replace($existing/node(), $content)
+    return
+        if($respondWithContent)
+        then $content
+        else ()
 };
 
 declare function store:getBinaryContentType(
