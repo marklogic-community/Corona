@@ -179,6 +179,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <request uri="^/manage(/)?$" endpoint="/corona/manage/state.xqy" user-params="allow">
         <http method="POST">
             <param name="isManaged" as="boolean" required="false"/>
+            <param name="insertTransforms" as="boolean" required="false"/>
+            <param name="fetchTransforms" as="boolean" required="false"/>
         </http>
     </request>
 
@@ -273,6 +275,14 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="place" required="false"/>
             <param name="type" required="false" default="include"/>
         </http>
+    </request>
+
+    <request uri="^/manage/hooks/?$" endpoint="/corona/manage/hooks.xqy" user-params="allow">
+        <http method="GET"/>
+        <http method="POST">
+            <param name="setInsertTransform" required="false"/>
+            <param name="setFetchTransform" required="false"/>
+	    </http>
     </request>
 
     <request uri="^/config/setup" endpoint="/config/setup.xqy" user-params="allow">

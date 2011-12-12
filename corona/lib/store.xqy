@@ -96,7 +96,9 @@ declare function store:outputDocument(
 
     (: Apply the transformation :)
     let $content :=
-        if(exists($applyTransform) and manage:fetchTransformsEnabled())
+		if(exists(manage:getFetchTransformer()))
+		then store:applyTransformer(manage:getFetchTransformer(), $content)
+        else if(exists($applyTransform) and manage:fetchTransformsEnabled())
         then store:applyTransformer($applyTransform, $content)
         else $content
 
@@ -417,7 +419,9 @@ declare function store:insertDocument(
 
     (: Apply the transformation :)
     let $body :=
-        if(exists($applyTransform) and manage:insertTransformsEnabled())
+		if(exists(manage:getFetchTransformer()))
+		then store:applyTransformer(manage:getFetchTransformer(), $body)
+        else if(exists($applyTransform) and manage:insertTransformsEnabled())
         then store:applyTransformer($applyTransform, $body)
         else $body
 
@@ -509,7 +513,9 @@ declare function store:updateDocumentContent(
 
     (: Apply the transformation :)
     let $body :=
-        if(exists($applyTransform) and manage:insertTransformsEnabled())
+		if(exists(manage:getFetchTransformer()))
+		then store:applyTransformer(manage:getFetchTransformer(), $body)
+        else if(exists($applyTransform) and manage:insertTransformsEnabled())
         then store:applyTransformer($applyTransform, $body)
         else $body
 
@@ -923,7 +929,9 @@ declare private function store:createSidecarDocument(
                         }</corona:extractedContent>
 
                     return
-                        if(exists($applyTransform) and manage:insertTransformsEnabled())
+						if(exists(manage:getFetchTransformer()))
+						then store:applyTransformer(manage:getFetchTransformer(), $content)
+                        else if(exists($applyTransform) and manage:insertTransformsEnabled())
                         then store:applyTransformer($applyTransform, $content)
                         else $content
                 else ()
