@@ -75,7 +75,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Search endpoint -->
-    <request uri="^/search(/)?$" endpoint="/corona/search.xqy" user-params="allow">
+    <request uri="^/search/?$" endpoint="/corona/search.xqy" user-params="allow">
         <param name="txid" required="false"/>
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
@@ -94,7 +94,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Key value queryies -->
-    <request uri="^/kvquery$" endpoint="/corona/kvquery.xqy" user-params="allow">
+    <request uri="^/kvquery/?$" endpoint="/corona/kvquery.xqy" user-params="allow">
         <param name="txid" required="false"/>
         <param name="key" required="false"/>
         <param name="element" required="false"/>
@@ -171,12 +171,12 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 
     <!-- Index management -->
 
-    <request uri="^/manage(/)?$" endpoint="/corona/manage/summary.xqy" user-params="allow">
+    <request uri="^/manage/?$" endpoint="/corona/manage/summary.xqy" user-params="allow">
         <http method="GET"/>
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage(/)?$" endpoint="/corona/manage/state.xqy" user-params="allow">
+    <request uri="^/manage/?$" endpoint="/corona/manage/state.xqy" user-params="allow">
         <http method="POST">
             <param name="isManaged" as="boolean" required="false"/>
         </http>
@@ -275,7 +275,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         </http>
     </request>
 
-    <request uri="^/config/setup" endpoint="/config/setup.xqy" user-params="allow">
+    <request uri="^/config/setup/?$" endpoint="/config/setup.xqy" user-params="allow">
         <http method="GET"/>
         <http method="POST"/>
     </request>
