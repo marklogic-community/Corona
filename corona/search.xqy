@@ -109,6 +109,11 @@ let $end :=
     then $total
     else $end
 
+let $highlightQuery :=
+    if(exists($structuredQueryJSON) and structquery:containsNamedQuery($structuredQueryJSON))
+    then structquery:getCTS($structuredQueryJSON, (), false())
+    else $query
+
 let $results :=
     try {
         store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)

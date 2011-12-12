@@ -22,6 +22,7 @@ import module namespace common="http://marklogic.com/corona/common" at "common.x
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "structured-query.xqy";
+import module namespace sqt="http://marklogic.com/corona/structured-query-translator" at "structured-query-translator.xqy";
 
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 
@@ -493,11 +494,24 @@ declare function search:getStoredQuery(
     return doc(search:generateURIForStoredQuery($name))/corona:storedQuery
 };
 
-declare function search:getAllStoredQueries(
-    $outputFormat as xs:string
-) as element()?
+declare function search:getStoredQueryCTS(
+    $name as xs:string,
+    $ignoreRange as xs:string?,
+    $useRegisteredQueries as xs:boolean
+) as cts:query?
 {
-    ()
+    let $query := doc(search:generateURIForStoredQuery($name))/corona:storedQuery
+    let $redo :=
+        if(exists($ignoreRange))
+        then true() (: XXX - Could be a ton less pessimistic here :)
+        else not($useRegisteredQueries)
+    return
+        if($redo)
+        then
+            if($query/@type = "structured")
+            then structquery:getCTS(if(exists($query/corona:original/*)) then sqt:translate($query/corona:original/*) else structquery:getParseTree(string($query/corona:original)), $ignoreRange, $useRegisteredQueries)
+            else stringquery:parse(string($query/corona:original))
+        else cts:registered-query(cts:register(cts:query($query/corona:seralized/*)))
 };
 
 declare function search:deleteStoredQuery(

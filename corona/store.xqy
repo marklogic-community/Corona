@@ -60,7 +60,7 @@ declare function local:queryFromRequest(
         catch ($e) {
             error(xs:QName("corona:INVALID-PARAMETER"), concat("The string query isn't valid: ", $e/*:message))
         }
-    return (stringquery:parse(map:get($params, "stringQuery")), structquery:getCTS($structuredQuery))[1]
+    return (stringquery:parse(map:get($params, "stringQuery")), structquery:getCTS($structuredQuery, (), false()))[1]
 };
 
 let $requestMethod := xdmp:get-request-method()
@@ -71,7 +71,7 @@ let $outputFormat := common:getOutputFormat((), map:get($params, "outputFormat")
 
 let $errors :=
     if($requestMethod = ("PUT", "POST", "GET") and string-length($uri) = 0)
-    then common:error("corona:INVALID-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $outputFormat)
+    then common:error("corona:MISSING-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $outputFormat)
     else if(not(common:validateOutputFormat($outputFormat)))
     then common:error("corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
     else ()
