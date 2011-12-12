@@ -419,8 +419,8 @@ declare function store:insertDocument(
 
     (: Apply the transformation :)
     let $body :=
-		if(exists(manage:getFetchTransformer()))
-		then store:applyTransformer(manage:getFetchTransformer(), $body)
+		if(exists(manage:getInsertTransformer()))
+		then store:applyTransformer(manage:getInsertTransformer(), $body)
         else if(exists($applyTransform) and manage:insertTransformsEnabled())
         then store:applyTransformer($applyTransform, $body)
         else $body
@@ -513,8 +513,8 @@ declare function store:updateDocumentContent(
 
     (: Apply the transformation :)
     let $body :=
-		if(exists(manage:getFetchTransformer()))
-		then store:applyTransformer(manage:getFetchTransformer(), $body)
+		if(exists(manage:getInsertTransformer()))
+		then store:applyTransformer(manage:getInsertTransformer(), $body)
         else if(exists($applyTransform) and manage:insertTransformsEnabled())
         then store:applyTransformer($applyTransform, $body)
         else $body
@@ -929,8 +929,8 @@ declare private function store:createSidecarDocument(
                         }</corona:extractedContent>
 
                     return
-						if(exists(manage:getFetchTransformer()))
-						then store:applyTransformer(manage:getFetchTransformer(), $content)
+						if(exists(manage:getInsertTransformer()))
+						then store:applyTransformer(manage:getInsertTransformer(), $content)
                         else if(exists($applyTransform) and manage:insertTransformsEnabled())
                         then store:applyTransformer($applyTransform, $content)
                         else $content
