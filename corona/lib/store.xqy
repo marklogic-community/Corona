@@ -33,6 +33,34 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare variable $xsltEval := try { xdmp:function(xs:QName("xdmp:xslt-eval")) } catch ($e) {};
 declare variable $xsltIsSupported := try { xdmp:apply($xsltEval, <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"/>, <foo/>)[3], true() } catch ($e) {xdmp:log($e), false() };
 
+declare function store:outputRawDocument(
+    $doc as document-node(),
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?,
+    $outputFormat as xs:string
+) as item()
+{
+    let $documentType := store:getDocumentTypeFromDoc($doc)
+
+    (: Perform the path extraction if one was provided :)
+    let $content :=
+        if(exists($extractPath) and $documentType = "xml")
+        then store:wrapContentNodes(path:select($doc, $extractPath, "xpath"), $documentType)
+        else if(exists($extractPath) and $documentType = "json")
+        then store:wrapContentNodes(path:select($doc/json:json, $extractPath, "json"), $documentType)
+        else if($documentType = "text")
+        then $doc/text()
+        else $doc
+
+    (: Apply the transformation :)
+    let $content :=
+        if(exists($applyTransform) and manage:fetchTransformsEnabled())
+        then store:applyTransformer($applyTransform, $content)
+        else $content
+
+    return $content
+};
+
 (:
     Can take in a JSON document, XML document, text document, binary node or binary sidecar.
     Will *not* output just the raw document if include equals and only equals "content", use doc() for that instead.
@@ -66,8 +94,6 @@ declare function store:outputDocument(
         else if($documentType = "binary")
         then string(doc($contentURI)/corona:sidecar/corona:suppliedContent/@format)
         else $documentType
-
-    let $collections := xdmp:document-get-collections($contentURI)
 
     let $searchableContent :=
         if($documentType = "text")
@@ -832,7 +858,9 @@ declare private function store:applyTransformer(
 {
     let $transformer := manage:getTransformer($name)
     return
-        if(exists($transformer/*) and $xsltIsSupported)
+        if(empty($transformer))
+        then error(xs:QName("corona:INVALID-TRANSFORMER"), concat("No transformer with the name '", $name, "' exists"))
+        else if(exists($transformer/*) and $xsltIsSupported)
         then xdmp:apply($xsltEval, $transformer/*, $content)
         else if(exists($transformer/text()))
         then xdmp:eval(string($transformer), (xs:QName("content"), $content), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)

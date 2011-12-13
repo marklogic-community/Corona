@@ -109,7 +109,7 @@ return
                 if(empty($doc))
                 then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no document at '", $uri, "'"), $outputFormat)
                 else if($include = "content" and count($include) = 1)
-                then $doc
+                then store:outputRawDocument($doc, $extractPath, $applyTransform, $outputFormat)
                 else if($outputFormat = "json")
                 then store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)
                 else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)/* }</corona:response>

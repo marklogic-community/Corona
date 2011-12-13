@@ -11,7 +11,7 @@ declare option xdmp:mapping "false";
 declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 <options xmlns="http://marklogic.com/appservices/rest">
     <!-- Manage documents in the database -->
-    <request uri="^/store/?$" endpoint="/corona/store-get.xqy" user-params="allow">
+    <request uri="^/store/?$" endpoint="/corona/store-get.xqy">
         <param name="uri" required="false"/>
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>

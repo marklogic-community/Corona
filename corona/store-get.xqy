@@ -71,14 +71,14 @@ let $content :=
     if($requestMethod = "GET" and string-length($uri))
     then try {
         let $extractPath := map:get($params, "extractPath")
-        let $transformer := map:get($params, "applyTransform")
+        let $applyTransform := map:get($params, "applyTransform")
         where empty($errors)
         return
             if($include = "content" and count($include) = 1)
-            then $doc
+            then store:outputRawDocument($doc, $extractPath, $applyTransform, $outputFormat)
             else if($outputFormat = "json")
-            then store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
-            else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
+            then store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)
+            else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
     }
     catch ($e) {
         xdmp:set($errors, common:errorFromException($e, $outputFormat))
