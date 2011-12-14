@@ -33,7 +33,7 @@ declare function stringquery:parse(
 	$query as xs:string?
 ) as cts:query?
 {
-    stringquery:parse($query, ())
+    stringquery:parse($query, (), true())
 };
 
 declare function stringquery:parse(
@@ -41,12 +41,21 @@ declare function stringquery:parse(
     $ignoreField as xs:string?
 ) as cts:query?
 {
+    stringquery:parse($query, $ignoreField, true())
+};
+
+declare function stringquery:parse(
+	$query as xs:string?,
+    $ignoreField as xs:string?,
+    $useRQ as xs:boolean
+) as cts:query?
+{
 	let $init := xdmp:set($GROUPING-INDEX, 0)
 	let $tokens := stringquery:tokenize($query)
 	let $grouped := stringquery:groupTokens($tokens, 1)
 	let $folded := stringquery:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
     where string-length($query)
-	return stringquery:dispatchQueryTree($folded, $ignoreField)
+	return stringquery:dispatchQueryTree($folded, $ignoreField, $useRQ)
 };
 
 declare function stringquery:getParseTree(
@@ -60,12 +69,42 @@ declare function stringquery:getParseTree(
 };
 
 declare function stringquery:getCTSFromParseTree(
+    $parseTree as element(group)
+) as cts:query?
+{
+    stringquery:getCTSFromParseTree($parseTree, (), true())
+};
+
+declare function stringquery:getCTSFromParseTree(
     $parseTree as element(group),
     $ignoreField as xs:string?
 ) as cts:query?
 {
-	stringquery:dispatchQueryTree($parseTree, $ignoreField)
+    stringquery:getCTSFromParseTree($parseTree, $ignoreField, true())
 };
+
+declare function stringquery:getCTSFromParseTree(
+    $parseTree as element(group),
+    $ignoreField as xs:string?,
+    $useRQ as xs:boolean
+) as cts:query?
+{
+	stringquery:dispatchQueryTree($parseTree, $ignoreField, $useRQ)
+};
+
+declare function stringquery:containsNamedQuery(
+	$query as xs:string?
+) as xs:boolean
+{
+    exists(
+        let $tree := stringquery:getParseTree($query)
+        for $term in $tree//constraint
+        let $index := config:get($term/field)
+        where $index[@type = "namedQueryPrefix"]
+        return true()
+    )
+};
+
 
 declare function stringquery:valuesForFacet(
     $parseTree as element(group),
@@ -271,12 +310,13 @@ declare private function stringquery:extractSequence(
 
 declare private function stringquery:dispatchQueryTree(
 	$token as element(),
-    $ignoreField as xs:string?
+    $ignoreField as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:query*
 {
 	let $queries :=
 		for $term in $token/*
-		return stringquery:termToQuery($term, $ignoreField)
+		return stringquery:termToQuery($term, $ignoreField, $useRQ)
 	return
 		if(count($queries) = 1 or local-name($token) = ("andQuery", "orQuery"))
 		then $queries
@@ -285,18 +325,19 @@ declare private function stringquery:dispatchQueryTree(
 
 declare private function stringquery:termToQuery(
 	$term as element(),
-    $ignoreField as xs:string?
+    $ignoreField as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:query?
 {
 	typeswitch ($term)
-	case element(andQuery) return cts:and-query(stringquery:dispatchQueryTree($term, $ignoreField))
-	case element(orQuery) return cts:or-query(stringquery:dispatchQueryTree($term, $ignoreField))
-	case element(notQuery) return stringquery:notQuery($term, $ignoreField)
-	case element(nearQuery) return stringquery:nearQuery($term, $ignoreField)
-	case element(constraint) return stringquery:constraintQuery($term, $ignoreField)
+	case element(andQuery) return cts:and-query(stringquery:dispatchQueryTree($term, $ignoreField, $useRQ))
+	case element(orQuery) return cts:or-query(stringquery:dispatchQueryTree($term, $ignoreField, $useRQ))
+	case element(notQuery) return stringquery:notQuery($term, $ignoreField, $useRQ)
+	case element(nearQuery) return stringquery:nearQuery($term, $ignoreField, $useRQ)
+	case element(constraint) return stringquery:constraintQuery($term, $ignoreField, $useRQ)
 	case element(term) return stringquery:wordQuery($term)
 	case element(phrase) return stringquery:wordQuery($term)
-	case element(group) return stringquery:dispatchQueryTree($term, $ignoreField)
+	case element(group) return stringquery:dispatchQueryTree($term, $ignoreField, $useRQ)
 	case element(whitespace) return ()
 
 	default return xdmp:log(concat("Unhandled query token: ", xdmp:quote($term)))
@@ -316,23 +357,26 @@ declare private function stringquery:wordQuery(
 
 declare private function stringquery:notQuery(
 	$term as element(notQuery),
-    $ignoreField as xs:string?
+    $ignoreField as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:not-query
 {
-	cts:not-query(stringquery:dispatchQueryTree($term, $ignoreField))
+	cts:not-query(stringquery:dispatchQueryTree($term, $ignoreField, $useRQ))
 };
 
 declare private function stringquery:nearQuery(
 	$term as element(nearQuery),
-    $ignoreField as xs:string?
+    $ignoreField as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:near-query
 {
-	cts:near-query(stringquery:dispatchQueryTree($term, $ignoreField), $term/@distance)
+	cts:near-query(stringquery:dispatchQueryTree($term, $ignoreField, $useRQ), $term/@distance)
 };
 
 declare private function stringquery:constraintQuery(
 	$term as element(constraint),
-    $ignoreField as xs:string?
+    $ignoreField as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:query?
 {
     let $value := string($term/value)
@@ -347,6 +391,9 @@ declare private function stringquery:constraintQuery(
 
         else if($index/@type = ("bucketedrange", "autobucketedrange"))
         then search:bucketLabelToQuery($index, $value)
+
+        else if($index[@type = "namedQueryPrefix"])
+        then search:getStoredQueryCTS(concat($term/field, ":", $value), $ignoreField, $useRQ)
 
         else if($index/@type = "geo")
         then

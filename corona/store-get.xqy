@@ -43,12 +43,12 @@ declare function local:queryFromRequest(
         }
     let $stringQuery :=
         try {
-            stringquery:parse(map:get($params, "stringQuery"))
+            stringquery:parse(map:get($params, "stringQuery"), (), false())
         }
         catch ($e) {
             error(xs:QName("corona:INVALID-PARAMETER"), concat("The string query isn't valid: ", $e/*:message))
         }
-    return (stringquery:parse(map:get($params, "stringQuery")), structquery:getCTS($structuredQuery, (), false()))[1]
+    return ($stringQuery, structquery:getCTS($structuredQuery, (), false()))[1]
 };
 
 let $requestMethod := xdmp:get-request-method()

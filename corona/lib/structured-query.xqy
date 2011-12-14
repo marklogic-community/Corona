@@ -177,7 +177,7 @@ declare private function structquery:process(
     case element(json:range) return structquery:handleRange($step, $ignoreRange)
     case element(json:collection) return structquery:handleCollection($step)
     case element(json:directory) return structquery:handleDirectory($step)
-    case element(json:stringQuery) return structquery:handleStringQuery($step, $ignoreRange)
+    case element(json:stringQuery) return structquery:handleStringQuery($step, $ignoreRange, $useRQ)
     case element(json:namedQuery) return structquery:handleNamedQuery($step, $ignoreRange, $useRQ)
     case element(json:wordAnywhere) return structquery:handleWordAnywhere($step)
     case element(json:wordInBinary) return structquery:handleWordInBinary($step)
@@ -426,10 +426,11 @@ declare private function structquery:handleDirectory(
 
 declare private function structquery:handleStringQuery(
     $step as element(json:stringQuery),
-    $ignoreRange as xs:string?
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:query?
 {
-    stringquery:parse(string($step), $ignoreRange)
+    stringquery:parse(string($step), $ignoreRange, $useRQ)
 };
 
 declare private function structquery:handleNamedQuery(

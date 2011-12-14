@@ -127,6 +127,11 @@ corona.queries = [
         "query": 'geokey:"37.819722, -122.478611"',
         "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongKey</cts:element> <cts:region xsi:type="cts:circle" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">@10 37.819721,-122.47861</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
         "purpose": "Quoted gespatial query"
+    },
+    {
+        "query": 'zip:94402',
+        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongKey</cts:element> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">37.554167,-122.31306</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
+        "purpose": "Stored query"
     }
 ];
 

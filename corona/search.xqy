@@ -112,6 +112,8 @@ let $end :=
 let $highlightQuery :=
     if(exists($structuredQueryJSON) and structquery:containsNamedQuery($structuredQueryJSON))
     then structquery:getCTS($structuredQueryJSON, (), false())
+    else if(exists($stringQuery) and stringquery:containsNamedQuery($stringQuery))
+    then stringquery:parse($stringQuery, (), false())
     else $query
 
 let $results :=

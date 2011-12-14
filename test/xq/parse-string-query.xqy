@@ -3,7 +3,7 @@ import module namespace stringquery="http://marklogic.com/corona/string-query" a
 declare option xdmp:mapping "false";
 
 try {
-    normalize-space(replace(xdmp:quote(<foo>{ stringquery:parse(xdmp:get-request-field("stringQuery")) }</foo>/*), "\n", ""))
+    normalize-space(replace(xdmp:quote(<foo>{ stringquery:parse(xdmp:get-request-field("stringQuery"), (), false()) }</foo>/*), "\n", ""))
 }
 catch ($e) {
     xdmp:log($e),
