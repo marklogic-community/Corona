@@ -37,7 +37,6 @@ let $name := map:get($params, "name")
 let $collections := map:get($params, "collection")
 let $properties := map:get($params, "property")
 let $matchingDocs := map:get($params, "matchingDoc")
-let $name := map:get($params, "name")
 let $stringQuery := map:get($params, "stringQuery")
 let $structuredQuery := map:get($params, "structuredQuery")
 let $outputFormat := common:getOutputFormat((), map:get($params, "outputFormat"))
@@ -83,7 +82,11 @@ return common:output(
         let $query := cts:and-query((
             cts:collection-query($const:StoredQueriesCollection),
 
-            if(exists($name))
+            if(exists(map:get($params, "prefix")))
+            then cts:element-attribute-value-query(xs:QName("corona:storedQuery"), xs:QName("prefix"), map:get($params, "prefix"), "exact")
+            else (),
+
+            if(string-length($name) > 0)
             then cts:element-attribute-value-query(xs:QName("corona:storedQuery"), xs:QName("name"), $name, "exact")
             else (),
 
@@ -128,6 +131,7 @@ return common:output(
                 "results", json:array((
                     for $result in $results
                     return json:object((
+                        "prefix", string($result/@prefix),
                         "name", string($result/@name),
                         "description", string($result/@description),
                         "queryType", string($result/@type),
@@ -146,6 +150,7 @@ return common:output(
                 <corona:results>{
                     for $result in $results
                     return <corona:result>
+                        <corona:prefix>{ string($result/@prefix) }</corona:prefix>
                         <corona:name>{ string($result/@name) }</corona:name>
                         <corona:description>{ string($result/@description) }</corona:description>
                         <corona:queryType>{ string($result/@type) }</corona:queryType>

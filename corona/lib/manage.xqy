@@ -24,6 +24,7 @@ import module namespace common="http://marklogic.com/corona/common" at "common.x
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 import module namespace prop="http://xqdev.com/prop" at "properties.xqy";
+import module namespace search="http://marklogic.com/corona/search" at "search.xqy";
 
 declare namespace corona="http://marklogic.com/corona";
 declare namespace db="http://marklogic.com/xdmp/database";
@@ -33,39 +34,81 @@ declare function manage:setManaged(
     $isManaged as xs:boolean
 ) as empty-sequence()
 {
-    prop:set("isManaged", $isManaged, true())
+    prop:set("corona-isManaged", $isManaged, true())
 };
 
 declare function manage:isManaged(
 ) as xs:boolean
 {
-    (prop:get("isManaged"), true())[1]
+    (prop:get("corona-isManaged"), true())[1]
 };
 
 declare function manage:enableInsertTransforms(
     $insertTransforms as xs:boolean
 ) as empty-sequence()
 {
-    prop:set("insertTransforms", $insertTransforms, true())
+    prop:set("corona-insertTransforms", $insertTransforms, true())
 };
 
 declare function manage:insertTransformsEnabled(
 ) as xs:boolean
 {
-    (prop:get("insertTransforms"), true())[1]
+    (prop:get("corona-insertTransforms"), true())[1]
 };
 
 declare function manage:enableFetchTransforms(
     $fetchTransforms as xs:boolean
 ) as empty-sequence()
 {
-    prop:set("fetchTransforms", $fetchTransforms, true())
+    prop:set("corona-fetchTransforms", $fetchTransforms, true())
 };
 
 declare function manage:fetchTransformsEnabled(
 ) as xs:boolean
 {
-    (prop:get("fetchTransforms"), true())[1]
+    (prop:get("corona-fetchTransforms"), true())[1]
+};
+
+(: Named query prefixes :)
+declare function manage:addNamedQueryPrefix(
+    $prefix as xs:string
+) as empty-sequence()
+{
+    let $test := manage:validateIndexName($prefix)
+    return config:addNamedQueryPrefix($prefix)
+};
+
+declare function manage:removeNamedQueryPrefix(
+    $prefix as xs:string
+) as empty-sequence()
+{
+    for $i in search:storedQueriesWithPrefix($prefix)
+    return xdmp:document-delete(base-uri($i))
+    ,
+    config:delete($prefix)
+};
+
+declare function manage:namedQueryPrefixExists(
+    $prefix as xs:string
+) as xs:boolean
+{
+    let $config := config:get($prefix)
+    return exists($config) and $config/@type = "namedQueryPrefix"
+};
+
+declare function manage:validateNamedQueryPrefix(
+    $prefix as xs:string
+) as empty-sequence()
+{
+    if(not(manage:namedQueryPrefixExists($prefix)))
+    then error(xs:QName("corona:INVALID-NAMED-QUERY-PREFIX"), concat("There is no named query prefix of '", $prefix, "'"))
+    else ()
+};
+
+declare function manage:getNamedQueryPrefixs(
+) as xs:string*
+{
+    config:prefixes()
 };
 
 (: Ranges :)
@@ -1509,7 +1552,7 @@ declare private function manage:validateIndexName(
     if(not(matches($name, "^[0-9A-Za-z][0-9A-Za-z_-]*$")))
     then error(xs:QName("corona:INVALID-INDEX-NAME"), "Index names can only contain alphanumeric, dash and underscore characters")
     else if(exists(config:get($name)))
-    then error(xs:QName("corona:DUPLICATE-INDEX-NAME"), concat("An range index or place with the name '", $name, "' already exists"))
+    then error(xs:QName("corona:DUPLICATE-INDEX-NAME"), concat("An range index, place or named query prefix with the name '", $name, "' already exists"))
     else ()
 };
 

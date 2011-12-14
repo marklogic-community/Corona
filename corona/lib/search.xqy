@@ -23,6 +23,7 @@ import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "structured-query.xqy";
 import module namespace sqt="http://marklogic.com/corona/structured-query-translator" at "structured-query-translator.xqy";
+import module namespace manage="http://marklogic.com/corona/manage" at "manage.xqy";
 
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 
@@ -443,10 +444,11 @@ declare function search:saveStructuredQuery(
 ) as empty-sequence()
 {
     let $uri := search:generateURIForStoredQuery($name)
-    let $test := search:validateNamedSearchName($name, "duplicate")
+    let $test := search:validateNamedQueryName($name, "duplicate")
     let $tree := structquery:getParseTree($query)
+    let $prefix := substring-before($name, ":")
     let $doc :=
-        <corona:storedQuery type="structured" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+        <corona:storedQuery type="structured" prefix="{ $prefix }" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
             <corona:original>{
                 if(common:xmlOrJSON($query) = "json")
                 then $query
@@ -472,9 +474,10 @@ declare function search:saveStringQuery(
 ) as empty-sequence()
 {
     let $uri := search:generateURIForStoredQuery($name)
-    let $test := search:validateNamedSearchName($name, "duplicate")
+    let $test := search:validateNamedQueryName($name, "duplicate")
+    let $prefix := substring-before($name, ":")
     let $doc :=
-        <corona:storedQuery type="string" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+        <corona:storedQuery type="string" prefix="{ $prefix }" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
             <corona:original>{ $query }</corona:original>
             <corona:seralized>{ stringquery:parse($query) }</corona:seralized>
         </corona:storedQuery>
@@ -490,7 +493,7 @@ declare function search:getStoredQuery(
     $name as xs:string
 ) as element(corona:storedQuery)
 {
-    let $test := search:validateNamedSearchName($name, "exists")
+    let $test := search:validateNamedQueryName($name, "exists")
     return doc(search:generateURIForStoredQuery($name))/corona:storedQuery
 };
 
@@ -518,8 +521,15 @@ declare function search:deleteStoredQuery(
     $name as xs:string
 ) as empty-sequence()
 {
-    let $test := search:validateNamedSearchName($name, "exists")
+    let $test := search:validateNamedQueryName($name, "exists")
     return xdmp:document-delete(search:generateURIForStoredQuery($name))
+};
+
+declare function search:storedQueriesWithPrefix(
+    $prefix as xs:string
+) as element(corona:storedQuery)*
+{
+    /corona:storedQuery[@prefix = $prefix]
 };
 
 declare private function search:generateURIForStoredQuery(
@@ -529,12 +539,21 @@ declare private function search:generateURIForStoredQuery(
     concat("_/storedQueries/", $name)
 };
 
-declare private function search:validateNamedSearchName(
+declare private function search:validateNamedQueryName(
     $name as xs:string,
     $mode as xs:string+
 ) as empty-sequence()
 {
     let $uri := search:generateURIForStoredQuery($name)
+    let $test :=
+        if(not(contains($name, ":")))
+        then error(xs:QName("corona:INVALID-NAMED-QUERY-NAME"), "Named queries must start with a valid named query prefix, followed by a colon then the actual name of the query")
+        else ()
+    let $test :=
+        if(string-length(substring-after($name, ":")) = 0)
+        then error(xs:QName("corona:INVALID-NAMED-QUERY-NAME"), "Named queries must start with a valid named query prefix, followed by a colon then the actual name of the query")
+        else ()
+    let $test := manage:validateNamedQueryPrefix(substring-before($name, ":"))
     let $test :=
         if($mode = "exists" and empty(doc($uri)))
         then error(xs:QName("corona:NAMED-QUERY-NOT-FOUND"), concat("The named query '", $name, "' does not exist"))

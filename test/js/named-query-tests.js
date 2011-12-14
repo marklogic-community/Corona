@@ -5,49 +5,41 @@ if(typeof corona == "undefined" || !corona) {
 
 corona.namedQueries = [
     {
+        name: "nqp:query1",
         purpose: "Basic string query",
         storeParams: {
-            name: "query1",
             description: "Hello world string query",
             stringQuery: "hello world"
         },
         getParams: {
-            name: "query1"
-        },
-        deleteParams: {
-            name: "query1"
         },
         shouldSucceed: true,
         assert: function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].name, "query1", "Correct name was found");
+            equals(data.results[0].name, "nqp:query1", "Correct name was found");
             equals(data.results[0].queryType, "string", "Correct query type was found");
         }
     },
     {
+        name: "nqp:query2",
         purpose: "Basic structured query",
         storeParams: {
-            name: "query2",
             description: "Hello world structured query",
             structuredQuery: JSON.stringify({wordAnywhere: "hello world"})
         },
         getParams: {
-            name: "query2"
-        },
-        deleteParams: {
-            name: "query2"
         },
         shouldSucceed: true,
         assert: function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].name, "query2", "Correct name was found");
+            equals(data.results[0].name, "nqp:query2", "Correct name was found");
             equals(data.results[0].queryType, "structured", "Correct query type was found");
         }
     },
     {
+        name: "nqp:query3",
         purpose: "Query with collection",
         storeParams: {
-            name: "query3",
             description: "Query in collection",
             structuredQuery: JSON.stringify({wordAnywhere: "hello world"}),
             collection: "namedQueryCollection1"
@@ -55,20 +47,17 @@ corona.namedQueries = [
         getParams: {
             collection: "namedQueryCollection1"
         },
-        deleteParams: {
-            name: "query3"
-        },
         shouldSucceed: true,
         assert: function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].name, "query3", "Correct name was found");
+            equals(data.results[0].name, "nqp:query3", "Correct name was found");
             equals(data.results[0].queryType, "structured", "Correct query type was found");
         }
     },
     {
+        name: "nqp:query4",
         purpose: "Query with property",
         storeParams: {
-            name: "query4",
             description: "Query with property",
             structuredQuery: JSON.stringify({wordAnywhere: "hello world"}),
             property: "querykey:foobar"
@@ -77,13 +66,10 @@ corona.namedQueries = [
             property: "querykey",
             value: "foobar"
         },
-        deleteParams: {
-            name: "query4"
-        },
         shouldSucceed: true,
         assert: function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].name, "query4", "Correct name was found");
+            equals(data.results[0].name, "nqp:query4", "Correct name was found");
             equals(data.results[0].queryType, "structured", "Correct query type was found");
         }
     },
@@ -92,7 +78,7 @@ corona.namedQueries = [
 corona.storeQuery = function(definition) {
     asyncTest(definition.purpose, function() {
         $.ajax({
-            url: "/namedquery",
+            url: "/namedquery/" + definition.name,
             type: 'POST',
             data: definition.storeParams,
             success: function() {
@@ -101,8 +87,13 @@ corona.storeQuery = function(definition) {
                     return;
                 }
 
+                url = "/namedquery";
+                if(definition.getParams.collection === undefined && definition.getParams.property === undefined) {
+                    url += "/" + definition.name;
+                }
+                
                 $.ajax({
-                    url:  "/namedquery",
+                    url:  url,
                     type: 'GET',
                     data: definition.getParams,
                     success: function(data) {
@@ -111,7 +102,7 @@ corona.storeQuery = function(definition) {
                             definition.assert.call(this, data);
                         }
                         $.ajax({
-                            url: "/namedquery?name=" + encodeURIComponent(definition.deleteParams.name),
+                            url: "/namedquery/" + definition.name,
                             type: 'DELETE',
                             success: function() {
                                 ok(true, "Deleted named query");
@@ -136,9 +127,44 @@ corona.storeQuery = function(definition) {
     });
 };
 
+corona.setup = function(callback) {
+    $.ajax({
+        url: "/manage/namedqueryprefix/nqp",
+        type: 'GET',
+        success: function() {
+            $.ajax({
+                url: "/manage/namedqueryprefix/nqp",
+                type: 'DELETE',
+                success: function() {
+                    callback.call();
+                }
+            });
+        },
+        error: function() {
+            callback.call();
+        }
+    });
+}
+
 $(document).ready(function() {
     module("Named Queries");
-    for(i = 0; i < corona.namedQueries.length; i += 1) {
-        corona.storeQuery(corona.namedQueries[i]);
-    }
+
+    corona.setup(function() {
+        asyncTest("Add named query prefix", function() {
+            $.ajax({
+                url: "/manage/namedqueryprefix/nqp",
+                type: 'POST',
+                success: function() {
+                    ok(true, "Named query prefix added");
+                    for(i = 0; i < corona.namedQueries.length; i += 1) {
+                        corona.storeQuery(corona.namedQueries[i]);
+                    }
+                },
+                error: function(j, t, error) {
+                    ok(false, "Named query prefix added");
+                },
+                complete: function() { start(); }
+            });
+        });
+    });
 });
