@@ -450,6 +450,15 @@ corona.queries = [
         "purpose": "boolean false query"
     },
 
+    {
+        "query": {
+            "namedQuery": "zip:94402"
+        },
+        "xmlQuery": '<namedQuery>zip:94402</namedQuery>',
+        "result": '<cts:element-geospatial-query xmlns:cts="http://marklogic.com/cts"> <cts:element xmlns:json="http://marklogic.com/json">json:latLongKey</cts:element> <cts:region xsi:type="cts:point" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">37.554167,-122.31306</cts:region> <cts:option>coordinate-system=wgs84</cts:option></cts:element-geospatial-query>',
+        "purpose": "Named query"
+    },
+
     /* Range */
     {
         "query": {

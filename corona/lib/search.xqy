@@ -514,7 +514,7 @@ declare function search:getStoredQueryCTS(
             if($query/@type = "structured")
             then structquery:getCTS(if(exists($query/corona:original/*)) then sqt:translate($query/corona:original/*) else structquery:getParseTree(string($query/corona:original)), $ignoreRange, $useRegisteredQueries)
             else stringquery:parse(string($query/corona:original))
-        else cts:registered-query(cts:register(cts:query($query/corona:seralized/*)))
+        else cts:registered-query(cts:register(cts:query($query/corona:seralized/*)), "unfiltered")
 };
 
 declare function search:deleteStoredQuery(

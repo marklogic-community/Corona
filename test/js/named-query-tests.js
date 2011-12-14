@@ -127,13 +127,13 @@ corona.storeQuery = function(definition) {
     });
 };
 
-corona.setup = function(callback) {
+corona.removePrefix = function(prefix, callback) {
     $.ajax({
-        url: "/manage/namedqueryprefix/nqp",
+        url: "/manage/namedqueryprefix/" + prefix,
         type: 'GET',
         success: function() {
             $.ajax({
-                url: "/manage/namedqueryprefix/nqp",
+                url: "/manage/namedqueryprefix/" + prefix,
                 type: 'DELETE',
                 success: function() {
                     callback.call();
@@ -149,7 +149,7 @@ corona.setup = function(callback) {
 $(document).ready(function() {
     module("Named Queries");
 
-    corona.setup(function() {
+    corona.removePrefix("nqp", function() {
         asyncTest("Add named query prefix", function() {
             $.ajax({
                 url: "/manage/namedqueryprefix/nqp",
@@ -166,5 +166,30 @@ $(document).ready(function() {
                 complete: function() { start(); }
             });
         });
+
+        corona.removePrefix("zip", function() {
+            $.ajax({
+                url: "/manage/namedqueryprefix/zip",
+                type: 'POST',
+                success: function() {
+                    $.ajax({
+                        url: "/namedquery/zip:94402",
+                        type: 'POST',
+                        data: {
+                            structuredQuery: JSON.stringify({
+                                "geo": "geokey",
+                                "region": {
+                                    "point": {
+                                        "latitude": 37.554167,
+                                        "longitude": -122.31305610
+                                    }
+                                }
+                            })
+                        }
+                    });
+                }
+            });
+        });
     });
+
 });

@@ -53,6 +53,7 @@ declare private function sqt:process(
     case element(keyExists) return sqt:handleSimpleKeyValue($step, ())
     case element(elementExists) return sqt:handleSimpleKeyValue($step, ())
     case element(collection) return sqt:handleSimpleKeyValue($step, ())
+    case element(namedQuery) return sqt:handleSimpleKeyValue($step, ())
 
     case element(equals) return sqt:handleMixedValue($step)
     case element(contains) return sqt:handleMixedValue($step)

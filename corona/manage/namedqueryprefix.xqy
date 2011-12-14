@@ -29,6 +29,7 @@ declare option xdmp:mapping "false";
 let $params := rest:process-request(endpoints:request("/corona/manage/namedqueryprefix.xqy"))
 let $prefix := map:get($params, "prefix")
 let $requestMethod := xdmp:get-request-method()
+let $set := xdmp:set-response-code(if($requestMethod = "GET") then 200 else 204, "Named query prefix")
 
 return common:output(
     if($requestMethod = "GET")
