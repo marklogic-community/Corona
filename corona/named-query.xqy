@@ -131,7 +131,7 @@ return common:output(
                 "results", json:array((
                     for $result in $results
                     return json:object((
-                        "prefix", string($result/@prefix),
+                        if(exists($result/@prefix)) then ("prefix", string($result/@prefix)) else (),
                         "name", string($result/@name),
                         "description", string($result/@description),
                         "queryType", string($result/@type),
@@ -150,7 +150,7 @@ return common:output(
                 <corona:results>{
                     for $result in $results
                     return <corona:result>
-                        <corona:prefix>{ string($result/@prefix) }</corona:prefix>
+                        { if(exists($result/@prefix)) then <corona:prefix>{ string($result/@prefix) }</corona:prefix> else () }
                         <corona:name>{ string($result/@name) }</corona:name>
                         <corona:description>{ string($result/@description) }</corona:description>
                         <corona:queryType>{ string($result/@type) }</corona:queryType>

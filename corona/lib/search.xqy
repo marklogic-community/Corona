@@ -446,9 +446,10 @@ declare function search:saveStructuredQuery(
     let $uri := search:generateURIForStoredQuery($name)
     let $test := search:validateNamedQueryName($name, "duplicate")
     let $tree := structquery:getParseTree($query)
-    let $prefix := substring-before($name, ":")
+    let $prefix := if(contains($name, ":")) then substring-before($name, ":") else ()
     let $doc :=
-        <corona:storedQuery type="structured" prefix="{ $prefix }" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+        <corona:storedQuery type="structured" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+            { if(exists($prefix)) then attribute { "prefix" } { $prefix} else () }
             <corona:original>{
                 if(common:xmlOrJSON($query) = "json")
                 then $query
@@ -475,9 +476,10 @@ declare function search:saveStringQuery(
 {
     let $uri := search:generateURIForStoredQuery($name)
     let $test := search:validateNamedQueryName($name, "duplicate")
-    let $prefix := substring-before($name, ":")
+    let $prefix := if(contains($name, ":")) then substring-before($name, ":") else ()
     let $doc :=
-        <corona:storedQuery type="string" prefix="{ $prefix }" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+        <corona:storedQuery type="string" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+            { if(exists($prefix)) then attribute { "prefix" } { $prefix} else () }
             <corona:original>{ $query }</corona:original>
             <corona:seralized>{ stringquery:parse($query) }</corona:seralized>
         </corona:storedQuery>
@@ -546,14 +548,14 @@ declare private function search:validateNamedQueryName(
 {
     let $uri := search:generateURIForStoredQuery($name)
     let $test :=
-        if(not(contains($name, ":")))
-        then error(xs:QName("corona:INVALID-NAMED-QUERY-NAME"), "Named queries must start with a valid named query prefix, followed by a colon then the actual name of the query")
+        if(contains($name, ":"))
+        then (
+            manage:validateNamedQueryPrefix(substring-before($name, ":")) ,
+            if(string-length(substring-after($name, ":")) = 0)
+            then error(xs:QName("corona:INVALID-NAMED-QUERY-NAME"), "Named queries with a prefix must contain a colon followed by the query name")
+            else ()
+        )
         else ()
-    let $test :=
-        if(string-length(substring-after($name, ":")) = 0)
-        then error(xs:QName("corona:INVALID-NAMED-QUERY-NAME"), "Named queries must start with a valid named query prefix, followed by a colon then the actual name of the query")
-        else ()
-    let $test := manage:validateNamedQueryPrefix(substring-before($name, ":"))
     let $test :=
         if($mode = "exists" and empty(doc($uri)))
         then error(xs:QName("corona:NAMED-QUERY-NOT-FOUND"), concat("The named query '", $name, "' does not exist"))

@@ -5,7 +5,7 @@ if(typeof corona == "undefined" || !corona) {
 
 corona.namedQueries = [
     {
-        name: "nqp:query1",
+        name: "query1",
         purpose: "Basic string query",
         storeParams: {
             description: "Hello world string query",
@@ -16,12 +16,12 @@ corona.namedQueries = [
         shouldSucceed: true,
         assert: function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].name, "nqp:query1", "Correct name was found");
+            equals(data.results[0].name, "query1", "Correct name was found");
             equals(data.results[0].queryType, "string", "Correct query type was found");
         }
     },
     {
-        name: "nqp:query2",
+        name: "query2",
         purpose: "Basic structured query",
         storeParams: {
             description: "Hello world structured query",
@@ -32,12 +32,12 @@ corona.namedQueries = [
         shouldSucceed: true,
         assert: function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].name, "nqp:query2", "Correct name was found");
+            equals(data.results[0].name, "query2", "Correct name was found");
             equals(data.results[0].queryType, "structured", "Correct query type was found");
         }
     },
     {
-        name: "nqp:query3",
+        name: "query3",
         purpose: "Query with collection",
         storeParams: {
             description: "Query in collection",
@@ -50,12 +50,12 @@ corona.namedQueries = [
         shouldSucceed: true,
         assert: function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].name, "nqp:query3", "Correct name was found");
+            equals(data.results[0].name, "query3", "Correct name was found");
             equals(data.results[0].queryType, "structured", "Correct query type was found");
         }
     },
     {
-        name: "nqp:query4",
+        name: "query4",
         purpose: "Query with property",
         storeParams: {
             description: "Query with property",
@@ -69,7 +69,7 @@ corona.namedQueries = [
         shouldSucceed: true,
         assert: function(data) {
             equals(data.results.length, 1, "Got one document");
-            equals(data.results[0].name, "nqp:query4", "Correct name was found");
+            equals(data.results[0].name, "query4", "Correct name was found");
             equals(data.results[0].queryType, "structured", "Correct query type was found");
         }
     },
@@ -149,46 +149,31 @@ corona.removePrefix = function(prefix, callback) {
 $(document).ready(function() {
     module("Named Queries");
 
-    corona.removePrefix("nqp", function() {
-        asyncTest("Add named query prefix", function() {
-            $.ajax({
-                url: "/manage/namedqueryprefix/nqp",
-                type: 'POST',
-                success: function() {
-                    ok(true, "Named query prefix added");
-                    for(i = 0; i < corona.namedQueries.length; i += 1) {
-                        corona.storeQuery(corona.namedQueries[i]);
-                    }
-                },
-                error: function(j, t, error) {
-                    ok(false, "Named query prefix added");
-                },
-                complete: function() { start(); }
-            });
-        });
+    for(i = 0; i < corona.namedQueries.length; i += 1) {
+        corona.storeQuery(corona.namedQueries[i]);
+    }
 
-        corona.removePrefix("zip", function() {
-            $.ajax({
-                url: "/manage/namedqueryprefix/zip",
-                type: 'POST',
-                success: function() {
-                    $.ajax({
-                        url: "/namedquery/zip:94402",
-                        type: 'POST',
-                        data: {
-                            structuredQuery: JSON.stringify({
-                                "geo": "geokey",
-                                "region": {
-                                    "point": {
-                                        "latitude": 37.554167,
-                                        "longitude": -122.31305610
-                                    }
+    corona.removePrefix("zip", function() {
+        $.ajax({
+            url: "/manage/namedqueryprefix/zip",
+            type: 'POST',
+            success: function() {
+                $.ajax({
+                    url: "/namedquery/zip:94402",
+                    type: 'POST',
+                    data: {
+                        structuredQuery: JSON.stringify({
+                            "geo": "geokey",
+                            "region": {
+                                "point": {
+                                    "latitude": 37.554167,
+                                    "longitude": -122.31305610
                                 }
-                            })
-                        }
-                    });
-                }
-            });
+                            }
+                        })
+                    }
+                });
+            }
         });
     });
 
