@@ -920,9 +920,22 @@ declare private function store:createSidecarDocument(
                     then <corona:title>{ string($extractedInfo/*:html/*:head/*:title) }</corona:title>
                     else (),
 
+                    let $map := map:map()
                     for $item in $extractedInfo/*:html/*:head/*:meta
+                    let $name :=
+                        if($item/@name != "xmp")
+                        then string($item/@name)
+                        else
+                            let $bits := tokenize($item/@content, ":")
+                            return concat($bits[1], "_", $bits[2])
+
+                    let $value :=
+                        if($item/@name != "xmp")
+                        then string($item/@content)
+                        else string-join(tokenize($item/@content, ":")[3 to last()], ":")
+
                     let $name := string-join(
-                        for $bit at $pos in tokenize($item/@name, "\-| |_")
+                        for $bit at $pos in tokenize($name, "\-| |_")
                         return 
                             if($pos > 1)
                             then concat(upper-case(substring($bit, 1, 1)), substring($bit, 2))
@@ -931,26 +944,31 @@ declare private function store:createSidecarDocument(
                                 then concat(lower-case(substring($bit, 1, 1)), substring($bit, 2))
                                 else $bit
                     , "")
+
                     let $name :=
                         (: Creating a mapping of various modification date names and changing them all to "modDate" :)
                         if($name = "lastSavedDate")
                         then "modDate"
                         else $name
+
                     let $element := element { xs:QName(concat("corona:", json:escapeNCName(string($name)))) } {(
                         if(matches($name, "date", "i"))
                         then
-                            let $normDate := dateparser:parse(string($item/@content))
+                            let $normDate := dateparser:parse($value)
                             where exists($normDate)
                             return attribute { "normazlied-date" } { $normDate }
                         else ()
                         ,
-                        string($item/@content)
+                        string($value)
                     )}
-                    where $name != "filterCapabilities"
-                    return
-                        if($name = "dimensions" and count(tokenize($item/@content, " x ")) = 2)
-                        then ($element, <corona:width>{ substring-before($item/@content, " x ") }</corona:width>, <corona:height>{ substring-after($item/@content, " x ") }</corona:height>)
+                    where $name != "filterCapabilities" and empty(map:get($map, $name))
+                    return (
+                        if($name = "dimensions" and count(tokenize($value, " x ")) = 2)
+                        then ($element, <corona:width>{ substring-before($value, " x ") }</corona:width>, <corona:height>{ substring-after($value, " x ") }</corona:height>)
                         else $element
+                        ,
+                        map:put($map, $name, true())
+                    )
                 )}</corona:meta>
                 else (),
 
