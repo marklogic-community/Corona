@@ -905,22 +905,22 @@ declare private function store:createSidecarDocument(
             then ()
             else
 
-            let $extratedInfo := try {
+            let $extractedInfo := try {
                 xdmp:apply(xdmp:function(xs:QName("xdmp:document-filter")), $content)
             }
             catch ($e) {
                 ()
             }
-            where exists($extratedInfo)
+            where exists($extractedInfo)
             return (
                 if($extractMetadata)
                 then
                 <corona:meta>{(
-                    if(exists($extratedInfo/*:html/*:head/*:title))
-                    then <corona:title>{ string($extratedInfo/*:html/*:head/*:title) }</corona:title>
+                    if(exists($extractedInfo/*:html/*:head/*:title))
+                    then <corona:title>{ string($extractedInfo/*:html/*:head/*:title) }</corona:title>
                     else (),
 
-                    for $item in $extratedInfo/*:html/*:head/*:meta
+                    for $item in $extractedInfo/*:html/*:head/*:meta
                     let $name := string-join(
                         for $bit at $pos in tokenize($item/@name, "\-| |_")
                         return 
@@ -931,7 +931,21 @@ declare private function store:createSidecarDocument(
                                 then concat(lower-case(substring($bit, 1, 1)), substring($bit, 2))
                                 else $bit
                     , "")
-                    let $element := element { xs:QName(concat("corona:", json:escapeNCName(string($name)))) } { string($item/@content) }
+                    let $name :=
+                        (: Creating a mapping of various modification date names and changing them all to "modDate" :)
+                        if($name = "lastSavedDate")
+                        then "modDate"
+                        else $name
+                    let $element := element { xs:QName(concat("corona:", json:escapeNCName(string($name)))) } {(
+                        if(matches($name, "date", "i"))
+                        then
+                            let $normDate := dateparser:parse(string($item/@content))
+                            where exists($normDate)
+                            return attribute { "normazlied-date" } { $normDate }
+                        else ()
+                        ,
+                        string($item/@content)
+                    )}
                     where $name != "filterCapabilities"
                     return
                         if($name = "dimensions" and count(tokenize($item/@content, " x ")) = 2)
@@ -940,11 +954,11 @@ declare private function store:createSidecarDocument(
                 )}</corona:meta>
                 else (),
 
-                if(exists($extratedInfo/*:html/*:body) and $extractContent)
+                if(exists($extractedInfo/*:html/*:body) and $extractContent)
                 then
                     let $content :=
                         <corona:extractedContent>{
-                            for $para in $extratedInfo/*:html/*:body/*:p
+                            for $para in $extractedInfo/*:html/*:body/*:p
                             let $string := normalize-space($para)
                             where string-length($string)
                             return <corona:extractedPara>{ $string }</corona:extractedPara>
