@@ -39,6 +39,14 @@ declare function common:validateOutputFormat(
 
 declare function common:error(
     $exceptionCode as xs:string,
+    $message as xs:string
+)
+{
+    common:error($exceptionCode, $message, ())
+};
+
+declare function common:error(
+    $exceptionCode as xs:string,
     $message as xs:string,
     $outputFormat as xs:string?
 )

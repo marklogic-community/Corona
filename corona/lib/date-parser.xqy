@@ -260,7 +260,7 @@ declare variable $dateparser:FORMATS as element(format)+ := (
         <minute>\d\d</minute>
         <string>:</string>
         <second>\d\d</second>
-        <timezone>-\d\d'\d\d'|\+\d\d'\d\d'</timezone>
+        <timezone>-\d\d'\d\d'|\+\d\d'\d\d'|\w+</timezone>
     </format>
 );
 
