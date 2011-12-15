@@ -176,6 +176,9 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <request uri="^/manage/?$" endpoint="/corona/manage/state.xqy" user-params="allow">
         <http method="POST">
             <param name="isManaged" as="boolean" required="false"/>
+            <param name="insertTransforms" as="boolean" required="false"/>
+            <param name="fetchTransforms" as="boolean" required="false"/>
+            <param name="defaultOutputFormat" required="false" values="json|xml"/>
         </http>
     </request>
 

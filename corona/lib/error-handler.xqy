@@ -20,4 +20,4 @@ import module namespace common="http://marklogic.com/corona/common" at "../lib/c
 
 declare variable $error:errors as node()* external;
 
-common:errorFromException($error:errors, xdmp:get-request-field("outputFormat", "json"))
+common:errorFromException($error:errors, xdmp:get-request-field("outputFormat"))

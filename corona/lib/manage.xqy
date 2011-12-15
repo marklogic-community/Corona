@@ -69,6 +69,19 @@ declare function manage:fetchTransformsEnabled(
     (prop:get("corona-fetchTransforms"), true())[1]
 };
 
+declare function manage:setDefaultOutputFormat(
+    $defaultOutputFormat as xs:string
+) as empty-sequence()
+{
+    prop:set("corona-defaultOutputFormat", $defaultOutputFormat, true())
+};
+
+declare function manage:defaultOutputFormat(
+) as xs:string
+{
+    (prop:get("corona-defaultOutputFormat"), "json")[1]
+};
+
 (: Named query prefixes :)
 declare function manage:addNamedQueryPrefix(
     $prefix as xs:string

@@ -21,6 +21,7 @@ import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace dateparser="http://marklogic.com/dateparser" at "date-parser.xqy";
 import module namespace config="http://marklogic.com/corona/index-config" at "index-config.xqy";
 import module namespace store="http://marklogic.com/corona/store" at "store.xqy";
+import module namespace manage="http://marklogic.com/corona/manage" at "manage.xqy";
 
 declare namespace corona="http://marklogic.com/corona";
 declare namespace search="http://marklogic.com/appservices/search";
@@ -39,9 +40,14 @@ declare function common:validateOutputFormat(
 declare function common:error(
     $exceptionCode as xs:string,
     $message as xs:string,
-    $outputFormat as xs:string
+    $outputFormat as xs:string?
 )
 {
+    let $outputFormat :=
+        if(exists($outputFormat))
+        then $outputFormat
+        else manage:defaultOutputFormat()
+
     let $isA400 := (
         "corona:DUPLICATE-INDEX-NAME",
         "corona:DUPLICATE-PLACE-ITEM",
@@ -84,7 +90,7 @@ declare function common:error(
 
 declare function common:errorFromException(
     $exception as element(),
-    $outputFormat as xs:string
+    $outputFormat as xs:string?
 )
 {
     if($exception/*:code = "SEC-ROLEDNE")

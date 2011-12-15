@@ -40,6 +40,7 @@ return common:output(
     then json:document(
         json:object((
             "isManaged", manage:isManaged(),
+            "defaultOutputFormat", manage:defaultOutputFormat(),
             "insertTransformsEnabled", manage:insertTransformsEnabled(),
             "fetchTransformsEnabled", manage:fetchTransformsEnabled(),
             "features", json:object((

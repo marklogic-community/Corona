@@ -63,7 +63,7 @@ let $errors :=
     else if(empty($doc))
     then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no document at '", $uri, "'"), $outputFormat)
     else if(not(common:validateOutputFormat($outputFormat)))
-    then common:error("corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
+    then common:error("corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"))
     else ()
 
 let $include := map:get($params, "include")

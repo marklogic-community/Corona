@@ -30,6 +30,7 @@ let $requestMethod := xdmp:get-request-method()
 let $isManaged := map:get($params, "isManaged")
 let $insertTransforms := map:get($params, "insertTransforms")
 let $fetchTransforms := map:get($params, "fetchTransforms")
+let $defaultOutputFormat := map:get($params, "defaultOutputFormat")
 
 let $set := xdmp:set-response-code(204, "State saved")
 return common:output(
@@ -40,6 +41,8 @@ return common:output(
         then manage:enableInsertTransforms($insertTransforms)
         else if(exists($fetchTransforms))
         then manage:enableFetchTransforms($fetchTransforms)
+        else if(exists($defaultOutputFormat))
+        then manage:setDefaultOutputFormat($defaultOutputFormat)
         else common:error("corona:INVALID-PARAMETER", "Must specify an action to perform", "json")
     }
     catch ($e) {
