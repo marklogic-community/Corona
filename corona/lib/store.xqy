@@ -165,7 +165,7 @@ declare function store:outputDocument(
             if($documentType = ("binary", "binary-sidecar") and $include = ("binaryMetadata", "all"))
             then ("binaryMetadata", json:object((
                 for $meta in doc($contentURI)/corona:sidecar/corona:meta/*
-                return (local-name($meta), string($meta))
+                return (local-name($meta), string(($meta/@normalized-date, $meta)[1]))
             )))
             else ()
         ))
@@ -956,7 +956,7 @@ declare private function store:createSidecarDocument(
                         then
                             let $normDate := dateparser:parse($value)
                             where exists($normDate)
-                            return attribute { "normazlied-date" } { $normDate }
+                            return attribute { "normalized-date" } { $normDate }
                         else ()
                         ,
                         string($value)
