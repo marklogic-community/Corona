@@ -272,7 +272,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         </http>
     </request>
 
-    <request uri="^/manage/(namedqueryprefixs|namedqueryprefix/([^/]+))/?$" endpoint="/corona/manage/namedqueryprefix.xqy" user-params="allow">
+    <request uri="^/manage/(namedqueryprefixes|namedqueryprefix/([^/]+))/?$" endpoint="/corona/manage/namedqueryprefix.xqy" user-params="allow">
         <uri-param name="prefix" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST"/>

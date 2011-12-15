@@ -76,6 +76,7 @@ return common:output(
                 "anonymousPlace", manage:getPlace(())
             )),
             "transformers", json:array(manage:getAllTransformerNames()),
+            "namedQueryPrefixes", json:array(manage:getNamedQueryPrefixes()),
             "statistics", json:object((
                 "XMLDocumentCount", $numXMLDocs,
                 "JSONDocumentCount", $numJSONDocs,

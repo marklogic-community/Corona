@@ -39,7 +39,7 @@ return common:output(
             if(manage:namedQueryPrefixExists($prefix))
             then json:object(("exists", true()))
             else common:error("corona:NAMED-QUERY-PREFIX-NOT-FOUND", "Named query prefix not found", "json")
-        else json:array(manage:getNamedQueryPrefixs())
+        else json:array(manage:getNamedQueryPrefixes())
 
     else if($requestMethod = "POST")
     then

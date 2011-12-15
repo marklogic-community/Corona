@@ -105,7 +105,7 @@ declare function manage:validateNamedQueryPrefix(
     else ()
 };
 
-declare function manage:getNamedQueryPrefixs(
+declare function manage:getNamedQueryPrefixes(
 ) as xs:string*
 {
     config:prefixes()
