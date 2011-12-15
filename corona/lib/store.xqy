@@ -950,6 +950,8 @@ declare private function store:createSidecarDocument(
                     return
                         if($name = "dimensions" and count(tokenize($item/@content, " x ")) = 2)
                         then ($element, <corona:width>{ substring-before($item/@content, " x ") }</corona:width>, <corona:height>{ substring-after($item/@content, " x ") }</corona:height>)
+                        else if($name = "modDate") (: modDate is what filtered PDF use vs. lastSavedDate that Office docs use :)
+                        then $element, <corona:lastSavedDate>{ fn:replace(fn:replace($item/@content, "/", "-"), " ", "T")}</corona:lastSavedDate>
                         else $element
                 )}</corona:meta>
                 else (),
