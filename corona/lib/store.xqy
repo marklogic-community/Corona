@@ -905,22 +905,22 @@ declare private function store:createSidecarDocument(
             then ()
             else
 
-            let $extratedInfo := try {
+            let $extractedInfo := try {
                 xdmp:apply(xdmp:function(xs:QName("xdmp:document-filter")), $content)
             }
             catch ($e) {
                 ()
             }
-            where exists($extratedInfo)
+            where exists($extractedInfo)
             return (
                 if($extractMetadata)
                 then
                 <corona:meta>{(
-                    if(exists($extratedInfo/*:html/*:head/*:title))
-                    then <corona:title>{ string($extratedInfo/*:html/*:head/*:title) }</corona:title>
+                    if(exists($extractedInfo/*:html/*:head/*:title))
+                    then <corona:title>{ string($extractedInfo/*:html/*:head/*:title) }</corona:title>
                     else (),
 
-                    for $item in $extratedInfo/*:html/*:head/*:meta
+                    for $item in $extractedInfo/*:html/*:head/*:meta
                     let $name := string-join(
                         for $bit at $pos in tokenize($item/@name, "\-| |_")
                         return 
@@ -936,15 +936,17 @@ declare private function store:createSidecarDocument(
                     return
                         if($name = "dimensions" and count(tokenize($item/@content, " x ")) = 2)
                         then ($element, <corona:width>{ substring-before($item/@content, " x ") }</corona:width>, <corona:height>{ substring-after($item/@content, " x ") }</corona:height>)
+                        else if($name = "modDate") (: modDate is what filtered PDF use vs. lastSavedDate that Office docs use :)
+                        then $element, <corona:lastSavedDate>{ fn:replace(fn:replace($item/@content, "/", "-"), " ", "T")}</corona:lastSavedDate>
                         else $element
                 )}</corona:meta>
                 else (),
 
-                if(exists($extratedInfo/*:html/*:body) and $extractContent)
+                if(exists($extractedInfo/*:html/*:body) and $extractContent)
                 then
                     let $content :=
                         <corona:extractedContent>{
-                            for $para in $extratedInfo/*:html/*:body/*:p
+                            for $para in $extractedInfo/*:html/*:body/*:p
                             let $string := normalize-space($para)
                             where string-length($string)
                             return <corona:extractedPara>{ $string }</corona:extractedPara>
