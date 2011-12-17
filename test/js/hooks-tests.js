@@ -75,8 +75,7 @@ corona.setFetchHook = function(name, callback) {
     });
 };
 
-$(document).ready(function() {
-    module("Hooks Management");
+corona.testInsertHook = function(callback) {
     corona.setInsertHook("adddate", function() {
 		asyncTest("Inserting document", function() {
 			$.ajax({
@@ -86,7 +85,7 @@ $(document).ready(function() {
 				success: function(response) {
 					ok(true, "Inserted document with auto-transform");
 					equals(response.getElementsByTagName("wrapper").length, 1, "Transformer was applied to document");
-					corona.setInsertHook("");
+					corona.setInsertHook("", callback);
 				},
 				error: function(j, t, error) {
 					ok(false, "Inserted document with auto-transform");
@@ -95,7 +94,9 @@ $(document).ready(function() {
 			});
 		});
     });
+};
 
+corona.testFetchHook = function(callback) {
     corona.setFetchHook("adddate", function() {
 		asyncTest("Inserting document", function() {
 			$.ajax({
@@ -109,7 +110,7 @@ $(document).ready(function() {
 						success: function(response) {
 							ok(true, "Fetching document with auto-transform");
 							equals(response.getElementsByTagName("wrapper").length, 1, "Transformer was applied to document");
-							corona.setFetchHook("");
+							corona.setFetchHook("", callback);
 						},
 						error: function(j, t, error) {
 							ok(false, "Fetching document with auto-transform");
@@ -123,4 +124,11 @@ $(document).ready(function() {
 			});
 		});
     });
+};
+
+
+$(document).ready(function() {
+    module("Hooks Management");
+	corona.testInsertHook(corona.testFetchHook);
+
 });
