@@ -54,6 +54,11 @@ declare function store:outputRawDocument(
 
     (: Apply the transformation :)
     let $content :=
+		if(exists(manage:getFetchTransformer()))
+		then store:applyTransformer(manage:getFetchTransformer(), $content)
+		else $content
+
+    let $content :=
         if(exists($applyTransform) and manage:fetchTransformsEnabled())
         then store:applyTransformer($applyTransform, $content)
         else $content
@@ -124,7 +129,10 @@ declare function store:outputDocument(
     let $content :=
 		if(exists(manage:getFetchTransformer()))
 		then store:applyTransformer(manage:getFetchTransformer(), $content)
-        else if(exists($applyTransform) and manage:fetchTransformsEnabled())
+		else $content
+
+    let $content :=
+        if(exists($applyTransform) and manage:fetchTransformsEnabled())
         then store:applyTransformer($applyTransform, $content)
         else $content
 
@@ -447,7 +455,10 @@ declare function store:insertDocument(
     let $body :=
 		if(exists(manage:getInsertTransformer()))
 		then store:applyTransformer(manage:getInsertTransformer(), $body)
-        else if(exists($applyTransform) and manage:insertTransformsEnabled())
+		else $body
+
+    let $body :=
+        if(exists($applyTransform) and manage:insertTransformsEnabled())
         then store:applyTransformer($applyTransform, $body)
         else $body
 
@@ -541,7 +552,10 @@ declare function store:updateDocumentContent(
     let $body :=
 		if(exists(manage:getInsertTransformer()))
 		then store:applyTransformer(manage:getInsertTransformer(), $body)
-        else if(exists($applyTransform) and manage:insertTransformsEnabled())
+		else $body
+
+	let $body :=
+        if(exists($applyTransform) and manage:insertTransformsEnabled())
         then store:applyTransformer($applyTransform, $body)
         else $body
 
@@ -988,12 +1002,17 @@ declare private function store:createSidecarDocument(
                             return <corona:extractedPara>{ $string }</corona:extractedPara>
                         }</corona:extractedContent>
 
-                    return
+					let $content :=
 						if(exists(manage:getInsertTransformer()))
 						then store:applyTransformer(manage:getInsertTransformer(), $content)
-                        else if(exists($applyTransform) and manage:insertTransformsEnabled())
+						else $content
+
+					let $content :=
+                        if(exists($applyTransform) and manage:insertTransformsEnabled())
                         then store:applyTransformer($applyTransform, $content)
                         else $content
+
+                    return $content
                 else ()
             )
         }
