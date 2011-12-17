@@ -5,17 +5,13 @@ if(typeof corona == "undefined" || !corona) {
 
 corona.namedQueries = [
     {
+        name: "query1",
         purpose: "Basic string query",
         storeParams: {
-            name: "query1",
             description: "Hello world string query",
             stringQuery: "hello world"
         },
         getParams: {
-            name: "query1"
-        },
-        deleteParams: {
-            name: "query1"
         },
         shouldSucceed: true,
         assert: function(data) {
@@ -25,17 +21,13 @@ corona.namedQueries = [
         }
     },
     {
+        name: "query2",
         purpose: "Basic structured query",
         storeParams: {
-            name: "query2",
             description: "Hello world structured query",
             structuredQuery: JSON.stringify({wordAnywhere: "hello world"})
         },
         getParams: {
-            name: "query2"
-        },
-        deleteParams: {
-            name: "query2"
         },
         shouldSucceed: true,
         assert: function(data) {
@@ -45,18 +37,15 @@ corona.namedQueries = [
         }
     },
     {
+        name: "query3",
         purpose: "Query with collection",
         storeParams: {
-            name: "query3",
             description: "Query in collection",
             structuredQuery: JSON.stringify({wordAnywhere: "hello world"}),
             collection: "namedQueryCollection1"
         },
         getParams: {
             collection: "namedQueryCollection1"
-        },
-        deleteParams: {
-            name: "query3"
         },
         shouldSucceed: true,
         assert: function(data) {
@@ -66,9 +55,9 @@ corona.namedQueries = [
         }
     },
     {
+        name: "query4",
         purpose: "Query with property",
         storeParams: {
-            name: "query4",
             description: "Query with property",
             structuredQuery: JSON.stringify({wordAnywhere: "hello world"}),
             property: "querykey:foobar"
@@ -76,9 +65,6 @@ corona.namedQueries = [
         getParams: {
             property: "querykey",
             value: "foobar"
-        },
-        deleteParams: {
-            name: "query4"
         },
         shouldSucceed: true,
         assert: function(data) {
@@ -92,7 +78,7 @@ corona.namedQueries = [
 corona.storeQuery = function(definition) {
     asyncTest(definition.purpose, function() {
         $.ajax({
-            url: "/namedquery",
+            url: "/namedquery/" + definition.name,
             type: 'POST',
             data: definition.storeParams,
             success: function() {
@@ -101,8 +87,13 @@ corona.storeQuery = function(definition) {
                     return;
                 }
 
+                url = "/namedquery";
+                if(definition.getParams.collection === undefined && definition.getParams.property === undefined) {
+                    url += "/" + definition.name;
+                }
+                
                 $.ajax({
-                    url:  "/namedquery",
+                    url:  url,
                     type: 'GET',
                     data: definition.getParams,
                     success: function(data) {
@@ -111,7 +102,7 @@ corona.storeQuery = function(definition) {
                             definition.assert.call(this, data);
                         }
                         $.ajax({
-                            url: "/namedquery?name=" + encodeURIComponent(definition.deleteParams.name),
+                            url: "/namedquery/" + definition.name,
                             type: 'DELETE',
                             success: function() {
                                 ok(true, "Deleted named query");
@@ -136,9 +127,54 @@ corona.storeQuery = function(definition) {
     });
 };
 
+corona.removePrefix = function(prefix, callback) {
+    $.ajax({
+        url: "/manage/namedqueryprefix/" + prefix,
+        type: 'GET',
+        success: function() {
+            $.ajax({
+                url: "/manage/namedqueryprefix/" + prefix,
+                type: 'DELETE',
+                success: function() {
+                    callback.call();
+                }
+            });
+        },
+        error: function() {
+            callback.call();
+        }
+    });
+}
+
 $(document).ready(function() {
     module("Named Queries");
+
     for(i = 0; i < corona.namedQueries.length; i += 1) {
         corona.storeQuery(corona.namedQueries[i]);
     }
+
+    corona.removePrefix("zip", function() {
+        $.ajax({
+            url: "/manage/namedqueryprefix/zip",
+            type: 'POST',
+            success: function() {
+                $.ajax({
+                    url: "/namedquery/zip:94402",
+                    type: 'POST',
+                    data: {
+                        structuredQuery: JSON.stringify({
+                            "geo": "geokey",
+                            "region": {
+                                "point": {
+                                    "latitude": 37.554167,
+                                    "longitude": -122.31305610
+                                }
+                            }
+                        })
+                    }
+                });
+            }
+        });
+    });
+
 });

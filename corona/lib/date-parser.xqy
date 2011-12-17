@@ -47,6 +47,38 @@ declare variable $dateparser:FORMATS as element(format)+ := (
         <ignore>\(\w+\)</ignore>
     </format>,
 
+    (: 2011:04:19 12:29:42 :)
+    <format>
+        <year>\d\d\d\d</year>
+        <string>:</string>
+        <month>\d\d</month>
+        <string>:</string>
+        <day>\d\d</day>
+        <whitespace/>
+        <hour>\d\d</hour>
+        <string>:</string>
+        <minute>\d\d</minute>
+        <string>:</string>
+        <second>\d\d</second>
+    </format>,
+
+    (: Sun Aug 15 19:42:00 2004 :)
+    <format>
+        <ignore>\w+</ignore>
+        <whitespace/>
+        <month>\w+</month>
+        <whitespace/>
+        <day>\d\d</day>
+        <whitespace/>
+        <hour>\d\d</hour>
+        <string>:</string>
+        <minute>\d\d</minute>
+        <string>:</string>
+        <second>\d\d</second>
+        <whitespace/>
+        <year>\d\d\d\d</year>
+    </format>,
+
     (: 25-Oct-2004 17:06:46 -0500 :)
     <format>
         <day>\d\d</day>
@@ -213,6 +245,22 @@ declare variable $dateparser:FORMATS as element(format)+ := (
         <string>,?</string>
         <whitespace/>
         <year>\d\d\d\d</year>
+    </format>,
+
+    (: 2009/04/15 14:26:51+12'00' :)
+    <format>
+        <year>\d\d\d\d</year>
+        <string>/</string>
+        <month>\d\d</month>
+        <string>/</string>
+        <day>\d\d</day>
+        <whitespace/>
+        <hour>\d\d</hour>
+        <string>:</string>
+        <minute>\d\d</minute>
+        <string>:</string>
+        <second>\d\d</second>
+        <timezone>-\d\d'\d\d'|\+\d\d'\d\d'|\w+</timezone>
     </format>
 );
 
@@ -393,11 +441,13 @@ declare private function dateparser:processZone(
 	$zone as xs:string?
 ) as xs:string
 {
-	if(matches($zone, "[+-]\d\d\d\d"))
-	then concat(substring($zone, 0, 4), ":", substring($zone, 4))
-	else if(matches($zone, "\w\w\w"))
-	then dateparser:timezoneLookup($zone)
-	else ""
+    let $zone := replace($zone, "'", "")
+    return
+        if(matches($zone, "[+-]\d\d\d\d"))
+        then concat(substring($zone, 0, 4), ":", substring($zone, 4))
+        else if(matches($zone, "\w\w\w"))
+        then dateparser:timezoneLookup($zone)
+        else ""
 };
 
 declare private function dateparser:stringPad(

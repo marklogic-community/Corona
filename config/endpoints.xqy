@@ -143,10 +143,10 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     </request>
 
     <!-- Named query management -->
-    <request uri="^/namedquery/?$" endpoint="/corona/named-query.xqy" user-params="allow">
+    <request uri="^/(namedquery|namedquery/([^/]+))/?$" endpoint="/corona/named-query.xqy" user-params="allow">
+        <uri-param name="name">$2</uri-param>
         <param name="outputFormat" required="false"  values="xml|json"/>
         <http method="GET">
-            <param name="name" required="false"/>
             <param name="property" required="false"/>
             <param name="value" required="false"/>
             <param name="collection" alias="collection[]" required="false" repeatable="true"/>
@@ -155,7 +155,6 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="length" required="false" as="positiveInteger" default="1"/>
         </http>
         <http method="POST">
-            <param name="name" required="true"/>
             <param name="description" required="false"/>
             <param name="stringQuery" required="false"/>
             <param name="structuredQuery" required="false"/>
@@ -163,9 +162,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="property" alias="property[]" repeatable="true" required="false"/>
             <param name="permission" alias="permission[]" repeatable="true" required="false"/>
         </http>
-        <http method="DELETE">
-            <param name="name" required="true"/>
-        </http>
+        <http method="DELETE"/>
     </request>
 
 
@@ -181,6 +178,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="isManaged" as="boolean" required="false"/>
             <param name="insertTransforms" as="boolean" required="false"/>
             <param name="fetchTransforms" as="boolean" required="false"/>
+            <param name="defaultOutputFormat" required="false" values="json|xml"/>
         </http>
     </request>
 
@@ -285,13 +283,15 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 	    </http>
     </request>
 
-    <request uri="^/config/setup/?$" endpoint="/config/setup.xqy" user-params="allow">
+    <request uri="^/manage/(namedqueryprefixes|namedqueryprefix/([^/]+))/?$" endpoint="/corona/manage/namedqueryprefix.xqy" user-params="allow">
+        <uri-param name="prefix" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST"/>
+        <http method="DELETE"/>
     </request>
-
-</options>;
-
+declare function endpoints:options(
+) as element(rest:options)
+{
 declare function endpoints:options(
 ) as element(rest:options)
 {

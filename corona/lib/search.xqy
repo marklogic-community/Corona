@@ -22,6 +22,8 @@ import module namespace common="http://marklogic.com/corona/common" at "common.x
 import module namespace json="http://marklogic.com/json" at "json.xqy";
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "structured-query.xqy";
+import module namespace sqt="http://marklogic.com/corona/structured-query-translator" at "structured-query-translator.xqy";
+import module namespace manage="http://marklogic.com/corona/manage" at "manage.xqy";
 
 import module namespace const="http://marklogic.com/corona/constants" at "constants.xqy";
 
@@ -442,10 +444,12 @@ declare function search:saveStructuredQuery(
 ) as empty-sequence()
 {
     let $uri := search:generateURIForStoredQuery($name)
-    let $test := search:validateNamedSearchName($name, "duplicate")
+    let $test := search:validateNamedQueryName($name, "duplicate")
     let $tree := structquery:getParseTree($query)
+    let $prefix := if(contains($name, ":")) then substring-before($name, ":") else ()
     let $doc :=
         <corona:storedQuery type="structured" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+            { if(exists($prefix)) then attribute { "prefix" } { $prefix} else () }
             <corona:original>{
                 if(common:xmlOrJSON($query) = "json")
                 then $query
@@ -471,9 +475,11 @@ declare function search:saveStringQuery(
 ) as empty-sequence()
 {
     let $uri := search:generateURIForStoredQuery($name)
-    let $test := search:validateNamedSearchName($name, "duplicate")
+    let $test := search:validateNamedQueryName($name, "duplicate")
+    let $prefix := if(contains($name, ":")) then substring-before($name, ":") else ()
     let $doc :=
         <corona:storedQuery type="string" name="{ $name }" description="{ $description }" createdOn="{ current-dateTime() }">
+            { if(exists($prefix)) then attribute { "prefix" } { $prefix} else () }
             <corona:original>{ $query }</corona:original>
             <corona:seralized>{ stringquery:parse($query) }</corona:seralized>
         </corona:storedQuery>
@@ -489,23 +495,43 @@ declare function search:getStoredQuery(
     $name as xs:string
 ) as element(corona:storedQuery)
 {
-    let $test := search:validateNamedSearchName($name, "exists")
+    let $test := search:validateNamedQueryName($name, "exists")
     return doc(search:generateURIForStoredQuery($name))/corona:storedQuery
 };
 
-declare function search:getAllStoredQueries(
-    $outputFormat as xs:string
-) as element()?
+declare function search:getStoredQueryCTS(
+    $name as xs:string,
+    $ignoreRange as xs:string?,
+    $useRegisteredQueries as xs:boolean
+) as cts:query?
 {
-    ()
+    let $query := doc(search:generateURIForStoredQuery($name))/corona:storedQuery
+    let $redo :=
+        if(exists($ignoreRange))
+        then true() (: XXX - Could be a ton less pessimistic here :)
+        else not($useRegisteredQueries)
+    return
+        if($redo)
+        then
+            if($query/@type = "structured")
+            then structquery:getCTS(if(exists($query/corona:original/*)) then sqt:translate($query/corona:original/*) else structquery:getParseTree(string($query/corona:original)), $ignoreRange, $useRegisteredQueries)
+            else stringquery:parse(string($query/corona:original))
+        else cts:registered-query(cts:register(cts:query($query/corona:seralized/*)), "unfiltered")
 };
 
 declare function search:deleteStoredQuery(
     $name as xs:string
 ) as empty-sequence()
 {
-    let $test := search:validateNamedSearchName($name, "exists")
+    let $test := search:validateNamedQueryName($name, "exists")
     return xdmp:document-delete(search:generateURIForStoredQuery($name))
+};
+
+declare function search:storedQueriesWithPrefix(
+    $prefix as xs:string
+) as element(corona:storedQuery)*
+{
+    /corona:storedQuery[@prefix = $prefix]
 };
 
 declare private function search:generateURIForStoredQuery(
@@ -515,12 +541,21 @@ declare private function search:generateURIForStoredQuery(
     concat("_/storedQueries/", $name)
 };
 
-declare private function search:validateNamedSearchName(
+declare private function search:validateNamedQueryName(
     $name as xs:string,
     $mode as xs:string+
 ) as empty-sequence()
 {
     let $uri := search:generateURIForStoredQuery($name)
+    let $test :=
+        if(contains($name, ":"))
+        then (
+            manage:validateNamedQueryPrefix(substring-before($name, ":")) ,
+            if(string-length(substring-after($name, ":")) = 0)
+            then error(xs:QName("corona:INVALID-NAMED-QUERY-NAME"), "Named queries with a prefix must contain a colon followed by the query name")
+            else ()
+        )
+        else ()
     let $test :=
         if($mode = "exists" and empty(doc($uri)))
         then error(xs:QName("corona:NAMED-QUERY-NOT-FOUND"), concat("The named query '", $name, "' does not exist"))

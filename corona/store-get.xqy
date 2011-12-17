@@ -43,12 +43,12 @@ declare function local:queryFromRequest(
         }
     let $stringQuery :=
         try {
-            stringquery:parse(map:get($params, "stringQuery"))
+            stringquery:parse(map:get($params, "stringQuery"), (), false())
         }
         catch ($e) {
             error(xs:QName("corona:INVALID-PARAMETER"), concat("The string query isn't valid: ", $e/*:message))
         }
-    return (stringquery:parse(map:get($params, "stringQuery")), structquery:getCTS($structuredQuery))[1]
+    return ($stringQuery, structquery:getCTS($structuredQuery, (), false()))[1]
 };
 
 let $requestMethod := xdmp:get-request-method()
@@ -59,11 +59,11 @@ let $outputFormat := common:getOutputFormat((), map:get($params, "outputFormat")
 let $doc := doc($uri)
 let $errors :=
     if($requestMethod = ("GET") and string-length($uri) = 0)
-    then common:error("corona:INVALID-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $outputFormat)
+    then common:error("corona:MISSING-PARAMETER", "Must supply a URI when inserting, updating or fetching a document", $outputFormat)
     else if(empty($doc))
     then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no document at '", $uri, "'"), $outputFormat)
     else if(not(common:validateOutputFormat($outputFormat)))
-    then common:error("corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"), "json")
+    then common:error("corona:INVALID-OUTPUT-FORMAT", concat("The output format '", $outputFormat, "' isn't valid"))
     else ()
 
 let $include := map:get($params, "include")
@@ -71,14 +71,14 @@ let $content :=
     if($requestMethod = "GET" and string-length($uri))
     then try {
         let $extractPath := map:get($params, "extractPath")
-        let $transformer := map:get($params, "applyTransform")
+        let $applyTransform := map:get($params, "applyTransform")
         where empty($errors)
         return
             if($include = "content" and count($include) = 1)
-            then $doc
+            then store:outputRawDocument($doc, $extractPath, $applyTransform, $outputFormat)
             else if($outputFormat = "json")
-            then store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)
-            else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $transformer, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
+            then store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)
+            else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
     }
     catch ($e) {
         xdmp:set($errors, common:errorFromException($e, $outputFormat))

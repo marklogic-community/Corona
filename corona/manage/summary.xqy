@@ -40,6 +40,7 @@ return common:output(
     then json:document(
         json:object((
             "isManaged", manage:isManaged(),
+            "defaultOutputFormat", manage:defaultOutputFormat(),
             "insertTransformsEnabled", manage:insertTransformsEnabled(),
             "fetchTransformsEnabled", manage:fetchTransformsEnabled(),
             "features", json:object((
@@ -76,6 +77,7 @@ return common:output(
                 "anonymousPlace", manage:getPlace(())
             )),
             "transformers", json:array(manage:getAllTransformerNames()),
+            "namedQueryPrefixes", json:array(manage:getNamedQueryPrefixes()),
             "statistics", json:object((
                 "XMLDocumentCount", $numXMLDocs,
                 "JSONDocumentCount", $numJSONDocs,

@@ -33,6 +33,34 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare variable $xsltEval := try { xdmp:function(xs:QName("xdmp:xslt-eval")) } catch ($e) {};
 declare variable $xsltIsSupported := try { xdmp:apply($xsltEval, <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"/>, <foo/>)[3], true() } catch ($e) {xdmp:log($e), false() };
 
+declare function store:outputRawDocument(
+    $doc as document-node(),
+    $extractPath as xs:string?,
+    $applyTransform as xs:string?,
+    $outputFormat as xs:string
+) as item()
+{
+    let $documentType := store:getDocumentTypeFromDoc($doc)
+
+    (: Perform the path extraction if one was provided :)
+    let $content :=
+        if(exists($extractPath) and $documentType = "xml")
+        then store:wrapContentNodes(path:select($doc, $extractPath, "xpath"), $documentType)
+        else if(exists($extractPath) and $documentType = "json")
+        then store:wrapContentNodes(path:select($doc/json:json, $extractPath, "json"), $documentType)
+        else if($documentType = "text")
+        then $doc/text()
+        else $doc
+
+    (: Apply the transformation :)
+    let $content :=
+        if(exists($applyTransform) and manage:fetchTransformsEnabled())
+        then store:applyTransformer($applyTransform, $content)
+        else $content
+
+    return $content
+};
+
 (:
     Can take in a JSON document, XML document, text document, binary node or binary sidecar.
     Will *not* output just the raw document if include equals and only equals "content", use doc() for that instead.
@@ -66,8 +94,6 @@ declare function store:outputDocument(
         else if($documentType = "binary")
         then string(doc($contentURI)/corona:sidecar/corona:suppliedContent/@format)
         else $documentType
-
-    let $collections := xdmp:document-get-collections($contentURI)
 
     let $searchableContent :=
         if($documentType = "text")
@@ -141,7 +167,7 @@ declare function store:outputDocument(
             if($documentType = ("binary", "binary-sidecar") and $include = ("binaryMetadata", "all"))
             then ("binaryMetadata", json:object((
                 for $meta in doc($contentURI)/corona:sidecar/corona:meta/*
-                return (local-name($meta), string($meta))
+                return (local-name($meta), string(($meta/@normalized-date, $meta)[1]))
             )))
             else ()
         ))
@@ -838,7 +864,9 @@ declare private function store:applyTransformer(
 {
     let $transformer := manage:getTransformer($name)
     return
-        if(exists($transformer/*) and $xsltIsSupported)
+        if(empty($transformer))
+        then error(xs:QName("corona:INVALID-TRANSFORMER"), concat("No transformer with the name '", $name, "' exists"))
+        else if(exists($transformer/*) and $xsltIsSupported)
         then xdmp:apply($xsltEval, $transformer/*, $content)
         else if(exists($transformer/text()))
         then xdmp:eval(string($transformer), (xs:QName("content"), $content), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
@@ -883,24 +911,37 @@ declare private function store:createSidecarDocument(
             then ()
             else
 
-            let $extratedInfo := try {
+            let $extractedInfo := try {
                 xdmp:apply(xdmp:function(xs:QName("xdmp:document-filter")), $content)
             }
             catch ($e) {
                 ()
             }
-            where exists($extratedInfo)
+            where exists($extractedInfo)
             return (
                 if($extractMetadata)
                 then
                 <corona:meta>{(
-                    if(exists($extratedInfo/*:html/*:head/*:title))
-                    then <corona:title>{ string($extratedInfo/*:html/*:head/*:title) }</corona:title>
+                    if(exists($extractedInfo/*:html/*:head/*:title))
+                    then <corona:title>{ string($extractedInfo/*:html/*:head/*:title) }</corona:title>
                     else (),
 
-                    for $item in $extratedInfo/*:html/*:head/*:meta
+                    let $map := map:map()
+                    for $item in $extractedInfo/*:html/*:head/*:meta
+                    let $name :=
+                        if($item/@name != "xmp")
+                        then string($item/@name)
+                        else
+                            let $bits := tokenize($item/@content, ":")
+                            return concat($bits[1], "_", $bits[2])
+
+                    let $value :=
+                        if($item/@name != "xmp")
+                        then string($item/@content)
+                        else string-join(tokenize($item/@content, ":")[3 to last()], ":")
+
                     let $name := string-join(
-                        for $bit at $pos in tokenize($item/@name, "\-| |_")
+                        for $bit at $pos in tokenize($name, "\-| |_")
                         return 
                             if($pos > 1)
                             then concat(upper-case(substring($bit, 1, 1)), substring($bit, 2))
@@ -909,20 +950,39 @@ declare private function store:createSidecarDocument(
                                 then concat(lower-case(substring($bit, 1, 1)), substring($bit, 2))
                                 else $bit
                     , "")
-                    let $element := element { xs:QName(concat("corona:", json:escapeNCName(string($name)))) } { string($item/@content) }
-                    where $name != "filterCapabilities"
-                    return
-                        if($name = "dimensions" and count(tokenize($item/@content, " x ")) = 2)
-                        then ($element, <corona:width>{ substring-before($item/@content, " x ") }</corona:width>, <corona:height>{ substring-after($item/@content, " x ") }</corona:height>)
+
+                    let $name :=
+                        (: Creating a mapping of various modification date names and changing them all to "modDate" :)
+                        if($name = "lastSavedDate")
+                        then "modDate"
+                        else $name
+
+                    let $element := element { xs:QName(concat("corona:", json:escapeNCName(string($name)))) } {(
+                        if(matches($name, "date", "i"))
+                        then
+                            let $normDate := dateparser:parse($value)
+                            where exists($normDate)
+                            return attribute { "normalized-date" } { $normDate }
+                        else ()
+                        ,
+                        string($value)
+                    )}
+                    where $name != "filterCapabilities" and empty(map:get($map, $name))
+                    return (
+                        if($name = "dimensions" and count(tokenize($value, " x ")) = 2)
+                        then ($element, <corona:width>{ substring-before($value, " x ") }</corona:width>, <corona:height>{ substring-after($value, " x ") }</corona:height>)
                         else $element
+                        ,
+                        map:put($map, $name, true())
+                    )
                 )}</corona:meta>
                 else (),
 
-                if(exists($extratedInfo/*:html/*:body) and $extractContent)
+                if(exists($extractedInfo/*:html/*:body) and $extractContent)
                 then
                     let $content :=
                         <corona:extractedContent>{
-                            for $para in $extratedInfo/*:html/*:body/*:p
+                            for $para in $extractedInfo/*:html/*:body/*:p
                             let $string := normalize-space($para)
                             where string-length($string)
                             return <corona:extractedPara>{ $string }</corona:extractedPara>

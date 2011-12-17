@@ -34,7 +34,7 @@ declare function structquery:getCTS(
     $json as element(json:json)?
 ) as cts:query?
 {
-    structquery:getCTS($json, ())
+    structquery:getCTS($json, (), true())
 };
 
 declare function structquery:getCTS(
@@ -42,9 +42,25 @@ declare function structquery:getCTS(
     $ignoreRange as xs:string?
 ) as cts:query?
 {
+    structquery:getCTS($json, $ignoreRange, true())
+};
+
+declare function structquery:getCTS(
+    $json as element(json:json)?,
+    $ignoreRange as xs:string?,
+    $useRegisteredQueries as xs:boolean
+) as cts:query?
+{
     if(exists($json))
-    then structquery:dispatch($json, $ignoreRange)
+    then structquery:dispatch($json, $ignoreRange, $useRegisteredQueries)
     else ()
+};
+
+declare function structquery:getCTSFromParseTree(
+    $parseTree as element(json:json)
+) as cts:query?
+{
+    structquery:getCTSFromParseTree($parseTree, (), true())
 };
 
 declare function structquery:getCTSFromParseTree(
@@ -52,7 +68,16 @@ declare function structquery:getCTSFromParseTree(
     $ignoreRange as xs:string?
 ) as cts:query?
 {
-    structquery:dispatch($parseTree, $ignoreRange)
+    structquery:getCTSFromParseTree($parseTree, $ignoreRange, true())
+};
+
+declare function structquery:getCTSFromParseTree(
+    $parseTree as element(json:json),
+    $ignoreRange as xs:string?,
+    $useRegisteredQueries as xs:boolean
+) as cts:query?
+{
+    structquery:dispatch($parseTree, $ignoreRange, $useRegisteredQueries)
 };
 
 declare function structquery:getParseTree(
@@ -75,10 +100,18 @@ declare function structquery:valuesForFacet(
     return string($range/json:value)
 };
 
+declare function structquery:containsNamedQuery(
+    $json as element(json:json)?
+) as xs:boolean
+{
+    exists($json//json:namedQuery)
+};
+
 
 declare private function structquery:dispatch(
     $step as element(),
-    $ignoreRange as xs:string?
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
 )
 {
     let $precedent := (
@@ -102,6 +135,7 @@ declare private function structquery:dispatch(
         $step/json:collection[@type = ("string", "array")],
         $step/json:directory[@type = ("string", "array")],
         $step/json:stringQuery[@type = "string"],
+        $step/json:namedQuery[@type = "string"],
         $step/json:wordAnywhere[@type = ("string", "array")],
         $step/json:wordInBinary[@type = ("string", "array")],
         $step/json:inTextDocument[@type = ("string", "array")],
@@ -113,26 +147,27 @@ declare private function structquery:dispatch(
         $step/json:box[@type = "object"],
         $step/json:polygon[@type = "array"]
     )[1]
-    return structquery:process($precedent, $ignoreRange)
+    return structquery:process($precedent, $ignoreRange, $useRQ)
 };
 
 declare private function structquery:process(
     $step as element(),
-    $ignoreRange as xs:string?
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
 )
 {
     typeswitch($step)
-    case element(json:item) return structquery:dispatch($step, $ignoreRange)
-    case element(json:and) return cts:and-query(for $item in $step/json:item[@type = "object"] return structquery:process($item, $ignoreRange))
-    case element(json:or) return cts:or-query(for $item in $step/json:item[@type = "object"] return structquery:process($item, $ignoreRange))
-    case element(json:not) return cts:not-query(structquery:dispatch($step, $ignoreRange))
-    case element(json:andNot) return structquery:handleAndNot($step, $ignoreRange)
-    case element(json:near) return structquery:handleNear($step, $ignoreRange)
+    case element(json:item) return structquery:dispatch($step, $ignoreRange, $useRQ)
+    case element(json:and) return cts:and-query(for $item in $step/json:item[@type = "object"] return structquery:process($item, $ignoreRange, $useRQ))
+    case element(json:or) return cts:or-query(for $item in $step/json:item[@type = "object"] return structquery:process($item, $ignoreRange, $useRQ))
+    case element(json:not) return cts:not-query(structquery:dispatch($step, $ignoreRange, $useRQ))
+    case element(json:andNot) return structquery:handleAndNot($step, $ignoreRange, $useRQ)
+    case element(json:near) return structquery:handleNear($step, $ignoreRange, $useRQ)
     case element(json:isNULL) return structquery:handleIsNULL($step)
     case element(json:keyExists) return structquery:handleKeyExists($step)
     case element(json:elementExists) return structquery:handleElementExists($step)
-    case element(json:underElement) return structquery:handleUnderElement($step, $ignoreRange)
-    case element(json:underKey) return structquery:handleUnderKey($step, $ignoreRange)
+    case element(json:underElement) return structquery:handleUnderElement($step, $ignoreRange, $useRQ)
+    case element(json:underKey) return structquery:handleUnderKey($step, $ignoreRange, $useRQ)
     case element(json:boolean) return structquery:handleBoolean($step)
 
     case element(json:key) return structquery:handleKey($step)
@@ -142,7 +177,8 @@ declare private function structquery:process(
     case element(json:range) return structquery:handleRange($step, $ignoreRange)
     case element(json:collection) return structquery:handleCollection($step)
     case element(json:directory) return structquery:handleDirectory($step)
-    case element(json:stringQuery) return structquery:handleStringQuery($step, $ignoreRange)
+    case element(json:stringQuery) return structquery:handleStringQuery($step, $ignoreRange, $useRQ)
+    case element(json:namedQuery) return structquery:handleNamedQuery($step, $ignoreRange, $useRQ)
     case element(json:wordAnywhere) return structquery:handleWordAnywhere($step)
     case element(json:wordInBinary) return structquery:handleWordInBinary($step)
     case element(json:inTextDocument) return structquery:handleInTextDocument($step)
@@ -159,22 +195,24 @@ declare private function structquery:process(
 
 declare private function structquery:handleAndNot(
     $step as element(json:andNot),
-    $ignoreRange as xs:string?
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:and-not-query?
 {
     let $positive := $step/json:positive[@type = "object"]
     let $negative := $step/json:negative[@type = "object"]
     where exists($positive) and exists($negative)
-    return cts:and-not-query(structquery:dispatch($positive, $ignoreRange), structquery:dispatch($negative, $ignoreRange))
+    return cts:and-not-query(structquery:dispatch($positive, $ignoreRange, $useRQ), structquery:dispatch($negative, $ignoreRange, $useRQ))
 };
 
 declare private function structquery:handleNear(
     $step as element(json:near),
-    $ignoreRange as xs:string?
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:near-query
 {
     let $container := $step/..
-    let $queries := for $item in $step/json:item return structquery:dispatch($item, $ignoreRange)
+    let $queries := for $item in $step/json:item return structquery:dispatch($item, $ignoreRange, $useRQ)
     let $distance := xs:double(($container/json:distance[@type = "number"], 10.0)[1]) 
     let $options :=
         if($container/json:ordered/@boolean = "true")
@@ -214,27 +252,29 @@ declare private function structquery:handleElementExists(
 
 declare private function structquery:handleUnderElement(
     $step as element(json:underElement),
-    $ignoreRange as xs:string?
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:element-query?
 {
     let $container := $step/..
     let $query :=
         if($container/json:query/@type = "string")
         then string($container/json:query)
-        else structquery:dispatch($container/json:query, $ignoreRange)
+        else structquery:dispatch($container/json:query, $ignoreRange, $useRQ)
     return cts:element-query(xs:QName($step), $query)
 };
 
 declare private function structquery:handleUnderKey(
     $step as element(json:underKey),
-    $ignoreRange as xs:string?
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:element-query?
 {
     let $container := $step/..
     let $query :=
         if($container/json:query/@type = "string")
         then string($container/json:query)
-        else structquery:dispatch($container/json:query, $ignoreRange)
+        else structquery:dispatch($container/json:query, $ignoreRange, $useRQ)
     return cts:element-query(common:keyToQName($step), $query)
 };
 
@@ -386,10 +426,20 @@ declare private function structquery:handleDirectory(
 
 declare private function structquery:handleStringQuery(
     $step as element(json:stringQuery),
-    $ignoreRange as xs:string?
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
 ) as cts:query?
 {
-    stringquery:parse(string($step), $ignoreRange)
+    stringquery:parse(string($step), $ignoreRange, $useRQ)
+};
+
+declare private function structquery:handleNamedQuery(
+    $step as element(json:namedQuery),
+    $ignoreRange as xs:string?,
+    $useRQ as xs:boolean
+) as cts:query?
+{
+    search:getStoredQueryCTS(string($step), $ignoreRange, $useRQ)
 };
 
 declare private function structquery:handleWordAnywhere(
@@ -446,7 +496,7 @@ declare private function structquery:handleGeo(
 ) as cts:query?
 {
     let $index := config:get(string($step))
-    let $region := structquery:process($step/../json:region, ())
+    let $region := structquery:process($step/../json:region, (), true())
     let $options := structquery:extractOptions($step/.., "geo")
     let $weight := xs:double(($step/../json:weight[@type = "number"], 1.0)[1])
     return search:geoQuery($index, $region, $options, $weight)
@@ -457,8 +507,8 @@ declare private function structquery:handleRegion(
 )
 {
     if($step[@type = "array"])
-    then for $item in $step/json:item[@type = "object"] return structquery:process($item, ())
-    else structquery:dispatch($step, ())
+    then for $item in $step/json:item[@type = "object"] return structquery:process($item, (), true())
+    else structquery:dispatch($step, (), true())
 };
 
 declare private function structquery:handleGeoPoint(

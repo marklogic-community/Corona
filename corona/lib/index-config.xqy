@@ -33,6 +33,22 @@ declare function config:delete(
     prop:delete(concat("corona-index-", $name))
 };
 
+declare function config:addNamedQueryPrefix(
+    $prefix as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-index-", $prefix), <index type="namedQueryPrefix" name="{ $prefix }"/>)
+};
+
+declare function config:prefixes(
+) as xs:string*
+{
+    for $key in prop:all()
+    let $value := prop:get($key)
+    where starts-with($key, "corona-index-") and $value/@type = "namedQueryPrefix"
+    return substring-after($key, "corona-index-")
+};
+
 declare function config:setJSONRange(
     $name as xs:string,
     $key as xs:string,
