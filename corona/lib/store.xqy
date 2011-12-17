@@ -453,14 +453,14 @@ declare function store:insertDocument(
 
     (: Apply the transformation :)
     let $body :=
-		if(exists(manage:getInsertTransformer()))
-		then store:applyTransformer(manage:getInsertTransformer(), $body)
-		else $body
-
-    let $body :=
         if(exists($applyTransform) and manage:insertTransformsEnabled())
         then store:applyTransformer($applyTransform, $body)
         else $body
+
+    let $body :=
+		if(exists(manage:getInsertTransformer()))
+		then store:applyTransformer(manage:getInsertTransformer(), $body)
+		else $body
 
     let $insert := xdmp:document-insert($uri, $body, (xdmp:default-permissions(), $permissions), $collections, $quality)
     let $set :=
@@ -549,15 +549,15 @@ declare function store:updateDocumentContent(
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
 
     (: Apply the transformation :)
-    let $body :=
-		if(exists(manage:getInsertTransformer()))
-		then store:applyTransformer(manage:getInsertTransformer(), $body)
-		else $body
-
 	let $body :=
         if(exists($applyTransform) and manage:insertTransformsEnabled())
         then store:applyTransformer($applyTransform, $body)
         else $body
+
+    let $body :=
+		if(exists(manage:getInsertTransformer()))
+		then store:applyTransformer(manage:getInsertTransformer(), $body)
+		else $body
 
     let $update :=
         if($contentType = "text")
@@ -1003,14 +1003,14 @@ declare private function store:createSidecarDocument(
                         }</corona:extractedContent>
 
 					let $content :=
-						if(exists(manage:getInsertTransformer()))
-						then store:applyTransformer(manage:getInsertTransformer(), $content)
-						else $content
-
-					let $content :=
                         if(exists($applyTransform) and manage:insertTransformsEnabled())
                         then store:applyTransformer($applyTransform, $content)
                         else $content
+
+					let $content :=
+						if(exists(manage:getInsertTransformer()))
+						then store:applyTransformer(manage:getInsertTransformer(), $content)
+						else $content
 
                     return $content
                 else ()
