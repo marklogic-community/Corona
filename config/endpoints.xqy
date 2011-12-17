@@ -275,6 +275,13 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         </http>
     </request>
 
+    <request uri="^/manage/(namedqueryprefixes|namedqueryprefix/([^/]+))/?$" endpoint="/corona/manage/namedqueryprefix.xqy" user-params="allow">
+        <uri-param name="prefix" as="string">$2</uri-param>
+        <http method="GET"/>
+        <http method="POST"/>
+        <http method="DELETE"/>
+    </request>
+
     <request uri="^/manage/hooks/?$" endpoint="/corona/manage/hooks.xqy" user-params="allow">
         <http method="GET"/>
         <http method="POST">
@@ -283,15 +290,13 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 	    </http>
     </request>
 
-    <request uri="^/manage/(namedqueryprefixes|namedqueryprefix/([^/]+))/?$" endpoint="/corona/manage/namedqueryprefix.xqy" user-params="allow">
-        <uri-param name="prefix" as="string">$2</uri-param>
+    <request uri="^/config/setup/?$" endpoint="/config/setup.xqy" user-params="allow">
         <http method="GET"/>
         <http method="POST"/>
-        <http method="DELETE"/>
     </request>
-declare function endpoints:options(
-) as element(rest:options)
-{
+
+</options>;
+
 declare function endpoints:options(
 ) as element(rest:options)
 {
