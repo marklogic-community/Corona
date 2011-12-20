@@ -56,19 +56,21 @@ let $errors := (
     else ()
 )
 
+
 return common:output(
     if(exists($errors))
     then $errors
     else 
 
     if($requestMethod = "POST")
-    then try {
+    then try {(
+        xdmp:set-response-code(204, "Query inserted"),
         if(exists($stringQuery))
         then search:saveStringQuery($name, map:get($params, "description"), $stringQuery, $collections, common:processPropertiesParameter($properties), common:processPermissionParameter(map:get($params, "permission")))
         else if(exists($structuredQuery))
         then search:saveStructuredQuery($name, map:get($params, "description"), $structuredQuery, $collections, common:processPropertiesParameter($properties), common:processPermissionParameter(map:get($params, "permission")))
         else ()
-    }
+    )}
     catch ($e) {
         common:errorFromException($e, $outputFormat)
     }
