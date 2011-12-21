@@ -20,7 +20,7 @@ for x, zipCode in enumerate(zips):
 	polygon = ""
 	shape = sf.shape(x)
 	for point in shape.points:
-		polygon += "<point><latitude>" + str(point[0]) + "</latitude><longitude>" + str(point[1]) + "</longitude></point>"
+		polygon += "<point><latitude>" + str(point[1]) + "</latitude><longitude>" + str(point[0]) + "</longitude></point>"
 
 	query = "<constraint><geo>" + sys.argv[4] + "</geo><region><polygon>" + polygon + "</polygon></region></constraint>"
 

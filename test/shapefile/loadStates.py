@@ -23,7 +23,7 @@ for x, state in enumerate(states):
 
 	polygon = []
 	for point in shapes[x].points:
-		polygon.append({"latitude": point[0], "longitude": point[1]})
+		polygon.append({"latitude": point[1], "longitude": point[0]})
 
 	query = {"geo": sys.argv[4], "region": {"polygon":polygon}}
 

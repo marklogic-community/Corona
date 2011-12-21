@@ -21,7 +21,7 @@ for x, zipCode in enumerate(zips):
 	polygon = []
 	shape = sf.shape(x)
 	for point in shape.points:
-		polygon.append({"latitude": point[0], "longitude": point[1]})
+		polygon.append({"latitude": point[1], "longitude": point[0]})
 
 	query = {"geo": sys.argv[4], "region": {"polygon":polygon}}
 
