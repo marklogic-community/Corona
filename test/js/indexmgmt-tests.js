@@ -32,7 +32,7 @@ corona.removeGeoIndexes = function(info, callback) {
                         $.ajax({
                             url: url,
                             success: function(data) {
-                                ok(false, "Namespace still exists");
+                                ok(false, "Geo index still exists: " + geo.name);
                             },
                             error: function() {
                                 ok(true, "Namespace is gone");
@@ -83,7 +83,7 @@ corona.removeNamespaces = function(info, callback) {
                         $.ajax({
                             url: url,
                             success: function(data) {
-                                ok(false, "Namespace still exists");
+                                ok(false, "Namespace still exists: " + namespace.prefix);
                             },
                             error: function() {
                                 ok(true, "Namespace is gone");
@@ -134,7 +134,7 @@ corona.removeTransformers = function(info, callback) {
                         $.ajax({
                             url: url,
                             success: function(data) {
-                                ok(false, "Transformer still exists");
+                                ok(false, "Transformer still exists: " + transformer);
                             },
                             error: function() {
                                 ok(true, "Transformer is gone");
@@ -188,7 +188,7 @@ corona.removeRangeIndexes = function(info, callback) {
                         $.ajax({
                             url: url,
                             success: function(data) {
-                                ok(false, "Range index still exists");
+                                ok(false, "Range index still exists: " + index.name);
                             },
                             error: function() {
                                 ok(true, "Range index is gone");

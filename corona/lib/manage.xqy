@@ -1565,7 +1565,7 @@ declare private function manage:validateIndexName(
     if(not(matches($name, "^[0-9A-Za-z][0-9A-Za-z_-]*$")))
     then error(xs:QName("corona:INVALID-INDEX-NAME"), "Index names can only contain alphanumeric, dash and underscore characters")
     else if(exists(config:get($name)))
-    then error(xs:QName("corona:DUPLICATE-INDEX-NAME"), concat("An range index, place or named query prefix with the name '", $name, "' already exists"))
+    then error(xs:QName("corona:DUPLICATE-INDEX-NAME"), concat("A range index, place or named query prefix with the name '", $name, "' already exists"))
     else ()
 };
 

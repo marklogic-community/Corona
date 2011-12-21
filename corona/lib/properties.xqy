@@ -43,6 +43,10 @@ import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare variable $getServerField := try { xdmp:function(xs:QName("xdmp:get-server-field")) } catch ($e) {};
+declare variable $setServerField := try { xdmp:function(xs:QName("xdmp:set-server-field")) } catch ($e) {};
+declare variable $serverFieldsSupported := try { (xdmp:apply($getServerField, ""), true())[last()] } catch ($e) { false() };
+
 (:~
  : Sets a property.
  :
@@ -83,6 +87,11 @@ declare function prop:set(
         else if(exists($existing) and $overwrite = false())
         then error(xs:QName("prop:REDEFINE-PROPERTY"), concat("A property with the key ", $key, " already exists"))
         else $config
+
+    let $setField :=
+        if($serverFieldsSupported)
+        then xdmp:apply($setServerField, $key, $value)
+        else ()
 
     let $type :=
         if($value instance of xs:string) then "string"
@@ -136,6 +145,10 @@ declare function prop:delete(
     let $config := admin:get-configuration()
     let $group := xdmp:group()
     let $namespace := admin:group-get-namespaces($config, $group)[*:prefix = $key]
+    let $emptyField :=
+        if($serverFieldsSupported)
+        then xdmp:apply($setServerField, $key, ())
+        else ()
     where exists($namespace)
     return admin:save-configuration(admin:group-delete-namespace($config, $group, $namespace))
 };
@@ -149,49 +162,62 @@ declare function prop:get(
 	$key as xs:string
 ) as item()?
 {
-	try {
-		let $uri := namespace-uri-for-prefix($key, element { concat($key, ":foo") } { () })
-		let $bits := tokenize($uri, "/")
-		let $type := $bits[5]
-		let $value := xdmp:url-decode(string-join($bits[6 to count($bits)], "/"))
-		where starts-with($uri, "http://xqdev.com/prop/")
-		return 
-			if($type = "string") then xs:string($value)
-			else if($type = "boolean") then xs:boolean($value)
-			else if($type = "decimal") then xs:decimal($value)
-			else if($type = "float") then xs:float($value)
-			else if($type = "double") then xs:double($value)
-			else if($type = "duration") then xs:duration($value)
-			else if($type = "dateTime") then xs:dateTime($value)
-			else if($type = "time") then xs:time($value)
-			else if($type = "date") then xs:date($value)
-			else if($type = "gYearMonth") then xs:gYearMonth($value)
-			else if($type = "gYear") then xs:gYear($value)
-			else if($type = "gMonthDay") then xs:gMonthDay($value)
-			else if($type = "gDay") then xs:gDay($value)
-			else if($type = "gMonth") then xs:gMonth($value)
-			else if($type = "hexBinary") then xs:hexBinary($value)
-			else if($type = "base64Binary") then xs:base64Binary($value)
-			else if($type = "QName") then xs:QName($value)
-			else if($type = "integer") then xs:integer($value)
-			else if($type = "nonPositiveInteger") then xs:nonPositiveInteger($value)
-			else if($type = "negativeInteger") then xs:negativeInteger($value)
-			else if($type = "long") then xs:long($value)
-			else if($type = "int") then xs:int($value)
-			else if($type = "short") then xs:short($value)
-			else if($type = "byte") then xs:byte($value)
-			else if($type = "nonNegativeInteger") then xs:nonNegativeInteger($value)
-			else if($type = "unsignedLong") then xs:unsignedLong($value)
-			else if($type = "unsignedInt") then xs:unsignedInt($value)
-			else if($type = "unsignedShort") then xs:unsignedShort($value)
-			else if($type = "unsignedByte") then xs:unsignedByte($value)
-            else if($type = "positiveInteger") then xs:positiveInteger($value)
-			else if($type = "xml") then xdmp:unquote(xdmp:url-decode($value))/*
-			else xs:string($value)
-	}
-	catch($e) {
-		()
-	}
+    let $cached :=
+        if($serverFieldsSupported)
+        then xdmp:apply($getServerField, $key)
+        else ()
+    let $computed :=
+        if(empty($cached))
+        then
+            try {
+                let $uri := namespace-uri-for-prefix($key, element { concat($key, ":foo") } { () })
+                let $bits := tokenize($uri, "/")
+                let $type := $bits[5]
+                let $value := xdmp:url-decode(string-join($bits[6 to count($bits)], "/"))
+                where starts-with($uri, "http://xqdev.com/prop/")
+                return 
+                    if($type = "string") then xs:string($value)
+                    else if($type = "boolean") then xs:boolean($value)
+                    else if($type = "decimal") then xs:decimal($value)
+                    else if($type = "float") then xs:float($value)
+                    else if($type = "double") then xs:double($value)
+                    else if($type = "duration") then xs:duration($value)
+                    else if($type = "dateTime") then xs:dateTime($value)
+                    else if($type = "time") then xs:time($value)
+                    else if($type = "date") then xs:date($value)
+                    else if($type = "gYearMonth") then xs:gYearMonth($value)
+                    else if($type = "gYear") then xs:gYear($value)
+                    else if($type = "gMonthDay") then xs:gMonthDay($value)
+                    else if($type = "gDay") then xs:gDay($value)
+                    else if($type = "gMonth") then xs:gMonth($value)
+                    else if($type = "hexBinary") then xs:hexBinary($value)
+                    else if($type = "base64Binary") then xs:base64Binary($value)
+                    else if($type = "QName") then xs:QName($value)
+                    else if($type = "integer") then xs:integer($value)
+                    else if($type = "nonPositiveInteger") then xs:nonPositiveInteger($value)
+                    else if($type = "negativeInteger") then xs:negativeInteger($value)
+                    else if($type = "long") then xs:long($value)
+                    else if($type = "int") then xs:int($value)
+                    else if($type = "short") then xs:short($value)
+                    else if($type = "byte") then xs:byte($value)
+                    else if($type = "nonNegativeInteger") then xs:nonNegativeInteger($value)
+                    else if($type = "unsignedLong") then xs:unsignedLong($value)
+                    else if($type = "unsignedInt") then xs:unsignedInt($value)
+                    else if($type = "unsignedShort") then xs:unsignedShort($value)
+                    else if($type = "unsignedByte") then xs:unsignedByte($value)
+                    else if($type = "positiveInteger") then xs:positiveInteger($value)
+                    else if($type = "xml") then xdmp:unquote(xdmp:url-decode($value))/*
+                    else xs:string($value)
+            }
+            catch($e) {
+                ()
+            }
+        else ()
+    let $set :=
+        if($serverFieldsSupported and empty($cached) and exists($computed))
+        then xdmp:apply($setServerField, $key, $computed)
+        else ()
+    return ($cached, $computed)[1]
 };
 
 declare function prop:all(
