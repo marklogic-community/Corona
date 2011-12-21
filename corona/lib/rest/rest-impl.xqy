@@ -38,7 +38,7 @@ declare variable $rest-impl:FAILEDCONDITION   := xs:QName("rest:FAILEDCONDITION"
    local function for convenience.
 :)
 
-declare variable $rest-impl:DEBUG as xs:boolean := false();
+declare variable $rest-impl:DEBUG as xs:boolean := true();
 
 declare function rest-impl:log($msgs as item()*) as empty-sequence() {
   if ($rest-impl:DEBUG)
