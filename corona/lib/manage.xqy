@@ -124,6 +124,37 @@ declare function manage:getNamedQueryPrefixes(
     config:prefixes()
 };
 
+
+declare function manage:setInsertTransform(
+    $insertTransformer as xs:string
+) as empty-sequence()
+{
+	if(string-length($insertTransformer))
+	then prop:set("insertTransformer", $insertTransformer, true())
+	else prop:delete("insertTransformer")
+};
+
+declare function manage:getInsertTransformer(
+) as xs:string?
+{
+	prop:get("insertTransformer")
+};
+
+declare function manage:setFetchTransform(
+    $fetchTransformer as xs:string
+) as empty-sequence()
+{
+	if(string-length($fetchTransformer))
+	then prop:set("fetchTransformer", $fetchTransformer, true())
+	else prop:delete("fetchTransformer")
+};
+
+declare function manage:getFetchTransformer(
+) as xs:string?
+{
+	prop:get("fetchTransformer")
+};
+
 (: Ranges :)
 declare function manage:createJSONRange(
     $name as xs:string,
