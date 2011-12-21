@@ -11,7 +11,7 @@ declare option xdmp:mapping "false";
 declare variable $endpoints:ENDPOINTS as element(rest:options) :=
 <options xmlns="http://marklogic.com/appservices/rest">
     <!-- Manage documents in the database -->
-    <request uri="^/store/?$" endpoint="/corona/store-get.xqy">
+    <request uri="^/store/?$" endpoint="/corona/store-get.xqy" user-params="allow">
         <param name="uri" required="false"/>
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
@@ -280,6 +280,14 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="GET"/>
         <http method="POST"/>
         <http method="DELETE"/>
+    </request>
+
+    <request uri="^/manage/hooks/?$" endpoint="/corona/manage/hooks.xqy" user-params="allow">
+        <http method="GET"/>
+        <http method="POST">
+            <param name="setInsertTransform" required="false"/>
+            <param name="setFetchTransform" required="false"/>
+	    </http>
     </request>
 
     <request uri="^/config/setup/?$" endpoint="/config/setup.xqy" user-params="allow">
