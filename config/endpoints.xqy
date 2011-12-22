@@ -179,6 +179,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="insertTransforms" as="boolean" required="false"/>
             <param name="fetchTransforms" as="boolean" required="false"/>
             <param name="defaultOutputFormat" required="false" values="json|xml"/>
+            <param name="debugLogging" as="boolean" required="false"/>
         </http>
     </request>
 
@@ -285,9 +286,12 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
     <request uri="^/manage/hooks/?$" endpoint="/corona/manage/hooks.xqy" user-params="allow">
         <http method="GET"/>
         <http method="POST">
-            <param name="setInsertTransform" required="false"/>
-            <param name="setFetchTransform" required="false"/>
+            <param name="insertTransformer" required="false"/>
+            <param name="fetchTransformer" required="false"/>
 	    </http>
+        <http method="DELETE">
+            <param name="hook" required="true"/>
+        </http>
     </request>
 
     <request uri="^/config/setup/?$" endpoint="/config/setup.xqy" user-params="allow">

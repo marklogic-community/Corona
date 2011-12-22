@@ -28,8 +28,8 @@ declare option xdmp:mapping "false";
 
 let $params := rest:process-request(endpoints:request("/corona/manage/hooks.xqy"))
 let $requestMethod := xdmp:get-request-method()
-let $insertTransformer := map:get($params, "setInsertTransform")
-let $fetchTransformer := map:get($params, "setFetchTransform")
+let $insertTransformer := map:get($params, "insertTransformer")
+let $fetchTransformer := map:get($params, "fetchTransformer")
 
 let $transformerName :=
 	if(string-length($insertTransformer))
@@ -43,14 +43,24 @@ return common:output(
 		if(exists($transformerName) and empty(manage:getTransformer($transformerName)))
 		then common:error("corona:INVALID-PARAMETER", concat("No transformer with the name: '", $transformerName, "'"), "json")
 
+		else if($requestMethod = "DELETE")
+		then (
+            let $hook := map:get($params, "hook")
+            return
+                if($hook = "insertTransformer")
+                then manage:deleteInsertTransformer()
+                else if($hook = "fetchTransformer")
+                then manage:deleteFetchTransformer()
+                else ()
+        )
 		else if($requestMethod = "POST")
 		then (
 			xdmp:set-response-code(204, "Hook saved"),
 
 			if(exists($insertTransformer))
-			then manage:setInsertTransform($insertTransformer)
+			then manage:setInsertTransformer($insertTransformer)
 			else if(exists($fetchTransformer))
-			then manage:setFetchTransform($fetchTransformer)
+			then manage:setFetchTransformer($fetchTransformer)
 			else common:error("corona:INVALID-PARAMETER", "Must specify a hook to set", "json")
 		)
 		else if($requestMethod = "GET")

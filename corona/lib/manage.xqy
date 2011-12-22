@@ -82,6 +82,19 @@ declare function manage:defaultOutputFormat(
     (prop:get("corona-defaultOutputFormat"), "json")[1]
 };
 
+declare function manage:setDebugLogging(
+    $enabled as xs:boolean
+) as empty-sequence()
+{
+    prop:set("corona-DEBUG", $enabled, true())
+};
+
+declare function manage:getDebugLogging(
+) as xs:boolean
+{
+    (prop:get("corona-DEBUG"), false())[1]
+};
+
 (: Named query prefixes :)
 declare function manage:addNamedQueryPrefix(
     $prefix as xs:string
@@ -125,34 +138,42 @@ declare function manage:getNamedQueryPrefixes(
 };
 
 
-declare function manage:setInsertTransform(
+declare function manage:setInsertTransformer(
     $insertTransformer as xs:string
 ) as empty-sequence()
 {
-	if(string-length($insertTransformer))
-	then prop:set("insertTransformer", $insertTransformer, true())
-	else prop:delete("insertTransformer")
+	prop:set("corona-insertTransformer", $insertTransformer, true())
+};
+
+declare function manage:deleteInsertTransformer(
+) as empty-sequence()
+{
+	prop:delete("corona-insertTransformer")
 };
 
 declare function manage:getInsertTransformer(
 ) as xs:string?
 {
-	prop:get("insertTransformer")
+	prop:get("corona-insertTransformer")
 };
 
-declare function manage:setFetchTransform(
+declare function manage:setFetchTransformer(
     $fetchTransformer as xs:string
 ) as empty-sequence()
 {
-	if(string-length($fetchTransformer))
-	then prop:set("fetchTransformer", $fetchTransformer, true())
-	else prop:delete("fetchTransformer")
+	prop:set("corona-fetchTransformer", $fetchTransformer, true())
+};
+
+declare function manage:deleteFetchTransformer(
+) as empty-sequence()
+{
+	prop:delete("corona-fetchTransformer")
 };
 
 declare function manage:getFetchTransformer(
 ) as xs:string?
 {
-	prop:get("fetchTransformer")
+	prop:get("corona-fetchTransformer")
 };
 
 (: Ranges :)
