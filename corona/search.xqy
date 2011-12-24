@@ -90,10 +90,14 @@ let $query := cts:and-query((
     return cts:directory-query($directory)
 ))
 
+let $log := common:log("Search", "Generated query", $query)
+
 let $options :=
     if($filtered)
     then "filtered"
     else "unfiltered"
+
+let $log := common:log("Search", "Search options", $options)
 
 let $end := $start + $length - 1
 

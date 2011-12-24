@@ -283,15 +283,13 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/hooks/?$" endpoint="/corona/manage/hooks.xqy" user-params="allow">
+    <request uri="^/manage/(env|env/([^/]+))/?$" endpoint="/corona/manage/env.xqy" user-params="allow">
+        <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>
         <http method="POST">
-            <param name="insertTransformer" required="false"/>
-            <param name="fetchTransformer" required="false"/>
+            <param name="value" required="true"/>
 	    </http>
-        <http method="DELETE">
-            <param name="hook" required="true"/>
-        </http>
+        <http method="DELETE"/>
     </request>
 
     <request uri="^/config/setup/?$" endpoint="/config/setup.xqy" user-params="allow">

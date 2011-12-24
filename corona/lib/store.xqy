@@ -54,8 +54,8 @@ declare function store:outputRawDocument(
 
     (: Apply the transformation :)
     let $content :=
-		if(exists(manage:getFetchTransformer()))
-		then store:applyTransformer(manage:getFetchTransformer(), $content)
+		if(exists(manage:getEnvVar("fetchTransformer")))
+		then store:applyTransformer(manage:getEnvVar("fetchTransformer"), $content)
 		else $content
 
     let $content :=
@@ -127,8 +127,8 @@ declare function store:outputDocument(
 
     (: Apply the transformation :)
     let $content :=
-		if(exists(manage:getFetchTransformer()))
-		then store:applyTransformer(manage:getFetchTransformer(), $content)
+		if(exists(manage:getEnvVar("fetchTransformer")))
+		then store:applyTransformer(manage:getEnvVar("fetchTransformer"), $content)
 		else $content
 
     let $content :=
@@ -458,8 +458,8 @@ declare function store:insertDocument(
         else $body
 
     let $body :=
-		if(exists(manage:getInsertTransformer()))
-		then store:applyTransformer(manage:getInsertTransformer(), $body)
+		if(exists(manage:getEnvVar("insertTransformer")))
+		then store:applyTransformer(manage:getEnvVar("insertTransformer"), $body)
 		else $body
 
     let $insert := xdmp:document-insert($uri, $body, (xdmp:default-permissions(), $permissions), $collections, $quality)
@@ -555,8 +555,8 @@ declare function store:updateDocumentContent(
         else $body
 
     let $body :=
-		if(exists(manage:getInsertTransformer()))
-		then store:applyTransformer(manage:getInsertTransformer(), $body)
+		if(exists(manage:getEnvVar("insertTransformer")))
+		then store:applyTransformer(manage:getEnvVar("insertTransformer"), $body)
 		else $body
 
     let $update :=
@@ -1008,8 +1008,8 @@ declare private function store:createSidecarDocument(
                         else $content
 
 					let $content :=
-						if(exists(manage:getInsertTransformer()))
-						then store:applyTransformer(manage:getInsertTransformer(), $content)
+						if(exists(manage:getEnvVar("insertTransformer")))
+						then store:applyTransformer(manage:getEnvVar("insertTransformer"), $content)
 						else $content
 
                     return $content

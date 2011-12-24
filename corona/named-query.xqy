@@ -103,6 +103,8 @@ return common:output(
             return cts:reverse-query(doc($matchingDoc))
         ))
 
+        let $log := common:log("Named Query", "Fetching with", $query)
+
         let $end := $start + $length - 1
         let $results := cts:search(/corona:storedQuery, $query)[$start to $end]
 

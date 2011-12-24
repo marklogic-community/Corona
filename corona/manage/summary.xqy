@@ -43,6 +43,7 @@ return common:output(
             "defaultOutputFormat", manage:defaultOutputFormat(),
             "insertTransformsEnabled", manage:insertTransformsEnabled(),
             "fetchTransformsEnabled", manage:fetchTransformsEnabled(),
+            "debugLogging", manage:getDebugLogging(),
             "features", json:object((
                 "JSONDocs", json:isSupported(),
                 "JSONPath", pathparser:supportedFormats() = "json",

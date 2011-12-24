@@ -30,6 +30,40 @@ declare namespace corona="http://marklogic.com/corona";
 declare namespace db="http://marklogic.com/xdmp/database";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+
+declare function manage:getEnvVar(
+    $name as xs:string
+) as xs:string?
+{
+    prop:get(concat("corona-env-", $name))
+};
+
+declare function manage:getEnvVars(
+) as element(json:item)
+{
+    json:object((
+        for $prop in prop:all()
+        where starts-with($prop, "corona-env-")
+        return (replace($prop, "^corona-env-", ""), prop:get($prop))
+    ))
+};
+
+declare function manage:setEnvVar(
+    $name as xs:string,
+    $value as xs:string
+) as empty-sequence()
+{
+    prop:set(concat("corona-env-", $name), $value, true())
+};
+
+declare function manage:deleteEnvVar(
+    $name as xs:string
+) as empty-sequence()
+{
+    prop:delete(concat("corona-env-", $name))
+};
+
+
 declare function manage:setManaged(
     $isManaged as xs:boolean
 ) as empty-sequence()
@@ -95,6 +129,8 @@ declare function manage:getDebugLogging(
     (prop:get("corona-DEBUG"), false())[1]
 };
 
+
+
 (: Named query prefixes :)
 declare function manage:addNamedQueryPrefix(
     $prefix as xs:string
@@ -137,44 +173,6 @@ declare function manage:getNamedQueryPrefixes(
     config:prefixes()
 };
 
-
-declare function manage:setInsertTransformer(
-    $insertTransformer as xs:string
-) as empty-sequence()
-{
-	prop:set("corona-insertTransformer", $insertTransformer, true())
-};
-
-declare function manage:deleteInsertTransformer(
-) as empty-sequence()
-{
-	prop:delete("corona-insertTransformer")
-};
-
-declare function manage:getInsertTransformer(
-) as xs:string?
-{
-	prop:get("corona-insertTransformer")
-};
-
-declare function manage:setFetchTransformer(
-    $fetchTransformer as xs:string
-) as empty-sequence()
-{
-	prop:set("corona-fetchTransformer", $fetchTransformer, true())
-};
-
-declare function manage:deleteFetchTransformer(
-) as empty-sequence()
-{
-	prop:delete("corona-fetchTransformer")
-};
-
-declare function manage:getFetchTransformer(
-) as xs:string?
-{
-	prop:get("corona-fetchTransformer")
-};
 
 (: Ranges :)
 declare function manage:createJSONRange(

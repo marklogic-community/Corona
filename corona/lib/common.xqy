@@ -29,6 +29,29 @@ declare namespace sec="http://marklogic.com/xdmp/security";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare function common:log(
+    $name as xs:string,
+    $message as item()*
+) as empty-sequence()
+{
+    common:log($name, (), $message)
+};
+
+declare function common:log(
+    $name as xs:string,
+    $description as xs:string?,
+    $message as item()*
+) as empty-sequence()
+{
+    if(manage:getDebugLogging())
+    then
+        let $message := string-join(for $i in $message return xdmp:quote(<foo>{ $message }</foo>/node()), ", ")
+        return
+            if(exists($description))
+            then xdmp:log(concat($name, ": ", $description, " - ", $message))
+            else xdmp:log(concat($name, ": ", $message))
+    else ()
+};
 
 declare function common:validateOutputFormat(
     $outputFormat as xs:string

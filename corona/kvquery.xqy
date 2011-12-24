@@ -108,6 +108,8 @@ let $query := cts:and-query((
     return cts:directory-query($directory)
 ))
 
+let $log := common:log("Key/Value Query", "Generated query", $query)
+
 let $end := $start + $length - 1
 
 let $results := cts:search(doc(), $query)[$start to $end]
