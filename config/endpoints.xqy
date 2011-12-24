@@ -173,16 +173,6 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
-    <request uri="^/manage/?$" endpoint="/corona/manage/state.xqy" user-params="allow">
-        <http method="POST">
-            <param name="isManaged" as="boolean" required="false"/>
-            <param name="insertTransforms" as="boolean" required="false"/>
-            <param name="fetchTransforms" as="boolean" required="false"/>
-            <param name="defaultOutputFormat" required="false" values="json|xml"/>
-            <param name="debugLogging" as="boolean" required="false"/>
-        </http>
-    </request>
-
     <request uri="^/manage/(ranges|range/([A-Za-z0-9_-]+))/?$" endpoint="/corona/manage/range.xqy" user-params="allow">
         <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>

@@ -31,11 +31,20 @@ declare namespace db="http://marklogic.com/xdmp/database";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 
+(: Environment variables :)
 declare function manage:getEnvVar(
     $name as xs:string
 ) as xs:string?
 {
-    prop:get(concat("corona-env-", $name))
+    manage:getEnvVar($name, ())
+};
+
+declare function manage:getEnvVar(
+    $name as xs:string,
+    $default as xs:string?
+) as xs:string?
+{
+    (prop:get(concat("corona-env-", $name)), $default)[1]
 };
 
 declare function manage:getEnvVars(
@@ -64,69 +73,34 @@ declare function manage:deleteEnvVar(
 };
 
 
-declare function manage:setManaged(
-    $isManaged as xs:boolean
-) as empty-sequence()
-{
-    prop:set("corona-isManaged", $isManaged, true())
-};
-
 declare function manage:isManaged(
 ) as xs:boolean
 {
-    (prop:get("corona-isManaged"), true())[1]
-};
-
-declare function manage:enableInsertTransforms(
-    $insertTransforms as xs:boolean
-) as empty-sequence()
-{
-    prop:set("corona-insertTransforms", $insertTransforms, true())
+    xs:boolean(manage:getEnvVar("isManaged", "true"))
 };
 
 declare function manage:insertTransformsEnabled(
 ) as xs:boolean
 {
-    (prop:get("corona-insertTransforms"), true())[1]
-};
-
-declare function manage:enableFetchTransforms(
-    $fetchTransforms as xs:boolean
-) as empty-sequence()
-{
-    prop:set("corona-fetchTransforms", $fetchTransforms, true())
+    xs:boolean(manage:getEnvVar("devInsertTransformsEnabled", "true"))
 };
 
 declare function manage:fetchTransformsEnabled(
 ) as xs:boolean
 {
-    (prop:get("corona-fetchTransforms"), true())[1]
-};
-
-declare function manage:setDefaultOutputFormat(
-    $defaultOutputFormat as xs:string
-) as empty-sequence()
-{
-    prop:set("corona-defaultOutputFormat", $defaultOutputFormat, true())
+    xs:boolean(manage:getEnvVar("devFetchTransformsEnabled", "true"))
 };
 
 declare function manage:defaultOutputFormat(
 ) as xs:string
 {
-    (prop:get("corona-defaultOutputFormat"), "json")[1]
-};
-
-declare function manage:setDebugLogging(
-    $enabled as xs:boolean
-) as empty-sequence()
-{
-    prop:set("corona-DEBUG", $enabled, true())
+    manage:getEnvVar("defaultOutputFormat", "json")
 };
 
 declare function manage:getDebugLogging(
 ) as xs:boolean
 {
-    (prop:get("corona-DEBUG"), false())[1]
+    xs:boolean(manage:getEnvVar("DEBUG", "false"))
 };
 
 
