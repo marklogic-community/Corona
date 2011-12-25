@@ -37,6 +37,7 @@ declare function store:outputRawDocument(
     $doc as document-node(),
     $extractPath as xs:string?,
     $applyTransform as xs:string?,
+    $requestParameters as map:map?,
     $outputFormat as xs:string
 ) as item()
 {
@@ -55,12 +56,12 @@ declare function store:outputRawDocument(
     (: Apply the transformation :)
     let $content :=
 		if(exists(manage:getEnvVar("fetchTransformer")))
-		then store:applyTransformer(manage:getEnvVar("fetchTransformer"), $content)
+		then store:applyTransformer(manage:getEnvVar("fetchTransformer"), $content, $requestParameters)
 		else $content
 
     let $content :=
         if(exists($applyTransform) and manage:fetchTransformsEnabled())
-        then store:applyTransformer($applyTransform, $content)
+        then store:applyTransformer($applyTransform, $content, $requestParameters)
         else $content
 
     return $content
@@ -76,6 +77,7 @@ declare function store:outputDocument(
     $extractPath as xs:string?,
     $applyTransform as xs:string?,
     $highlightQuery as cts:query?,
+    $requestParameters as map:map?,
     $outputFormat as xs:string
 ) as element()
 {
@@ -128,12 +130,12 @@ declare function store:outputDocument(
     (: Apply the transformation :)
     let $content :=
 		if(exists(manage:getEnvVar("fetchTransformer")))
-		then store:applyTransformer(manage:getEnvVar("fetchTransformer"), $content)
+		then store:applyTransformer(manage:getEnvVar("fetchTransformer"), $content, $requestParameters)
 		else $content
 
     let $content :=
         if(exists($applyTransform) and manage:fetchTransformsEnabled())
-        then store:applyTransformer($applyTransform, $content)
+        then store:applyTransformer($applyTransform, $content, $requestParameters)
         else $content
 
     (: If the wrapper element from wrapContentNodes is still sticking around, remove it :)
@@ -223,6 +225,7 @@ declare function store:outputMultipleDocuments(
     $query as cts:query?,
     $extractPath as xs:string?,
     $applyTransform as xs:string?,
+    $requestParameters as map:map?,
     $outputFormat as xs:string
 ) as element()
 {
@@ -237,7 +240,7 @@ declare function store:outputMultipleDocuments(
 
     let $results :=
         for $doc in $docs
-        return store:outputDocument($doc, $include, $extractPath, $applyTransform, $query, $outputFormat)
+        return store:outputDocument($doc, $include, $extractPath, $applyTransform, $query, $requestParameters, $outputFormat)
     let $executionTime := substring(string(xdmp:query-meters()/*:elapsed-time), 3, 4)
     return
         if($outputFormat = "json")
@@ -426,7 +429,7 @@ declare function store:insertDocument(
     $contentType as xs:string
 ) as empty-sequence()
 {
-    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, (), false())
+    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, (), (), false())
 };
 
 declare function store:insertDocument(
@@ -438,6 +441,7 @@ declare function store:insertDocument(
     $quality as xs:integer?,
     $contentType as xs:string,
     $applyTransform as xs:string?,
+    $requestParameters as map:map?,
     $respondWithContent as xs:boolean
 ) as node()?
 {
@@ -454,12 +458,12 @@ declare function store:insertDocument(
     (: Apply the transformation :)
     let $body :=
         if(exists($applyTransform) and manage:insertTransformsEnabled())
-        then store:applyTransformer($applyTransform, $body)
+        then store:applyTransformer($applyTransform, $body, $requestParameters)
         else $body
 
     let $body :=
 		if(exists(manage:getEnvVar("insertTransformer")))
-		then store:applyTransformer(manage:getEnvVar("insertTransformer"), $body)
+		then store:applyTransformer(manage:getEnvVar("insertTransformer"), $body, $requestParameters)
 		else $body
 
     let $insert := xdmp:document-insert($uri, $body, (xdmp:default-permissions(), $permissions), $collections, $quality)
@@ -485,7 +489,7 @@ declare function store:insertBinaryDocument(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
-    store:insertBinaryDocument($uri, $content, $suppliedContent, $collections, $properties, $permissions, $quality, $extractMetadata, $extractContent, (), false())
+    store:insertBinaryDocument($uri, $content, $suppliedContent, $collections, $properties, $permissions, $quality, $extractMetadata, $extractContent, (), (), false())
 };
 
 declare function store:insertBinaryDocument(
@@ -499,12 +503,13 @@ declare function store:insertBinaryDocument(
     $extractMetadata as xs:boolean,
     $extractContent as xs:boolean,
     $applyTransform as xs:string?,
+    $requestParameters as map:map?,
     $respondWithContent as xs:boolean
 ) as node()?
 {
     let $test := store:validateURI($uri)
     let $sidecarURI := store:getSidecarURI($uri)
-    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent, $applyTransform)
+    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent, $applyTransform, $requestParameters)
     let $insertSidecar := xdmp:document-insert($sidecarURI, $sidecar, (xdmp:default-permissions(), $permissions), $collections, $quality)
     let $setPropertis :=
         if(exists($properties))
@@ -523,7 +528,7 @@ declare function store:updateDocumentContent(
     $contentType as xs:string
 ) as empty-sequence()
 {
-    store:updateDocumentContent($uri, $content, $contentType, (), false())
+    store:updateDocumentContent($uri, $content, $contentType, (), (), false())
 };
 
 declare function store:updateDocumentContent(
@@ -531,6 +536,7 @@ declare function store:updateDocumentContent(
     $content as xs:string,
     $contentType as xs:string,
     $applyTransform as xs:string?,
+    $requestParameters as map:map?,
     $respondWithContent as xs:boolean
 ) as node()?
 {
@@ -551,12 +557,12 @@ declare function store:updateDocumentContent(
     (: Apply the transformation :)
 	let $body :=
         if(exists($applyTransform) and manage:insertTransformsEnabled())
-        then store:applyTransformer($applyTransform, $body)
+        then store:applyTransformer($applyTransform, $body, $requestParameters)
         else $body
 
     let $body :=
 		if(exists(manage:getEnvVar("insertTransformer")))
-		then store:applyTransformer(manage:getEnvVar("insertTransformer"), $body)
+		then store:applyTransformer(manage:getEnvVar("insertTransformer"), $body, $requestParameters)
 		else $body
 
     let $update :=
@@ -577,7 +583,7 @@ declare function store:updateBinaryDocumentContent(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
-    store:updateBinaryDocumentContent($uri, $content, $suppliedContent, $extractMetadata, $extractContent, (), false())
+    store:updateBinaryDocumentContent($uri, $content, $suppliedContent, $extractMetadata, $extractContent, (), (), false())
 };
 
 declare function store:updateBinaryDocumentContent(
@@ -587,6 +593,7 @@ declare function store:updateBinaryDocumentContent(
     $extractMetadata as xs:boolean,
     $extractContent as xs:boolean,
     $applyTransform as xs:string?,
+    $requestParameters as map:map?,
     $respondWithContent as xs:boolean
 ) as node()?
 {
@@ -599,7 +606,7 @@ declare function store:updateBinaryDocumentContent(
 
     let $sidecarURI := store:getSidecarURI($uri)
     let $existingSidecar := doc($sidecarURI)
-    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent, $applyTransform)
+    let $sidecar := store:createSidecarDocument($uri, $content, $suppliedContent, $extractMetadata, $extractContent, $applyTransform, $requestParameters)
     let $updateSidecar :=
         if(exists($existingSidecar))
         then xdmp:node-replace($existingSidecar/*, $sidecar)
@@ -873,7 +880,8 @@ declare private function store:wrapContentNodes(
 
 declare private function store:applyTransformer(
     $name as xs:string,
-    $content as node()
+    $content as node(),
+    $requestParameters as map:map?
 ) as item()*
 {
     let $transformer := manage:getTransformer($name)
@@ -881,9 +889,9 @@ declare private function store:applyTransformer(
         if(empty($transformer))
         then error(xs:QName("corona:INVALID-TRANSFORMER"), concat("No transformer with the name '", $name, "' exists"))
         else if(exists($transformer/*) and $xsltIsSupported)
-        then xdmp:apply($xsltEval, $transformer/*, $content)
+        then xdmp:apply($xsltEval, $transformer/*, $content, $requestParameters)
         else if(exists($transformer/text()))
-        then xdmp:eval(string($transformer), (xs:QName("content"), $content), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
+        then xdmp:eval(string($transformer), (xs:QName("content"), $content, xs:QName("requestParameters"), $requestParameters), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
         else error(xs:QName("corona:INVALID-TRANSFORMER"), "XSLT transformations are not supported in this version of MarkLogic, upgrade to 5.0 or later")
 };
 
@@ -907,7 +915,8 @@ declare private function store:createSidecarDocument(
     $suppliedContent as xs:string?,
     $extractMetadata as xs:boolean,
     $extractContent as xs:boolean,
-    $applyTransform as xs:string?
+    $applyTransform as xs:string?,
+    $requestParameters as map:map?
 ) as element(corona:sidecar)
 {
     let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
@@ -1004,12 +1013,12 @@ declare private function store:createSidecarDocument(
 
 					let $content :=
                         if(exists($applyTransform) and manage:insertTransformsEnabled())
-                        then store:applyTransformer($applyTransform, $content)
+                        then store:applyTransformer($applyTransform, $content, $requestParameters)
                         else $content
 
 					let $content :=
 						if(exists(manage:getEnvVar("insertTransformer")))
-						then store:applyTransformer(manage:getEnvVar("insertTransformer"), $content)
+						then store:applyTransformer(manage:getEnvVar("insertTransformer"), $content, $requestParameters)
 						else $content
 
                     return $content

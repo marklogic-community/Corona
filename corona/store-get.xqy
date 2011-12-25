@@ -75,10 +75,10 @@ let $content :=
         where empty($errors)
         return
             if($include = "content" and count($include) = 1)
-            then store:outputRawDocument($doc, $extractPath, $applyTransform, $outputFormat)
+            then store:outputRawDocument($doc, $extractPath, $applyTransform, $params, $outputFormat)
             else if($outputFormat = "json")
-            then store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)
-            else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
+            then store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $params, $outputFormat)
+            else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $params, $outputFormat)/* }</corona:response>
     }
     catch ($e) {
         xdmp:set($errors, common:errorFromException($e, $outputFormat))

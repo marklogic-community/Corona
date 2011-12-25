@@ -109,10 +109,10 @@ return
                 if(empty($doc))
                 then common:error("corona:DOCUMENT-NOT-FOUND", concat("There is no document at '", $uri, "'"), $outputFormat)
                 else if($include = "content" and count($include) = 1)
-                then store:outputRawDocument($doc, $extractPath, $applyTransform, $outputFormat)
+                then store:outputRawDocument($doc, $extractPath, $applyTransform, $params, $outputFormat)
                 else if($outputFormat = "json")
-                then store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)
-                else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $outputFormat)/* }</corona:response>
+                then store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $params, $outputFormat)
+                else <corona:response>{ store:outputDocument($doc, $include, $extractPath, $applyTransform, local:queryFromRequest($params), $params, $outputFormat)/* }</corona:response>
         }
         catch ($e) {
             common:errorFromException($e, $outputFormat)
@@ -138,8 +138,8 @@ return
             let $set := xdmp:set-response-code(if($respondWithContent) then 200 else 204, "Document inserted")
             return
                 if($contentType = "binary")
-                then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $respondWithContent)
-                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, $applyTransform, $respondWithContent)
+                then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $params, $respondWithContent)
+                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, $applyTransform, $params, $respondWithContent)
         }
         catch ($e) {
             common:errorFromException($e, $outputFormat)
@@ -175,13 +175,13 @@ return
                     if(empty(doc($uri)) and exists($bodyContent))
                     then
                         if($contentType = "binary")
-                        then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $respondWithContent)
-                        else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, $applyTransform, $respondWithContent)
+                        then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $params, $respondWithContent)
+                        else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, $applyTransform, $params, $respondWithContent)
                     else if(exists($bodyContent))
                     then
                         if($contentType = "binary")
-                        then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"), map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $respondWithContent)
-                        else store:updateDocumentContent($uri, $bodyContent, $contentType, $applyTransform, $respondWithContent)
+                        then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"), map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $params, $respondWithContent)
+                        else store:updateDocumentContent($uri, $bodyContent, $contentType, $applyTransform, $params, $respondWithContent)
                     else (),
                     if(exists($properties))
                     then store:setProperties($uri, $properties)

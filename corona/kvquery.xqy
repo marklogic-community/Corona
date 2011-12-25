@@ -126,7 +126,7 @@ let $end :=
 
 let $results :=
     try {
-        store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $outputFormat)
+        store:outputMultipleDocuments($results, $start, $end, $total, $include, $query, $extractPath, $applyTransform, $params, $outputFormat)
     }
     catch ($e) {
         xdmp:set($errors, common:errorFromException($e, $outputFormat))
