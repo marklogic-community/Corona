@@ -329,7 +329,7 @@ declare function store:deleteDocument(
     then
         let $uris :=
             if(exists(manage:getEnvVar("deleteTransformer")))
-            then store:applyContentTransformer(manage:getEnvVar("deleteTransformer"), $uri, $requestParameters)
+            then store:applyURITransformer(manage:getEnvVar("deleteTransformer"), $uri, $requestParameters)
             else $uri
         let $delete :=
             for $uri in $uris
@@ -400,7 +400,7 @@ declare function store:deleteDocumentsWithQuery(
 
     let $uris :=
         if(exists(manage:getEnvVar("deleteTransformer")))
-        then store:applyContentTransformer(manage:getEnvVar("deleteTransformer"), $uris, $requestParameters)
+        then store:applyURITransformer(manage:getEnvVar("deleteTransformer"), $uris, $requestParameters)
         else $uris
 
     let $numDeleted :=
@@ -933,11 +933,13 @@ declare private function store:applyURITransformer(
 ) as item()*
 {
     let $transformer := manage:getTransformer($name)
+	let $map := map:map()
+	let $put := map:put($map, "uris", $uris)
     return
         if(empty($transformer))
         then error(xs:QName("corona:INVALID-TRANSFORMER"), concat("No transformer with the name '", $name, "' exists"))
         else if(exists($transformer/text()))
-        then xdmp:eval(string($transformer), (xs:QName("uris"), $uris, xs:QName("requestParameters"), $requestParameters, xs:QName("testMode"), false()), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
+        then xdmp:eval(string($transformer), (xs:QName("content"), $map, xs:QName("requestParameters"), $requestParameters, xs:QName("testMode"), false()), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
         else error(xs:QName("corona:INVALID-TRANSFORMER"), "XSLT transformations are not supported in this version of MarkLogic, upgrade to 5.0 or later")
 };
 
