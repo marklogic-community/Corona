@@ -89,9 +89,9 @@ return
             let $include := map:get($params, "include")
             return
                 if(string-length($uri))
-                then store:deleteDocument($uri, map:get($params, "include") = ("uri", "uris"), $outputFormat)
+                then store:deleteDocument($uri, map:get($params, "include") = ("uri", "uris"), $params, $outputFormat)
                 else if(exists($query))
-                then store:deleteDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"), $outputFormat)
+                then store:deleteDocumentsWithQuery($query, map:get($params, "bulkDelete"), map:get($params, "include") = ("uri", "uris"), map:get($params, "limit"), $params, $outputFormat)
                 else error(xs:QName("corona:MISSING-PARAMETER"), "Missing parameters: Must supply a URI, a string query or a structured query with DELETE requests")
         }
         catch ($e) {

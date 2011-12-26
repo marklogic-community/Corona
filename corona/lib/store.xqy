@@ -37,7 +37,7 @@ declare function store:outputRawDocument(
     $doc as document-node(),
     $extractPath as xs:string?,
     $applyTransform as xs:string?,
-    $requestParameters as map:map?,
+    $requestParameters as map:map,
     $outputFormat as xs:string
 ) as item()
 {
@@ -55,13 +55,13 @@ declare function store:outputRawDocument(
 
     (: Apply the transformation :)
     let $content :=
-		if(exists(manage:getEnvVar("fetchTransformer")))
-		then store:applyTransformer(manage:getEnvVar("fetchTransformer"), $content, $requestParameters)
-		else $content
+        if(exists(manage:getEnvVar("fetchTransformer")))
+        then store:applyContentTransformer(manage:getEnvVar("fetchTransformer"), $content, $requestParameters)
+        else $content
 
     let $content :=
         if(exists($applyTransform) and manage:fetchTransformsEnabled())
-        then store:applyTransformer($applyTransform, $content, $requestParameters)
+        then store:applyContentTransformer($applyTransform, $content, $requestParameters)
         else $content
 
     return $content
@@ -77,7 +77,7 @@ declare function store:outputDocument(
     $extractPath as xs:string?,
     $applyTransform as xs:string?,
     $highlightQuery as cts:query?,
-    $requestParameters as map:map?,
+    $requestParameters as map:map,
     $outputFormat as xs:string
 ) as element()
 {
@@ -129,13 +129,13 @@ declare function store:outputDocument(
 
     (: Apply the transformation :)
     let $content :=
-		if(exists(manage:getEnvVar("fetchTransformer")))
-		then store:applyTransformer(manage:getEnvVar("fetchTransformer"), $content, $requestParameters)
-		else $content
+        if(exists(manage:getEnvVar("fetchTransformer")))
+        then store:applyContentTransformer(manage:getEnvVar("fetchTransformer"), $content, $requestParameters)
+        else $content
 
     let $content :=
         if(exists($applyTransform) and manage:fetchTransformsEnabled())
-        then store:applyTransformer($applyTransform, $content, $requestParameters)
+        then store:applyContentTransformer($applyTransform, $content, $requestParameters)
         else $content
 
     (: If the wrapper element from wrapContentNodes is still sticking around, remove it :)
@@ -225,7 +225,7 @@ declare function store:outputMultipleDocuments(
     $query as cts:query?,
     $extractPath as xs:string?,
     $applyTransform as xs:string?,
-    $requestParameters as map:map?,
+    $requestParameters as map:map,
     $outputFormat as xs:string
 ) as element()
 {
@@ -321,39 +321,47 @@ declare function store:getDocumentTypeFromDoc(
 declare function store:deleteDocument(
     $uri as xs:string,
     $includeURIs as xs:boolean,
+    $requestParameters as map:map,
     $outputFormat as xs:string
 ) as element()
 {
     if(store:documentExists($uri))
-    then (
-        if(store:getDocumentType($uri) = "binary" and exists(doc(store:getSidecarURI($uri))))
-        then xdmp:document-delete(store:getSidecarURI($uri))
-        else (),
-        xdmp:document-delete($uri),
-        if($outputFormat = "json")
-        then json:object((
-            "meta", json:object((
-                "deleted", 1,
-                "numRemaining", 0
-            )),
-            if($includeURIs)
-            then ("uris", json:array($uri))
-            else ()
-        ))
-        else if($outputFormat = "xml")
-        then <corona:results>
-            <corona:meta>
-                <corona:deleted>1</corona:deleted>
-                <corona:numRemaining>0</corona:numRemaining>
-            </corona:meta>
-            {
-                if($includeURIs)
-                then <corona:uris><corona:uri>{ $uri }</corona:uri></corona:uris>
+    then
+        let $uris :=
+            if(exists(manage:getEnvVar("deleteTransformer")))
+            then store:applyContentTransformer(manage:getEnvVar("deleteTransformer"), $uri, $requestParameters)
+            else $uri
+        let $delete :=
+            for $uri in $uris
+            let $deleteSidecar :=
+                if(store:getDocumentType($uri) = "binary" and exists(doc(store:getSidecarURI($uri))))
+                then xdmp:document-delete(store:getSidecarURI($uri))
                 else ()
-            }
-        </corona:results>
-        else ()
-    )
+            return xdmp:document-delete($uri)
+        return
+            if($outputFormat = "json")
+            then json:object((
+                "meta", json:object((
+                    "deleted", 1,
+                    "numRemaining", 0
+                )),
+                if($includeURIs)
+                then ("uris", json:array($uris))
+                else ()
+            ))
+            else if($outputFormat = "xml")
+            then <corona:results>
+                <corona:meta>
+                    <corona:deleted>1</corona:deleted>
+                    <corona:numRemaining>0</corona:numRemaining>
+                </corona:meta>
+                {
+                    if($includeURIs)
+                    then <corona:uris>{ for $uri in $uris return <corona:uri>{ $uri }</corona:uri> }</corona:uris>
+                    else ()
+                }
+            </corona:results>
+            else ()
     else error(xs:QName("corona:DOCUMENT-NOT-FOUND"), concat("There is no document to delete at '", $uri, "'"))
 };
 
@@ -362,26 +370,52 @@ declare function store:deleteDocumentsWithQuery(
     $bulkDelete as xs:boolean,
     $includeURIs as xs:boolean,
     $limit as xs:integer?,
+    $requestParameters as map:map,
     $outputFormat as xs:string
 ) as element()
 {
-    let $docs :=
-        if(exists($limit))
-        then cts:search(doc(), $query)[1 to $limit]
-        else cts:search(doc(), $query)
-    let $count := if(exists($docs)) then cts:remainder($docs[1]) else 0
+    let $count := 0
+    let $uris :=
+        try {
+            let $results :=
+                if(exists($limit))
+                then cts:uris((), $query)[1 to $limit]
+                else cts:uris((), $query)
+            let $set := if(exists($results)) then xdmp:set($count, cts:remainder($results[1])) else ()
+            for $result in $results
+            return
+                if(store:isSidecarURI($result))
+                then string(doc($result)/corona:sidecar/@original)
+                else $result
+        }
+        catch ($e) {
+            let $results :=
+                if(exists($limit))
+                then cts:search(doc(), $query)[1 to $limit]
+                else cts:search(doc(), $query)
+            let $set := if(exists($results)) then xdmp:set($count, cts:remainder($results[1])) else ()
+            for $result in $results
+            return ($result/corona:sidecar/@original, base-uri($result))[1]
+        }
+
+    let $uris :=
+        if(exists(manage:getEnvVar("deleteTransformer")))
+        then store:applyContentTransformer(manage:getEnvVar("deleteTransformer"), $uris, $requestParameters)
+        else $uris
+
     let $numDeleted :=
         if(exists($limit))
         then $limit
-        else $count
-    let $deletedURIs :=
-        for $doc in $docs
-        let $uri := base-uri($doc)
+        else count($uris)
+
+    let $delete :=
+        for $uri in $uris
+        let $doc := doc($uri)
         where not(xdmp:document-get-collections($uri) = $const:TransformersCollection)
         return (
-            if(exists(doc($doc/corona:sidecar/@original)))
-            then (string($doc/corona:sidecar/@original), xdmp:document-delete($doc/corona:sidecar/@original))
-            else $uri
+            if(exists($doc/binary()))
+            then xdmp:document-delete(base-uri(/corona:sidecar[@original = $uri]))
+            else ()
             ,
             xdmp:document-delete($uri)
         )
@@ -395,7 +429,7 @@ declare function store:deleteDocumentsWithQuery(
                     "numRemaining", $count - $numDeleted
                 )),
                 if($includeURIs)
-                then ("uris", json:array($deletedURIs))
+                then ("uris", json:array($uris))
                 else ()
             ))
             else if($outputFormat = "xml")
@@ -406,10 +440,7 @@ declare function store:deleteDocumentsWithQuery(
                 </corona:meta>
                 {
                     if($includeURIs)
-                    then <corona:uris>{
-                        for $uri in $deletedURIs
-                        return <corona:uri>{ $uri }</corona:uri>
-                    }</corona:uris>
+                    then <corona:uris>{ for $uri in $uris return <corona:uri>{ $uri }</corona:uri> }</corona:uris>
                     else ()
                 }
             </corona:results>
@@ -429,7 +460,7 @@ declare function store:insertDocument(
     $contentType as xs:string
 ) as empty-sequence()
 {
-    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, (), (), false())
+    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, (), map:map(), false())
 };
 
 declare function store:insertDocument(
@@ -441,7 +472,7 @@ declare function store:insertDocument(
     $quality as xs:integer?,
     $contentType as xs:string,
     $applyTransform as xs:string?,
-    $requestParameters as map:map?,
+    $requestParameters as map:map,
     $respondWithContent as xs:boolean
 ) as node()?
 {
@@ -458,13 +489,13 @@ declare function store:insertDocument(
     (: Apply the transformation :)
     let $body :=
         if(exists($applyTransform) and manage:insertTransformsEnabled())
-        then store:applyTransformer($applyTransform, $body, $requestParameters)
+        then store:applyContentTransformer($applyTransform, $body, $requestParameters)
         else $body
 
     let $body :=
-		if(exists(manage:getEnvVar("insertTransformer")))
-		then store:applyTransformer(manage:getEnvVar("insertTransformer"), $body, $requestParameters)
-		else $body
+        if(exists(manage:getEnvVar("insertTransformer")))
+        then store:applyContentTransformer(manage:getEnvVar("insertTransformer"), $body, $requestParameters)
+        else $body
 
     let $insert := xdmp:document-insert($uri, $body, (xdmp:default-permissions(), $permissions), $collections, $quality)
     let $set :=
@@ -489,7 +520,7 @@ declare function store:insertBinaryDocument(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
-    store:insertBinaryDocument($uri, $content, $suppliedContent, $collections, $properties, $permissions, $quality, $extractMetadata, $extractContent, (), (), false())
+    store:insertBinaryDocument($uri, $content, $suppliedContent, $collections, $properties, $permissions, $quality, $extractMetadata, $extractContent, (), map:map(), false())
 };
 
 declare function store:insertBinaryDocument(
@@ -503,7 +534,7 @@ declare function store:insertBinaryDocument(
     $extractMetadata as xs:boolean,
     $extractContent as xs:boolean,
     $applyTransform as xs:string?,
-    $requestParameters as map:map?,
+    $requestParameters as map:map,
     $respondWithContent as xs:boolean
 ) as node()?
 {
@@ -528,7 +559,7 @@ declare function store:updateDocumentContent(
     $contentType as xs:string
 ) as empty-sequence()
 {
-    store:updateDocumentContent($uri, $content, $contentType, (), (), false())
+    store:updateDocumentContent($uri, $content, $contentType, (), map:map(), false())
 };
 
 declare function store:updateDocumentContent(
@@ -536,7 +567,7 @@ declare function store:updateDocumentContent(
     $content as xs:string,
     $contentType as xs:string,
     $applyTransform as xs:string?,
-    $requestParameters as map:map?,
+    $requestParameters as map:map,
     $respondWithContent as xs:boolean
 ) as node()?
 {
@@ -555,15 +586,15 @@ declare function store:updateDocumentContent(
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
 
     (: Apply the transformation :)
-	let $body :=
+    let $body :=
         if(exists($applyTransform) and manage:insertTransformsEnabled())
-        then store:applyTransformer($applyTransform, $body, $requestParameters)
+        then store:applyContentTransformer($applyTransform, $body, $requestParameters)
         else $body
 
     let $body :=
-		if(exists(manage:getEnvVar("insertTransformer")))
-		then store:applyTransformer(manage:getEnvVar("insertTransformer"), $body, $requestParameters)
-		else $body
+        if(exists(manage:getEnvVar("insertTransformer")))
+        then store:applyContentTransformer(manage:getEnvVar("insertTransformer"), $body, $requestParameters)
+        else $body
 
     let $update :=
         if($contentType = "text")
@@ -583,7 +614,7 @@ declare function store:updateBinaryDocumentContent(
     $extractContent as xs:boolean
 ) as empty-sequence()
 {
-    store:updateBinaryDocumentContent($uri, $content, $suppliedContent, $extractMetadata, $extractContent, (), (), false())
+    store:updateBinaryDocumentContent($uri, $content, $suppliedContent, $extractMetadata, $extractContent, (), map:map(), false())
 };
 
 declare function store:updateBinaryDocumentContent(
@@ -593,7 +624,7 @@ declare function store:updateBinaryDocumentContent(
     $extractMetadata as xs:boolean,
     $extractContent as xs:boolean,
     $applyTransform as xs:string?,
-    $requestParameters as map:map?,
+    $requestParameters as map:map,
     $respondWithContent as xs:boolean
 ) as node()?
 {
@@ -878,10 +909,10 @@ declare private function store:wrapContentNodes(
         else $nodes
 };
 
-declare private function store:applyTransformer(
+declare private function store:applyContentTransformer(
     $name as xs:string,
     $content as node(),
-    $requestParameters as map:map?
+    $requestParameters as map:map
 ) as item()*
 {
     let $transformer := manage:getTransformer($name)
@@ -895,11 +926,33 @@ declare private function store:applyTransformer(
         else error(xs:QName("corona:INVALID-TRANSFORMER"), "XSLT transformations are not supported in this version of MarkLogic, upgrade to 5.0 or later")
 };
 
+declare private function store:applyURITransformer(
+    $name as xs:string,
+    $uris as xs:string+,
+    $requestParameters as map:map
+) as item()*
+{
+    let $transformer := manage:getTransformer($name)
+    return
+        if(empty($transformer))
+        then error(xs:QName("corona:INVALID-TRANSFORMER"), concat("No transformer with the name '", $name, "' exists"))
+        else if(exists($transformer/text()))
+        then xdmp:eval(string($transformer), (xs:QName("uris"), $uris, xs:QName("requestParameters"), $requestParameters, xs:QName("testMode"), false()), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
+        else error(xs:QName("corona:INVALID-TRANSFORMER"), "XSLT transformations are not supported in this version of MarkLogic, upgrade to 5.0 or later")
+};
+
 declare private function store:getSidecarURI(
     $uri as xs:string
 ) as xs:string
 {
     concat($uri, "-sidecar")
+};
+
+declare private function store:isSidecarURI(
+    $uri as xs:string
+) as xs:boolean
+{
+    ends-with($uri, "-sidecar")
 };
 
 declare private function store:getDocumentURIFromSidecar(
@@ -916,7 +969,7 @@ declare private function store:createSidecarDocument(
     $extractMetadata as xs:boolean,
     $extractContent as xs:boolean,
     $applyTransform as xs:string?,
-    $requestParameters as map:map?
+    $requestParameters as map:map
 ) as element(corona:sidecar)
 {
     let $suppliedContentFormat := common:xmlOrJSON($suppliedContent)
@@ -1011,15 +1064,15 @@ declare private function store:createSidecarDocument(
                             return <corona:extractedPara>{ $string }</corona:extractedPara>
                         }</corona:extractedContent>
 
-					let $content :=
+                    let $content :=
                         if(exists($applyTransform) and manage:insertTransformsEnabled())
-                        then store:applyTransformer($applyTransform, $content, $requestParameters)
+                        then store:applyContentTransformer($applyTransform, $content, $requestParameters)
                         else $content
 
-					let $content :=
-						if(exists(manage:getEnvVar("insertTransformer")))
-						then store:applyTransformer(manage:getEnvVar("insertTransformer"), $content, $requestParameters)
-						else $content
+                    let $content :=
+                        if(exists(manage:getEnvVar("insertTransformer")))
+                        then store:applyContentTransformer(manage:getEnvVar("insertTransformer"), $content, $requestParameters)
+                        else $content
 
                     return $content
                 else ()
