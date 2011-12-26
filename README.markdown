@@ -16,6 +16,5 @@ Corona runs on MarkLogic 4.1 or later.  Some features require 4.2 or 5.0.
 
 ## [Installation](https://github.com/marklogic/Corona/wiki/Installation)
 
-
 ## [API Documentation](http://github.com/marklogic/Corona/wiki)
 [Check the wiki for documentation on how to store, index and query the documents.](http://github.com/marklogic/Corona/wiki)
