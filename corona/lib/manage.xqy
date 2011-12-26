@@ -1249,10 +1249,10 @@ declare function manage:setTransformer(
     else
         let $test :=
             try {
-                xdmp:eval($transformer, (xs:QName("content"), <foo/>), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
+                xdmp:eval($transformer, (xs:QName("content"), <foo/>, xs:QName("requestParameters"), map:map(), xs:QName("testMode"), true()), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
             }
             catch ($e) {
-                error(xs:QName("corona:INVALID-TRANSFORMER"), "Invalid transformer: XQuery evaluation error")
+                error(xs:QName("corona:INVALID-TRANSFORMER"), concat("Invalid transformer: XQuery evaluation error: ", xdmp:quote($e)))
             }
         return xdmp:document-insert(concat("_/transformers/", $name), text { $transformer }, (xdmp:default-permissions(), xdmp:permission($const:TransformerReadRole, "read")), $const:TransformersCollection)
 };

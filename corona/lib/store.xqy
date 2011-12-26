@@ -891,7 +891,7 @@ declare private function store:applyTransformer(
         else if(exists($transformer/*) and $xsltIsSupported)
         then xdmp:apply($xsltEval, $transformer/*, $content, $requestParameters)
         else if(exists($transformer/text()))
-        then xdmp:eval(string($transformer), (xs:QName("content"), $content, xs:QName("requestParameters"), $requestParameters), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
+        then xdmp:eval(string($transformer), (xs:QName("content"), $content, xs:QName("requestParameters"), $requestParameters, xs:QName("testMode"), false()), <options xmlns="xdmp:eval"><isolation>same-statement</isolation></options>)
         else error(xs:QName("corona:INVALID-TRANSFORMER"), "XSLT transformations are not supported in this version of MarkLogic, upgrade to 5.0 or later")
 };
 
