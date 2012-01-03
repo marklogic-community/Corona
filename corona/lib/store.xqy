@@ -481,7 +481,7 @@ declare function store:insertDocument(
         if($contentType = "json")
         then json:parse($content)
         else if($contentType = "xml")
-        then xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+        then store:unquoteXML($content)
         else if($contentType = "text")
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml, json or text")
@@ -580,7 +580,7 @@ declare function store:updateDocumentContent(
         if($contentType = "json")
         then json:parse($content)
         else if($contentType = "xml")
-        then xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+        then store:unquoteXML($content)
         else if($contentType = "text")
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
@@ -980,7 +980,7 @@ declare private function store:createSidecarDocument(
         then
             if($suppliedContentFormat = "json")
             then json:parse($suppliedContent)
-            else xdmp:unquote($suppliedContent, (), ("repair-none", "format-xml"))[1]
+            else store:unquoteXML($suppliedContent)
         else ()
     return <corona:sidecar type="binary" original="{ $documentURI }">
         <corona:suppliedContent format="{ $suppliedContentFormat }">{ $suppliedContent }</corona:suppliedContent>
@@ -1088,6 +1088,18 @@ declare private function store:validateURI(
 ) as empty-sequence()
 {
     if(starts-with($uri, "_/") or ends-with($uri, "-sidecar"))
-    then error(xs:QName("INVALID-URI"), "Document URI's starting with '_/' or ending with '-sidecar' are reserved")
+    then error(xs:QName("corona:INVALID-URI"), "Document URI's starting with '_/' or ending with '-sidecar' are reserved")
     else ()
+};
+
+declare private function store:unquoteXML(
+    $content as xs:string
+) as document-node()
+{
+    try {
+        xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+    }
+    catch ($e) {
+        error(xs:QName("corona:INVALID-XML"), "Invalid XML")
+    }
 };
