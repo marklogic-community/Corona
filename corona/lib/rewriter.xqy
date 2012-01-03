@@ -16,6 +16,8 @@ limitations under the License.
 
 xquery version "1.0-ml";
 
+import module namespace manage="http://marklogic.com/corona/manage" at "manage.xqy";
+import module namespace common="http://marklogic.com/corona/common" at "common.xqy";
 import module namespace rest="http://marklogic.com/appservices/rest" at "rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
 
@@ -25,6 +27,20 @@ declare option xdmp:mapping "false";
 
 let $url := xdmp:get-request-url()
 let $result := rest:rewrite(endpoints:options())
+let $log :=
+    if(manage:getDebugLogging())
+    then (
+        common:log("Request", concat(xdmp:get-request-method(), " ", $url)),
+
+        for $header in xdmp:get-request-header-names()
+        for $value in xdmp:get-request-header($header)
+        return common:log("Header", concat("    ", $header, ": ", $value)),
+
+        for $param in xdmp:get-request-field-names()
+        for $value in xdmp:get-request-field($param)
+        return common:log("Parameter", concat("    ", $param, ": ", $value))
+    )
+    else ()
 return
     if(exists($result))
     then $result

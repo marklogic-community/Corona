@@ -2,8 +2,6 @@ xquery version "1.0-ml";
 
 module namespace rest-impl="http://marklogic.com/appservices/rest-impl";
 
-import module namespace common="http://marklogic.com/corona/common" at "../common.xqy";
-
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare namespace rest="http://marklogic.com/appservices/rest";
@@ -43,7 +41,9 @@ declare variable $rest-impl:FAILEDCONDITION   := xs:QName("rest:FAILEDCONDITION"
 declare variable $rest-impl:DEBUG as xs:boolean := false();
 
 declare function rest-impl:log($msgs as item()*) as empty-sequence() {
-    common:log("REST", $msgs)
+    if ($rest-impl:DEBUG)
+    then for $msg in $msgs return xdmp:log($msg)
+    else ()
 };
 
 declare function rest-impl:check-reqenv(
