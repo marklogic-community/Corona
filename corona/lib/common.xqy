@@ -45,7 +45,14 @@ declare function common:log(
 {
     if(manage:getDebugLogging())
     then
-        let $message := string-join(for $i in $message return xdmp:quote(<foo>{ $message }</foo>/node()), ", ")
+        let $message := string-join(
+            for $i in $message
+            let $i :=
+                if($i instance of element() and namespace-uri($i) = "http://marklogic.com/json")
+                then json:serialize($i)
+                else $i
+            return xdmp:quote(<foo>{ $i }</foo>/node()),
+        ", ")
         return
             if(exists($description))
             then xdmp:log(concat($name, ": ", $description, " - ", $message))
@@ -99,7 +106,7 @@ declare function common:error(
 
     let $set := xdmp:set-response-code($statusCode, $message)
     let $add := xdmp:add-response-header("Date", string(current-dateTime()))
-    return
+    let $output :=
         if($outputFormat = "xml")
         then
             <corona:error>
@@ -117,6 +124,8 @@ declare function common:error(
                     ))
                 ))
             )
+    let $log := common:log("Error", $output)
+    return $output
 };
 
 declare function common:errorFromException(
