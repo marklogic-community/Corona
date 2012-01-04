@@ -271,7 +271,8 @@ declare function common:translateSnippet(
     $outputType as xs:string
 ) as item()*
 {
-    let $results :=
+    if($outputType = "json")
+    then json:array(
         for $match in $snippet/search:match
         return
             string-join(
@@ -281,10 +282,18 @@ declare function common:translateSnippet(
                     then concat("<span class='hit'>", string($node), "</span>")
                     else string($node)
             , "")
-    return
-        if($outputType = "json")
-        then json:array($results)
-        else $results
+    )
+    else
+        for $match in $snippet/search:match
+        let $path := replace($match/@path, '^fn:doc\("[^"]*"\)', "")
+        return concat("<span class='match' path='", $path, "'>",
+            string-join(
+                for $node in $match/node()
+                return
+                    if($node instance of element(search:highlight))
+                    then concat("<span class='hit'>", string($node), "</span>")
+                    else string($node)
+            , ""), "</span>")
 };
 
 declare function common:dualStrftime(
