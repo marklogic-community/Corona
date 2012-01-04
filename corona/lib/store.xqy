@@ -146,7 +146,7 @@ declare function store:outputDocument(
 
     let $snippet :=
         if($include = ("snippet", "all") and exists($highlightQuery))
-        then common:translateSnippet(search:snippet($doc, <cast>{ $highlightQuery }</cast>/*), $outputFormat)
+        then common:translateSnippet(search:snippet($doc, <cast>{ $highlightQuery }</cast>/*))
         else ()
 
     return

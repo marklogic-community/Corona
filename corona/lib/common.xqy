@@ -267,33 +267,20 @@ declare function common:humanOperatorToMathmatical(
 };
 
 declare function common:translateSnippet(
-    $snippet as element(search:snippet),
-    $outputType as xs:string
+    $snippet as element(search:snippet)
 ) as item()*
 {
-    if($outputType = "json")
-    then json:array(
-        for $match in $snippet/search:match
-        return
-            string-join(
-                for $node in $match/node()
-                return
-                    if($node instance of element(search:highlight))
-                    then concat("<span class='hit'>", string($node), "</span>")
-                    else string($node)
-            , "")
+    for $match in $snippet/search:match
+    let $path := replace($match/@path, '^fn:doc\("[^"]*"\)', "")
+    return concat("<span class='match' path='", $path, "'>",
+        string-join(
+            for $node in $match/node()
+            return
+                if($node instance of element(search:highlight))
+                then concat("<span class='hit'>", string($node), "</span>")
+                else string($node)
+        , ""), "</span>"
     )
-    else
-        for $match in $snippet/search:match
-        let $path := replace($match/@path, '^fn:doc\("[^"]*"\)', "")
-        return concat("<span class='match' path='", $path, "'>",
-            string-join(
-                for $node in $match/node()
-                return
-                    if($node instance of element(search:highlight))
-                    then concat("<span class='hit'>", string($node), "</span>")
-                    else string($node)
-            , ""), "</span>")
 };
 
 declare function common:dualStrftime(
