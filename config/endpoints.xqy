@@ -282,6 +282,12 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
+    <request uri="^/config/?$" endpoint="/config/site/index.xqy" user-params="allow"/>
+    <request uri="^/config/search/?$" endpoint="/config/site/search.xqy" user-params="allow"/>
+    <request uri="^/config/namespaces/?$" endpoint="/config/site/namespaces.xqy" user-params="allow"/>
+    <request uri="^/config/transformers/?$" endpoint="/config/site/transformers.xqy" user-params="allow"/>
+    <request uri="^/config/env/?$" endpoint="/config/site/env.xqy" user-params="allow"/>
+
     <request uri="^/config/setup/?$" endpoint="/config/setup.xqy" user-params="allow">
         <http method="GET"/>
         <http method="POST"/>

@@ -28,6 +28,18 @@ declare function template:apply(
         $scripts as element(script)*
 ) as item()+
 {
+    template:apply($content, $title, $nav, $page, $scripts, ())
+};
+
+declare function template:apply(
+		$content as element()*,
+        $title as xs:string,
+        $nav as element(li)*,
+        $page as xs:integer,
+        $scripts as element(script)*,
+        $links as element(link)*
+) as item()+
+{
 	let $set := xdmp:set-response-content-type("text/html; charset=utf-8")
     (: 
     let $nav := (
@@ -61,6 +73,7 @@ declare function template:apply(
         <link rel="stylesheet" href="/corona/htools/css/screen.css" type="text/css" media="screen, projection" />
         <link rel="stylesheet" href="/corona/htools/css/print.css" type="text/css" media="print"/>
         <!--[if lt IE 8]><link rel="stylesheet" href="/corona/htools/css/ie.css" type="text/css" media="screen, projection"/><![endif]-->
+        { $links }
     </head>
     <body>
         <div class="header">

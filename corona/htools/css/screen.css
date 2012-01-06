@@ -337,3 +337,19 @@ a.btn:focus {
 .pagination a.btn {
 	margin-bottom: 3px;
 }
+
+div.dataTables_wrapper label {
+    font-weight: normal;
+}
+
+div.dataTables_wrapper table {
+    background-color: white;
+}
+
+div.dataTables_wrapper th.sorting_disabled {
+    background-color: inherit;
+}
+
+div.dataTables_wrapper td.delete {
+    text-align: right;
+}
