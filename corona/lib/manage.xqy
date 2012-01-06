@@ -82,25 +82,41 @@ declare function manage:isManaged(
 declare function manage:insertTransformsEnabled(
 ) as xs:boolean
 {
-    xs:boolean(manage:getEnvVar("devInsertTransformsEnabled", "true"))
+    let $value := manage:getEnvVar("devInsertTransformsEnabled", "true")
+    return
+        if($value castable as xs:boolean)
+        then xs:boolean($value)
+        else true()
 };
 
 declare function manage:fetchTransformsEnabled(
 ) as xs:boolean
 {
-    xs:boolean(manage:getEnvVar("devFetchTransformsEnabled", "true"))
+    let $value := manage:getEnvVar("devFetchTransformsEnabled", "true")
+    return
+        if($value castable as xs:boolean)
+        then xs:boolean($value)
+        else true()
 };
 
 declare function manage:defaultOutputFormat(
 ) as xs:string
 {
-    manage:getEnvVar("defaultOutputFormat", "json")
+    let $value := manage:getEnvVar("defaultOutputFormat", "json")
+    return
+        if($value = ("xml", "json"))
+        then $value
+        else "json"
 };
 
 declare function manage:getDebugLogging(
 ) as xs:boolean
 {
-    xs:boolean(manage:getEnvVar("DEBUG", "false"))
+    let $value := manage:getEnvVar("DEBUG", "false")
+    return
+        if($value castable as xs:boolean)
+        then xs:boolean($value)
+        else false()
 };
 
 
@@ -1273,11 +1289,28 @@ declare function manage:getTransformer(
     doc(concat("_/transformers/", $name))
 };
 
+declare function manage:getTransformerType(
+    $name as xs:string
+) as xs:string?
+{
+    let $transformer := manage:getTransformer($name)
+    return
+        if(exists($transformer/*))
+        then "xslt"
+        else if(exists($transformer/text()))
+        then "xquery"
+        else ()
+};
+
 declare function manage:getAllTransformerNames(
-) as xs:string*
+) as element(json:item)*
 {
     for $transformer in collection($const:TransformersCollection)
-    return tokenize(base-uri($transformer), "/")[last()]
+    let $name := tokenize(base-uri($transformer), "/")[last()]
+    return json:object((
+        "name", $name,
+        "type", manage:getTransformerType($name)
+    ))
 };
 
 declare function manage:deleteAllTransformers(

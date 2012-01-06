@@ -122,6 +122,7 @@ corona.removeTransformers = function(info, callback) {
             callback.call();
             return;
         }
+        transformer = transformer.name;
 
         asyncTest("Remove the " + transformer + " transformer", function() {
             var url = "/manage/transformer/" + transformer;
