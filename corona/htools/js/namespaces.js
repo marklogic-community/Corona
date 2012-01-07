@@ -23,8 +23,8 @@ corona.namespaces = {};
 corona.namespaces.fetch = function() {
     $.ajax("/manage/namespaces", {
         success: function(data) {
-            var addButton = $("<div><button style='float: right'>Add Namespace</button></div>");
-            addButton.click(function() {
+            var addButton = $("<button style='float: right'>Add Namespace</button>");
+            addButton.button().click(function() {
                 dataTable.fnAddTr(corona.namespaces.createRow("", "").get(0));
                 corona.namespaces.makeTableEditable(dataTable);
             });
@@ -41,6 +41,8 @@ corona.namespaces.fetch = function() {
             });
 
             var dataTable = table.dataTable({
+                 "bJQueryUI": true,
+                 "sPaginationType": "full_numbers",
                  "aoColumns": [ 
                     null,
                     null,
@@ -125,7 +127,8 @@ corona.namespaces.makeTableEditable = function(table) {
 
             return value;
         },
-        sDeleteURL: function() { return true; }
+        sDeleteURL: function() { return true; },
+        aoColumns: [{}, {}, null]
     });
 
     table.find("td.delete").click(corona.namespaces.deleteRow);

@@ -49,7 +49,7 @@
 }
 
 .paging_full_numbers {
-	width: 350px !important;
+	/* width: 350px !important; */
 }
 
 .dataTables_wrapper .ui-toolbar {

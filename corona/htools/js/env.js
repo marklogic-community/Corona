@@ -23,8 +23,8 @@ corona.envvars = {};
 corona.envvars.fetch = function() {
     $.ajax("/manage/env", {
         success: function(data) {
-            var addButton = $("<div><button style='float: right'>Add Variable</button></div>");
-            addButton.click(function() {
+            var addButton = $("<button style='float: right'>Add Variable</button>");
+            addButton.button().click(function() {
                 dataTable.fnAddTr(corona.envvars.createRow("", "").get(0));
                 corona.envvars.makeTableEditable(dataTable);
             });
@@ -41,6 +41,8 @@ corona.envvars.fetch = function() {
             });
 
             var dataTable = table.dataTable({
+                 "bJQueryUI": true,
+                 "sPaginationType": "full_numbers",
                  "aoColumns": [ 
                     null,
                     null,
@@ -125,7 +127,8 @@ corona.envvars.makeTableEditable = function(table) {
 
             return newValue;
         },
-        sDeleteURL: function() { return true; }
+        sDeleteURL: function() { return true; },
+        aoColumns: [{}, {}, null]
     });
 
     table.find("td.delete").click(corona.envvars.deleteRow);

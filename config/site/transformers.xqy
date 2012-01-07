@@ -22,6 +22,20 @@ template:apply(
     <div>
         <h2>Transformers</h2>
         <div id="jscontent"><!-- --></div>
+        <div id="newTransfomerDialog" title="Create new transformer">
+            <form>
+                <label for="name">Name</label><br/>
+                <input type="text" name="name" id="newTransformerName" class="text ui-widget-content ui-corner-all" /><br/>
+                <textarea id="newTransformerContent" style="width: 100%; height: 380px;" class="transformer">&nbsp;</textarea>
+            </form>
+        </div>
+        <div id="editTransfomerDialog" title="Edit transformer">
+            <form>
+                <label for="name">Name</label><br/>
+                <input type="text" name="name" id="editTransformerName" disabled="true" class="text ui-widget-content ui-corner-all" /><br/>
+                <textarea id="editTransformerContent" style="width: 100%; height: 380px;" class="transformer">&nbsp;</textarea>
+            </form>
+        </div>
     </div>,
     "Transformers - Corona",
     (
@@ -31,5 +45,15 @@ template:apply(
         <li><h4><a href="/config/env">Environment Vars</a></h4></li>
     ),
     3,
-    <script src="/corona/htools/js/transformers.js"><!-- --></script>
+    (
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/jquery-ui.min.js"><!-- --></script>,
+        <script src="/corona/htools/js/DataTables-1.8.2/js/jquery.dataTables.min.js"><!-- --></script>,
+        <script src="/corona/htools/js/DataTables-1.8.2/js/jquery.jeditable.js"><!-- --></script>,
+        <script src="/corona/htools/js/DataTables-1.8.2/js/jquery.dataTables.editable.js"><!-- --></script>,
+        <script src="/corona/htools/js/transformers.js"><!-- --></script>
+    ),
+    (
+        <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/themes/smoothness/jquery-ui.css" type="text/css" />,
+        <link rel="stylesheet" href="/corona/htools/js/DataTables-1.8.2/css/demo_table_jui.css" type="text/css" media="screen, projection" />
+    )
 )
