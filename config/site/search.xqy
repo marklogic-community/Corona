@@ -31,5 +31,15 @@ template:apply(
         <li><h4><a href="/config/env">Environment Vars</a></h4></li>
     ),
     1,
-    <script src="/corona/htools/js/search.js"><!-- --></script>
+    (
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/jquery-ui.min.js"><!-- --></script>,
+        <script src="/corona/htools/js/DataTables-1.8.2/js/jquery.dataTables.min.js"><!-- --></script>,
+        <script src="/corona/htools/js/DataTables-1.8.2/js/jquery.jeditable.js"><!-- --></script>,
+        <script src="/corona/htools/js/DataTables-1.8.2/js/jquery.dataTables.editable.js"><!-- --></script>,
+        <script src="/corona/htools/js/search.js"><!-- --></script>
+    ),
+    (
+        <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/themes/smoothness/jquery-ui.css" type="text/css" />,
+        <link rel="stylesheet" href="/corona/htools/js/DataTables-1.8.2/css/demo_table_jui.css" type="text/css" media="screen, projection" />
+    )
 )
