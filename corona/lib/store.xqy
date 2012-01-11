@@ -457,10 +457,11 @@ declare function store:insertDocument(
     $properties as element()*,
     $permissions as element()*,
     $quality as xs:integer?,
-    $contentType as xs:string
+    $contentType as xs:string,
+	$repair as xs:boolean
 ) as empty-sequence()
 {
-    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, (), map:map(), false())
+    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, $repair, (), map:map(), false())
 };
 
 declare function store:insertDocument(
@@ -471,6 +472,7 @@ declare function store:insertDocument(
     $permissions as element()*,
     $quality as xs:integer?,
     $contentType as xs:string,
+	$repair as xs:boolean,
     $applyTransform as xs:string?,
     $requestParameters as map:map,
     $respondWithContent as xs:boolean
@@ -481,7 +483,7 @@ declare function store:insertDocument(
         if($contentType = "json")
         then json:parse($content)
         else if($contentType = "xml")
-        then store:unquoteXML($content)
+        then store:unquoteXML($content, $repair)
         else if($contentType = "text")
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml, json or text")
@@ -556,16 +558,18 @@ declare function store:insertBinaryDocument(
 declare function store:updateDocumentContent(
     $uri as xs:string,
     $content as xs:string,
-    $contentType as xs:string
+    $contentType as xs:string,
+	$repair as xs:boolean
 ) as empty-sequence()
 {
-    store:updateDocumentContent($uri, $content, $contentType, (), map:map(), false())
+    store:updateDocumentContent($uri, $content, $contentType, $repair, (), map:map(), false())
 };
 
 declare function store:updateDocumentContent(
     $uri as xs:string,
     $content as xs:string,
     $contentType as xs:string,
+	$repair as xs:boolean,
     $applyTransform as xs:string?,
     $requestParameters as map:map,
     $respondWithContent as xs:boolean
@@ -580,7 +584,7 @@ declare function store:updateDocumentContent(
         if($contentType = "json")
         then json:parse($content)
         else if($contentType = "xml")
-        then store:unquoteXML($content)
+        then store:unquoteXML($content, $repair)
         else if($contentType = "text")
         then text { $content }
         else error(xs:QName("corona:INVALID-PARAMETER"), "Invalid content type, must be one of xml or json")
@@ -980,7 +984,7 @@ declare private function store:createSidecarDocument(
         then
             if($suppliedContentFormat = "json")
             then json:parse($suppliedContent)
-            else store:unquoteXML($suppliedContent)
+            else store:unquoteXML($suppliedContent, false())
         else ()
     return <corona:sidecar type="binary" original="{ $documentURI }">
         <corona:suppliedContent format="{ $suppliedContentFormat }">{ $suppliedContent }</corona:suppliedContent>
@@ -1093,13 +1097,14 @@ declare private function store:validateURI(
 };
 
 declare private function store:unquoteXML(
-    $content as xs:string
+    $content as xs:string,
+	$repair as xs:boolean
 ) as document-node()
 {
     try {
-        xdmp:unquote($content, (), ("repair-none", "format-xml"))[1]
+        xdmp:unquote($content, (), (if($repair) then () else "repair-none", "format-xml"))[1]
     }
     catch ($e) {
-        error(xs:QName("corona:INVALID-XML"), "Invalid XML")
+        error(xs:QName("corona:INVALID-XML"), concat("Invalid XML: ", substring-after($e/*:format-string, " -- ")))
     }
 };
