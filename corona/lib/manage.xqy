@@ -1820,24 +1820,28 @@ declare private function manage:createFieldForPlace(
         if(exists($existing))
         then admin:database-delete-field($dbConfig, $database, $fieldName)
         else $dbConfig
-    let $dbConfig := admin:database-add-field($dbConfig, $database, admin:database-field($fieldName, false()))
 
-    let $add :=
-        for $item in $config/query/field/*[@type = "include"]
-        let $nsLnBits :=
-            if(local-name($item) = "element")
-            then manage:getNSAndLN($item/@element)
-            else ("http://marklogic.com/json", json:escapeNCName($item/@key))
-        let $el := admin:database-included-element($nsLnBits[1], $nsLnBits[2], ($item/@weight, 1)[1], (), "", "")
-        return xdmp:set($dbConfig, admin:database-add-field-included-element($dbConfig, $database, $fieldName, $el))
-    let $add :=
-        for $item in $config/query/field/*[@type = "exclude"]
-        let $nsLnBits :=
-            if(local-name($item) = "element")
-            then manage:getNSAndLN($item/@element)
-            else ("http://marklogic.com/json", json:escapeNCName($item/@key))
-        let $el := admin:database-excluded-element($nsLnBits[1], $nsLnBits[2])
-        return xdmp:set($dbConfig, admin:database-add-field-excluded-element($dbConfig, $database, $fieldName, $el))
+    let $dbConfig :=
+        if(exists($config/query/field))
+        then admin:database-add-field($dbConfig, $database, admin:database-field($fieldName, false()))
+        else $dbConfig
+    return 
+        let $add :=
+            for $item in $config/query/field/*[@type = "include"]
+            let $nsLnBits :=
+                if(local-name($item) = "element")
+                then manage:getNSAndLN($item/@element)
+                else ("http://marklogic.com/json", json:escapeNCName($item/@key))
+            let $el := admin:database-included-element($nsLnBits[1], $nsLnBits[2], ($item/@weight, 1)[1], (), "", "")
+            return xdmp:set($dbConfig, admin:database-add-field-included-element($dbConfig, $database, $fieldName, $el))
+        let $add :=
+            for $item in $config/query/field/*[@type = "exclude"]
+            let $nsLnBits :=
+                if(local-name($item) = "element")
+                then manage:getNSAndLN($item/@element)
+                else ("http://marklogic.com/json", json:escapeNCName($item/@key))
+            let $el := admin:database-excluded-element($nsLnBits[1], $nsLnBits[2])
+            return xdmp:set($dbConfig, admin:database-add-field-excluded-element($dbConfig, $database, $fieldName, $el))
 
-    return admin:save-configuration($dbConfig)
+        return admin:save-configuration($dbConfig)
 };
