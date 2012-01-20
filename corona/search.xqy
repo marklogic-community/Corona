@@ -101,7 +101,7 @@ let $log := common:log("Search", "Search options", $options)
 
 let $end := $start + $length - 1
 
-let $results := cts:search(doc(), $query, $options)[$start to $end]
+let $results := cts:search(doc(), $query, $options, map:get($params, "qualityWeight"))[$start to $end]
 
 let $total :=
     if(exists($results[1]))

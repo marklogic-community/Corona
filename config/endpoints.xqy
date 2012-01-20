@@ -81,6 +81,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="structuredQuery" required="false"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="length" required="false" as="positiveInteger" default="10"/>
+        <param name="qualityWeight" required="false" as="decimal" default="1.0"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         <param name="filtered" required="false" default="false" as="boolean"/>
         <param name="extractPath" required="false"/>
