@@ -51,6 +51,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="extractContent" required="false" as="boolean" default="true"/>
             <param name="applyTransform" required="false"/>
             <param name="respondWithContent" required="false" as="boolean" default="false"/>
+            <param name="repair" required="false" as="boolean" default="false"/>
         </http>
         <http method="PUT">
             <param name="contentType" required="false" values="json|xml|text|binary"/>
@@ -63,6 +64,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="extractContent" required="false" as="boolean" default="true"/>
             <param name="applyTransform" required="false"/>
             <param name="respondWithContent" required="false" as="boolean" default="false"/>
+            <param name="repair" required="false" as="boolean" default="false"/>
         </http>
         <http method="DELETE">
             <param name="stringQuery" required="false"/>

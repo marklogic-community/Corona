@@ -139,7 +139,7 @@ return
             return
                 if($contentType = "binary")
                 then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $params, $respondWithContent)
-                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, $applyTransform, $params, $respondWithContent)
+                else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, map:get($params, "repair"), $applyTransform, $params, $respondWithContent)
         }
         catch ($e) {
             common:errorFromException($e, $outputFormat)
@@ -176,12 +176,12 @@ return
                     then
                         if($contentType = "binary")
                         then store:insertBinaryDocument($uri, $bodyContent, map:get($params, "contentForBinary"), $collections, $properties, $permissions, $quality, map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $params, $respondWithContent)
-                        else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, $applyTransform, $params, $respondWithContent)
+                        else store:insertDocument($uri, $bodyContent, $collections, $properties, $permissions, $quality, $contentType, map:get($params, "repair"), $applyTransform, $params, $respondWithContent)
                     else if(exists($bodyContent))
                     then
                         if($contentType = "binary")
                         then store:updateBinaryDocumentContent($uri, $bodyContent, map:get($params, "contentForBinary"), map:get($params, "extractMetadata"), map:get($params, "extractContent"), $applyTransform, $params, $respondWithContent)
-                        else store:updateDocumentContent($uri, $bodyContent, $contentType, $applyTransform, $params, $respondWithContent)
+                        else store:updateDocumentContent($uri, $bodyContent, $contentType, map:get($params, "repair"), $applyTransform, $params, $respondWithContent)
                     else (),
                     if(exists($properties))
                     then store:setProperties($uri, $properties)
