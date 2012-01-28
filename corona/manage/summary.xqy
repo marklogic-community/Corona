@@ -86,7 +86,8 @@ return common:output(
                 "TextDocumentCount", $numTextDocs,
                 "BinaryDocumentCount", $numBinaryDocs
             )),
-            "xmlNamespaces", json:array(manage:getAllNamespaces())
+            "xmlNamespaces", json:array(manage:getAllNamespaces()),
+            "xmlSchemas", json:array(manage:getAllSchemaURIs())
         ))
     )
     else if($requestMethod = "DELETE")
@@ -96,7 +97,8 @@ return common:output(
             manage:deleteAllPlaces(),
             manage:deleteAllGeos(),
             manage:deleteAllTransformers(),
-            manage:deleteAllNamespaces()
+            manage:deleteAllNamespaces(),
+            manage:deleteAllSchemas()
     )
     else ()
 )

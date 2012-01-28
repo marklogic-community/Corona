@@ -276,6 +276,15 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <http method="DELETE"/>
     </request>
 
+    <!-- Schema management -->
+    <request uri="^/manage/(schemas|schema)/?$" endpoint="/corona/manage/schemas.xqy" user-params="allow">
+        <param name="uri" required="false"/>
+        <http method="GET"/>
+        <http method="PUT"/>
+        <http method="DELETE"/>
+    </request>
+
+    <!-- Environment variables -->
     <request uri="^/manage/(env|env/([^/]+))/?$" endpoint="/corona/manage/env.xqy" user-params="allow">
         <uri-param name="name" as="string">$2</uri-param>
         <http method="GET"/>

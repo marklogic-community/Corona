@@ -1321,6 +1321,93 @@ declare function manage:deleteAllTransformers(
 };
 
 
+(: Schemas :)
+declare function manage:setSchema(
+    $uri as xs:string,
+    $schema as element(xs:schema)
+) as empty-sequence()
+{
+    xdmp:eval("
+        declare variable $uri as xs:string external;
+        declare variable $schema as element(xs:schema) external;
+
+        xdmp:document-insert($uri, $schema)
+        ",
+        (
+            xs:QName("uri"), $uri,
+            xs:QName("schema"), $schema
+        ),
+        <options xmlns="xdmp:eval">
+            <database>{ xdmp:schema-database() }</database>
+        </options>
+    )
+};
+
+declare function manage:deleteSchema(
+    $uri as xs:string
+) as empty-sequence()
+{
+    xdmp:eval("
+        declare variable $uri as xs:string external;
+
+        xdmp:document-delete($uri)
+        ",
+        (
+            xs:QName("uri"), $uri
+        ),
+        <options xmlns="xdmp:eval">
+            <database>{ xdmp:schema-database() }</database>
+        </options>
+    )
+};
+
+declare function manage:getSchema(
+    $uri as xs:string
+) as element(xs:schema)?
+{
+    xdmp:eval("
+        declare variable $uri as xs:string external;
+
+        doc($uri)/xs:schema
+        ",
+        (
+            xs:QName("uri"), $uri
+        ),
+        <options xmlns="xdmp:eval">
+            <database>{ xdmp:schema-database() }</database>
+        </options>
+    )
+};
+
+declare function manage:getAllSchemaURIs(
+) as xs:string*
+{
+    xdmp:eval("
+        for $schema in /xs:schema
+        return base-uri($schema)
+        ",
+        (),
+        <options xmlns="xdmp:eval">
+            <database>{ xdmp:schema-database() }</database>
+        </options>
+    )
+};
+
+declare function manage:deleteAllSchemas(
+) as empty-sequence()
+{
+    xdmp:eval("
+        for $schema in /xs:schema
+        return xdmp:document-delete(base-uri($schema))
+        ",
+        (),
+        <options xmlns="xdmp:eval">
+            <database>{ xdmp:schema-database() }</database>
+        </options>
+    )
+};
+
+
 (: Private functions :)
 
 declare private function manage:createJSONRangeIndex(
