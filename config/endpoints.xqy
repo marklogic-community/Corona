@@ -45,6 +45,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="addPermission" alias="addPermission[]" repeatable="true" required="false"/>
             <param name="removePermission" alias="removePermission[]" repeatable="true" required="false"/>
             <param name="quality" required="false"/>
+			<param name="language" required="false" />
             <param name="contentForBinary" required="false"/>
             <param name="moveTo" required="false"/>
             <param name="extractMetadata" required="false" as="boolean" default="true"/>
@@ -59,6 +60,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
             <param name="property" alias="property[]" repeatable="true" required="false"/>
             <param name="permission" alias="permission[]" repeatable="true" required="false"/>
             <param name="quality" required="false"/>
+			<param name="language" required="false" />
             <param name="contentForBinary" required="false"/>
             <param name="extractMetadata" required="false" as="boolean" default="true"/>
             <param name="extractContent" required="false" as="boolean" default="true"/>

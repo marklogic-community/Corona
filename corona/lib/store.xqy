@@ -461,7 +461,7 @@ declare function store:insertDocument(
 	$repair as xs:boolean
 ) as empty-sequence()
 {
-    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, $repair, (), map:map(), false())
+    store:insertDocument($uri, $content, $collections, $properties, $permissions, $quality, $contentType, (), $repair, (), map:map(), false())
 };
 
 declare function store:insertDocument(
@@ -472,6 +472,7 @@ declare function store:insertDocument(
     $permissions as element()*,
     $quality as xs:integer?,
     $contentType as xs:string,
+	$language as xs:string?,
 	$repair as xs:boolean,
     $applyTransform as xs:string?,
     $requestParameters as map:map,
@@ -481,7 +482,7 @@ declare function store:insertDocument(
     let $test := store:validateURI($uri)
     let $body :=
         if($contentType = "json")
-        then json:parse($content)
+        then json:document(json:parse($content), $language)
         else if($contentType = "xml")
         then store:unquoteXML($content, $repair)
         else if($contentType = "text")
@@ -562,13 +563,14 @@ declare function store:updateDocumentContent(
 	$repair as xs:boolean
 ) as empty-sequence()
 {
-    store:updateDocumentContent($uri, $content, $contentType, $repair, (), map:map(), false())
+    store:updateDocumentContent($uri, $content, $contentType, (), $repair, (), map:map(), false())
 };
 
 declare function store:updateDocumentContent(
     $uri as xs:string,
     $content as xs:string,
     $contentType as xs:string,
+	$language as xs:string?,
 	$repair as xs:boolean,
     $applyTransform as xs:string?,
     $requestParameters as map:map,
@@ -582,7 +584,7 @@ declare function store:updateDocumentContent(
         else ()
     let $body :=
         if($contentType = "json")
-        then json:parse($content)
+        then json:document(json:parse($content), $language)
         else if($contentType = "xml")
         then store:unquoteXML($content, $repair)
         else if($contentType = "text")
