@@ -86,6 +86,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="qualityWeight" required="false" as="decimal" default="1.0"/>
         <param name="include" alias="include[]" repeatable="true" required="false" default="content"/>
         <param name="filtered" required="false" default="false" as="boolean"/>
+        <param name="language" required="false" />
         <param name="extractPath" required="false"/>
         <param name="applyTransform" required="false"/>
         <param name="collection" alias="collection[]" required="false" repeatable="true"/>
@@ -123,6 +124,7 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <uri-param name="facets">$1</uri-param>
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
+        <param name="language" required="false" />
         <param name="limit" as="integer" default="25" required="false"/>
         <param name="order" required="false" default="frequency" values="descending|ascending|frequency"/>
         <param name="frequency" required="false" default="document" values="document|key"/>
