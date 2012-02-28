@@ -383,7 +383,7 @@ declare function common:nsFromQName(
 {
     if(contains($item, ":"))
     then
-        let $ns := namespace-uri-from-QName($item)
+        let $ns := namespace-uri-from-QName(xs:QName($item))
         where string-length($ns)
         return $ns
     else ()
@@ -394,7 +394,7 @@ declare function common:nameFromQName(
 ) as xs:string?
 {
     if(contains($item, ":"))
-    then local-name-from-QName($item)
+    then local-name-from-QName(xs:QName($item))
     else ()
 };
 
