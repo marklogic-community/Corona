@@ -45,11 +45,7 @@ let $frequency := map:get($params, "frequency")
 let $includeAllValues := map:get($params, "includeAllValues")
 let $txid := map:get($params, "txid")
 
-let $errors := (
-    if(empty($stringQuery) and empty($structuredQuery))
-    then common:error("corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $outputFormat)
-    else ()
-)
+let $errors := ()
 
 let $query :=
     if(exists($stringQuery))
