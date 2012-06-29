@@ -153,7 +153,7 @@ declare function store:outputDocument(
         if($outputFormat = "json")
         then json:object((
             "uri", $documentURI,
-            if($include = ("content", "all"))
+            if($include = ("content", "highlighting", "all"))
             then ("content", store:wrapContentNodes($content, $contentType))
             else (),
             if($include = ("collections", "all"))
@@ -184,7 +184,7 @@ declare function store:outputDocument(
         else if($outputFormat = "xml")
         then <corona:result>{(
             <corona:uri>{ $documentURI }</corona:uri>,
-            if($include = ("content", "all"))
+            if($include = ("content", "highlighting", "all"))
             then <corona:content>{
                 if($contentType = "json")
                 then json:serialize(store:wrapContentNodes($content, $contentType))
