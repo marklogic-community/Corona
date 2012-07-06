@@ -45,7 +45,7 @@ let $extractPath := map:get($params, "extractPath")
 let $applyTransform := map:get($params, "applyTransform")
 
 let $txid := map:get($params, "txid")
-let $outputFormat := map:get($params, "outputFormat")
+let $outputFormat := common:getOutputFormat((), map:get($params, "outputFormat"))
 
 let $errors := (
     if(exists($attribute) and empty($element))

@@ -67,7 +67,7 @@ return
 
 let $query :=
     if(exists($stringQuery))
-    then stringquery:parse($stringQuery)
+    then stringquery:parse($stringQuery, map:get($params, "language"))
     else if(exists($structuredQuery))
     then structquery:getCTS($structuredQueryJSON)
     else ()
@@ -117,7 +117,7 @@ let $highlightQuery :=
     if(exists($structuredQueryJSON) and structquery:containsNamedQuery($structuredQueryJSON))
     then structquery:getCTS($structuredQueryJSON, (), false())
     else if(exists($stringQuery) and stringquery:containsNamedQuery($stringQuery))
-    then stringquery:parse($stringQuery, (), false())
+    then stringquery:parse($stringQuery, map:get($params, "language"), (), false())
     else $query
 
 let $results :=

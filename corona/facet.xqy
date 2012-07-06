@@ -45,15 +45,11 @@ let $frequency := map:get($params, "frequency")
 let $includeAllValues := map:get($params, "includeAllValues")
 let $txid := map:get($params, "txid")
 
-let $errors := (
-    if(empty($stringQuery) and empty($structuredQuery))
-    then common:error("corona:MISSING-PARAMETER", "Must supply either a string or a structured query", $outputFormat)
-    else ()
-)
+let $errors := ()
 
 let $query :=
     if(exists($stringQuery))
-    then stringquery:parse($stringQuery)
+    then stringquery:parse($stringQuery, map:get($params, "language"))
     else if(exists($structuredQuery))
     then try {
         structquery:getCTS(structquery:getParseTree($structuredQuery), ())
@@ -103,7 +99,7 @@ let $values :=
 
     let $query :=
         if(exists($stringQuery))
-        then stringquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
+        then stringquery:getCTSFromParseTree($rawQuery, map:get($params, "language"), $ignoreFacet)
         else if(exists($structuredQuery))
         then structquery:getCTSFromParseTree($rawQuery, $ignoreFacet)
         else $query

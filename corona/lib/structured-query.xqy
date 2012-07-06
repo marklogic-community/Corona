@@ -430,7 +430,7 @@ declare private function structquery:handleStringQuery(
     $useRQ as xs:boolean
 ) as cts:query?
 {
-    stringquery:parse(string($step), $ignoreRange, $useRQ)
+    stringquery:parse(string($step), (), $ignoreRange, $useRQ)
 };
 
 declare private function structquery:handleNamedQuery(
@@ -612,10 +612,6 @@ declare private function structquery:extractOptions(
             then "wildcarded"
             else "unwildcarded"
         else ()
-        ,
-        if(exists($item/json:language[@type = "string"]))
-        then concat("lang=", string($item/json:language[@type = "string"]))
-        else ()
     )
     else ()
     ,
@@ -627,6 +623,10 @@ declare private function structquery:extractOptions(
         ,
         if(exists($item/json:maximumOccurances[@type = "number"]))
         then concat("max-occurs=", string($item/json:maximumOccurances[@type = "number"]))
+        else ()
+        ,
+        if(exists($item/json:language[@type = "string"]))
+        then concat("lang=", string($item/json:language[@type = "string"]))
         else ()
     )
     else ()
