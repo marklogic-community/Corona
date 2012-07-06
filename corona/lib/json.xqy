@@ -126,12 +126,23 @@ declare function json:serialize(
     A JSON item may also be the result return value of json:array or json:object.
 :)
 declare function json:document(
+    $value as item(),
+	$language as xs:string?
+) as element(json:json)
+{
+    <json:json version="1.0">{(
+		if(exists($language))
+		then attribute { xs:QName("xml:lang") } { $language }
+		else (),
+        json:untypedToJSONType($value)/(@*, node())
+    )}</json:json>
+};
+
+declare function json:document(
     $value as item()
 ) as element(json:json)
 {
-    <json:json version="1.0">{
-        json:untypedToJSONType($value)/(@*, node())
-    }</json:json>
+	json:document($value, ())
 };
 
 (:

@@ -14,6 +14,11 @@ corona.queries = [
         "purpose": "Simple word query"
     },
     {
+        "query": '-foo',
+        "result": '<cts:not-query xmlns:cts="http://marklogic.com/cts"> <cts:or-query> ' + corona.wordQueryValue("foo") + ' </cts:or-query></cts:not-query>',
+        "purpose": "Negated word query"
+    },
+    {
         "query": '"foo bar"',
         "result": '<cts:or-query xmlns:cts="http://marklogic.com/cts"> ' + corona.wordQueryValue("foo bar") + '</cts:or-query>',
         "purpose": "Simple phrase query"
@@ -52,6 +57,11 @@ corona.queries = [
         "query": 'place1:foo',
         "result": '<cts:field-word-query xmlns:cts="http://marklogic.com/cts"> <cts:field>corona-field-place1</cts:field> <cts:text xml:lang="en">foo</cts:text></cts:field-word-query>',
         "purpose": "Place constraint"
+    },
+    {
+        "query": '-place1:foo AND "bar baz"',
+        "result": '<cts:and-query xmlns:cts="http://marklogic.com/cts"> <cts:not-query> <cts:field-word-query> <cts:field>corona-field-place1</cts:field> <cts:text xml:lang="en">foo</cts:text> </cts:field-word-query> </cts:not-query> <cts:or-query> <cts:element-word-query weight="10"> <cts:element xmlns:json="http://marklogic.com/json">json:subject</cts:element> <cts:text xml:lang="en">bar baz</cts:text> </cts:element-word-query> <cts:element-word-query weight="8"> <cts:element xmlns:testns="http://test.ns/uri">testns:subject</cts:element> <cts:text xml:lang="en">bar baz</cts:text> </cts:element-word-query> <cts:element-attribute-word-query weight="8"> <cts:element xmlns:testns="http://test.ns/uri">testns:subject</cts:element> <cts:attribute>normalized</cts:attribute> <cts:text xml:lang="en">bar baz</cts:text> </cts:element-attribute-word-query> <cts:element-word-query weight="10"> <cts:element xmlns:json="http://marklogic.com/json">json:tri_003Dck_007Cey</cts:element> <cts:text xml:lang="en">bar baz</cts:text> </cts:element-word-query> </cts:or-query></cts:and-query>',
+        "purpose": "Negated constraint with phrase"
     },
     {
         "query": 'place1:foo OR place1:bar',
