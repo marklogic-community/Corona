@@ -83,6 +83,8 @@ declare variable $endpoints:ENDPOINTS as element(rest:options) :=
         <param name="txid" required="false"/>
         <param name="stringQuery" required="false"/>
         <param name="structuredQuery" required="false"/>
+        <param name="orderBy" required="false"/>
+        <param name="orderDirection" required="false" default="descending"/>
         <param name="start" required="false" as="positiveInteger" default="1"/>
         <param name="length" required="false" as="positiveInteger" default="10"/>
         <param name="qualityWeight" required="false" as="decimal" default="1.0"/>

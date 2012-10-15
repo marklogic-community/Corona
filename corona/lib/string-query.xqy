@@ -62,11 +62,8 @@ declare function stringquery:parse(
 {
 	let $init := xdmp:set($GROUPING-INDEX, 0)
 	let $tokens := stringquery:tokenize($query)
-	let $log := xdmp:log($tokens)
 	let $grouped := stringquery:groupTokens($tokens, 1)
-	let $log := xdmp:log($grouped)
 	let $folded := stringquery:foldTokens(<group>{ $grouped }</group>, ("not", "or", "and", "near"))
-	let $log := xdmp:log($folded)
     where string-length($query)
 	return stringquery:dispatchQueryTree($folded, $language, $ignoreField, $useRQ)
 };
