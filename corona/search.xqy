@@ -22,6 +22,7 @@ import module namespace const="http://marklogic.com/corona/constants" at "lib/co
 import module namespace stringquery="http://marklogic.com/corona/string-query" at "lib/string-query.xqy";
 import module namespace structquery="http://marklogic.com/corona/structured-query" at "lib/structured-query.xqy";
 import module namespace store="http://marklogic.com/corona/store" at "lib/store.xqy";
+import module namespace config="http://marklogic.com/corona/index-config" at "lib/index-config.xqy";
 
 import module namespace rest="http://marklogic.com/appservices/rest" at "lib/rest/rest.xqy";
 import module namespace endpoints="http://marklogic.com/corona/endpoints" at "/config/endpoints.xqy";
@@ -101,7 +102,27 @@ let $log := common:log("Search", "Search options", $options)
 
 let $end := $start + $length - 1
 
-let $results := cts:search(doc(), $query, $options, map:get($params, "qualityWeight"))[$start to $end]
+let $orderBy := map:get($params, "orderBy")
+let $orderDirection := map:get($params, "orderDirection")
+let $orderPath :=
+	if(empty($orderBy))
+	then ()
+	else config:rangePath($orderBy)
+let $results :=
+	if(empty($orderBy) or empty($orderPath))
+	then cts:search(doc(), $query, $options, map:get($params, "qualityWeight"))[$start to $end]
+	else
+		if($orderDirection = "ascending")
+		then (
+			for $result in cts:search(doc(), $query, $options, map:get($params, "qualityWeight"))
+			order by $result//xdmp:unpath($orderPath) ascending
+			return $result
+		)[$start to $end]
+		else (
+			for $result in cts:search(doc(), $query, $options, map:get($params, "qualityWeight"))
+			order by $result//xdmp:unpath($orderPath) descending
+			return $result
+		)[$start to $end]
 
 let $total :=
     if(exists($results[1]))
