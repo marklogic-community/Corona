@@ -408,6 +408,21 @@ declare function config:get(
         else $property
 };
 
+declare function config:rangePath(
+	$rangeName as xs:string
+) as xs:string?
+{
+	let $config := config:get($rangeName)
+	return
+		if($config/structure = "json")
+		then concat("json:", $config/key)
+		else if($config/structure = "xmlelement")
+		then string($config/element)
+		else if($config/structure = "xmlattribute")
+		then concat($config/element, "/@", $config/attribute)
+		else ()
+};
+
 declare function config:rangeNames(
 ) as xs:string*
 {
